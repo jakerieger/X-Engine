@@ -1,5 +1,5 @@
+#include <iostream>
 #include "Engine/Game.hpp"
-#include "Common/Types.hpp"
 
 using namespace x;
 
@@ -10,5 +10,9 @@ public:
 
 int main() {
     SpaceGame game;
+
+    const uptr x = RCAST<uptr>(&game);
+    std::cout << x << '\n';
+
     return 0;
 }

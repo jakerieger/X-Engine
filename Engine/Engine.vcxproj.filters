@@ -1,9 +1,21 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\Code\Engine\Game.cpp" />
+    <ClCompile Include="..\Code\Engine\Game.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Code\Engine\Game.hpp" />
+    <ClInclude Include="..\Code\Engine\Game.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Configuration">
+      <UniqueIdentifier>{57ffd4ac-0031-46b1-b409-46637101cc01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{01cdf2d7-8bb1-4298-90dc-123af75cc1d4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

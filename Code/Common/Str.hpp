@@ -1,7 +1,6 @@
 // Author: Jake Rieger
 // Created: 1/16/2025.
 //
-
 #pragma once
 
 #include "Types.hpp"
