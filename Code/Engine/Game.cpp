@@ -104,6 +104,10 @@ namespace x {
 
         ::ShowWindow(_hwnd, SW_SHOWDEFAULT);
         ::UpdateWindow(_hwnd);
+
+        if (!renderer.Initialize(_hwnd, _currentWidth, _currentHeight)) {
+            throw std::runtime_error("Failed to intialize renderer.");
+        }
     }
 
     void IGame::Shutdown() {
@@ -113,6 +117,21 @@ namespace x {
     LRESULT IGame::ResizeHandler(u32 width, u32 height) {
         _currentWidth  = width;
         _currentHeight = height;
+
+        if (const auto context = renderer.GetContext(); context) {
+            renderer.ResizeSwapchainBuffers(width, height);
+
+            D3D11_VIEWPORT vp;
+            vp.TopLeftX = 0.0f;
+            vp.TopLeftY = 0.0f;
+            vp.Width    = CAST<f32>(width);
+            vp.Height   = CAST<f32>(height);
+            vp.MinDepth = 0.0f;
+            vp.MaxDepth = 1.0f;
+
+            context->RSSetViewports(1, &vp);
+        }
+
         OnResize(width, height);
         return S_OK;
     }

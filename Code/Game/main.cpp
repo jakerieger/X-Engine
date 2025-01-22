@@ -12,7 +12,11 @@ public:
 
     void Update() override {}
 
-    void Render() override {}
+    void Render() override {
+        renderer.BeginFrame();
+
+        renderer.EndFrame();
+    }
 
     void OnResize(u32 width, u32 height) override {}
 };

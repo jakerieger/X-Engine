@@ -2,6 +2,7 @@
 
 #include "Common/Types.hpp"
 #include "Platform.hpp"
+#include "Renderer.hpp"
 
 namespace x {
     /// @brief Base interface for implementing a game application.
@@ -18,6 +19,12 @@ namespace x {
     public:
         explicit IGame(HINSTANCE instance, str title, u32 width, u32 height);
         virtual ~IGame();
+
+        // Prevent moves or copies
+        IGame(const IGame& other)            = delete;
+        IGame(IGame&& other)                 = delete;
+        IGame& operator=(const IGame& other) = delete;
+        IGame& operator=(IGame&& other)      = delete;
 
         /// @brief This is the only function that is required to be called on an IGame instance.
         /// Initializes the app, enters into the main loop, and shuts down when the application is closed.
@@ -40,6 +47,9 @@ namespace x {
         virtual void Update() = 0;
         virtual void Render() = 0;
         virtual void OnResize(u32 width, u32 height) = 0;
+
+    protected:
+        Renderer renderer;
 
     private:
         void Initialize();
