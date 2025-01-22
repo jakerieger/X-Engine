@@ -12,10 +12,11 @@ public:
 
     void Update() override {}
 
-    void Render() override {
-        renderer.BeginFrame(Colors::Black);
+    void Render() override {}
 
-        renderer.EndFrame();
+    void DrawDebugUI() override {
+        ImGui::Begin("Text");
+        ImGui::End();
     }
 
     void OnResize(u32 width, u32 height) override {}
@@ -25,7 +26,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
     SpaceGame game(hInstance);
 
     #ifndef NDEBUG
-    game.EnableConsole();
+    if (!game.EnableConsole()) { return EXIT_FAILURE; }
+    game.EnableDebugUI();
     #endif
 
     game.Run();

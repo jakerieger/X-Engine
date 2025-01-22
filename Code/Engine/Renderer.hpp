@@ -35,6 +35,10 @@ namespace x {
             return _backBuffer.Get();
         }
 
+        [[nodiscard]] ID3D11RenderTargetView* GetRTV() const {
+            return _renderTargetView.Get();
+        }
+
         bool Initialize(HWND hwnd, int width, int height);
         void BeginFrame();
         void BeginFrame(const f32 clearColor[4]);

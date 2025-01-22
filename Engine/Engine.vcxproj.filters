@@ -10,6 +10,27 @@
     <ClCompile Include="..\Code\Engine\RenderSystem.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Code\Vendor\imgui\imgui.cpp">
+      <Filter>Vendor\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Code\Vendor\imgui\imgui_demo.cpp">
+      <Filter>Vendor\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Code\Vendor\imgui\imgui_draw.cpp">
+      <Filter>Vendor\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Code\Vendor\imgui\imgui_tables.cpp">
+      <Filter>Vendor\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Code\Vendor\imgui\imgui_widgets.cpp">
+      <Filter>Vendor\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Code\Vendor\imgui\backends\imgui_impl_dx11.cpp">
+      <Filter>Vendor\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Code\Vendor\imgui\backends\imgui_impl_win32.cpp">
+      <Filter>Vendor\imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Code\Engine\Game.hpp">
@@ -30,6 +51,33 @@
     <ClInclude Include="..\Code\Engine\Volatile.hpp">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="..\Code\Vendor\imgui\imconfig.h">
+      <Filter>Vendor\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\imgui\imgui.h">
+      <Filter>Vendor\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\imgui\imgui_internal.h">
+      <Filter>Vendor\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\imgui\imstb_rectpack.h">
+      <Filter>Vendor\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\imgui\imstb_textedit.h">
+      <Filter>Vendor\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\imgui\imstb_truetype.h">
+      <Filter>Vendor\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\imgui\backends\imgui_impl_dx11.h">
+      <Filter>Vendor\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\imgui\backends\imgui_impl_win32.h">
+      <Filter>Vendor\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\DebugUI.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Configuration">
@@ -46,6 +94,12 @@
     </Filter>
     <Filter Include="Shaders\Header">
       <UniqueIdentifier>{eb318049-0f7a-43c9-95e1-a7a47af40547}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Vendor">
+      <UniqueIdentifier>{4be642d8-f331-4454-8314-bf7e5673b354}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Vendor\imgui">
+      <UniqueIdentifier>{4425b333-79ff-4c5f-b9b7-b1d2bd467c44}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

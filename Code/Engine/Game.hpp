@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DebugUI.hpp"
 #include "Common/Types.hpp"
 #include "Platform.hpp"
 #include "Renderer.hpp"
@@ -16,6 +17,7 @@ namespace x {
         u32 _currentHeight;
         str _title;
         bool _consoleEnabled{false};
+        bool _debugUIEnabled{false};
         std::atomic<bool> _isRunning{false};
 
     public:
@@ -38,6 +40,8 @@ namespace x {
         /// @brief Enables the console window for Win32 apps. Typically enabled for debug builds to show console output.
         bool EnableConsole();
 
+        void EnableDebugUI();
+
         [[nodiscard]] u32 GetWidth() const;
 
         [[nodiscard]] u32 GetHeight() const;
@@ -49,10 +53,12 @@ namespace x {
         virtual void Update() = 0;
         virtual void Render() = 0;
         virtual void OnResize(u32 width, u32 height) = 0;
+        virtual void DrawDebugUI() {}
 
     protected:
         Renderer renderer;
         unique_ptr<RenderSystem> renderSystem;
+        std::unique_ptr<DebugUI> debugUI;
         vector<Volatile*> volatiles;
 
         void RegisterVolatile(Volatile* vol) {

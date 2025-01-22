@@ -1,6 +1,7 @@
 #include "Game.hpp"
-
 #include <stdexcept>
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace x {
     IGame::IGame(const HINSTANCE instance, str title, const u32 width, const u32 height): _instance(instance),
@@ -34,7 +35,15 @@ namespace x {
                 ::DispatchMessageA(&msg);
             } else {
                 Update();
+
+                renderer.BeginFrame();
                 Render();
+                if (_debugUIEnabled) {
+                    debugUI->BeginFrame();
+                    DrawDebugUI();
+                    debugUI->EndFrame();
+                }
+                renderer.EndFrame();
             }
         }
 
@@ -63,6 +72,10 @@ namespace x {
         _consoleEnabled = true;
 
         return true;
+    }
+
+    void IGame::EnableDebugUI() {
+        _debugUIEnabled = true;
     }
 
     u32 IGame::GetWidth() const {
@@ -115,11 +128,16 @@ namespace x {
         // Tell the engine that these classes need to handle resizing when the window size changes
         RegisterVolatile(renderSystem.get());
         RegisterVolatile(&renderer);
+
+        if (_debugUIEnabled) {
+            debugUI = make_unique<DebugUI>(_hwnd, renderer);
+        }
     }
 
     void IGame::Shutdown() {
         UnloadContent();
         renderSystem.reset();
+        debugUI.reset();
     }
 
     LRESULT IGame::ResizeHandler(u32 width, u32 height) {
@@ -135,6 +153,9 @@ namespace x {
     }
 
     LRESULT IGame::MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) {
+        if (_debugUIEnabled && ImGui_ImplWin32_WndProcHandler(_hwnd, msg, wParam, lParam))
+            return true;
+
         switch (msg) {
             case WM_DESTROY:
                 Quit();
