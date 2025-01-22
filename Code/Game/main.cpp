@@ -1,4 +1,3 @@
-#include <iostream>
 #include "Engine/Game.hpp"
 
 using namespace x;

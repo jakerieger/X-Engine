@@ -12,6 +12,11 @@ using namespace DirectX;
 
 #include "Common/Str.hpp" // for WideToAnsi()
 
+#ifndef PLATFORM_INCLUDED
+#include <wrl/client.h>
+using Microsoft::WRL::ComPtr;
+#endif
+
 namespace x {
     class DxException final : public std::runtime_error {
         HRESULT _errCode;
