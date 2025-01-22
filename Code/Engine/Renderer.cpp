@@ -47,11 +47,10 @@ namespace x {
         if (FAILED(hr)) { return false; }
 
         // Create render target view
-        ComPtr<ID3D11Texture2D> backBuffer;
-        hr = _swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &backBuffer);
+        hr = _swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &_backBuffer);
         if (FAILED(hr)) { return false; }
 
-        hr = _device->CreateRenderTargetView(backBuffer.Get(), nullptr, &_renderTargetView);
+        hr = _device->CreateRenderTargetView(_backBuffer.Get(), nullptr, &_renderTargetView);
         if (FAILED(hr)) { return false; }
 
         // Create depth stencil texture
@@ -93,8 +92,8 @@ namespace x {
         _context->OMSetDepthStencilState(_depthStencilState.Get(), 0);
 
         D3D11_VIEWPORT viewport = {};
-        viewport.Width          = static_cast<float>(width);
-        viewport.Height         = static_cast<float>(height);
+        viewport.Width          = CAST<f32>(width);
+        viewport.Height         = CAST<f32>(height);
         viewport.MinDepth       = 0.0f;
         viewport.MaxDepth       = 1.0f;
         viewport.TopLeftX       = 0.0f;
@@ -108,12 +107,12 @@ namespace x {
     void Renderer::ResizeSwapchainBuffers(u32 width, u32 height) {
         _renderTargetView.Reset();
         _depthStencilView.Reset();
+        _backBuffer.Reset();
 
         DX_THROW_IF_FAILED(_swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0))
 
-        ComPtr<ID3D11Texture2D> backBuffer;
-        DX_THROW_IF_FAILED(_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer)))
-        DX_THROW_IF_FAILED(_device->CreateRenderTargetView(backBuffer.Get(), None, &_renderTargetView))
+        DX_THROW_IF_FAILED(_swapChain->GetBuffer(0, IID_PPV_ARGS(&_backBuffer)))
+        DX_THROW_IF_FAILED(_device->CreateRenderTargetView(_backBuffer.Get(), None, &_renderTargetView))
 
         D3D11_TEXTURE2D_DESC depthStencilDesc = {};
         depthStencilDesc.Width                = width;
@@ -134,12 +133,30 @@ namespace x {
     }
 
     void Renderer::BeginFrame() {
-        constexpr float clearColor[4] = {0.1f, 0.1f, 0.1f, 1.0f};
+        constexpr float clearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+        BeginFrame(clearColor);
+    }
+
+    void Renderer::BeginFrame(const f32 clearColor[4]) {
         _context->ClearRenderTargetView(_renderTargetView.Get(), clearColor);
         _context->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
     }
 
     void Renderer::EndFrame() {
         DX_THROW_IF_FAILED(_swapChain->Present(0, 0));
+    }
+
+    void Renderer::OnResize(u32 width, u32 height) {
+        ResizeSwapchainBuffers(width, height);
+
+        D3D11_VIEWPORT viewport;
+        viewport.Width    = CAST<f32>(width);
+        viewport.Height   = CAST<f32>(height);
+        viewport.MinDepth = 0.0f;
+        viewport.MaxDepth = 1.0f;
+        viewport.TopLeftX = 0.0f;
+        viewport.TopLeftY = 0.0f;
+
+        _context->RSSetViewports(1, &viewport);
     }
 }

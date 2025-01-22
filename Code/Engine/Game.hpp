@@ -4,6 +4,7 @@
 #include "Platform.hpp"
 #include "Renderer.hpp"
 #include "RenderSystem.hpp"
+#include "Volatile.hpp"
 
 namespace x {
     /// @brief Base interface for implementing a game application.
@@ -52,6 +53,11 @@ namespace x {
     protected:
         Renderer renderer;
         unique_ptr<RenderSystem> renderSystem;
+        vector<Volatile*> volatiles;
+
+        void RegisterVolatile(Volatile* vol) {
+            volatiles.push_back(vol);
+        }
 
     private:
         void Initialize();

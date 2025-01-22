@@ -12,13 +12,13 @@ namespace x {
         std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
         try {
             return converter.to_bytes(input);
-        } catch (const std::range_error& e) { return str(); }
+        } catch (const std::range_error&) { return str(); }
     }
 
     inline wstr AnsiToWide(const str& input) {
         std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
         try {
             return converter.from_bytes(input);
-        } catch (const std::range_error& e) { return wstr(); }
+        } catch (const std::range_error&) { return wstr(); }
     }
 }

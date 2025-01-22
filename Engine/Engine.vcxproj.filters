@@ -27,6 +27,9 @@
     <ClInclude Include="..\Code\Engine\RenderSystem.hpp">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="..\Code\Engine\Volatile.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Configuration">
@@ -34,6 +37,15 @@
     </Filter>
     <Filter Include="Source">
       <UniqueIdentifier>{01cdf2d7-8bb1-4298-90dc-123af75cc1d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{960c4d23-da7a-42f4-8ef5-89e1f70ae9d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Source">
+      <UniqueIdentifier>{5fad7bf5-c246-4163-bbf4-d7be55eb78ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Header">
+      <UniqueIdentifier>{eb318049-0f7a-43c9-95e1-a7a47af40547}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

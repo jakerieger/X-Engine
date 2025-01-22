@@ -4,28 +4,16 @@ using namespace x;
 
 class SpaceGame final : public IGame {
 public:
-    SpaceGame() : IGame(GetModuleHandleA(None), "SpaceGame", 1280, 720) {}
+    explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {}
 
-    void LoadContent() override {
-        SceneConstants constants;
-        constants.viewProjection   = XMMatrixIdentity();
-        constants.cameraPosition   = XMFLOAT3(0, 0, -5);
-        constants.screenDimensions = XMFLOAT2(GetWidth(), GetHeight());
-        constants.nearZ            = 0.1f;
-        constants.farZ             = 1000.0f;
-
-        renderSystem->UpdateSceneConstants(constants);
-    }
+    void LoadContent() override {}
 
     void UnloadContent() override {}
 
     void Update() override {}
 
     void Render() override {
-        renderer.BeginFrame();
-
-        // Primary forward+ pass
-        renderSystem->Render();
+        renderer.BeginFrame(Colors::Black);
 
         renderer.EndFrame();
     }
@@ -33,8 +21,8 @@ public:
     void OnResize(u32 width, u32 height) override {}
 };
 
-int main() {
-    SpaceGame game;
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow) {
+    SpaceGame game(hInstance);
 
     #ifndef NDEBUG
     game.EnableConsole();
