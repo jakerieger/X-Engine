@@ -2,6 +2,7 @@
 
 #include "Common/Types.hpp"
 #include "Platform.hpp"
+#include "D3D.hpp"
 
 namespace x {
     /// @brief Base interface for implementing a game application.

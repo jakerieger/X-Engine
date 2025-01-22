@@ -123,7 +123,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;dxguid.lib;</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;dxguid.lib;</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -147,13 +147,14 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;dxguid.lib;</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;dxguid.lib;</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Code\Engine\Game.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Code\Engine\D3D.hpp" />
     <ClInclude Include="..\Code\Engine\Game.hpp" />
     <ClInclude Include="..\Code\Engine\Platform.hpp" />
   </ItemGroup>
