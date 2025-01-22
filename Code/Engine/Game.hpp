@@ -3,6 +3,7 @@
 #include "Common/Types.hpp"
 #include "Platform.hpp"
 #include "Renderer.hpp"
+#include "RenderSystem.hpp"
 
 namespace x {
     /// @brief Base interface for implementing a game application.
@@ -50,6 +51,7 @@ namespace x {
 
     protected:
         Renderer renderer;
+        unique_ptr<RenderSystem> renderSystem;
 
     private:
         void Initialize();

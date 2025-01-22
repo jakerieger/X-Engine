@@ -108,10 +108,14 @@ namespace x {
         if (!renderer.Initialize(_hwnd, _currentWidth, _currentHeight)) {
             throw std::runtime_error("Failed to intialize renderer.");
         }
+
+        renderSystem = make_unique<RenderSystem>(renderer);
+        renderSystem->Initialize();
     }
 
     void IGame::Shutdown() {
         UnloadContent();
+        renderSystem.reset();
     }
 
     LRESULT IGame::ResizeHandler(u32 width, u32 height) {

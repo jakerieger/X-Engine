@@ -6,7 +6,16 @@ class SpaceGame final : public IGame {
 public:
     SpaceGame() : IGame(GetModuleHandleA(None), "SpaceGame", 1280, 720) {}
 
-    void LoadContent() override {}
+    void LoadContent() override {
+        SceneConstants constants;
+        constants.viewProjection   = XMMatrixIdentity();
+        constants.cameraPosition   = XMFLOAT3(0, 0, -5);
+        constants.screenDimensions = XMFLOAT2(GetWidth(), GetHeight());
+        constants.nearZ            = 0.1f;
+        constants.farZ             = 1000.0f;
+
+        renderSystem->UpdateSceneConstants(constants);
+    }
 
     void UnloadContent() override {}
 
@@ -14,6 +23,9 @@ public:
 
     void Render() override {
         renderer.BeginFrame();
+
+        // Primary forward+ pass
+        renderSystem->Render();
 
         renderer.EndFrame();
     }
