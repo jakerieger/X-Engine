@@ -83,6 +83,9 @@ struct VSOutputGBuffer {
     float4 positionCS : TEXCOORD2; // Clip space position
 };
 
+//-----------------------------------------------------------------------------
+// Helpers
+//-----------------------------------------------------------------------------
 float3 CalculateBitangent(float3 normal, float3 tangent, float handedness) {
     return cross(normal, tangent) * handedness;
 }
