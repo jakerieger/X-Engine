@@ -46,6 +46,9 @@
     <ClCompile Include="..\Code\Engine\Model.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Code\Engine\Camera.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Code\Engine\Game.hpp">
@@ -132,6 +135,264 @@
     <ClInclude Include="..\Code\Engine\Model.hpp">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="..\Code\Engine\Camera.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\Math.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\Compiler\poppack1.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\Compiler\pstdint.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\Compiler\pushpack1.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\port\AndroidJNI\AndroidJNIIOSystem.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\port\AndroidJNI\BundledAssetIOSystem.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\aabb.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\ai_assert.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\anim.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\AssertHandler.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\Base64.hpp">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\BaseImporter.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\Bitmap.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\BlobIOSystem.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\ByteSwapper.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\camera.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\cexport.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\cfileio.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\cimport.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\ColladaMetaData.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\color4.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\commonMetaData.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\CreateAnimMesh.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\DefaultIOStream.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\DefaultIOSystem.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\DefaultLogger.hpp">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\defs.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\Exceptional.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\Exporter.hpp">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\fast_atof.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\GenericProperty.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\GltfMaterial.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\Hash.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\Importer.hpp">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\importerdesc.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\IOStream.hpp">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\IOStreamBuffer.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\IOSystem.hpp">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\light.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\LineSplitter.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\LogAux.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\Logger.hpp">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\LogStream.hpp">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\material.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\MathFunctions.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\matrix3x3.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\matrix4x4.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\MemoryIOWrapper.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\mesh.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\metadata.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\NullLogger.hpp">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\ObjMaterial.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\ParsingUtils.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\pbrmaterial.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\postprocess.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\Profiler.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\ProgressHandler.hpp">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\qnan.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\quaternion.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\RemoveComments.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\scene.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\SceneCombiner.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\SGSpatialSort.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\SkeletonMeshBuilder.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\SmallVector.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\SmoothingGroups.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\SpatialSort.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\StandardShapes.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\StreamReader.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\StreamWriter.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\StringComparison.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\StringUtils.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\Subdivision.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\texture.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\TinyFormatter.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\types.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\vector2.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\vector3.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\version.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\Vertex.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\XmlParser.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\XMLTools.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\ZipArchiveIOSystem.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\config.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\assimp\revision.h">
+      <Filter>Vendor\assimp</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Configuration">
@@ -155,6 +416,9 @@
     <Filter Include="Vendor\imgui">
       <UniqueIdentifier>{4425b333-79ff-4c5f-b9b7-b1d2bd467c44}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Vendor\assimp">
+      <UniqueIdentifier>{5410eaed-8296-475b-a9cd-d7d847acaec5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Source\Common.hlsli">
@@ -165,6 +429,39 @@
     </None>
     <None Include="Shaders\Source\Unlit.hlsl">
       <Filter>Shaders\Source</Filter>
+    </None>
+    <None Include="..\Code\Vendor\assimp\color4.inl">
+      <Filter>Vendor\assimp</Filter>
+    </None>
+    <None Include="..\Code\Vendor\assimp\config.h.in">
+      <Filter>Vendor\assimp</Filter>
+    </None>
+    <None Include="..\Code\Vendor\assimp\material.inl">
+      <Filter>Vendor\assimp</Filter>
+    </None>
+    <None Include="..\Code\Vendor\assimp\matrix3x3.inl">
+      <Filter>Vendor\assimp</Filter>
+    </None>
+    <None Include="..\Code\Vendor\assimp\matrix4x4.inl">
+      <Filter>Vendor\assimp</Filter>
+    </None>
+    <None Include="..\Code\Vendor\assimp\module.modulemap">
+      <Filter>Vendor\assimp</Filter>
+    </None>
+    <None Include="..\Code\Vendor\assimp\quaternion.inl">
+      <Filter>Vendor\assimp</Filter>
+    </None>
+    <None Include="..\Code\Vendor\assimp\revision.h.in">
+      <Filter>Vendor\assimp</Filter>
+    </None>
+    <None Include="..\Code\Vendor\assimp\SmoothingGroups.inl">
+      <Filter>Vendor\assimp</Filter>
+    </None>
+    <None Include="..\Code\Vendor\assimp\vector2.inl">
+      <Filter>Vendor\assimp</Filter>
+    </None>
+    <None Include="..\Code\Vendor\assimp\vector3.inl">
+      <Filter>Vendor\assimp</Filter>
     </None>
   </ItemGroup>
 </Project>

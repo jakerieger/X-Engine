@@ -113,7 +113,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Code;$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Engine\Shaders\Header;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Code;$(SolutionDir)Engine\Shaders\Header;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
@@ -136,7 +136,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Code;$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Engine\Shaders\Header;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Code;$(SolutionDir)Engine\Shaders\Header;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
@@ -153,6 +153,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Code\Engine\Camera.cpp" />
     <ClCompile Include="..\Code\Engine\Game.cpp" />
     <ClCompile Include="..\Code\Engine\Material.cpp" />
     <ClCompile Include="..\Code\Engine\Mesh.cpp" />
@@ -170,6 +171,7 @@
     <ClCompile Include="..\Code\Vendor\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Code\Engine\Camera.hpp" />
     <ClInclude Include="..\Code\Engine\ComponentManager.hpp" />
     <ClInclude Include="..\Code\Engine\D3D.hpp" />
     <ClInclude Include="..\Code\Engine\DebugUI.hpp" />
@@ -180,6 +182,7 @@
     <ClInclude Include="..\Code\Engine\InputLayouts.hpp" />
     <ClInclude Include="..\Code\Engine\Lights.hpp" />
     <ClInclude Include="..\Code\Engine\Material.hpp" />
+    <ClInclude Include="..\Code\Engine\Math.hpp" />
     <ClInclude Include="..\Code\Engine\Mesh.hpp" />
     <ClInclude Include="..\Code\Engine\Model.hpp" />
     <ClInclude Include="..\Code\Engine\Platform.hpp" />
@@ -190,6 +193,90 @@
     <ClInclude Include="..\Code\Engine\TransformComponent.hpp" />
     <ClInclude Include="..\Code\Engine\TransformMatrices.hpp" />
     <ClInclude Include="..\Code\Engine\Volatile.hpp" />
+    <ClInclude Include="..\Code\Vendor\assimp\aabb.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\ai_assert.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\anim.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\AssertHandler.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\Base64.hpp" />
+    <ClInclude Include="..\Code\Vendor\assimp\BaseImporter.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\Bitmap.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\BlobIOSystem.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\ByteSwapper.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\camera.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\cexport.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\cfileio.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\cimport.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\ColladaMetaData.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\color4.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\commonMetaData.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\Compiler\poppack1.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\Compiler\pstdint.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\Compiler\pushpack1.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\config.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\CreateAnimMesh.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\DefaultIOStream.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\DefaultIOSystem.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\DefaultLogger.hpp" />
+    <ClInclude Include="..\Code\Vendor\assimp\defs.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\Exceptional.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\Exporter.hpp" />
+    <ClInclude Include="..\Code\Vendor\assimp\fast_atof.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\GenericProperty.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\GltfMaterial.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\Hash.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\Importer.hpp" />
+    <ClInclude Include="..\Code\Vendor\assimp\importerdesc.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\IOStream.hpp" />
+    <ClInclude Include="..\Code\Vendor\assimp\IOStreamBuffer.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\IOSystem.hpp" />
+    <ClInclude Include="..\Code\Vendor\assimp\light.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\LineSplitter.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\LogAux.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\Logger.hpp" />
+    <ClInclude Include="..\Code\Vendor\assimp\LogStream.hpp" />
+    <ClInclude Include="..\Code\Vendor\assimp\material.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\MathFunctions.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\matrix3x3.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\matrix4x4.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\MemoryIOWrapper.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\mesh.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\metadata.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\NullLogger.hpp" />
+    <ClInclude Include="..\Code\Vendor\assimp\ObjMaterial.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\ParsingUtils.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\pbrmaterial.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\port\AndroidJNI\AndroidJNIIOSystem.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\port\AndroidJNI\BundledAssetIOSystem.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\postprocess.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\Profiler.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\ProgressHandler.hpp" />
+    <ClInclude Include="..\Code\Vendor\assimp\qnan.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\quaternion.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\RemoveComments.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\revision.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\scene.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\SceneCombiner.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\SGSpatialSort.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\SkeletonMeshBuilder.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\SmallVector.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\SmoothingGroups.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\SpatialSort.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\StandardShapes.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\StreamReader.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\StreamWriter.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\StringComparison.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\StringUtils.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\Subdivision.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\texture.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\TinyFormatter.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\types.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\vector2.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\vector3.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\version.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\Vertex.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\XmlParser.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\XMLTools.h" />
+    <ClInclude Include="..\Code\Vendor\assimp\ZipArchiveIOSystem.h" />
     <ClInclude Include="..\Code\Vendor\imgui\backends\imgui_impl_dx11.h" />
     <ClInclude Include="..\Code\Vendor\imgui\backends\imgui_impl_win32.h" />
     <ClInclude Include="..\Code\Vendor\imgui\imconfig.h" />
@@ -200,6 +287,17 @@
     <ClInclude Include="..\Code\Vendor\imgui\imstb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\Code\Vendor\assimp\color4.inl" />
+    <None Include="..\Code\Vendor\assimp\config.h.in" />
+    <None Include="..\Code\Vendor\assimp\material.inl" />
+    <None Include="..\Code\Vendor\assimp\matrix3x3.inl" />
+    <None Include="..\Code\Vendor\assimp\matrix4x4.inl" />
+    <None Include="..\Code\Vendor\assimp\module.modulemap" />
+    <None Include="..\Code\Vendor\assimp\quaternion.inl" />
+    <None Include="..\Code\Vendor\assimp\revision.h.in" />
+    <None Include="..\Code\Vendor\assimp\SmoothingGroups.inl" />
+    <None Include="..\Code\Vendor\assimp\vector2.inl" />
+    <None Include="..\Code\Vendor\assimp\vector3.inl" />
     <None Include="Shaders\Source\Common.hlsli" />
     <None Include="Shaders\Source\IO.hlsli" />
   </ItemGroup>

@@ -26,7 +26,7 @@ namespace x {
         }
 
         _isRunning = true;
-        LoadContent();
+        LoadContent(_state);
 
         MSG msg{};
         while (msg.message != WM_QUIT && _isRunning) {
@@ -34,10 +34,10 @@ namespace x {
                 ::TranslateMessage(&msg);
                 ::DispatchMessageA(&msg);
             } else {
-                Update();
+                Update(_state);
 
                 renderer.BeginFrame();
-                Render();
+                Render(_state);
                 if (_debugUIEnabled) {
                     debugUI->BeginFrame();
                     DrawDebugUI();
@@ -128,6 +128,7 @@ namespace x {
         // Tell the engine that these classes need to handle resizing when the window size changes
         RegisterVolatile(renderSystem.get());
         RegisterVolatile(&renderer);
+        RegisterVolatile(&_state.GetMainCamera());
 
         if (_debugUIEnabled) {
             debugUI = make_unique<DebugUI>(_hwnd, renderer);

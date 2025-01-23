@@ -3,6 +3,8 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
+#include "TransformMatrices.hpp"
+
 namespace x {
     #pragma region ModelHandle
     ModelHandle ModelHandle::LoadFromFile(Renderer& renderer, const str& filename) {
@@ -19,9 +21,9 @@ namespace x {
         return handle;
     }
 
-    void ModelHandle::Draw(const TransformComponent& transform) {
+    void ModelHandle::Draw(const Camera& camera, const TransformComponent& transform) {
         if (_modelData) {
-            _modelData->Draw(transform);
+            _modelData->Draw(camera, transform);
         }
     }
 
@@ -39,10 +41,14 @@ namespace x {
         return !_meshes.empty();
     }
 
-    void ModelData::Draw(const TransformComponent& transform) {
+    void ModelData::Draw(const Camera& camera, const TransformComponent& transform) {
         // prep transform matrices
         // bind material
         // update cbuffers, maybe move this to an update callback instead
+
+        TransformMatrices transformMatrices(transform.GetTransformMatrix(),
+                                            camera.GetViewMatrix(),
+                                            camera.GetProjectionMatrix());
 
         for (const auto& mesh : _meshes) {
             mesh->Draw();

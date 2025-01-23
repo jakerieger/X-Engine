@@ -9,6 +9,7 @@
 #include "ComponentManager.hpp"
 #include "TransformComponent.hpp"
 #include "Lights.hpp"
+#include "Camera.hpp"
 
 namespace x {
     template<typename T>
@@ -87,11 +88,20 @@ namespace x {
             return _lightState;
         }
 
+        Camera& GetMainCamera() {
+            return _mainCamera;
+        }
+
+        [[nodiscard]] Camera const& GetMainCamera() const {
+            return _mainCamera;
+        }
+
     private:
         u64 _nextId = 0;
 
         // Global state
         LightState _lightState;
+        Camera _mainCamera;
 
         // Component managers
         ComponentManager<TransformComponent> _transforms;

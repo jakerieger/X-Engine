@@ -1,5 +1,6 @@
 #include "Engine/Game.hpp"
 #include "Engine/GeometryBuffer.hpp"
+#include "Engine/Model.hpp"
 #include "Engine/Shader.hpp"
 
 using namespace x;
@@ -13,14 +14,14 @@ class SpaceGame final : public IGame {
     // TODO: These can be abstracted into a Material class
     VertexShader* _vs = None;
     PixelShader* _ps  = None;
-
-    GeometryBuffer<Vertex> _geoBuffer;
+    ModelHandle _starshipHandle;
 
 public:
     explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {}
 
-    void LoadContent() override {
-        const auto shaderFile = R"(C:\Users\conta\Code\SpaceGame\Engine\Shaders\Source\Unlit.hlsl)";
+    void LoadContent(GameState& state) override {
+        const auto starshipFile = R"("C:\Users\conta\Documents\3D Assets\spaceship\source\SpaceShip\StarShip2.obj")";
+        const auto shaderFile   = R"(C:\Users\conta\Code\SpaceGame\Engine\Shaders\Source\Unlit.hlsl)";
 
         _vs = new VertexShader(renderer);
         _vs->LoadFromFile(shaderFile);
@@ -28,7 +29,7 @@ public:
         _ps = new PixelShader(renderer);
         _ps->LoadFromFile(shaderFile);
 
-        CreateBuffers();
+        _starshipHandle = ModelHandle::LoadFromFile(renderer, starshipFile);
     }
 
     void UnloadContent() override {
@@ -36,16 +37,13 @@ public:
         delete _ps;
     }
 
-    void Update() override {}
+    void Update(GameState& state) override {}
 
-    void Render() override {
+    void Render(const GameState& state) override {
         _vs->Bind();
         _ps->Bind();
 
-        _geoBuffer.Bind(renderer);
-
-        auto* context = renderer.GetContext();
-        context->DrawIndexed(_geoBuffer.GetIndexCount(), 0, 0);
+        _starshipHandle.Draw(state.GetMainCamera(), {});
     }
 
     void DrawDebugUI() override {
@@ -54,23 +52,6 @@ public:
     }
 
     void OnResize(u32 width, u32 height) override {}
-
-private:
-    void CreateBuffers() {
-        constexpr Vertex triangleVertices[] = {
-            {XMFLOAT3(0.0f, 0.5f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)}, // Top vertex (red)
-            {XMFLOAT3(0.5f, -0.5f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f)}, // Right vertex (green)
-            {XMFLOAT3(-0.5f, -0.5f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f)} // Left vertex (blue)
-        };
-
-        constexpr u32 triangleIndices[] = {0, 1, 2};
-
-        _geoBuffer.Create(renderer,
-                          triangleVertices,
-                          sizeof(triangleVertices),
-                          triangleIndices,
-                          sizeof(triangleIndices));
-    }
 };
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow) {
