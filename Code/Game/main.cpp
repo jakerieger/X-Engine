@@ -14,22 +14,26 @@ class SpaceGame final : public IGame {
     // TODO: These can be abstracted into a Material class
     VertexShader* _vs = None;
     PixelShader* _ps  = None;
+
     ModelHandle _starshipHandle;
 
 public:
     explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {}
 
     void LoadContent(GameState& state) override {
-        const auto starshipFile = R"("C:\Users\conta\Documents\3D Assets\spaceship\source\SpaceShip\StarShip2.obj")";
-        const auto shaderFile   = R"(C:\Users\conta\Code\SpaceGame\Engine\Shaders\Source\Unlit.hlsl)";
+        const auto starshipFile = R"(C:\Users\conta\Documents\3D Assets\spaceship\source\SpaceShip\StarShip2.obj)";
+        _starshipHandle         = ModelHandle::LoadFromFile(renderer, starshipFile);
+        if (!_starshipHandle.Valid()) {
+            throw std::runtime_error("Failed to load model data.");
+        }
+
+        const auto shaderFile = R"(C:\Users\conta\Code\SpaceGame\Engine\Shaders\Source\Unlit.hlsl)";
 
         _vs = new VertexShader(renderer);
         _vs->LoadFromFile(shaderFile);
 
         _ps = new PixelShader(renderer);
         _ps->LoadFromFile(shaderFile);
-
-        _starshipHandle = ModelHandle::LoadFromFile(renderer, starshipFile);
     }
 
     void UnloadContent() override {
