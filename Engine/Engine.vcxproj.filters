@@ -139,10 +139,8 @@
     <None Include="Shaders\Source\IO.hlsli">
       <Filter>Shaders\Source</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Shaders\Source\Unlit.hlsl">
+    <None Include="Shaders\Source\Unlit.hlsl">
       <Filter>Shaders\Source</Filter>
-    </FxCompile>
+    </None>
   </ItemGroup>
 </Project>
