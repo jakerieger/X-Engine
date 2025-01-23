@@ -190,6 +190,7 @@
     <ClInclude Include="..\Code\Vendor\imgui\imstb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\Source\Common.hlsli" />
     <None Include="Shaders\Source\Triangle.hlsl">
       <FileType>Document</FileType>
     </None>

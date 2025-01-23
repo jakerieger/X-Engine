@@ -11,9 +11,9 @@ namespace x {
     using Float3 = DirectX::XMFLOAT3;
     using Float2 = DirectX::XMFLOAT2;
 
-    static constexpr size_t kMaxPointLights = 10;
-    static constexpr size_t kMaxSpotLights  = 10;
-    static constexpr size_t kMaxAreaLights  = 10;
+    static constexpr size_t kMaxPointLights = 16;
+    static constexpr size_t kMaxSpotLights  = 16;
+    static constexpr size_t kMaxAreaLights  = 16;
 
     struct alignas(16) DirectionalLight {
         Float3 direction = {0.0f, 0.0f, 0.0f};

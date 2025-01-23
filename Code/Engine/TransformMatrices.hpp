@@ -8,7 +8,7 @@
 #include <DirectXMath.h>
 
 namespace x {
-    struct TransformMatrices {
+    struct alignas(16) TransformMatrices {
         DirectX::XMMATRIX model;
         DirectX::XMMATRIX view;
         DirectX::XMMATRIX projection;
@@ -16,13 +16,13 @@ namespace x {
         DirectX::XMMATRIX viewProjection;
         DirectX::XMMATRIX modelViewProjection;
 
-        TransformMatrices(DirectX::XMMATRIX m, DirectX::XMMATRIX v, DirectX::XMMATRIX p) {
+        TransformMatrices(const DirectX::XMMATRIX& m, const DirectX::XMMATRIX& v, const DirectX::XMMATRIX& p) {
             this->model               = m;
             this->view                = v;
             this->projection          = p;
-            this->modelView           = DirectX::XMMatrixMultiply(m, v);
-            this->viewProjection      = DirectX::XMMatrixMultiply(v, p);
-            this->modelViewProjection = DirectX::XMMatrixMultiply(m, this->viewProjection);
+            this->modelView           = XMMatrixMultiply(m, v);
+            this->viewProjection      = XMMatrixMultiply(v, p);
+            this->modelViewProjection = XMMatrixMultiply(m, this->viewProjection);
         }
     };
 }
