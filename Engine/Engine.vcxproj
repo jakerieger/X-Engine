@@ -154,6 +154,8 @@
     <ClCompile Include="..\Code\Engine\Game.cpp" />
     <ClCompile Include="..\Code\Engine\Renderer.cpp" />
     <ClCompile Include="..\Code\Engine\RenderSystem.cpp" />
+    <ClCompile Include="..\Code\Engine\Shader.cpp" />
+    <ClCompile Include="..\Code\Engine\TransformComponent.cpp" />
     <ClCompile Include="..\Code\Vendor\imgui\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="..\Code\Vendor\imgui\backends\imgui_impl_win32.cpp" />
     <ClCompile Include="..\Code\Vendor\imgui\imgui.cpp" />
@@ -163,12 +165,20 @@
     <ClCompile Include="..\Code\Vendor\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Code\Engine\ComponentManager.hpp" />
     <ClInclude Include="..\Code\Engine\D3D.hpp" />
     <ClInclude Include="..\Code\Engine\DebugUI.hpp" />
+    <ClInclude Include="..\Code\Engine\EntityId.hpp" />
     <ClInclude Include="..\Code\Engine\Game.hpp" />
+    <ClInclude Include="..\Code\Engine\GameState.hpp" />
+    <ClInclude Include="..\Code\Engine\Lights.hpp" />
     <ClInclude Include="..\Code\Engine\Platform.hpp" />
     <ClInclude Include="..\Code\Engine\Renderer.hpp" />
     <ClInclude Include="..\Code\Engine\RenderSystem.hpp" />
+    <ClInclude Include="..\Code\Engine\Resource.hpp" />
+    <ClInclude Include="..\Code\Engine\Shader.hpp" />
+    <ClInclude Include="..\Code\Engine\TransformComponent.hpp" />
+    <ClInclude Include="..\Code\Engine\TransformMatrices.hpp" />
     <ClInclude Include="..\Code\Engine\Volatile.hpp" />
     <ClInclude Include="..\Code\Vendor\imgui\backends\imgui_impl_dx11.h" />
     <ClInclude Include="..\Code\Vendor\imgui\backends\imgui_impl_win32.h" />
@@ -178,6 +188,11 @@
     <ClInclude Include="..\Code\Vendor\imgui\imstb_rectpack.h" />
     <ClInclude Include="..\Code\Vendor\imgui\imstb_textedit.h" />
     <ClInclude Include="..\Code\Vendor\imgui\imstb_truetype.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\Source\Triangle.hlsl">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

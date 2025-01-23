@@ -15,7 +15,7 @@ public:
     void Render() override {}
 
     void DrawDebugUI() override {
-        ImGui::Begin("Text");
+        ImGui::Begin("Performance");
         ImGui::End();
     }
 

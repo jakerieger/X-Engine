@@ -31,6 +31,12 @@
     <ClCompile Include="..\Code\Vendor\imgui\backends\imgui_impl_win32.cpp">
       <Filter>Vendor\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="..\Code\Engine\Shader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Code\Engine\TransformComponent.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Code\Engine\Game.hpp">
@@ -78,6 +84,30 @@
     <ClInclude Include="..\Code\Engine\DebugUI.hpp">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="..\Code\Engine\Shader.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\ComponentManager.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\EntityId.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\GameState.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\Lights.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\Resource.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\TransformComponent.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\TransformMatrices.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Configuration">
@@ -101,5 +131,10 @@
     <Filter Include="Vendor\imgui">
       <UniqueIdentifier>{4425b333-79ff-4c5f-b9b7-b1d2bd467c44}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\Source\Triangle.hlsl">
+      <Filter>Shaders\Source</Filter>
+    </None>
   </ItemGroup>
 </Project>
