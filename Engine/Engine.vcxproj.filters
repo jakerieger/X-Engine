@@ -40,6 +40,12 @@
     <ClCompile Include="..\Code\Engine\Material.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Code\Engine\Mesh.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Code\Engine\Model.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Code\Engine\Game.hpp">
@@ -118,6 +124,12 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Code\Engine\InputLayouts.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\Mesh.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\Model.hpp">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>

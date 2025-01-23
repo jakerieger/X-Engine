@@ -113,7 +113,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Code;$(SolutionDir)Code\Engine;$(SolutionDir)Engine\Shaders\Header;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Code;$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Engine\Shaders\Header;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
@@ -123,7 +123,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3d11.lib;dxguid.lib;</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;dxguid.lib;assimp-vc143-mtd.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\conta\Libraries\assimp\build\lib\Debug</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -135,7 +136,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Code;$(SolutionDir)Code\Engine;$(SolutionDir)Engine\Shaders\Header;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Code;$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Engine\Shaders\Header;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
@@ -147,12 +148,15 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3d11.lib;dxguid.lib;</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;dxguid.lib;assimp-vc143-mtd.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\conta\Libraries\assimp\build\lib\Debug</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Code\Engine\Game.cpp" />
     <ClCompile Include="..\Code\Engine\Material.cpp" />
+    <ClCompile Include="..\Code\Engine\Mesh.cpp" />
+    <ClCompile Include="..\Code\Engine\Model.cpp" />
     <ClCompile Include="..\Code\Engine\Renderer.cpp" />
     <ClCompile Include="..\Code\Engine\RenderSystem.cpp" />
     <ClCompile Include="..\Code\Engine\Shader.cpp" />
@@ -176,6 +180,8 @@
     <ClInclude Include="..\Code\Engine\InputLayouts.hpp" />
     <ClInclude Include="..\Code\Engine\Lights.hpp" />
     <ClInclude Include="..\Code\Engine\Material.hpp" />
+    <ClInclude Include="..\Code\Engine\Mesh.hpp" />
+    <ClInclude Include="..\Code\Engine\Model.hpp" />
     <ClInclude Include="..\Code\Engine\Platform.hpp" />
     <ClInclude Include="..\Code\Engine\Renderer.hpp" />
     <ClInclude Include="..\Code\Engine\RenderSystem.hpp" />
