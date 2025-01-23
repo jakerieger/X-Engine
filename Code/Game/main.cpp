@@ -2,6 +2,7 @@
 #include "Engine/GeometryBuffer.hpp"
 #include "Engine/Model.hpp"
 #include "Engine/Shader.hpp"
+#include "Engine/Material.hpp"
 
 using namespace x;
 
@@ -11,10 +12,7 @@ struct Vertex {
 };
 
 class SpaceGame final : public IGame {
-    // TODO: These can be abstracted into a Material class
-    VertexShader* _vs = None;
-    PixelShader* _ps  = None;
-
+    shared_ptr<PBRMaterial> _material;
     ModelHandle _starshipHandle;
 
 public:
@@ -27,26 +25,18 @@ public:
             throw std::runtime_error("Failed to load model data.");
         }
 
-        const auto shaderFile = R"(C:\Users\conta\Code\SpaceGame\Engine\Shaders\Source\Unlit.hlsl)";
-
-        _vs = new VertexShader(renderer);
-        _vs->LoadFromFile(shaderFile);
-
-        _ps = new PixelShader(renderer);
-        _ps->LoadFromFile(shaderFile);
+        _material = make_shared<PBRMaterial>(renderer);
     }
 
-    void UnloadContent() override {
-        delete _vs;
-        delete _ps;
-    }
+    void UnloadContent() override {}
 
     void Update(GameState& state) override {}
 
     void Render(const GameState& state) override {
-        _vs->Bind();
-        _ps->Bind();
-
+        TransformMatrices transformMatrices(XMMatrixIdentity(),
+                                            state.GetMainCamera().GetViewMatrix(),
+                                            state.GetMainCamera().GetProjectionMatrix());
+        _material->Apply(transformMatrices, state.GetLightState());
         _starshipHandle.Draw(state.GetMainCamera(), {});
     }
 

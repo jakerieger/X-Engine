@@ -460,5 +460,8 @@
     <None Include="..\Code\Vendor\assimp\vector3.inl">
       <Filter>Vendor\assimp</Filter>
     </None>
+    <None Include="Shaders\Source\Common.hlsli">
+      <Filter>Shaders\Source</Filter>
+    </None>
   </ItemGroup>
 </Project>

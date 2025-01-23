@@ -54,6 +54,12 @@ struct VSOutputPosTex {
     float4 positionCS : TEXCOORD1; // Clip space position for post-process effects
 };
 
+struct VSOutputPosTexNormal {
+    float4 position : SV_POSITION;
+    float3 normal : NORMAL;
+    float2 texCoord : TEXCOORD0;
+};
+
 struct VSOutputLighting {
     float4 position : SV_POSITION; // Projected position
     float2 texCoord : TEXCOORD0; // Texture coordinates

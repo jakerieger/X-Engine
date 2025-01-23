@@ -2,11 +2,20 @@
 
 namespace x {
     PBRMaterial::PBRMaterial(Renderer& renderer) : _renderer(renderer) {
+        _vertexShader = make_unique<VertexShader>(renderer);
+        _pixelShader  = make_unique<PixelShader>(renderer);
+
+        const auto pbrShader = R"(C:\Users\conta\Code\SpaceGame\Engine\Shaders\Source\Unlit.hlsl)";
+        _vertexShader->LoadFromFile(pbrShader);
+        _pixelShader->LoadFromFile(pbrShader);
         CreateBuffers();
     }
 
     void PBRMaterial::Apply(const TransformMatrices& transformMatrices, const LightState& lightState) {
         UpdateBuffers(transformMatrices, lightState);
+
+        _vertexShader->Bind();
+        _pixelShader->Bind();
 
         auto* context = _renderer.GetContext();
         context->VSSetConstantBuffers(0, 1, _transformsCB.GetAddressOf());

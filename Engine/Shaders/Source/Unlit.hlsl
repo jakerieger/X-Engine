@@ -1,22 +1,16 @@
-struct VSInput {
-    float3 position : POSITION;
-    float4 color : COLOR;
-};
+#include "Common.hlsli"
+#include "IO.hlsli"
 
-struct PSInput {
-    float4 position : SV_Position;
-    float4 color : COLOR;
-};
-
-PSInput VS_Main(VSInput input) {
-    PSInput output;
+VSOutputPosTexNormal VS_Main(VSInputPosTexNormal input) {
+    VSOutputPosTexNormal output;
 
     output.position = float4(input.position, 1.0f);
-    output.color = input.color;
+    output.texCoord = input.texCoord;
+    output.normal = input.normal;
 
     return output;
 }
 
-float4 PS_Main(PSInput input) : SV_Target {
-    return input.color;
+float4 PS_Main(VSOutputPosTexNormal input) : SV_Target {
+    return float4(input.texCoord, 0.0f, 1.0f);
 }

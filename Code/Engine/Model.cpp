@@ -45,11 +45,6 @@ namespace x {
         // prep transform matrices
         // bind material
         // update cbuffers, maybe move this to an update callback instead
-
-        TransformMatrices transformMatrices(transform.GetTransformMatrix(),
-                                            camera.GetViewMatrix(),
-                                            camera.GetProjectionMatrix());
-
         for (const auto& mesh : _meshes) {
             mesh->Draw();
         }
