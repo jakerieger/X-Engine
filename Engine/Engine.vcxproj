@@ -173,6 +173,7 @@
     <ClInclude Include="..\Code\Engine\Game.hpp" />
     <ClInclude Include="..\Code\Engine\GameState.hpp" />
     <ClInclude Include="..\Code\Engine\GeometryBuffer.hpp" />
+    <ClInclude Include="..\Code\Engine\InputLayouts.hpp" />
     <ClInclude Include="..\Code\Engine\Lights.hpp" />
     <ClInclude Include="..\Code\Engine\Material.hpp" />
     <ClInclude Include="..\Code\Engine\Platform.hpp" />
