@@ -298,7 +298,6 @@
     <None Include="..\Code\Vendor\assimp\SmoothingGroups.inl" />
     <None Include="..\Code\Vendor\assimp\vector2.inl" />
     <None Include="..\Code\Vendor\assimp\vector3.inl" />
-    <None Include="Shaders\Source\Common.hlsli" />
     <None Include="Shaders\Source\IO.hlsli" />
   </ItemGroup>
   <ItemGroup>

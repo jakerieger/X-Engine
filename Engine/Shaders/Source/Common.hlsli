@@ -92,6 +92,10 @@ cbuffer LightBuffer : register(b1) {
     AreaLight AreaLights[MAX_AREA_LIGHTS];
 }
 
+cbuffer PBRMaterialBuffer : register(b2) {
+    PBRMaterial Material;
+}
+
 //-----------------------------------------------------------------------------
 // Helper Functions
 //-----------------------------------------------------------------------------
