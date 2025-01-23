@@ -139,5 +139,8 @@
     <None Include="Shaders\Source\Common.hlsli">
       <Filter>Shaders\Source</Filter>
     </None>
+    <None Include="Shaders\Source\IO.hlsli">
+      <Filter>Shaders\Source</Filter>
+    </None>
   </ItemGroup>
 </Project>

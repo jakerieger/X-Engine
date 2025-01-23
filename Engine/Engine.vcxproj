@@ -191,6 +191,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Source\Common.hlsli" />
+    <None Include="Shaders\Source\IO.hlsli" />
     <None Include="Shaders\Source\Triangle.hlsl">
       <FileType>Document</FileType>
     </None>
