@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Code\Engine\Game.cpp" />
+    <ClCompile Include="..\Code\Engine\Material.cpp" />
     <ClCompile Include="..\Code\Engine\Renderer.cpp" />
     <ClCompile Include="..\Code\Engine\RenderSystem.cpp" />
     <ClCompile Include="..\Code\Engine\Shader.cpp" />
@@ -171,7 +172,9 @@
     <ClInclude Include="..\Code\Engine\EntityId.hpp" />
     <ClInclude Include="..\Code\Engine\Game.hpp" />
     <ClInclude Include="..\Code\Engine\GameState.hpp" />
+    <ClInclude Include="..\Code\Engine\GeometryBuffer.hpp" />
     <ClInclude Include="..\Code\Engine\Lights.hpp" />
+    <ClInclude Include="..\Code\Engine\Material.hpp" />
     <ClInclude Include="..\Code\Engine\Platform.hpp" />
     <ClInclude Include="..\Code\Engine\Renderer.hpp" />
     <ClInclude Include="..\Code\Engine\RenderSystem.hpp" />

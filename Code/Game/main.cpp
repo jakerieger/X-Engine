@@ -1,4 +1,5 @@
 #include "Engine/Game.hpp"
+#include "Engine/GeometryBuffer.hpp"
 #include "Engine/Shader.hpp"
 
 using namespace x;
@@ -13,12 +14,7 @@ class SpaceGame final : public IGame {
     VertexShader* _vs = None;
     PixelShader* _ps  = None;
 
-    // TODO: These can be abstracted into a GeometryBuffer class
-    ComPtr<ID3D11Buffer> _vertexBuffer;
-    ComPtr<ID3D11Buffer> _indexBuffer;
-    UINT _stride     = sizeof(Vertex);
-    UINT _offset     = 0;
-    UINT _indexCount = 0;
+    GeometryBuffer<Vertex> _geoBuffer;
 
 public:
     explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {}
@@ -38,8 +34,6 @@ public:
     void UnloadContent() override {
         delete _vs;
         delete _ps;
-        _vertexBuffer.Reset();
-        _indexBuffer.Reset();
     }
 
     void Update() override {}
@@ -48,11 +42,10 @@ public:
         _vs->Bind();
         _ps->Bind();
 
+        _geoBuffer.Bind(renderer);
+
         auto* context = renderer.GetContext();
-        context->IASetVertexBuffers(0, 1, _vertexBuffer.GetAddressOf(), &_stride, &_offset);
-        context->IASetIndexBuffer(_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-        context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        context->DrawIndexed(_indexCount, 0, 0);
+        context->DrawIndexed(_geoBuffer.GetIndexCount(), 0, 0);
     }
 
     void DrawDebugUI() override {
@@ -70,31 +63,13 @@ private:
             {XMFLOAT3(-0.5f, -0.5f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f)} // Left vertex (blue)
         };
 
-        D3D11_BUFFER_DESC vertexBufferDesc = {};
-        vertexBufferDesc.Usage             = D3D11_USAGE_DEFAULT;
-        vertexBufferDesc.ByteWidth         = sizeof(triangleVertices);
-        vertexBufferDesc.BindFlags         = D3D11_BIND_VERTEX_BUFFER;
+        constexpr u32 triangleIndices[] = {0, 1, 2};
 
-        D3D11_SUBRESOURCE_DATA vertexData = {};
-        vertexData.pSysMem                = triangleVertices;
-
-        auto* device = renderer.GetDevice();
-        DX_THROW_IF_FAILED(device->CreateBuffer(&vertexBufferDesc, &vertexData, &_vertexBuffer));
-
-        // Define triangle indices
-        UINT triangleIndices[] = {0, 1, 2};
-        _indexCount            = ARRAYSIZE(triangleIndices);
-
-        // Create index buffer
-        D3D11_BUFFER_DESC indexBufferDesc = {};
-        indexBufferDesc.Usage             = D3D11_USAGE_DEFAULT;
-        indexBufferDesc.ByteWidth         = sizeof(triangleIndices);
-        indexBufferDesc.BindFlags         = D3D11_BIND_INDEX_BUFFER;
-
-        D3D11_SUBRESOURCE_DATA indexData = {};
-        indexData.pSysMem                = triangleIndices;
-
-        DX_THROW_IF_FAILED(device->CreateBuffer(&indexBufferDesc, &indexData, &_indexBuffer));
+        _geoBuffer.Create(renderer,
+                          triangleVertices,
+                          sizeof(triangleVertices),
+                          triangleIndices,
+                          sizeof(triangleIndices));
     }
 };
 

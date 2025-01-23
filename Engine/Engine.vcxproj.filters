@@ -37,6 +37,9 @@
     <ClCompile Include="..\Code\Engine\TransformComponent.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Code\Engine\Material.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Code\Engine\Game.hpp">
@@ -106,6 +109,12 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Code\Engine\TransformMatrices.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\GeometryBuffer.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\Material.hpp">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
