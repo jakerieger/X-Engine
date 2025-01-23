@@ -192,9 +192,9 @@
   <ItemGroup>
     <None Include="Shaders\Source\Common.hlsli" />
     <None Include="Shaders\Source\IO.hlsli" />
-    <None Include="Shaders\Source\Triangle.hlsl">
-      <FileType>Document</FileType>
-    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\Source\Unlit.hlsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

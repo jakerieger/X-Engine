@@ -161,8 +161,82 @@ namespace x {
     #pragma endregion
 
     #pragma region PixelShader
+    void PixelShader::LoadFromFile(const str& filename, const char* entryPoint) {
+        InitFromFile(filename, entryPoint, kPixelShaderModel);
+        const auto hr = _renderer.GetDevice()->CreatePixelShader(_shaderBlob->GetBufferPointer(),
+                                                                 _shaderBlob->GetBufferSize(),
+                                                                 None,
+                                                                 RCAST<ID3D11PixelShader**>(_shader.GetAddressOf()));
+        DX_THROW_IF_FAILED(hr)
+    }
+
+    void PixelShader::LoadFromMemory(const u8* data, const size_t size) {
+        InitFromMemory(data, size);
+        const auto hr = _renderer.GetDevice()->CreatePixelShader(_shaderBlob->GetBufferPointer(),
+                                                                 _shaderBlob->GetBufferSize(),
+                                                                 None,
+                                                                 RCAST<ID3D11PixelShader**>(_shader.GetAddressOf()));
+        DX_THROW_IF_FAILED(hr)
+    }
+
+    void PixelShader::Bind() {
+        const auto pixelShader = CAST<ID3D11PixelShader*>(_shader.Get());
+        if (!pixelShader) {
+            printf("Pixel shader is null.\n");
+            return;
+        }
+        _renderer.GetContext()->PSSetShader(pixelShader, None, 0);
+    }
     #pragma endregion
 
     #pragma region ComputeShader
+    void ComputeShader::LoadFromFile(const str& filename, const char* entryPoint) {
+        InitFromFile(filename, entryPoint, kComputeShaderModel);
+        const auto hr =
+            _renderer.GetDevice()->CreateComputeShader(_shaderBlob->GetBufferPointer(),
+                                                       _shaderBlob->GetBufferSize(),
+                                                       None,
+                                                       RCAST<ID3D11ComputeShader**>(_shader.GetAddressOf()));
+        DX_THROW_IF_FAILED(hr)
+        ExtractThreadGroupSize();
+    }
+
+    void ComputeShader::LoadFromMemory(const u8* data, const size_t size) {
+        InitFromMemory(data, size);
+        const auto hr =
+            _renderer.GetDevice()->CreateComputeShader(_shaderBlob->GetBufferPointer(),
+                                                       _shaderBlob->GetBufferSize(),
+                                                       None,
+                                                       RCAST<ID3D11ComputeShader**>(_shader.GetAddressOf()));
+        DX_THROW_IF_FAILED(hr)
+        ExtractThreadGroupSize();
+    }
+
+    void ComputeShader::Bind() const {
+        _renderer.GetContext()->CSSetShader(CAST<ID3D11ComputeShader*>(_shader.Get()), None, 0);
+    }
+
+    void ComputeShader::Dispatch(const u32 groupSizeX, const u32 groupSizeY, const u32 groupSizeZ) const {
+        _renderer.GetContext()->Dispatch(groupSizeX, groupSizeY, groupSizeZ);
+    }
+
+    void ComputeShader::DispatchWithThreadCount(const u32 threadCountX,
+                                                const u32 threadCountY,
+                                                const u32 threadCountZ) const {
+        const u32 groupSizeX = (threadCountX + _threadGroupSizeX - 1) / _threadGroupSizeX;
+        const u32 groupSizeY = (threadCountY + _threadGroupSizeY - 1) / _threadGroupSizeY;
+        const u32 groupSizeZ = (threadCountZ + _threadGroupSizeZ - 1) / _threadGroupSizeZ;
+        Dispatch(groupSizeX, groupSizeY, groupSizeZ);
+    }
+
+    void ComputeShader::ExtractThreadGroupSize() {
+        const u32 result = _reflection->GetThreadGroupSize(&_threadGroupSizeX, &_threadGroupSizeY, &_threadGroupSizeZ);
+        if (!result) {
+            throw std::runtime_error("Failed to get thread group size from reflection data.");
+        }
+        if (_threadGroupSizeX == 0 || _threadGroupSizeY == 0 || _threadGroupSizeZ == 0) {
+            throw std::runtime_error("Invalid thread group size in compute shader");
+        }
+    }
     #pragma endregion
 }

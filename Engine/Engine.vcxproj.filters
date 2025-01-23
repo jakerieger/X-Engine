@@ -133,14 +133,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Source\Triangle.hlsl">
-      <Filter>Shaders\Source</Filter>
-    </None>
     <None Include="Shaders\Source\Common.hlsli">
       <Filter>Shaders\Source</Filter>
     </None>
     <None Include="Shaders\Source\IO.hlsli">
       <Filter>Shaders\Source</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\Source\Unlit.hlsl">
+      <Filter>Shaders\Source</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
