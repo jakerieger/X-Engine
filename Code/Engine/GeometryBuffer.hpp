@@ -30,7 +30,7 @@ namespace x {
             return _indexBuffer.Get();
         }
 
-        u32 GetIndexCount() const {
+        [[nodiscard]] u32 GetIndexCount() const {
             return _indexCount;
         }
     };
@@ -43,7 +43,7 @@ namespace x {
                                    const size_t indexDataSize) {
         D3D11_BUFFER_DESC vbd{};
         vbd.Usage     = D3D11_USAGE_DEFAULT;
-        vbd.ByteWidth = vertexDataSize;
+        vbd.ByteWidth = vertexDataSize * sizeof(T);
         vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
         D3D11_SUBRESOURCE_DATA vd{};
@@ -54,7 +54,7 @@ namespace x {
 
         D3D11_BUFFER_DESC ibd{};
         ibd.Usage     = D3D11_USAGE_DEFAULT;
-        ibd.ByteWidth = indexDataSize;
+        ibd.ByteWidth = indexDataSize * sizeof(u32);
         ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 
         D3D11_SUBRESOURCE_DATA id{};

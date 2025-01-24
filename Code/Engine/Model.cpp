@@ -40,19 +40,17 @@ namespace x {
     }
 
     void ModelData::Draw(const Camera& camera, const TransformComponent& transform) {
-        // prep transform matrices
-        // bind material
-        // update cbuffers, maybe move this to an update callback instead
         for (const auto& mesh : _meshes) {
             mesh->Draw();
         }
     }
 
-    static constexpr auto kProcessFlags = aiProcess_Triangulate | aiProcess_ConvertToLeftHanded; /*
-                                      aiProcess_GenNormals | aiProcess_JoinIdenticalVertices |
-                                      aiProcess_ValidateDataStructure | aiProcess_ImproveCacheLocality |
-                                      aiProcess_RemoveRedundantMaterials | aiProcess_GenUVCoords |
-                                      aiProcess_CalcTangentSpace;*/
+    static constexpr auto kProcessFlags = aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_GenNormals;
+    /*
+                                         aiProcess_GenNormals | aiProcess_JoinIdenticalVertices |
+                                         aiProcess_ValidateDataStructure | aiProcess_ImproveCacheLocality |
+                                         aiProcess_RemoveRedundantMaterials | aiProcess_GenUVCoords |
+                                         aiProcess_CalcTangentSpace;*/
 
     bool ModelData::LoadFromFile(const str& filename) {
         Assimp::Importer importer;
@@ -121,6 +119,7 @@ namespace x {
 
         for (u32 i = 0; i < mesh->mNumFaces; i++) {
             aiFace face = mesh->mFaces[i];
+
             for (u32 j = 0; j < face.mNumIndices; j++) {
                 indices.push_back(face.mIndices[j]);
             }

@@ -28,7 +28,7 @@ public:
         _material = make_shared<PBRMaterial>(renderer);
 
         auto camera = state.GetMainCamera();
-        camera.SetPosition(XMVectorSet(0.f, 1.f, -5.f, 1.0f));
+        camera.SetPosition(XMVectorSet(0.f, 1.f, -300.f, 1.0f));
     }
 
     void UnloadContent() override {}
@@ -37,8 +37,14 @@ public:
 
     void Render(const GameState& state) override {
         auto model = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-        auto view  = state.GetMainCamera().GetViewMatrix();
-        auto proj  = state.GetMainCamera().GetProjectionMatrix();
+
+        XMVECTOR eye = XMVectorSet(0.0f, 5.0f, -10.0f, 0.0f);
+        XMVECTOR at  = XMVectorSet(0.0f, 2.0f, 0.0f, 0.0f);
+        XMVECTOR up  = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+        auto view    = XMMatrixLookAtLH(eye, at, up);
+
+        //auto view = state.GetMainCamera().GetViewMatrix();
+        auto proj = state.GetMainCamera().GetProjectionMatrix();
 
         TransformMatrices transformMatrices(model, view, proj);
         _material->Apply(transformMatrices, state.GetLightState());
