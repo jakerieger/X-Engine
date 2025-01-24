@@ -19,8 +19,8 @@ public:
     explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {}
 
     void LoadContent(GameState& state) override {
-        const auto starshipFile = R"(C:\Users\conta\Documents\3D Assets\Cube.glb)";
-        _starshipHandle         = ModelHandle::LoadFromFile(renderer, starshipFile);
+        const auto starshipFile = R"(C:\Users\conta\Documents\3D Assets\Pickle.glb)";
+        _starshipHandle         = ModelHandle::LoadGLTF(renderer, starshipFile);
         if (!_starshipHandle.Valid()) {
             throw std::runtime_error("Failed to load model data.");
         }

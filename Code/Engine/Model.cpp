@@ -1,21 +1,11 @@
 #include "Model.hpp"
 
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
-
 namespace x {
     #pragma region ModelHandle
-    ModelHandle ModelHandle::LoadFromFile(Renderer& renderer, const str& filename) {
+    ModelHandle ModelHandle::LoadGLTF(Renderer& renderer, const str& filename) {
         ModelHandle handle;
         handle._modelData = make_shared<ModelData>(renderer);
-        if (!handle._modelData->LoadFromFile(filename)) { handle._modelData.reset(); }
-        return handle;
-    }
-
-    ModelHandle ModelHandle::LoadFromMemory(Renderer& renderer, const u8* data, const size_t size) {
-        ModelHandle handle;
-        handle._modelData = make_shared<ModelData>(renderer);
-        if (!handle._modelData->LoadFromMemory(data, size)) { handle._modelData.reset(); }
+        if (!handle._modelData->LoadGLTF(filename)) { handle._modelData.reset(); }
         return handle;
     }
 
@@ -45,90 +35,60 @@ namespace x {
         }
     }
 
-    static constexpr auto kProcessFlags = aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_GenNormals;
-    /*
-                                         aiProcess_GenNormals | aiProcess_JoinIdenticalVertices |
-                                         aiProcess_ValidateDataStructure | aiProcess_ImproveCacheLocality |
-                                         aiProcess_RemoveRedundantMaterials | aiProcess_GenUVCoords |
-                                         aiProcess_CalcTangentSpace;*/
+    bool ModelData::LoadGLTF(const str& filename) {
+        tinygltf::TinyGLTF loader;
+        tinygltf::Model model;
+        str err, warn;
 
-    bool ModelData::LoadFromFile(const str& filename) {
-        Assimp::Importer importer;
-        const auto* scene = importer.ReadFile(filename.c_str(), kProcessFlags);
-        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+        bool success = loader.LoadBinaryFromFile(&model, &err, &warn, filename);
+        if (!success)
             return false;
-        }
-        ProcessNode(scene->mRootNode, scene);
-        return true;
-    }
 
-    bool ModelData::LoadFromMemory(const u8* data, const size_t size) {
-        Assimp::Importer importer;
-        const auto* scene = importer.ReadFileFromMemory(data,
-                                                        size,
-                                                        kProcessFlags);
-        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) { return false; }
-        ProcessNode(scene->mRootNode, scene);
-        return true;
-    }
-
-    void ModelData::ProcessNode(const aiNode* node, const aiScene* scene) {
-        for (u32 i = 0; i < node->mNumMeshes; i++) {
-            auto* mesh = scene->mMeshes[node->mMeshes[i]];
-            _meshes.push_back(ProcessMesh(mesh, scene));
+        for (const auto& mesh : model.meshes) {
+            auto processedMesh = ProcessGLTFMesh(model, mesh);
+            if (processedMesh) {
+                _meshes.push_back(std::move(processedMesh));
+            }
         }
 
-        for (u32 i = 0; i < node->mNumChildren; i++) {
-            ProcessNode(node->mChildren[i], scene);
-        }
+        return !_meshes.empty();
     }
 
-    unique_ptr<Mesh> ModelData::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
+    unique_ptr<Mesh> ModelData::ProcessGLTFMesh(const tinygltf::Model& model, const tinygltf::Mesh& mesh) {
         vector<VSInputPosTexNormal> vertices;
         vector<u32> indices;
 
-        for (u32 i = 0; i < mesh->mNumVertices; i++) {
-            VSInputPosTexNormal vertex = {};
+        for (const auto& primitive : mesh.primitives) {
+            const auto& posAccessor = model.accessors[primitive.attributes.at("POSITION")];
+            auto positions          = GetBufferData<Float3>(model, posAccessor);
 
-            vertex.position.x = mesh->mVertices[i].x;
-            vertex.position.y = mesh->mVertices[i].y;
-            vertex.position.z = mesh->mVertices[i].z;
-
-            vertex.normal.x = mesh->mNormals[i].x;
-            vertex.normal.y = mesh->mNormals[i].y;
-            vertex.normal.z = mesh->mNormals[i].z;
-
-            // vertex.tangent.x = mesh->mTangents[i].x;
-            // vertex.tangent.y = mesh->mTangents[i].y;
-            // vertex.tangent.z = mesh->mTangents[i].z;
-            //
-            // vertex.biTangent.x = mesh->mBitangents[i].x;
-            // vertex.biTangent.y = mesh->mBitangents[i].y;
-            // vertex.biTangent.z = mesh->mBitangents[i].z;
-
-            if (mesh->mTextureCoords[0]) {
-                vertex.texCoord.x = mesh->mTextureCoords[0][i].x;
-                vertex.texCoord.y = mesh->mTextureCoords[0][i].y;
-            } else {
-                vertex.texCoord.x = 0;
-                vertex.texCoord.y = 0;
+            vector<Float3> normals;
+            if (primitive.attributes.contains("NORMAL")) {
+                const auto& normalAccessor = model.accessors[primitive.attributes.at("NORMAL")];
+                normals                    = GetBufferData<Float3>(model, normalAccessor);
             }
 
-            vertices.push_back(vertex);
-        }
-
-        for (u32 i = 0; i < mesh->mNumFaces; i++) {
-            aiFace face = mesh->mFaces[i];
-
-            for (u32 j = 0; j < face.mNumIndices; j++) {
-                indices.push_back(face.mIndices[j]);
+            vector<Float2> texCoords;
+            if (primitive.attributes.contains("TEXCOORD_0")) {
+                const auto& uvAccessor = model.accessors[primitive.attributes.at("TEXCOORD_0")];
+                texCoords              = GetBufferData<Float2>(model, uvAccessor);
             }
+
+            const auto& indexAccessor = model.accessors[primitive.indices];
+            auto primitiveIndices     = GetBufferData<u32>(model, indexAccessor);
+
+            for (size_t i = 0; i < positions.size(); i++) {
+                VSInputPosTexNormal vertex{};
+                vertex.position = positions[i];
+                vertex.normal   = normals.empty() ? Float3{0, 1, 0} : normals[i];
+                vertex.texCoord = texCoords.empty() ? Float2{0, 0} : texCoords[i];
+                vertices.push_back(vertex);
+            }
+
+            indices.insert(indices.end(), primitiveIndices.begin(), primitiveIndices.end());
         }
 
-        return make_unique<Mesh>(
-            _renderer,
-            vertices,
-            indices);
+        return make_unique<Mesh>(_renderer, vertices, indices);
     }
     #pragma endregion
 }

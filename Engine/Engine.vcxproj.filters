@@ -49,6 +49,9 @@
     <ClCompile Include="..\Code\Engine\Camera.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Code\Vendor\tiny_gltf.cpp">
+      <Filter>Vendor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Code\Engine\Game.hpp">
@@ -392,6 +395,18 @@
     </ClInclude>
     <ClInclude Include="..\Code\Vendor\assimp\revision.h">
       <Filter>Vendor\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\json.hpp">
+      <Filter>Vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\stb_image.h">
+      <Filter>Vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\stb_image_write.h">
+      <Filter>Vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Vendor\tiny_gltf.h">
+      <Filter>Vendor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

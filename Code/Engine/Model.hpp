@@ -4,12 +4,11 @@
 #include "InputLayouts.hpp"
 #include "Renderer.hpp"
 
-#include <assimp/mesh.h>
-#include <assimp/scene.h>
-
 #include "Camera.hpp"
 #include "Mesh.hpp"
 #include "TransformComponent.hpp"
+
+#include "tiny_gltf.h"
 
 namespace x {
     class ModelData;
@@ -21,8 +20,7 @@ namespace x {
     public:
         ModelHandle() = default;
 
-        static ModelHandle LoadFromFile(Renderer& renderer, const str& filename);
-        static ModelHandle LoadFromMemory(Renderer& renderer, const u8* data, size_t size);
+        static ModelHandle LoadGLTF(Renderer& renderer, const str& filename);
 
         void Draw(const Camera& camera, const TransformComponent& transform);
         void Release() override;
@@ -41,10 +39,15 @@ namespace x {
         vector<unique_ptr<Mesh>> _meshes;
 
         void Draw(const Camera& camera, const TransformComponent& transform);
-        bool LoadFromFile(const str& filename);
-        bool LoadFromMemory(const u8* data, size_t size);
+        bool LoadGLTF(const str& filename);
+        unique_ptr<Mesh> ProcessGLTFMesh(const tinygltf::Model& model, const tinygltf::Mesh& mesh);
 
-        void ProcessNode(const aiNode* node, const aiScene* scene);
-        unique_ptr<Mesh> ProcessMesh(aiMesh* mesh, const aiScene* scene);
+        template<typename T>
+        vector<T> GetBufferData(const tinygltf::Model& model, const tinygltf::Accessor& accessor) {
+            const tinygltf::BufferView& bufferView = model.bufferViews[accessor.bufferView];
+            const tinygltf::Buffer& buffer = model.buffers[bufferView.buffer];
+            const T* data = RCAST<const T*>(&buffer.data[bufferView.byteOffset + accessor.byteOffset]);
+            return vector<T>(data, data + accessor.count);
+        }
     };
 }

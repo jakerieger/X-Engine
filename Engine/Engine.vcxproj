@@ -169,6 +169,7 @@
     <ClCompile Include="..\Code\Vendor\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\Code\Vendor\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\Code\Vendor\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="..\Code\Vendor\tiny_gltf.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Code\Engine\Camera.hpp" />
@@ -285,6 +286,10 @@
     <ClInclude Include="..\Code\Vendor\imgui\imstb_rectpack.h" />
     <ClInclude Include="..\Code\Vendor\imgui\imstb_textedit.h" />
     <ClInclude Include="..\Code\Vendor\imgui\imstb_truetype.h" />
+    <ClInclude Include="..\Code\Vendor\json.hpp" />
+    <ClInclude Include="..\Code\Vendor\stb_image.h" />
+    <ClInclude Include="..\Code\Vendor\stb_image_write.h" />
+    <ClInclude Include="..\Code\Vendor\tiny_gltf.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Code\Vendor\assimp\color4.inl" />
