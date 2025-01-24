@@ -178,9 +178,7 @@ float3 CalculatePointLightPBR(PointLight light, float3 worldPos, float3 normal, 
         return float3(0, 0, 0);
     
     // Calculate attenuation
-    float attenuation = CalculateAttenuation(distance, light.constant, light.
-    linear , light.
-    quadratic);
+    float attenuation = CalculateAttenuation(distance, light.constant, light.lin, light.quadratic);
     
     // Calculate base reflectivity (F0)
     float3 F0 = lerp(float3(0.04, 0.04, 0.04), material.albedo, material.metallic);

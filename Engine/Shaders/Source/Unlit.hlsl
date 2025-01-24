@@ -4,7 +4,10 @@
 VSOutputPosTexNormal VS_Main(VSInputPosTexNormal input) {
     VSOutputPosTexNormal output;
 
-    output.position = float4(input.position, 1.0f);
+    float4 pos = float4(input.position, 1.0f);
+    float4 mvp = mul(pos, Transforms.modelViewProjection);
+
+    output.position = mvp;
     output.texCoord = input.texCoord;
     output.normal = input.normal;
 
@@ -12,5 +15,5 @@ VSOutputPosTexNormal VS_Main(VSInputPosTexNormal input) {
 }
 
 float4 PS_Main(VSOutputPosTexNormal input) : SV_Target {
-    return float4(input.texCoord, 0.0f, 1.0f);
+    return float4(input.position);
 }

@@ -424,9 +424,6 @@
     <None Include="Shaders\Source\IO.hlsli">
       <Filter>Shaders\Source</Filter>
     </None>
-    <None Include="Shaders\Source\Unlit.hlsl">
-      <Filter>Shaders\Source</Filter>
-    </None>
     <None Include="..\Code\Vendor\assimp\color4.inl">
       <Filter>Vendor\assimp</Filter>
     </None>
@@ -461,6 +458,9 @@
       <Filter>Vendor\assimp</Filter>
     </None>
     <None Include="Shaders\Source\Common.hlsli">
+      <Filter>Shaders\Source</Filter>
+    </None>
+    <None Include="Shaders\Source\Unlit.hlsl">
       <Filter>Shaders\Source</Filter>
     </None>
   </ItemGroup>

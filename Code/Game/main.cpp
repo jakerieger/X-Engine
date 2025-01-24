@@ -26,6 +26,9 @@ public:
         }
 
         _material = make_shared<PBRMaterial>(renderer);
+
+        auto camera = state.GetMainCamera();
+        camera.SetPosition(XMVectorSet(0.f, 1.f, -5.f, 1.0f));
     }
 
     void UnloadContent() override {}
@@ -33,9 +36,11 @@ public:
     void Update(GameState& state) override {}
 
     void Render(const GameState& state) override {
-        TransformMatrices transformMatrices(XMMatrixIdentity(),
-                                            state.GetMainCamera().GetViewMatrix(),
-                                            state.GetMainCamera().GetProjectionMatrix());
+        auto model = XMMatrixIdentity();
+        auto view  = state.GetMainCamera().GetViewMatrix();
+        auto proj  = state.GetMainCamera().GetProjectionMatrix();
+
+        TransformMatrices transformMatrices(model, view, proj);
         _material->Apply(transformMatrices, state.GetLightState());
         _starshipHandle.Draw(state.GetMainCamera(), {});
     }

@@ -4,25 +4,29 @@
 
 #pragma once
 
-#include "Common/Types.hpp"
-#include <DirectXMath.h>
+#include "Math.hpp"
 
 namespace x {
     struct alignas(16) TransformMatrices {
-        DirectX::XMMATRIX model;
-        DirectX::XMMATRIX view;
-        DirectX::XMMATRIX projection;
-        DirectX::XMMATRIX modelView;
-        DirectX::XMMATRIX viewProjection;
-        DirectX::XMMATRIX modelViewProjection;
+        Matrix model;
+        Matrix view;
+        Matrix projection;
+        Matrix modelView;
+        Matrix viewProjection;
+        Matrix modelViewProjection;
 
-        TransformMatrices(const DirectX::XMMATRIX& m, const DirectX::XMMATRIX& v, const DirectX::XMMATRIX& p) {
-            this->model               = m;
-            this->view                = v;
-            this->projection          = p;
-            this->modelView           = XMMatrixMultiply(m, v);
-            this->viewProjection      = XMMatrixMultiply(v, p);
-            this->modelViewProjection = XMMatrixMultiply(m, this->viewProjection);
+        TransformMatrices(const Matrix& m, const Matrix& v, const Matrix& p) {
+            this->model      = XMMatrixTranspose(m);
+            this->view       = XMMatrixTranspose(v);
+            this->projection = XMMatrixTranspose(p);
+
+            const auto mv  = XMMatrixMultiply(m, v);
+            const auto vp  = XMMatrixMultiply(v, p);
+            const auto mvp = XMMatrixMultiply(m, vp);
+
+            this->modelView           = XMMatrixTranspose(mv);
+            this->viewProjection      = XMMatrixTranspose(vp);
+            this->modelViewProjection = XMMatrixTranspose(mvp);
         }
     };
 }
