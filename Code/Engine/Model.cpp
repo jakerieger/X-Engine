@@ -48,13 +48,13 @@ namespace x {
         }
     }
 
-    bool ModelData::LoadFromFile(const str& filename) {
-        static constexpr auto kProcessFlags = aiProcess_Triangulate | aiProcess_ConvertToLeftHanded |
-                                              aiProcess_GenNormals | aiProcess_JoinIdenticalVertices |
-                                              aiProcess_ValidateDataStructure | aiProcess_ImproveCacheLocality |
-                                              aiProcess_RemoveRedundantMaterials | aiProcess_GenUVCoords |
-                                              aiProcess_CalcTangentSpace;
+    static constexpr auto kProcessFlags = aiProcess_Triangulate | aiProcess_ConvertToLeftHanded; /*
+                                      aiProcess_GenNormals | aiProcess_JoinIdenticalVertices |
+                                      aiProcess_ValidateDataStructure | aiProcess_ImproveCacheLocality |
+                                      aiProcess_RemoveRedundantMaterials | aiProcess_GenUVCoords |
+                                      aiProcess_CalcTangentSpace;*/
 
+    bool ModelData::LoadFromFile(const str& filename) {
         Assimp::Importer importer;
         const auto* scene = importer.ReadFile(filename.c_str(), kProcessFlags);
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
@@ -68,8 +68,7 @@ namespace x {
         Assimp::Importer importer;
         const auto* scene = importer.ReadFileFromMemory(data,
                                                         size,
-                                                        aiProcess_Triangulate | aiProcess_GenNormals |
-                                                        aiProcess_ConvertToLeftHanded | aiProcess_CalcTangentSpace);
+                                                        kProcessFlags);
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) { return false; }
         ProcessNode(scene->mRootNode, scene);
         return true;

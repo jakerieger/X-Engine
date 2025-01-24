@@ -19,7 +19,7 @@ public:
     explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {}
 
     void LoadContent(GameState& state) override {
-        const auto starshipFile = R"(C:\Users\conta\Documents\3D Assets\spaceship\source\SpaceShip\StarShip2.obj)";
+        const auto starshipFile = R"(C:\Users\conta\Documents\3D Assets\Cube.glb)";
         _starshipHandle         = ModelHandle::LoadFromFile(renderer, starshipFile);
         if (!_starshipHandle.Valid()) {
             throw std::runtime_error("Failed to load model data.");
@@ -36,7 +36,7 @@ public:
     void Update(GameState& state) override {}
 
     void Render(const GameState& state) override {
-        auto model = XMMatrixIdentity();
+        auto model = XMMatrixScaling(1.0f, 1.0f, 1.0f);
         auto view  = state.GetMainCamera().GetViewMatrix();
         auto proj  = state.GetMainCamera().GetProjectionMatrix();
 
