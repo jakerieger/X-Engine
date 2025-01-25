@@ -9,6 +9,7 @@
 #include "TransformComponent.hpp"
 
 #include "tiny_gltf.h"
+#include "ufbx.h"
 
 namespace x {
     class ModelData;
@@ -21,6 +22,7 @@ namespace x {
         ModelHandle() = default;
 
         static ModelHandle LoadGLTF(Renderer& renderer, const str& filename);
+        static ModelHandle LoadFBX(Renderer& renderer, const str& filename);
 
         void Draw(const Camera& camera, const TransformComponent& transform);
         void Release() override;
@@ -40,7 +42,10 @@ namespace x {
 
         void Draw(const Camera& camera, const TransformComponent& transform);
         bool LoadGLTF(const str& filename);
+        bool LoadFBX(const str& filename);
+
         unique_ptr<Mesh> ProcessGLTFMesh(const tinygltf::Model& model, const tinygltf::Mesh& mesh);
+        unique_ptr<Mesh> ProcessFBXMesh(const ufbx_scene* scene, const ufbx_mesh* mesh);
 
         template<typename T>
         vector<T> GetBufferData(const tinygltf::Model& model, const tinygltf::Accessor& accessor) {

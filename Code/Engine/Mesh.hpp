@@ -11,8 +11,6 @@ namespace x {
 
     public:
         Mesh(Renderer& renderer, const vector<VSInputPosTexNormal>& vertices, const vector<u32>& indices);
-        ~Mesh();
-
         void Draw();
     };
 }

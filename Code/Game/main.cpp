@@ -19,8 +19,8 @@ public:
     explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {}
 
     void LoadContent(GameState& state) override {
-        const auto starshipFile = R"(C:\Users\conta\Documents\3D Assets\Pickle.glb)";
-        _starshipHandle         = ModelHandle::LoadGLTF(renderer, starshipFile);
+        const auto starshipFile = R"(C:\Users\conta\Documents\3D Assets\Cube.fbx)";
+        _starshipHandle         = ModelHandle::LoadFBX(renderer, starshipFile);
         if (!_starshipHandle.Valid()) {
             throw std::runtime_error("Failed to load model data.");
         }
@@ -64,7 +64,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 
     #ifndef NDEBUG
     if (!game.EnableConsole()) { return EXIT_FAILURE; }
-    game.EnableDebugUI();
+    // game.EnableDebugUI();
     #endif
 
     game.Run();

@@ -42,7 +42,7 @@ namespace x {
                                    const u32* indexData,
                                    const size_t indexDataSize) {
         D3D11_BUFFER_DESC vbd{};
-        vbd.Usage     = D3D11_USAGE_DEFAULT;
+        vbd.Usage     = D3D11_USAGE_IMMUTABLE;
         vbd.ByteWidth = vertexDataSize * sizeof(T);
         vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
@@ -53,7 +53,7 @@ namespace x {
         DX_THROW_IF_FAILED(device->CreateBuffer(&vbd, &vd, &_vertexBuffer))
 
         D3D11_BUFFER_DESC ibd{};
-        ibd.Usage     = D3D11_USAGE_DEFAULT;
+        ibd.Usage     = D3D11_USAGE_IMMUTABLE;
         ibd.ByteWidth = indexDataSize * sizeof(u32);
         ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 
@@ -62,7 +62,7 @@ namespace x {
 
         DX_THROW_IF_FAILED(device->CreateBuffer(&ibd, &id, &_indexBuffer))
 
-        _indexCount = indexDataSize / sizeof(u32);
+        _indexCount = indexDataSize;
     }
 
     template<typename T>

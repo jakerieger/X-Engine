@@ -6,8 +6,6 @@ namespace x {
         _geometryBuffers.Create(renderer, vertices.data(), vertices.size(), indices.data(), indices.size());
     }
 
-    Mesh::~Mesh() = default; // probably dont need this
-
     void Mesh::Draw() {
         _geometryBuffers.Bind(_renderer);
         _renderer.GetContext()->DrawIndexed(_geometryBuffers.GetIndexCount(), 0, 0);
