@@ -74,10 +74,13 @@ namespace x {
 
     bool ModelData::LoadFBX(const str& filename) {
         ufbx_error err;
-        ufbx_load_opts opts;
-        ufbx_scene* scene = ufbx_load_file(filename.c_str(), None, &err);
+        ufbx_load_opts opts = {0};
+
+        ufbx_scene* scene = ufbx_load_file(filename.c_str(), &opts, &err);
         if (!scene) {
-            // print error
+            char buffer[1024];
+            std::ignore = snprintf(buffer, 1024, "UFBX Error: %s\n", err.info);
+            std::ignore = fprintf(stderr, buffer);
             return false;
         }
 
