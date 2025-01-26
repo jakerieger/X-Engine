@@ -7,10 +7,10 @@
 namespace x {
     class Mesh {
         Renderer& _renderer;
-        GeometryBuffer<VSInputPosTexNormal> _geometryBuffers{};
+        GeometryBuffer<VSInputPBR> _geometryBuffers{};
 
     public:
-        Mesh(Renderer& renderer, const vector<VSInputPosTexNormal>& vertices, const vector<u32>& indices)
+        Mesh(Renderer& renderer, const vector<VSInputPBR>& vertices, const vector<u32>& indices)
             : _renderer(renderer) {
             _geometryBuffers.Create(renderer, vertices.data(), vertices.size(), indices.data(), indices.size());
         }

@@ -5,6 +5,9 @@
 #include "Renderer.hpp"
 
 namespace x {
+    // TODO: This doesn't really need to be a template class because every other class that uses it would need to be as well.
+    // Maybe some other way caclulating stride would suffice
+
     template<typename T>
     class GeometryBuffer {
         ComPtr<ID3D11Buffer> _vertexBuffer;

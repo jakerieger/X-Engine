@@ -2,10 +2,8 @@
 
 #include "Common/Types.hpp"
 #include "Renderer.hpp"
-
-#include "Camera.hpp"
 #include "Mesh.hpp"
-#include "TransformComponent.hpp"
+#include "Resource.hpp"
 
 namespace x {
     class ModelData;

@@ -52,7 +52,7 @@ namespace x {
     }
 
     unique_ptr<Mesh> FBXLoader::ProcessMesh(const ufbx_scene* scene, const ufbx_mesh* mesh) {
-        vector<VSInputPosTexNormal> vertices;
+        vector<VSInputPBR> vertices;
         vector<u32> indices;
 
         for (auto i = 0; i < mesh->num_vertices; i++) {
@@ -60,7 +60,7 @@ namespace x {
             const auto normal = mesh->vertex_normal[i];
             const auto uv     = mesh->vertex_uv[i];
 
-            VSInputPosTexNormal vertex;
+            VSInputPBR vertex;
 
             vertex.position.x = CAST<f32>(pos.x);
             vertex.position.y = CAST<f32>(pos.y);

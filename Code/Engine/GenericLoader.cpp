@@ -4,7 +4,8 @@
 #include <assimp/postprocess.h>
 
 namespace x {
-    static constexpr u32 kProcessFlags = aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_GenNormals;
+    static constexpr u32 kProcessFlags = aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_GenNormals |
+                                         aiProcess_CalcTangentSpace;
 
     shared_ptr<ModelData> GenericLoader::LoadFromFile(const str& path) {
         Assimp::Importer importer;
@@ -48,11 +49,11 @@ namespace x {
     }
 
     unique_ptr<Mesh> GenericLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
-        vector<VSInputPosTexNormal> vertices;
+        vector<VSInputPBR> vertices;
         vector<u32> indices;
 
         for (auto i = 0; i < mesh->mNumVertices; ++i) {
-            VSInputPosTexNormal vertex;
+            VSInputPBR vertex;
 
             vertex.position.x = mesh->mVertices[i].x;
             vertex.position.y = mesh->mVertices[i].y;
@@ -70,7 +71,9 @@ namespace x {
             }
 
             if (mesh->HasTangentsAndBitangents()) {
-                // TODO: Load tangents and bitangents
+                vertex.tangent.x = mesh->mTangents[i].x;
+                vertex.tangent.y = mesh->mTangents[i].y;
+                vertex.tangent.z = mesh->mTangents[i].z;
             }
 
             vertices.push_back(vertex);
