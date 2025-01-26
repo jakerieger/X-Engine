@@ -35,12 +35,15 @@ public:
         }
 
         _material = make_shared<PBRMaterial>(renderer);
+        _material->SetAlbedo({1.0f, 0.0f, 0.5f});
 
         auto camera = state.GetMainCamera();
         camera.SetPosition(XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f));
 
-        auto lightState          = state.GetLightState();
-        lightState.sun.direction = Float3(-0.577f, 0.577f, -0.577f);
+        auto& sun     = state.GetLightState().Sun;
+        sun.intensity = 1.0f;
+        sun.color     = {1.0f, 1.0f, 1.0f};
+        sun.direction = {-0.57f, 0.57f, -0.57f};
     }
 
     void UnloadContent() override {}

@@ -55,9 +55,9 @@ namespace x {
     };
 
     struct LightState {
-        DirectionalLight sun;
-        PointLight pointLights[kMaxPointLights];
-        SpotLight spotLights[kMaxSpotLights];
-        AreaLight areaLights[kMaxAreaLights];
+        DirectionalLight Sun;
+        PointLight PointLights[kMaxPointLights];
+        SpotLight SpotLights[kMaxSpotLights];
+        AreaLight AreaLights[kMaxAreaLights];
     };
 }
