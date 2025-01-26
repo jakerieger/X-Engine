@@ -1,3 +1,4 @@
+#include "Engine/DevConsole.hpp"
 #include "Engine/Game.hpp"
 #include "Engine/GeometryBuffer.hpp"
 #include "Engine/Model.hpp"
@@ -67,10 +68,7 @@ public:
         _modelHandle.Draw();
     }
 
-    void DrawDebugUI() override {
-        ImGui::Begin("Performance");
-        ImGui::End();
-    }
+    void DrawDebugUI() override {}
 
     void OnResize(u32 width, u32 height) override {}
 };
@@ -80,7 +78,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 
     #ifndef NDEBUG
     if (!game.EnableConsole()) { return EXIT_FAILURE; }
-    // game.EnableDebugUI();
+    game.EnableDebugUI();
     #endif
 
     game.Run();

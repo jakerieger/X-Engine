@@ -154,6 +154,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Code\Engine\Camera.cpp" />
+    <ClCompile Include="..\Code\Engine\DevConsole.cpp" />
     <ClCompile Include="..\Code\Engine\FBXLoader.cpp" />
     <ClCompile Include="..\Code\Engine\Game.cpp" />
     <ClCompile Include="..\Code\Engine\GenericLoader.cpp" />
@@ -180,6 +181,7 @@
     <ClInclude Include="..\Code\Engine\ComponentManager.hpp" />
     <ClInclude Include="..\Code\Engine\D3D.hpp" />
     <ClInclude Include="..\Code\Engine\DebugUI.hpp" />
+    <ClInclude Include="..\Code\Engine\DevConsole.hpp" />
     <ClInclude Include="..\Code\Engine\EntityId.hpp" />
     <ClInclude Include="..\Code\Engine\FBXLoader.hpp" />
     <ClInclude Include="..\Code\Engine\Game.hpp" />

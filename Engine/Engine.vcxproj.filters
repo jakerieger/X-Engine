@@ -64,6 +64,9 @@
     <ClCompile Include="..\Code\Engine\RasterizerState.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Code\Engine\DevConsole.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Code\Engine\Game.hpp">
@@ -430,6 +433,9 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Code\Engine\RasterizerState.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\DevConsole.hpp">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>

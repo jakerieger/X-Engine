@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DebugUI.hpp"
+#include "DevConsole.hpp"
 #include "GameState.hpp"
 #include "Common/Types.hpp"
 #include "Platform.hpp"
@@ -62,6 +63,7 @@ namespace x {
         unique_ptr<RenderSystem> renderSystem;
         std::unique_ptr<DebugUI> debugUI;
         vector<Volatile*> volatiles;
+        DevConsole devConsole;
 
         void RegisterVolatile(Volatile* vol) {
             volatiles.push_back(vol);

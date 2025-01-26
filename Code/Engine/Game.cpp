@@ -41,6 +41,7 @@ namespace x {
                 if (_debugUIEnabled) {
                     debugUI->BeginFrame();
                     DrawDebugUI();
+                    devConsole.Draw();
                     debugUI->EndFrame();
                 }
                 renderer.EndFrame();
@@ -133,6 +134,11 @@ namespace x {
         if (_debugUIEnabled) {
             debugUI = make_unique<DebugUI>(_hwnd, renderer);
         }
+
+        devConsole.RegisterCommand("quit",
+                                   [this](auto) {
+                                       Quit();
+                                   });
     }
 
     void IGame::Shutdown() {
