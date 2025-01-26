@@ -61,6 +61,7 @@ namespace x {
             const auto uv     = mesh->vertex_uv[i];
 
             VSInputPosTexNormal vertex;
+
             vertex.position.x = CAST<f32>(pos.x);
             vertex.position.y = CAST<f32>(pos.y);
             vertex.position.z = CAST<f32>(pos.z);

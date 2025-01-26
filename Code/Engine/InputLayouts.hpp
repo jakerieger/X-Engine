@@ -22,7 +22,7 @@ namespace x {
         Float3 position;
         Float3 normal;
         Float3 tangent;
-        Float2 texCoord0;
+        Float2 texCoord;
         Float2 texCoord1;
     };
 
@@ -34,4 +34,22 @@ namespace x {
         Uint4 boneIds;
         Float4 weights;
     };
+
+    template<typename T>
+    concept HasTexCoord0 = requires(T t) { t.texCoord; };
+
+    template<typename T>
+    concept HasNormal = requires(T t) { t.normal; };
+
+    template<typename T>
+    concept HasTangent = requires(T t) { t.tangent; };
+
+    template<typename T>
+    concept HasTexCoord1 = requires(T t) { t.texCoord1; };
+
+    template<typename T>
+    concept HasBoneIds = requires(T t) { t.boneIds; };
+
+    template<typename T>
+    concept HasWeights = requires(T t) { t.weights; };
 }
