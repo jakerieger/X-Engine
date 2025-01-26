@@ -2,6 +2,7 @@
 #include "Engine/GeometryBuffer.hpp"
 #include "Engine/Model.hpp"
 #include "Engine/FBXLoader.hpp"
+#include "Engine/GenericLoader.hpp"
 #include "Engine/Material.hpp"
 #include "Engine/RasterizerState.hpp"
 
@@ -14,7 +15,7 @@ struct Vertex {
 
 class SpaceGame final : public IGame {
     shared_ptr<PBRMaterial> _material;
-    ModelHandle _starshipHandle;
+    ModelHandle _modelHandle;
 
 public:
     explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {}
@@ -22,21 +23,18 @@ public:
     void LoadContent(GameState& state) override {
         RasterizerStates::SetupRasterizerStates(renderer);
 
-        const auto starshipFile = R"(C:\Users\conta\Documents\3D Assets\Pickle.fbx)";
+        const auto starshipFile = R"(C:\Users\conta\Documents\3D Assets\monke.glb)";
 
-        FBXLoader loader(renderer);
+        GenericLoader loader(renderer);
         const auto modelData = loader.LoadFromFile(starshipFile);
 
-        _starshipHandle.SetModelData(modelData);
+        _modelHandle.SetModelData(modelData);
 
-        if (!_starshipHandle.Valid()) {
+        if (!_modelHandle.Valid()) {
             throw std::runtime_error("Failed to load model data.");
         }
 
         _material = make_shared<PBRMaterial>(renderer);
-
-        auto camera = state.GetMainCamera();
-        camera.SetPosition(XMVectorSet(0.f, 1.f, -300.f, 1.0f));
     }
 
     void UnloadContent() override {}
@@ -48,17 +46,16 @@ public:
 
         auto model = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 
-        XMVECTOR eye = XMVectorSet(0.0f, 5.0f, -10.0f, 0.0f);
-        XMVECTOR at  = XMVectorSet(0.0f, 2.0f, 0.0f, 0.0f);
+        XMVECTOR eye = XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f);
+        XMVECTOR at  = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
         XMVECTOR up  = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
         auto view    = XMMatrixLookAtLH(eye, at, up);
 
-        //auto view = state.GetMainCamera().GetViewMatrix();
         auto proj = state.GetMainCamera().GetProjectionMatrix();
 
         TransformMatrices transformMatrices(model, view, proj);
         _material->Apply(transformMatrices, state.GetLightState());
-        _starshipHandle.Draw(state.GetMainCamera(), {});
+        _modelHandle.Draw();
     }
 
     void DrawDebugUI() override {

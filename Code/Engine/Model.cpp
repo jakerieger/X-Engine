@@ -2,9 +2,9 @@
 
 namespace x {
     #pragma region ModelHandle
-    void ModelHandle::Draw(const Camera& camera, const TransformComponent& transform) {
+    void ModelHandle::Draw() {
         if (_modelData) {
-            _modelData->Draw(camera, transform);
+            _modelData->Draw();
         }
     }
 
@@ -22,7 +22,7 @@ namespace x {
         return !_meshes.empty();
     }
 
-    void ModelData::Draw(const Camera& camera, const TransformComponent& transform) {
+    void ModelData::Draw() {
         for (const auto& mesh : _meshes) {
             mesh->Draw();
         }

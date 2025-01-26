@@ -17,7 +17,7 @@ namespace x {
     public:
         ModelHandle() = default;
 
-        void Draw(const Camera& camera, const TransformComponent& transform);
+        void Draw();
         void Release() override;
         [[nodiscard]] bool Valid() const;
 
@@ -39,6 +39,6 @@ namespace x {
         Renderer& _renderer;
         vector<unique_ptr<Mesh>> _meshes;
 
-        void Draw(const Camera& camera, const TransformComponent& transform);
+        void Draw();
     };
 }
