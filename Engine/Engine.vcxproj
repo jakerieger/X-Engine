@@ -160,6 +160,7 @@
     <ClCompile Include="..\Code\Engine\Material.cpp" />
     <ClCompile Include="..\Code\Engine\Mesh.cpp" />
     <ClCompile Include="..\Code\Engine\Model.cpp" />
+    <ClCompile Include="..\Code\Engine\RasterizerState.cpp" />
     <ClCompile Include="..\Code\Engine\Renderer.cpp" />
     <ClCompile Include="..\Code\Engine\RenderSystem.cpp" />
     <ClCompile Include="..\Code\Engine\Shader.cpp" />
@@ -192,6 +193,7 @@
     <ClInclude Include="..\Code\Engine\Mesh.hpp" />
     <ClInclude Include="..\Code\Engine\Model.hpp" />
     <ClInclude Include="..\Code\Engine\Platform.hpp" />
+    <ClInclude Include="..\Code\Engine\RasterizerState.hpp" />
     <ClInclude Include="..\Code\Engine\Renderer.hpp" />
     <ClInclude Include="..\Code\Engine\RenderSystem.hpp" />
     <ClInclude Include="..\Code\Engine\Resource.hpp" />

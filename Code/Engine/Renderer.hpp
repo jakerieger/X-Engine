@@ -10,6 +10,7 @@ namespace x {
         ComPtr<ID3D11Device> _device;
         ComPtr<ID3D11DeviceContext> _context;
         ComPtr<ID3D11Texture2D> _backBuffer;
+        ComPtr<ID3D11RasterizerState> _rasterizerState;
         ComPtr<ID3D11RenderTargetView> _renderTargetView;
         ComPtr<ID3D11DepthStencilView> _depthStencilView;
         ComPtr<ID3D11DepthStencilState> _depthStencilState;

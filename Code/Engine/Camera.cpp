@@ -78,7 +78,7 @@ namespace x {
     }
 
     void Camera::UpdateViewMatrix() {
-        _viewMatrix = XMMatrixLookToLH(_position, _forward, _up);
+        _viewMatrix = XMMatrixLookAtLH(_position, _forward, _up);
     }
 
     void Camera::UpdateProjectionMatrix() {

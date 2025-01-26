@@ -61,6 +61,9 @@
     <ClCompile Include="..\Code\Engine\FBXLoader.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Code\Engine\RasterizerState.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Code\Engine\Game.hpp">
@@ -424,6 +427,9 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Code\Engine\GenericLoader.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\RasterizerState.hpp">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>

@@ -15,5 +15,6 @@ VSOutputPosTexNormal VS_Main(VSInputPosTexNormal input) {
 }
 
 float4 PS_Main(VSOutputPosTexNormal input) : SV_Target {
-    return float4(input.normal, 1.0f);
+    float3 normal = normalize(input.normal);
+    return float4(normal, 1.0f);
 }

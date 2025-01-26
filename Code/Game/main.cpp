@@ -3,6 +3,7 @@
 #include "Engine/Model.hpp"
 #include "Engine/FBXLoader.hpp"
 #include "Engine/Material.hpp"
+#include "Engine/RasterizerState.hpp"
 
 using namespace x;
 
@@ -19,7 +20,9 @@ public:
     explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {}
 
     void LoadContent(GameState& state) override {
-        const auto starshipFile = R"(C:\Users\conta\Documents\3D Assets\Cube.fbx)";
+        RasterizerStates::SetupRasterizerStates(renderer);
+
+        const auto starshipFile = R"(C:\Users\conta\Documents\3D Assets\Pickle.fbx)";
 
         FBXLoader loader(renderer);
         const auto modelData = loader.LoadFromFile(starshipFile);
@@ -41,6 +44,8 @@ public:
     void Update(GameState& state) override {}
 
     void Render(const GameState& state) override {
+        renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
+
         auto model = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 
         XMVECTOR eye = XMVectorSet(0.0f, 5.0f, -10.0f, 0.0f);
