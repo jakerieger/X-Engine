@@ -7,7 +7,8 @@
 #include <ufbx.h>
 
 namespace x {
-    /// @brief Loads mesh data from FBX files or data stored in memory. Prefer this over GenericLoader when possible.
+    /// @brief Loads mesh data from FBX files or data stored in memory.
+    /// @note This is currently outputting faces in the wrong winding order. Use GenericLoader for now.
     class FBXLoader {
         Renderer& _renderer;
 

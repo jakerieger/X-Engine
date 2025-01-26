@@ -85,7 +85,7 @@ namespace x {
         ImGui::SetNextWindowPos(viewport->Pos);
         ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, viewport->Size.y * 0.3f));
 
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, {0.0f, 0.0f, 0.0f, 0.5f});
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, {0.0f, 0.0f, 0.0f, 0.67f});
         if (!ImGui::Begin("##console",
                           &_visible,
                           ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse |

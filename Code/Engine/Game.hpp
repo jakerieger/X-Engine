@@ -56,7 +56,7 @@ namespace x {
         virtual void Update(GameState& state) = 0;
         virtual void Render(const GameState& state) = 0;
         virtual void OnResize(u32 width, u32 height) = 0;
-        virtual void DrawDebugUI() {}
+        virtual void DrawDebugUI();
 
     protected:
         Renderer renderer;

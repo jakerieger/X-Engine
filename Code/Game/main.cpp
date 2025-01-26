@@ -64,7 +64,11 @@ public:
         _modelHandle.Draw();
     }
 
-    void DrawDebugUI() override {}
+    void DrawDebugUI() override {
+        IGame::DrawDebugUI(); // Call base impl first!
+
+        // Draw custom debug UI with ImGui
+    }
 
     void OnResize(u32 width, u32 height) override {}
 };

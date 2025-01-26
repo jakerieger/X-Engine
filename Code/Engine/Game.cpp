@@ -1,4 +1,6 @@
 #include "Game.hpp"
+
+#include <Vendor/imgui/imgui.h>
 #include <stdexcept>
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -39,10 +41,11 @@ namespace x {
                 renderer.BeginFrame();
                 Render(_state);
                 if (_debugUIEnabled) {
-                    debugUI->BeginFrame();
-                    DrawDebugUI();
-                    devConsole.Draw();
-                    debugUI->EndFrame();
+                    debugUI->BeginFrame(); // begin ImGui frame
+                    debugUI->Draw(); // draw built-in debug ui
+                    DrawDebugUI(); // draw user-defined debug ui
+                    devConsole.Draw(); // draw developer console
+                    debugUI->EndFrame(); // end imgui frame
                 }
                 renderer.EndFrame();
             }
@@ -91,6 +94,8 @@ namespace x {
         return CAST<f32>(_currentWidth) / CAST<f32>(_currentHeight);
     }
 
+    void IGame::DrawDebugUI() {}
+
     void IGame::Initialize() {
         WNDCLASSEXA wc{};
         wc.cbSize        = sizeof(WNDCLASSEXA);
@@ -138,6 +143,34 @@ namespace x {
         devConsole.RegisterCommand("quit",
                                    [this](auto) {
                                        Quit();
+                                   });
+
+        devConsole.RegisterCommand("close",
+                                   [this](auto) {
+                                       devConsole.ToggleVisible();
+                                   });
+
+        devConsole.RegisterCommand("r_FrameGraph",
+                                   [this](auto args) {
+                                       if (args.size() < 1) {
+                                           return;
+                                       }
+                                       const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                                       debugUI->SetShowFramegraph(CAST<bool>(show));
+                                   });
+
+        devConsole.RegisterCommand("r_DeviceInfo",
+                                   [this](auto args) {
+                                       if (args.size() < 1) { return; }
+                                       const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                                       debugUI->SetShowDeviceInfo(CAST<bool>(show));
+                                   });
+
+        devConsole.RegisterCommand("r_RenderInfo",
+                                   [this](auto args) {
+                                       if (args.size() < 1) { return; }
+                                       const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                                       debugUI->SetShowRenderInfo(CAST<bool>(show));
                                    });
     }
 
