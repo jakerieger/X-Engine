@@ -41,6 +41,7 @@ namespace x {
 
     constexpr std::nullptr_t None  = nullptr;
     constexpr std::nullopt_t Empty = std::nullopt;
+    constexpr std::_Ignore _i_     = std::ignore;
 
     // Most used STL objects included for convenience
     using std::array;

@@ -1,7 +1,7 @@
 #include "Engine/Game.hpp"
 #include "Engine/GeometryBuffer.hpp"
 #include "Engine/Model.hpp"
-#include "Engine/Shader.hpp"
+#include "Engine/FBXLoader.hpp"
 #include "Engine/Material.hpp"
 
 using namespace x;
@@ -20,7 +20,12 @@ public:
 
     void LoadContent(GameState& state) override {
         const auto starshipFile = R"(C:\Users\conta\Documents\3D Assets\Cube.fbx)";
-        _starshipHandle         = ModelHandle::LoadFBX(renderer, starshipFile);
+
+        FBXLoader loader(renderer);
+        const auto modelData = loader.LoadFromFile(starshipFile);
+
+        _starshipHandle.SetModelData(modelData);
+
         if (!_starshipHandle.Valid()) {
             throw std::runtime_error("Failed to load model data.");
         }
