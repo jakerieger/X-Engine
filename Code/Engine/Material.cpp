@@ -11,8 +11,10 @@ namespace x {
         CreateBuffers();
     }
 
-    void PBRMaterial::Apply(const TransformMatrices& transformMatrices, const LightState& lightState) {
-        UpdateBuffers(transformMatrices, lightState);
+    void PBRMaterial::Apply(const TransformMatrices& transformMatrices,
+                            const LightState& lightState,
+                            const Float3& cameraPos) {
+        UpdateBuffers(transformMatrices, lightState, cameraPos);
 
         _vertexShader->Bind();
         _pixelShader->Bind();
@@ -21,6 +23,7 @@ namespace x {
         context->VSSetConstantBuffers(0, 1, _transformsCB.GetAddressOf());
         context->PSSetConstantBuffers(1, 1, _lightsCB.GetAddressOf());
         context->PSSetConstantBuffers(2, 1, _materialCB.GetAddressOf());
+        context->PSSetConstantBuffers(3, 1, _cameraCB.GetAddressOf());
     }
 
     void PBRMaterial::SetAlbedo(const Float3& albedo) {
@@ -77,9 +80,22 @@ namespace x {
 
         hr = _renderer.GetDevice()->CreateBuffer(&materialBufDesc, None, &_materialCB);
         DX_THROW_IF_FAILED(hr)
+
+        D3D11_BUFFER_DESC cameraBufDesc;
+        cameraBufDesc.ByteWidth           = sizeof(Float4);
+        cameraBufDesc.Usage               = D3D11_USAGE_DYNAMIC;
+        cameraBufDesc.BindFlags           = D3D11_BIND_CONSTANT_BUFFER;
+        cameraBufDesc.CPUAccessFlags      = D3D11_CPU_ACCESS_WRITE;
+        cameraBufDesc.MiscFlags           = 0;
+        cameraBufDesc.StructureByteStride = 0;
+
+        hr = _renderer.GetDevice()->CreateBuffer(&cameraBufDesc, None, &_cameraCB);
+        DX_THROW_IF_FAILED(hr)
     }
 
-    void PBRMaterial::UpdateBuffers(const TransformMatrices& transformMatrices, const LightState& lightState) {
+    void PBRMaterial::UpdateBuffers(const TransformMatrices& transformMatrices,
+                                    const LightState& lightState,
+                                    const Float3& cameraPos) {
         auto* context = _renderer.GetContext();
 
         // Update transform buffer
@@ -100,5 +116,12 @@ namespace x {
         DX_THROW_IF_FAILED(hr)
         memcpy(mapped.pData, &_materialProperties, sizeof(_materialProperties));
         context->Unmap(_materialCB.Get(), 0);
+
+        // Camera buffer
+        hr = context->Map(_cameraCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+        DX_THROW_IF_FAILED(hr)
+        Float4 paddedPos = Float4(cameraPos.x, cameraPos.y, cameraPos.z, 0.0f);
+        memcpy(mapped.pData, &paddedPos, sizeof(paddedPos));
+        context->Unmap(_cameraCB.Get(), 0);
     }
 }

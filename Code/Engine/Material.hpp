@@ -13,6 +13,7 @@ namespace x {
         ComPtr<ID3D11Buffer> _transformsCB;
         ComPtr<ID3D11Buffer> _lightsCB;
         ComPtr<ID3D11Buffer> _materialCB;
+        ComPtr<ID3D11Buffer> _cameraCB;
         unique_ptr<VertexShader> _vertexShader;
         unique_ptr<PixelShader> _pixelShader;
 
@@ -27,7 +28,7 @@ namespace x {
 
     public:
         explicit PBRMaterial(Renderer& renderer);
-        void Apply(const TransformMatrices& transformMatrices, const LightState& lightState);
+        void Apply(const TransformMatrices& transformMatrices, const LightState& lightState, const Float3& cameraPos);
 
         void SetAlbedo(const Float3& albedo);
         void SetMetallic(f32 metallic);
@@ -37,6 +38,8 @@ namespace x {
 
     private:
         void CreateBuffers();
-        void UpdateBuffers(const TransformMatrices& transformMatrices, const LightState& lightState);
+        void UpdateBuffers(const TransformMatrices& transformMatrices,
+                           const LightState& lightState,
+                           const Float3& cameraPos);
     };
 }

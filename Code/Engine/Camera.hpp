@@ -28,6 +28,7 @@ namespace x {
         Matrix GetViewMatrix() const;
         Matrix GetProjectionMatrix() const;
         Matrix GetViewProjectionMatrix() const;
+        Float3 GetPosition() const;
 
     private:
         void UpdateViewMatrix();

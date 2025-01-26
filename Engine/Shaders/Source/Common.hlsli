@@ -96,6 +96,10 @@ cbuffer PBRMaterialBuffer : register(b2) {
     PBRMaterial Material;
 }
 
+cbuffer CameraBuffer : register(b3) {
+    float4 CameraPosition;
+}
+
 //-----------------------------------------------------------------------------
 // Helper Functions
 //-----------------------------------------------------------------------------

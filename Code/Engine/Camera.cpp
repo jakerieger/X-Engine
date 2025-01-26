@@ -44,6 +44,12 @@ namespace x {
         return XMMatrixMultiply(_viewMatrix, _projectionMatrix);
     }
 
+    Float3 Camera::GetPosition() const {
+        Float3 pos;
+        XMStoreFloat3(&pos, _position);
+        return pos;
+    }
+
     void Camera::UpdateViewMatrix() {
         _viewMatrix = XMMatrixLookAtLH(_position, _at, _up);
     }

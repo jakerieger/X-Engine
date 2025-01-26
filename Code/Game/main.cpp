@@ -60,7 +60,7 @@ public:
         auto proj = state.GetMainCamera().GetProjectionMatrix();
 
         TransformMatrices transformMatrices(model, view, proj);
-        _material->Apply(transformMatrices, state.GetLightState());
+        _material->Apply(transformMatrices, state.GetLightState(), state.GetMainCamera().GetPosition());
         _modelHandle.Draw();
     }
 
