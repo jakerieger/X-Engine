@@ -68,7 +68,7 @@ namespace x {
         _i_                              = vsnprintf(buffer, IM_ARRAYSIZE(buffer), fmt, args);
         buffer[IM_ARRAYSIZE(buffer) - 1] = 0;
         va_end(args);
-        _items.push_back(buffer);
+        _items.emplace_back(buffer);
     }
 
     void DevConsole::Draw() {
@@ -99,7 +99,7 @@ namespace x {
         ImGui::EndChild();
 
         // Command line
-        bool reclaimFocus                  = true;
+        bool reclaimFocus                  = false;
         ImGuiInputTextFlags inputTextFlags = ImGuiInputTextFlags_EnterReturnsTrue |
                                              ImGuiInputTextFlags_CallbackCompletion |
                                              ImGuiInputTextFlags_CallbackHistory;

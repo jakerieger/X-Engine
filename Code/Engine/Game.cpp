@@ -170,6 +170,14 @@ namespace x {
 
             case WM_SIZE:
                 return ResizeHandler(LOWORD(lParam), HIWORD(lParam));
+
+            case WM_KEYDOWN: {
+                // Backtick / tilde key
+                if (wParam == VK_OEM_3) {
+                    devConsole.ToggleVisibility();
+                }
+            }
+                return 0;
         }
 
         return ::DefWindowProcA(_hwnd, msg, wParam, lParam);
