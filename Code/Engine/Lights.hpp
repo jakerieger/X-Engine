@@ -5,28 +5,24 @@
 #pragma once
 
 #include "Common/Types.hpp"
-#include <DirectXMath.h>
+#include "Math.hpp"
 
 namespace x {
-    using float4 = DirectX::XMFLOAT4;
-    using float3 = DirectX::XMFLOAT3;
-    using float2 = DirectX::XMFLOAT2;
-
     static constexpr size_t kMaxPointLights = 16;
     static constexpr size_t kMaxSpotLights  = 16;
     static constexpr size_t kMaxAreaLights  = 16;
 
     struct alignas(16) DirectionalLight {
-        float3 direction = {0.0f, 0.0f, 0.0f};
-        float3 color     = {1.0f, 1.0f, 1.0f};
+        Float3 direction = {0.0f, 0.0f, 0.0f};
+        Float3 color     = {1.0f, 1.0f, 1.0f};
         f32 intensity    = 1.0f;
         bool castsShadow = true;
         bool enabled     = true;
     };
 
     struct alignas(16) PointLight {
-        float3 position  = {0.0f, 0.0f, 0.0f};
-        float3 color     = {1.0f, 1.0f, 1.0f};
+        Float3 position  = {0.0f, 0.0f, 0.0f};
+        Float3 color     = {1.0f, 1.0f, 1.0f};
         f32 intensity    = 1.0f;
         f32 constant     = 1.0f;
         f32 linear       = 0.09f;
@@ -37,9 +33,9 @@ namespace x {
     };
 
     struct alignas(16) SpotLight {
-        float3 position  = {0.0f, 0.0f, 0.0f}; // Origin of the light
-        float3 direction = {0.0f, -1.0f, 0.0f}; // Direction the cone points
-        float3 color     = {1.0f, 1.0f, 1.0f}; // Light's color
+        Float3 position  = {0.0f, 0.0f, 0.0f}; // Origin of the light
+        Float3 direction = {0.0f, -1.0f, 0.0f}; // Direction the cone points
+        Float3 color     = {1.0f, 1.0f, 1.0f}; // Light's color
         f32 intensity    = 1.0f; // Overall brightness
         f32 innerAngle   = 0.8f; // Inner cone angle (cosine)
         f32 outerAngle   = 0.6f; // Outer cone angle (cosine)
@@ -49,10 +45,10 @@ namespace x {
     };
 
     struct alignas(16) AreaLight {
-        float3 position   = {0.0f, 0.0f, 0.0f}; // Center position
-        float3 direction  = {0.0f, -1.0f, 0.0f}; // Normal direction
-        float3 color      = {1.0f, 1.0f, 1.0f}; // Light's color
-        float2 dimensions = {1.0f, 1.0f}; // Width and height of the area
+        Float3 position   = {0.0f, 0.0f, 0.0f}; // Center position
+        Float3 direction  = {0.0f, -1.0f, 0.0f}; // Normal direction
+        Float3 color      = {1.0f, 1.0f, 1.0f}; // Light's color
+        Float2 dimensions = {1.0f, 1.0f}; // Width and height of the area
         f32 intensity     = 1.0f; // Overall brightness
         bool castsShadow  = true;
         bool enabled      = false;

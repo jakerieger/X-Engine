@@ -35,6 +35,12 @@ public:
         }
 
         _material = make_shared<PBRMaterial>(renderer);
+
+        auto camera = state.GetMainCamera();
+        camera.SetPosition(XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f));
+
+        auto lightState          = state.GetLightState();
+        lightState.sun.direction = Float3(-0.577f, 0.577f, -0.577f);
     }
 
     void UnloadContent() override {}
@@ -46,11 +52,11 @@ public:
 
         auto model = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 
-        XMVECTOR eye = XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f);
-        XMVECTOR at  = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-        XMVECTOR up  = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-        auto view    = XMMatrixLookAtLH(eye, at, up);
+        // XMVECTOR eye = XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f);
+        // XMVECTOR at  = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+        // XMVECTOR up  = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
+        auto view = state.GetMainCamera().GetViewMatrix();
         auto proj = state.GetMainCamera().GetProjectionMatrix();
 
         TransformMatrices transformMatrices(model, view, proj);
