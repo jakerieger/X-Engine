@@ -7,6 +7,7 @@
 #include <ufbx.h>
 
 namespace x {
+    /// @brief Loads mesh data from FBX files or data stored in memory. Prefer this over GenericLoader when possible.
     class FBXLoader {
         Renderer& _renderer;
 
