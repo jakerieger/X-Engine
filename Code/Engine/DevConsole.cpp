@@ -5,9 +5,11 @@
 #include <cstdarg>
 #include <sstream>
 
+#include "Common/Str.hpp"
+
 namespace x {
     DevConsole::DevConsole() {
-        _i_ = strcpy(_inputBuffer, "");
+        _i_ = StrCopy(_inputBuffer, kMaxInputLength, "");
 
         RegisterCommand("clear",
                         [this](const vector<str>&) {
@@ -53,7 +55,8 @@ namespace x {
 
         _history.emplace_back(cmdLine);
         _historyPos = -1;
-        strcpy(_inputBuffer, "");
+
+        _i_ = StrCopy(_inputBuffer, kMaxInputLength, "");
     }
 
     void DevConsole::RegisterCommand(const str& name, const CommandHandler& handler) {
@@ -65,7 +68,9 @@ namespace x {
         char buffer[1024];
         va_list args;
         va_start(args, fmt);
-        _i_                              = vsnprintf(buffer, IM_ARRAYSIZE(buffer), fmt, args);
+
+        _i_ = vsnprintf(buffer, IM_ARRAYSIZE(buffer), fmt, args);
+
         buffer[IM_ARRAYSIZE(buffer) - 1] = 0;
         va_end(args);
         _items.emplace_back(buffer);
@@ -79,6 +84,8 @@ namespace x {
         const ImGuiViewport* viewport = ImGui::GetMainViewport();
         ImGui::SetNextWindowPos(viewport->Pos);
         ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, viewport->Size.y * 0.3f));
+
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, {0.0f, 0.0f, 0.0f, 0.5f});
         if (!ImGui::Begin("##console",
                           &_visible,
                           ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse |
@@ -86,6 +93,7 @@ namespace x {
             ImGui::End();
             return;
         }
+        ImGui::PopStyleColor();
 
         ImGui::BeginChild("ScrollingRegion",
                           ImVec2(0, -ImGui::GetFrameHeightWithSpacing()),
@@ -104,6 +112,11 @@ namespace x {
                                              ImGuiInputTextFlags_CallbackCompletion |
                                              ImGuiInputTextFlags_CallbackHistory;
 
+        if (_shouldFocus) {
+            ImGui::SetKeyboardFocusHere();
+            _shouldFocus = false;
+        }
+
         ImGui::Text(">");
         ImGui::SameLine();
         ImGui::PushItemWidth(-1);
@@ -118,7 +131,7 @@ namespace x {
                 return console->TextEditCallback(data);
             },
             this)) {
-            char* input_end = _inputBuffer + strlen(_inputBuffer);
+            char* input_end = _inputBuffer + StrLen(_inputBuffer, kMaxInputLength);
             while (input_end > _inputBuffer && input_end[-1] == ' ')
                 input_end--;
             *input_end = 0;
@@ -155,12 +168,12 @@ namespace x {
 
                 if (prevHistoryPos != _historyPos) {
                     data->CursorPos = data->SelectionStart = data->SelectionEnd = data->BufTextLen =
-                                                                 (int)snprintf(data->Buf,
-                                                                               CAST<size_t>(data->BufSize),
-                                                                               "%s",
-                                                                               (_historyPos >= 0)
-                                                                                   ? _history[_historyPos].c_str()
-                                                                                   : "");
+                                                                 snprintf(data->Buf,
+                                                                          CAST<size_t>(data->BufSize),
+                                                                          "%s",
+                                                                          (_historyPos >= 0)
+                                                                              ? _history[_historyPos].c_str()
+                                                                              : "");
                     data->BufDirty = true;
                 }
                 break;
@@ -169,8 +182,9 @@ namespace x {
         return 0;
     }
 
-    void DevConsole::ToggleVisibility() {
-        _visible = !_visible;
+    void DevConsole::ToggleVisible() {
+        _visible     = !_visible;
+        _shouldFocus = _visible;
     }
 
     bool DevConsole::IsVisible() const {

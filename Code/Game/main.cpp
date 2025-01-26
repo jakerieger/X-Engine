@@ -38,7 +38,7 @@ public:
         _material = make_shared<PBRMaterial>(renderer);
         _material->SetAlbedo({1.0f, 0.0f, 0.5f});
 
-        auto camera = state.GetMainCamera();
+        auto& camera = state.GetMainCamera();
         camera.SetPosition(XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f));
 
         auto& sun     = state.GetLightState().Sun;
@@ -54,14 +54,10 @@ public:
     void Render(const GameState& state) override {
         renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
 
+        // TODO: Implement the component system and pull this from the TransformComponent.
         auto model = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-
-        // XMVECTOR eye = XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f);
-        // XMVECTOR at  = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-        // XMVECTOR up  = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-
-        auto view = state.GetMainCamera().GetViewMatrix();
-        auto proj = state.GetMainCamera().GetProjectionMatrix();
+        auto view  = state.GetMainCamera().GetViewMatrix();
+        auto proj  = state.GetMainCamera().GetProjectionMatrix();
 
         TransformMatrices transformMatrices(model, view, proj);
         _material->Apply(transformMatrices, state.GetLightState(), state.GetMainCamera().GetPosition());

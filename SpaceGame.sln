@@ -11,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{D9CDE4
 	ProjectSection(SolutionItems) = preProject
 		Code\Common\Filesystem.cpp = Code\Common\Filesystem.cpp
 		Code\Common\Filesystem.hpp = Code\Common\Filesystem.hpp
+		Code\Common\Memory.hpp = Code\Common\Memory.hpp
 		Code\Common\Str.hpp = Code\Common\Str.hpp
 		Code\Common\Types.hpp = Code\Common\Types.hpp
 	EndProjectSection

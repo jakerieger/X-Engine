@@ -13,7 +13,8 @@ namespace x {
         using CommandHandler = std::function<void(const vector<str>&)>;
 
     private:
-        bool _visible = true;
+        bool _visible     = false;
+        bool _shouldFocus = false;
         char _inputBuffer[kMaxInputLength];
         vector<str> _items;
         vector<str> _commands;
@@ -27,7 +28,7 @@ namespace x {
         void AddLog(const char* fmt, ...);
         void Draw();
         int TextEditCallback(ImGuiInputTextCallbackData* data);
-        void ToggleVisibility();
+        void ToggleVisible();
         bool IsVisible() const;
     };
 }

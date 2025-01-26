@@ -55,13 +55,13 @@ namespace x {
             const _com_error err(hr);
             std::string errMsg = WideToAnsi(err.ErrorMessage());
             char buffer[1024];
-            std::ignore = snprintf(buffer,
-                                   1024,
-                                   "%s:%d D3D API Error:\n In: %s\n Message: %s\n",
-                                   file.c_str(),
-                                   line,
-                                   func.c_str(),
-                                   errMsg.c_str());
+            _i_ = snprintf(buffer,
+                           1024,
+                           "%s:%d D3D API Error:\n In: %s\n Message: %s\n",
+                           file.c_str(),
+                           line,
+                           func.c_str(),
+                           errMsg.c_str());
             return {buffer};
         }
     };

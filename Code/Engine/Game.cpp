@@ -18,7 +18,7 @@ namespace x {
             Initialize();
         } catch (const std::runtime_error& e) {
             if (_consoleEnabled) {
-                std::ignore = fprintf(stderr, "Exception thrown when initializing IGame instance: %s\n", e.what());
+                _i_ = fprintf(stderr, "Exception thrown when initializing IGame instance: %s\n", e.what());
             } else {
                 OutputDebugStringA(e.what());
             }
@@ -174,7 +174,7 @@ namespace x {
             case WM_KEYDOWN: {
                 // Backtick / tilde key
                 if (wParam == VK_OEM_3) {
-                    devConsole.ToggleVisibility();
+                    devConsole.ToggleVisible();
                 }
             }
                 return 0;
