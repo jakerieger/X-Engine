@@ -295,6 +295,7 @@
     <ClInclude Include="..\Code\Vendor\imgui\imstb_rectpack.h" />
     <ClInclude Include="..\Code\Vendor\imgui\imstb_textedit.h" />
     <ClInclude Include="..\Code\Vendor\imgui\imstb_truetype.h" />
+    <ClInclude Include="..\Code\Vendor\JetBrainsMono.h" />
     <ClInclude Include="..\Code\Vendor\json.hpp" />
     <ClInclude Include="..\Code\Vendor\stb_image.h" />
     <ClInclude Include="..\Code\Vendor\stb_image_write.h" />

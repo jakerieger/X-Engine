@@ -4,6 +4,7 @@
 #include "Vendor/imgui/backends/imgui_impl_win32.h"
 #include "Vendor/imgui/backends/imgui_impl_dx11.h"
 #include "Renderer.hpp"
+#include <JetBrainsMono.h>
 
 namespace x {
     class DebugUI {
@@ -11,6 +12,7 @@ namespace x {
         bool _showFrameGraph = false;
         bool _showDeviceInfo = false;
         bool _showRenderInfo = false;
+        ImFont* _font        = None;
 
     public:
         explicit DebugUI(const HWND hwnd, Renderer& renderer) : _renderer(renderer) {
@@ -58,6 +60,11 @@ namespace x {
             ImGuiIO& io = ImGui::GetIO();
             (void)io;
             io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+            _font = io.Fonts->AddFontFromMemoryCompressedTTF(JetBrainsMono_TTF_compressed_data,
+                                                             JetBrainsMono_TTF_compressed_size,
+                                                             16.0f);
+
             ImGui::StyleColorsDark();
             ImGui_ImplWin32_Init(hwnd);
             ImGui_ImplDX11_Init(_renderer.GetDevice(), _renderer.GetContext());

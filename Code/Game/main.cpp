@@ -17,6 +17,7 @@ struct Vertex {
 class SpaceGame final : public IGame {
     shared_ptr<PBRMaterial> _material;
     ModelHandle _modelHandle;
+    f32 _rotationY;
 
 public:
     explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {}
@@ -56,6 +57,7 @@ public:
 
         // TODO: Implement the component system and pull this from the TransformComponent.
         auto model = XMMatrixScaling(1.0f, 1.0f, 1.0f);
+        model      = XMMatrixMultiply(model, XMMatrixRotationY((++_rotationY) * 0.0001f));
         auto view  = state.GetMainCamera().GetViewMatrix();
         auto proj  = state.GetMainCamera().GetProjectionMatrix();
 
