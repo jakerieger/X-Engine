@@ -188,6 +188,7 @@ namespace x {
         _context->ClearRenderTargetView(_renderTargetView.Get(), clearColor);
         _context->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
         _frameInfo.drawCallsPerFrame = 0; // reset frame draw call count
+        _frameInfo.numTriangles      = 0;
     }
 
     void Renderer::EndFrame() {
@@ -196,11 +197,16 @@ namespace x {
 
     void Renderer::Draw(const u32 vertexCount) {
         _context->Draw(vertexCount, 0);
+        _frameInfo.drawCallsPerFrame++;
     }
 
     void Renderer::DrawIndexed(const u32 indexCount) {
         _context->DrawIndexed(indexCount, 0, 0);
         _frameInfo.drawCallsPerFrame++;
+    }
+
+    void Renderer::AddTriangleCountToFrame(u32 count) {
+        _frameInfo.numTriangles += count;
     }
 
     void Renderer::OnResize(u32 width, u32 height) {

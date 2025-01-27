@@ -15,6 +15,7 @@ namespace x {
 
     struct FrameInfo {
         u32 drawCallsPerFrame = 0;
+        u32 numTriangles      = 0;
     };
 
     class Renderer final : public Volatile {
@@ -69,6 +70,7 @@ namespace x {
 
         void Draw(u32 vertexCount);
         void DrawIndexed(u32 indexCount);
+        void AddTriangleCountToFrame(u32 count);
 
         void OnResize(u32 width, u32 height) override;
 

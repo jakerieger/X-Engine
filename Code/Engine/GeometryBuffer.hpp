@@ -8,9 +8,10 @@ namespace x {
     class GeometryBuffer {
         ComPtr<ID3D11Buffer> _vertexBuffer;
         ComPtr<ID3D11Buffer> _indexBuffer;
-        u32 _stride     = 0;
-        u32 _offset     = 0;
-        u32 _indexCount = 0;
+        u32 _stride      = 0;
+        u32 _offset      = 0;
+        u32 _indexCount  = 0;
+        u32 _vertexCount = 0;
 
     public:
         GeometryBuffer() = default;
@@ -44,7 +45,8 @@ namespace x {
 
             PANIC_IF_FAILED(device->CreateBuffer(&ibd, &id, &_indexBuffer), "Failed to create index buffer.")
 
-            _indexCount = indexCount;
+            _indexCount  = indexCount;
+            _vertexCount = vertexCount;
         }
 
         void Bind(const Renderer& renderer) {
@@ -64,6 +66,10 @@ namespace x {
 
         [[nodiscard]] u32 GetIndexCount() const {
             return _indexCount;
+        }
+
+        [[nodiscard]] u32 GetVertexCount() const {
+            return _vertexCount;
         }
     };
 }

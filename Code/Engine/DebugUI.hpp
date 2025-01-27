@@ -11,8 +11,8 @@
 namespace x {
     class DebugUI {
         Renderer& _renderer;
-        bool _showFrameGraph = true;
-        bool _showDeviceInfo = true;
+        bool _showFrameGraph = false;
+        bool _showDeviceInfo = false;
         bool _showFrameInfo  = true;
         ImFont* _font        = None;
 
@@ -144,13 +144,15 @@ namespace x {
 
             ImGui::Text("Frame Info");
 
-            auto frameTime = std::format("Frame time: {:.8f}ms", clock.GetDeltaTime() / 1000.0);
-            auto frameRate = std::format("Frame rate: {:.0f} FPS", clock.GetFramesPerSecond());
-            auto drawCalls = std::format("Draw Calls: {}", frameInfo.drawCallsPerFrame);
+            auto frameTime = std::format("Frame time : {:.8f}ms", clock.GetDeltaTime() / 1000.0);
+            auto frameRate = std::format("Frame rate : {:.0f} FPS", clock.GetFramesPerSecond());
+            auto drawCalls = std::format("Draw Calls : {}", frameInfo.drawCallsPerFrame);
+            auto triangles = std::format("Triangles  : {}", frameInfo.numTriangles);
 
             ImGui::Text(frameTime.c_str());
             ImGui::Text(frameRate.c_str());
             ImGui::Text(drawCalls.c_str());
+            ImGui::Text(triangles.c_str());
 
             ImGui::End();
         }

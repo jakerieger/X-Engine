@@ -25,7 +25,7 @@ public:
     void LoadContent(GameState& state) override {
         RasterizerStates::SetupRasterizerStates(renderer);
 
-        const auto starshipFile = R"(C:\Users\conta\Documents\3D Assets\monke.glb)";
+        const auto starshipFile = R"(C:\Users\conta\Documents\3D Assets\monke_subdiv.glb)";
 
         GenericLoader loader(renderer);
         const auto modelData = loader.LoadFromFile(starshipFile);

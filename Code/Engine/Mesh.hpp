@@ -22,6 +22,7 @@ namespace x {
 
         void Draw() {
             _geometryBuffers.Bind(_renderer);
+            _renderer.AddTriangleCountToFrame(_geometryBuffers.GetIndexCount() / 3);
             _renderer.DrawIndexed(_geometryBuffers.GetIndexCount());
         }
     };
