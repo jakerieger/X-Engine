@@ -70,12 +70,14 @@ namespace x {
 
         void Draw(u32 vertexCount);
         void DrawIndexed(u32 indexCount);
-        void AddTriangleCountToFrame(u32 count);
 
         void OnResize(u32 width, u32 height) override;
+
+        friend class Mesh;
 
     private:
         void ResizeSwapchainBuffers(u32 width, u32 height);
         void QueryDeviceInfo();
+        void AddTriangleCountToFrame(u32 count);
     };
 }
