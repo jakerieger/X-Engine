@@ -101,6 +101,8 @@ namespace x {
 
         _context->RSSetViewports(1, &viewport);
 
+        QueryDeviceInfo(); // Cache device information
+
         return true;
     }
 
@@ -132,6 +134,47 @@ namespace x {
         _context->OMSetRenderTargets(1, _renderTargetView.GetAddressOf(), _depthStencilView.Get());
     }
 
+    static str GetVendorNameFromId(const u32 id) {
+        switch (id) {
+            case 0x10DE:
+                return "NVIDIA";
+            case 0x1002:
+                return "AMD";
+            case 0x8086:
+                return "Intel";
+            default:
+                return "Unknown";
+        }
+    }
+
+    void Renderer::QueryDeviceInfo() {
+        IDXGIFactory* factory = None;
+        if (FAILED(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factory))) {
+            throw std::runtime_error("Failed to create DXGI factory.");
+        }
+
+        IDXGIAdapter* adapter = None;
+        if (FAILED(factory->EnumAdapters(0, &adapter))) {
+            factory->Release();
+            throw std::runtime_error("Failed to get GPU adapter");
+        }
+
+        DXGI_ADAPTER_DESC desc;
+        if (FAILED(adapter->GetDesc(&desc))) {
+            adapter->Release();
+            factory->Release();
+            throw std::runtime_error("Failed to get GPU description.");
+        }
+
+        _deviceInfo.vendor              = GetVendorNameFromId(desc.VendorId);
+        _deviceInfo.model               = WideToAnsi(desc.Description);
+        _deviceInfo.videoMemoryInBytes  = desc.DedicatedVideoMemory;
+        _deviceInfo.sharedMemoryInBytes = desc.SharedSystemMemory;
+
+        adapter->Release();
+        factory->Release();
+    }
+
     void Renderer::BeginFrame() {
         constexpr float clearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
         BeginFrame(clearColor);
@@ -140,10 +183,21 @@ namespace x {
     void Renderer::BeginFrame(const f32 clearColor[4]) {
         _context->ClearRenderTargetView(_renderTargetView.Get(), clearColor);
         _context->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+        _frameInfo.drawCallsPerFrame = 0; // reset frame draw call count
     }
 
     void Renderer::EndFrame() {
         DX_THROW_IF_FAILED(_swapChain->Present(0, 0));
+    }
+
+    void Renderer::Draw(const u32 vertexCount) {
+        _context->Draw(vertexCount, 0);
+        _frameInfo.drawCallsPerFrame++;
+    }
+
+    void Renderer::DrawIndexed(const u32 indexCount) {
+        _context->DrawIndexed(indexCount, 0, 0);
+        _frameInfo.drawCallsPerFrame++;
     }
 
     void Renderer::OnResize(u32 width, u32 height) {

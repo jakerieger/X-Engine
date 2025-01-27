@@ -50,7 +50,7 @@ public:
 
     void UnloadContent() override {}
 
-    void Update(GameState& state) override {}
+    void Update(GameState& state, const Clock& clock) override {}
 
     void Render(const GameState& state) override {
         renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());

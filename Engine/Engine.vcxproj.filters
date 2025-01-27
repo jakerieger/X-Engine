@@ -67,6 +67,9 @@
     <ClCompile Include="..\Code\Engine\DevConsole.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Code\Engine\Clock.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Code\Engine\Game.hpp">
@@ -440,6 +443,9 @@
     </ClInclude>
     <ClInclude Include="..\Code\Vendor\JetBrainsMono.h">
       <Filter>Vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\Clock.hpp">
+      <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

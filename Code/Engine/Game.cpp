@@ -36,13 +36,15 @@ namespace x {
                 ::TranslateMessage(&msg);
                 ::DispatchMessageA(&msg);
             } else {
-                Update(_state);
+                _clock.Tick();
+
+                Update(_state, _clock);
 
                 renderer.BeginFrame();
                 Render(_state);
                 if (_debugUIEnabled) {
                     debugUI->BeginFrame(); // begin ImGui frame
-                    debugUI->Draw(); // draw built-in debug ui
+                    debugUI->Draw(renderer, _clock); // draw built-in debug ui
                     DrawDebugUI(); // draw user-defined debug ui
                     devConsole.Draw(); // draw developer console
                     debugUI->EndFrame(); // end imgui frame
@@ -156,7 +158,7 @@ namespace x {
                                            return;
                                        }
                                        const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
-                                       debugUI->SetShowFramegraph(CAST<bool>(show));
+                                       debugUI->SetShowFrameGraph(CAST<bool>(show));
                                    });
 
         devConsole.RegisterCommand("r_DeviceInfo",
@@ -166,11 +168,20 @@ namespace x {
                                        debugUI->SetShowDeviceInfo(CAST<bool>(show));
                                    });
 
-        devConsole.RegisterCommand("r_RenderInfo",
+        devConsole.RegisterCommand("r_FrameInfo",
                                    [this](auto args) {
                                        if (args.size() < 1) { return; }
                                        const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
-                                       debugUI->SetShowRenderInfo(CAST<bool>(show));
+                                       debugUI->SetShowFrameInfo(CAST<bool>(show));
+                                   });
+
+        devConsole.RegisterCommand("r_ToggleAll",
+                                   [this](auto args) {
+                                       if (args.size() < 1) { return; }
+                                       const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                                       debugUI->SetShowFrameGraph(CAST<bool>(show));
+                                       debugUI->SetShowDeviceInfo(CAST<bool>(show));
+                                       debugUI->SetShowFrameInfo(CAST<bool>(show));
                                    });
     }
 

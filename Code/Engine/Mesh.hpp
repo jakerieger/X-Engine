@@ -17,7 +17,7 @@ namespace x {
 
         void Draw() {
             _geometryBuffers.Bind(_renderer);
-            _renderer.GetContext()->DrawIndexed(_geometryBuffers.GetIndexCount(), 0, 0);
+            _renderer.DrawIndexed(_geometryBuffers.GetIndexCount());
         }
     };
 }

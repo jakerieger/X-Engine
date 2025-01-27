@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Clock.hpp"
 #include "DebugUI.hpp"
 #include "DevConsole.hpp"
 #include "GameState.hpp"
@@ -22,6 +23,7 @@ namespace x {
         bool _debugUIEnabled{false};
         std::atomic<bool> _isRunning{false};
         GameState _state;
+        Clock _clock;
 
     public:
         explicit IGame(HINSTANCE instance, str title, u32 width, u32 height);
@@ -53,7 +55,7 @@ namespace x {
 
         virtual void LoadContent(GameState& state) = 0;
         virtual void UnloadContent() = 0;
-        virtual void Update(GameState& state) = 0;
+        virtual void Update(GameState& state, const Clock& clock) = 0;
         virtual void Render(const GameState& state) = 0;
         virtual void OnResize(u32 width, u32 height) = 0;
         virtual void DrawDebugUI();

@@ -5,7 +5,18 @@
 #include "Volatile.hpp"
 
 namespace x {
-    class Renderer : public Volatile {
+    struct DeviceInfo {
+        str vendor;
+        str model;
+        size_t videoMemoryInBytes;
+        size_t sharedMemoryInBytes;
+    };
+
+    struct FrameInfo {
+        u32 drawCallsPerFrame = 0;
+    };
+
+    class Renderer final : public Volatile {
         ComPtr<IDXGISwapChain> _swapChain;
         ComPtr<ID3D11Device> _device;
         ComPtr<ID3D11DeviceContext> _context;
@@ -14,6 +25,8 @@ namespace x {
         ComPtr<ID3D11RenderTargetView> _renderTargetView;
         ComPtr<ID3D11DepthStencilView> _depthStencilView;
         ComPtr<ID3D11DepthStencilState> _depthStencilState;
+        DeviceInfo _deviceInfo;
+        FrameInfo _frameInfo;
 
     public:
         Renderer() = default;
@@ -40,14 +53,26 @@ namespace x {
             return _renderTargetView.Get();
         }
 
+        [[nodiscard]] DeviceInfo GetDeviceInfo() const {
+            return _deviceInfo;
+        }
+
+        [[nodiscard]] FrameInfo GetFrameInfo() const {
+            return _frameInfo;
+        }
+
         bool Initialize(HWND hwnd, int width, int height);
         void BeginFrame();
         void BeginFrame(const f32 clearColor[4]);
         void EndFrame();
 
+        void Draw(u32 vertexCount);
+        void DrawIndexed(u32 indexCount);
+
         void OnResize(u32 width, u32 height) override;
 
     private:
         void ResizeSwapchainBuffers(u32 width, u32 height);
+        void QueryDeviceInfo();
     };
 }
