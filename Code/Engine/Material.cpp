@@ -57,7 +57,7 @@ namespace x {
         transformBufDesc.StructureByteStride = 0;
 
         auto hr = _renderer.GetDevice()->CreateBuffer(&transformBufDesc, None, &_transformsCB);
-        DX_THROW_IF_FAILED(hr)
+        PANIC_IF_FAILED(hr, "Failed to create transforms constant buffer.")
 
         D3D11_BUFFER_DESC lightsBufDesc;
         lightsBufDesc.ByteWidth           = sizeof(LightState);
@@ -68,7 +68,7 @@ namespace x {
         lightsBufDesc.StructureByteStride = 0;
 
         hr = _renderer.GetDevice()->CreateBuffer(&lightsBufDesc, None, &_lightsCB);
-        DX_THROW_IF_FAILED(hr)
+        PANIC_IF_FAILED(hr, "Failed to create lights constant buffer.")
 
         D3D11_BUFFER_DESC materialBufDesc;
         materialBufDesc.ByteWidth           = sizeof(MaterialProperties);
@@ -79,7 +79,7 @@ namespace x {
         materialBufDesc.StructureByteStride = 0;
 
         hr = _renderer.GetDevice()->CreateBuffer(&materialBufDesc, None, &_materialCB);
-        DX_THROW_IF_FAILED(hr)
+        PANIC_IF_FAILED(hr, "Failed to create material constant buffer.")
 
         D3D11_BUFFER_DESC cameraBufDesc;
         cameraBufDesc.ByteWidth           = sizeof(Float4);
@@ -90,7 +90,7 @@ namespace x {
         cameraBufDesc.StructureByteStride = 0;
 
         hr = _renderer.GetDevice()->CreateBuffer(&cameraBufDesc, None, &_cameraCB);
-        DX_THROW_IF_FAILED(hr)
+        PANIC_IF_FAILED(hr, "Failed to create camera constant buffer.")
     }
 
     void PBRMaterial::UpdateBuffers(const TransformMatrices& transformMatrices,
@@ -101,25 +101,25 @@ namespace x {
         // Update transform buffer
         D3D11_MAPPED_SUBRESOURCE mapped;
         auto hr = context->Map(_transformsCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-        DX_THROW_IF_FAILED(hr)
+        PANIC_IF_FAILED(hr, "Failed to map transforms buffer.")
         memcpy(mapped.pData, &transformMatrices, sizeof(transformMatrices));
         context->Unmap(_transformsCB.Get(), 0);
 
         // Update light state buffer
         hr = context->Map(_lightsCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-        DX_THROW_IF_FAILED(hr)
+        PANIC_IF_FAILED(hr, "Failed to map lights buffer.")
         memcpy(mapped.pData, &lightState, sizeof(lightState));
         context->Unmap(_lightsCB.Get(), 0);
 
         // Update material properties buffer
         hr = context->Map(_materialCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-        DX_THROW_IF_FAILED(hr)
+        PANIC_IF_FAILED(hr, "Failed to map material buffer.")
         memcpy(mapped.pData, &_materialProperties, sizeof(_materialProperties));
         context->Unmap(_materialCB.Get(), 0);
 
         // Camera buffer
         hr = context->Map(_cameraCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-        DX_THROW_IF_FAILED(hr)
+        PANIC_IF_FAILED(hr, "Failed to map camera buffer.")
         Float4 paddedPos = Float4(cameraPos.x, cameraPos.y, cameraPos.z, 0.0f);
         memcpy(mapped.pData, &paddedPos, sizeof(paddedPos));
         context->Unmap(_cameraCB.Get(), 0);

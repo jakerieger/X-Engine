@@ -6,6 +6,7 @@
 #include "Engine/GenericLoader.hpp"
 #include "Engine/Material.hpp"
 #include "Engine/RasterizerState.hpp"
+#include "Common/Panic.hpp"
 
 using namespace x;
 

@@ -38,12 +38,12 @@ namespace x {
     }
 
     void GenericLoader::ProcessNode(aiNode* node, const aiScene* scene, const shared_ptr<ModelData>& outData) {
-        for (auto i = 0; i < node->mNumMeshes; i++) {
+        for (u32 i = 0; i < node->mNumMeshes; i++) {
             auto* mesh = scene->mMeshes[node->mMeshes[i]];
             outData->_meshes.push_back(ProcessMesh(mesh, scene));
         }
 
-        for (auto i = 0; i < node->mNumChildren; i++) {
+        for (u32 i = 0; i < node->mNumChildren; i++) {
             ProcessNode(node->mChildren[i], scene, outData);
         }
     }
@@ -52,7 +52,7 @@ namespace x {
         vector<VSInputPBR> vertices;
         vector<u32> indices;
 
-        for (auto i = 0; i < mesh->mNumVertices; ++i) {
+        for (u32 i = 0; i < mesh->mNumVertices; ++i) {
             VSInputPBR vertex;
 
             vertex.position.x = mesh->mVertices[i].x;
@@ -79,7 +79,7 @@ namespace x {
             vertices.push_back(vertex);
         }
 
-        for (auto i = 0; i < mesh->mNumFaces; i++) {
+        for (u32 i = 0; i < mesh->mNumFaces; i++) {
             const auto face = mesh->mFaces[i];
             for (auto j = 0; j < face.mNumIndices; j++) {
                 indices.push_back(face.mIndices[j]);

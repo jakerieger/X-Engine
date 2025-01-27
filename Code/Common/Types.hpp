@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#pragma warning(disable : 4267)
 
 #include <cstdint>
 #include <cstring>

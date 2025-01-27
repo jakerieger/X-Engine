@@ -1,4 +1,5 @@
 #include "Renderer.hpp"
+#include "Common/Str.hpp"
 
 namespace x {
     bool Renderer::Initialize(HWND hwnd, int width, int height) {
@@ -111,10 +112,11 @@ namespace x {
         _depthStencilView.Reset();
         _backBuffer.Reset();
 
-        DX_THROW_IF_FAILED(_swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0))
-
-        DX_THROW_IF_FAILED(_swapChain->GetBuffer(0, IID_PPV_ARGS(&_backBuffer)))
-        DX_THROW_IF_FAILED(_device->CreateRenderTargetView(_backBuffer.Get(), None, &_renderTargetView))
+        PANIC_IF_FAILED(_swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0),
+                        "Failed to resize swapchain buffers.")
+        PANIC_IF_FAILED(_swapChain->GetBuffer(0, IID_PPV_ARGS(&_backBuffer)), "Failed to get swapchain back buffer.")
+        PANIC_IF_FAILED(_device->CreateRenderTargetView(_backBuffer.Get(), None, &_renderTargetView),
+                        "Failed to create render target view.")
 
         D3D11_TEXTURE2D_DESC depthStencilDesc = {};
         depthStencilDesc.Width                = width;
@@ -128,8 +130,10 @@ namespace x {
         depthStencilDesc.BindFlags            = D3D11_BIND_DEPTH_STENCIL;
 
         ComPtr<ID3D11Texture2D> depthStencilBuffer;
-        DX_THROW_IF_FAILED(_device->CreateTexture2D(&depthStencilDesc, None, &depthStencilBuffer))
-        DX_THROW_IF_FAILED(_device->CreateDepthStencilView(depthStencilBuffer.Get(), None, &_depthStencilView))
+        PANIC_IF_FAILED(_device->CreateTexture2D(&depthStencilDesc, None, &depthStencilBuffer),
+                        "Failed to create depth-stencil texture.")
+        PANIC_IF_FAILED(_device->CreateDepthStencilView(depthStencilBuffer.Get(), None, &_depthStencilView),
+                        "Failed to ceare depth-stencil view.")
 
         _context->OMSetRenderTargets(1, _renderTargetView.GetAddressOf(), _depthStencilView.Get());
     }
@@ -187,12 +191,11 @@ namespace x {
     }
 
     void Renderer::EndFrame() {
-        DX_THROW_IF_FAILED(_swapChain->Present(0, 0));
+        PANIC_IF_FAILED(_swapChain->Present(0, 0), "Failed to present swapchain image.");
     }
 
     void Renderer::Draw(const u32 vertexCount) {
         _context->Draw(vertexCount, 0);
-        _frameInfo.drawCallsPerFrame++;
     }
 
     void Renderer::DrawIndexed(const u32 indexCount) {

@@ -1,7 +1,7 @@
 #include "RasterizerState.hpp"
 
 namespace x {
-    void RasterizerStates::SetupRasterizerStates(const Renderer& renderer) {
+    void RasterizerStates::SetupRasterizerStates(const Renderer& renderer) noexcept {
         D3D11_RASTERIZER_DESC defaultSolid{};
         defaultSolid.FillMode              = D3D11_FILL_SOLID;
         defaultSolid.CullMode              = D3D11_CULL_BACK;
@@ -21,10 +21,15 @@ namespace x {
         scissorTest.ScissorEnable         = TRUE;
 
         auto* device = renderer.GetDevice();
-        DX_THROW_IF_FAILED(device->CreateRasterizerState(&defaultSolid, &DefaultSolid));
-        DX_THROW_IF_FAILED(device->CreateRasterizerState(&wireframe, &Wireframe));
-        DX_THROW_IF_FAILED(device->CreateRasterizerState(&noCull, &NoCull));
-        DX_THROW_IF_FAILED(device->CreateRasterizerState(&cullFront, &CullFront));
-        DX_THROW_IF_FAILED(device->CreateRasterizerState(&scissorTest, &ScissorTest));
+        PANIC_IF_FAILED(device->CreateRasterizerState(&defaultSolid, &DefaultSolid),
+                        "Failed to create DefaultSolid rasterizer state.");
+        PANIC_IF_FAILED(device->CreateRasterizerState(&wireframe, &Wireframe),
+                        "Failed to create Wireframe rasterizer state.");
+        PANIC_IF_FAILED(device->CreateRasterizerState(&noCull, &NoCull),
+                        "Failed to create NoCull rasterizer state.");
+        PANIC_IF_FAILED(device->CreateRasterizerState(&cullFront, &CullFront),
+                        "Failed to create CullFront rasterizer state.");
+        PANIC_IF_FAILED(device->CreateRasterizerState(&scissorTest, &ScissorTest),
+                        "Failed to create ScissorTest rasterizer state.");
     }
 }

@@ -53,7 +53,7 @@ namespace x {
         vd.pSysMem = vertexData;
 
         auto* device = renderer.GetDevice();
-        DX_THROW_IF_FAILED(device->CreateBuffer(&vbd, &vd, &_vertexBuffer))
+        PANIC_IF_FAILED(device->CreateBuffer(&vbd, &vd, &_vertexBuffer), "Failed to create vertex buffer.")
 
         D3D11_BUFFER_DESC ibd{};
         ibd.Usage     = D3D11_USAGE_IMMUTABLE;
@@ -63,7 +63,7 @@ namespace x {
         D3D11_SUBRESOURCE_DATA id{};
         id.pSysMem = indexData;
 
-        DX_THROW_IF_FAILED(device->CreateBuffer(&ibd, &id, &_indexBuffer))
+        PANIC_IF_FAILED(device->CreateBuffer(&ibd, &id, &_indexBuffer), "Failed to create index buffer.")
 
         _indexCount = indexDataSize;
     }

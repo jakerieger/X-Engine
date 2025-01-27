@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Common/Types.hpp"
+#include "Common/Panic.hpp"
 #include "D3D.hpp"
 #include "Volatile.hpp"
 
