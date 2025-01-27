@@ -7,12 +7,17 @@
 namespace x {
     class Mesh {
         Renderer& _renderer;
-        GeometryBuffer<VSInputPBR> _geometryBuffers{};
+        GeometryBuffer _geometryBuffers{};
 
     public:
         Mesh(Renderer& renderer, const vector<VSInputPBR>& vertices, const vector<u32>& indices)
             : _renderer(renderer) {
-            _geometryBuffers.Create(renderer, vertices.data(), vertices.size(), indices.data(), indices.size());
+            _geometryBuffers.Create(renderer,
+                                    vertices.data(),
+                                    sizeof(VSInputPBR),
+                                    vertices.size(),
+                                    indices.data(),
+                                    indices.size());
         }
 
         void Draw() {
