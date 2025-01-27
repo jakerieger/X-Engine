@@ -17,10 +17,13 @@ struct Vertex {
 class SpaceGame final : public IGame {
     shared_ptr<PBRMaterial> _material;
     ModelHandle _modelHandle;
-    f32 _rotationY;
+    f32 _rotationY = 0.f;
+    Matrix _modelMatrix;
 
 public:
-    explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {}
+    explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {
+        _modelMatrix = XMMatrixIdentity();
+    }
 
     void LoadContent(GameState& state) override {
         RasterizerStates::SetupRasterizerStates(renderer);
@@ -50,18 +53,18 @@ public:
 
     void UnloadContent() override {}
 
-    void Update(GameState& state, const Clock& clock) override {}
+    void Update(GameState& state, const Clock& clock) override {
+        _rotationY += CAST<f32>(clock.GetDeltaTime());
+        _modelMatrix = XMMatrixRotationY(_rotationY);
+    }
 
     void Render(const GameState& state) override {
         renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
 
-        // TODO: Implement the component system and pull this from the TransformComponent.
-        auto model = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-        model      = XMMatrixMultiply(model, XMMatrixRotationY((++_rotationY) * 0.0001f));
-        auto view  = state.GetMainCamera().GetViewMatrix();
-        auto proj  = state.GetMainCamera().GetProjectionMatrix();
+        auto view = state.GetMainCamera().GetViewMatrix();
+        auto proj = state.GetMainCamera().GetProjectionMatrix();
 
-        TransformMatrices transformMatrices(model, view, proj);
+        TransformMatrices transformMatrices(_modelMatrix, view, proj);
         _material->Apply(transformMatrices, state.GetLightState(), state.GetMainCamera().GetPosition());
         _modelHandle.Draw();
     }

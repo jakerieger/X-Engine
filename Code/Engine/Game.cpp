@@ -36,17 +36,20 @@ namespace x {
                 ::TranslateMessage(&msg);
                 ::DispatchMessageA(&msg);
             } else {
-                _clock.Tick();
+                // Only tick engine forward if we're not currently paused
+                if (!_isPaused) {
+                    _clock.Tick();
+                    Update(_state, _clock);
+                }
 
-                Update(_state, _clock);
-
+                // Continue rendering whether we're paused or not
                 renderer.BeginFrame();
                 Render(_state);
                 if (_debugUIEnabled) {
                     debugUI->BeginFrame(); // begin ImGui frame
                     debugUI->Draw(renderer, _clock); // draw built-in debug ui
                     DrawDebugUI(); // draw user-defined debug ui
-                    devConsole.Draw(); // draw developer console
+                    devConsole.Draw(); // draw developer console last so it overlaps correctly
                     debugUI->EndFrame(); // end imgui frame
                 }
                 renderer.EndFrame();
@@ -183,12 +186,27 @@ namespace x {
                                        debugUI->SetShowDeviceInfo(CAST<bool>(show));
                                        debugUI->SetShowFrameInfo(CAST<bool>(show));
                                    });
+
+        devConsole.RegisterCommand("r_Pause",
+                                   [this](auto) {
+                                       Pause();
+                                   });
+
+        devConsole.RegisterCommand("r_Resume", [this](auto) { Resume(); });
     }
 
     void IGame::Shutdown() {
         UnloadContent();
         renderSystem.reset();
         debugUI.reset();
+    }
+
+    void IGame::Pause() {
+        _isPaused = true;
+    }
+
+    void IGame::Resume() {
+        _isPaused = false;
     }
 
     LRESULT IGame::ResizeHandler(u32 width, u32 height) {

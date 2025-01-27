@@ -22,6 +22,7 @@ namespace x {
         bool _consoleEnabled{false};
         bool _debugUIEnabled{false};
         std::atomic<bool> _isRunning{false};
+        std::atomic<bool> _isPaused{false};
         GameState _state;
         Clock _clock;
 
@@ -74,6 +75,8 @@ namespace x {
     private:
         void Initialize();
         void Shutdown();
+        void Pause();
+        void Resume();
 
         LRESULT ResizeHandler(u32 width, u32 height);
         LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam);
