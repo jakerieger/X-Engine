@@ -50,6 +50,8 @@ public:
         sun.intensity = 1.0f;
         sun.color     = {1.0f, 1.0f, 1.0f};
         sun.direction = {-0.57f, 0.57f, -0.57f};
+
+        renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
     }
 
     void UnloadContent() override {}
@@ -60,8 +62,6 @@ public:
     }
 
     void Render(const GameState& state) override {
-        renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
-
         auto view = state.GetMainCamera().GetViewMatrix();
         auto proj = state.GetMainCamera().GetProjectionMatrix();
 
@@ -71,8 +71,6 @@ public:
     }
 
     void DrawDebugUI() override {
-        IGame::DrawDebugUI(); // Call base impl first!
-
         // Draw custom debug UI with ImGui
     }
 
