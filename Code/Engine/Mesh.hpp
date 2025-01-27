@@ -23,7 +23,7 @@ namespace x {
         void Draw() {
             const auto indexCount = _geometryBuffers.GetIndexCount();
             _geometryBuffers.Bind(_renderer);
-            _renderer.AddTriangleCountToFrame(indexCount / 3);
+            _renderer.AddTriangleCountToFrame(indexCount / 3); // for debug purposes
             _renderer.DrawIndexed(indexCount);
         }
     };
