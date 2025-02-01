@@ -72,7 +72,7 @@ float4 PS_Main(VSOutputPBR input) : SV_Target {
 
     // TODO: Calculate other light sources
 
-    float3 color = Lo;
+    float3 color = Lo * ao;
 
     float exposure = 1.0f;
     color *= exposure;
