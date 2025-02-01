@@ -101,6 +101,24 @@ cbuffer CameraBuffer : register(b3) {
 }
 
 //-----------------------------------------------------------------------------
+// Samplers
+//-----------------------------------------------------------------------------
+Texture2D AlbedoMap : register(t0);
+SamplerState AlbedoState : register(s0);
+
+Texture2D MetallicMap : register(t1);
+SamplerState MetallicState : register(s1);
+
+Texture2D RoughnessMap : register(t2);
+SamplerState RoughnessState : register(s2);
+
+Texture2D AOMap : register(t3);
+SamplerState AOState : register(s3);
+
+Texture2D NormalMap : register(t4);
+SamplerState NormalState : register(s4);
+
+//-----------------------------------------------------------------------------
 // Helper Functions
 //-----------------------------------------------------------------------------
 float CalculateAttenuation(float distance, float constant, float lin, float quadratic) {

@@ -22,7 +22,7 @@ float4 PS_Main(VSOutputPBR input) : SV_Target {
     const float intensity = 1.0f;
 
     float diffStrength = max(dot(input.normal, Sun.direction), 0.0f);
-    float3 diffuse = Material.albedo * diffStrength;
+    float3 diffuse = AlbedoMap.Sample(AlbedoState, input.texCoord0) * diffStrength;
 
     float3 halfwayDir = normalize(Sun.direction + CameraPosition.xyz);
     float3 specDot = dot(input.normal, halfwayDir);
