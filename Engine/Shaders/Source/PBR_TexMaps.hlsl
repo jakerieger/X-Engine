@@ -55,15 +55,10 @@ float4 PS_Main(VSOutputPBR input) : SV_Target {
     // SUN
     if (Sun.enabled) {
         float3 L = normalize(-Sun.direction);
-        float3 H = normalize(V + L); // Half vector for specular
-        
         float3 specular = SpecularBRDF(N, V, L, roughnessSample, F0);
         float3 diffuse = EnergyConservation(specular, metallicSample, albedoSample.rgb);
-
         float NdotL = max(dot(N, L), 0.01f);
-        
         float3 radiance = Sun.color * Sun.intensity;
-
         Lo += (diffuse / PI + specular) * radiance * NdotL;
     }
     // END SUN
