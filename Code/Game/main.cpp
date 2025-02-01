@@ -26,7 +26,7 @@ class SpaceGame final : public IGame {
     TextureHandle<Texture2D> _albedoMap;
     TextureHandle<Texture2D> _metallicMap;
     TextureHandle<Texture2D> _roughnessMap;
-    TextureHandle<Texture2D> _aoMap;
+    // TextureHandle<Texture2D> _aoMap;
     TextureHandle<Texture2D> _normalMap;
 
 public:
@@ -63,7 +63,10 @@ public:
 
         // Test texture abstraction(s)
         TextureLoader texLoader(renderer);
-        _albedoMap = texLoader.LoadFromFile2D(ContentPath("checkerboard.dds"));
+        _albedoMap    = texLoader.LoadFromFile2D(ContentPath("Metal_Albedo.dds"));
+        _normalMap    = texLoader.LoadFromFile2D(ContentPath("Metal_Normal.dds"));
+        _metallicMap  = texLoader.LoadFromFile2D(ContentPath("Metal_Metallic.dds"));
+        _roughnessMap = texLoader.LoadFromFile2D(ContentPath("Metal_Roughness.dds"));
     }
 
     void UnloadContent() override {}
@@ -80,6 +83,10 @@ public:
         TransformMatrices transformMatrices(_modelMatrix, view, proj);
 
         _albedoMap->Bind(0);
+        _metallicMap->Bind(1);
+        _roughnessMap->Bind(2);
+        _normalMap->Bind(4);
+
         _material->Apply(transformMatrices, state.GetLightState(), state.GetMainCamera().GetPosition());
         _modelHandle.Draw();
     }
