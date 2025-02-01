@@ -252,7 +252,7 @@ namespace x {
                 return ResizeHandler(LOWORD(lParam), HIWORD(lParam));
 
             case WM_KEYDOWN: {
-                // Backtick / tilde key
+                // Backtick/tilde key
                 if (wParam == VK_OEM_3) {
                     devConsole.ToggleVisible();
                 }
