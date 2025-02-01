@@ -43,7 +43,15 @@ namespace x {
     public:
         explicit TextureLoader(Renderer& renderer) : _renderer(renderer) {}
 
+        /// @brief Load a 2D texture from a .DDS file
+        /// @param filename Path of .DDS texture file
+        /// @return Handle for Texture2D
         TextureHandle<Texture2D> LoadFromFile2D(const str& filename);
+
+        /// @brief Load a 2D texture from memory
+        /// @param data Image data bytes
+        /// @param size Image data size in bytes
+        /// @return Handle for Texture2D
         TextureHandle<Texture2D> LoadFromMemory2D(const u8* data, size_t size);
     };
 }

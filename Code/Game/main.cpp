@@ -66,7 +66,7 @@ public:
     void UnloadContent() override {}
 
     void Update(GameState& state, const Clock& clock) override {
-        _rotationY += clock.GetDeltaTime();
+        _rotationY += CAST<f32>(clock.GetDeltaTime());
         _modelMatrix = XMMatrixRotationY(_rotationY);
     }
 
