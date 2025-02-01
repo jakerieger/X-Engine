@@ -37,7 +37,7 @@ public:
     void LoadContent(GameState& state) override {
         RasterizerStates::SetupRasterizerStates(renderer);
 
-        const auto starshipFile = ContentPath("Monke.glb");
+        const auto starshipFile = ContentPath("Ship_V2.glb");
 
         GenericLoader loader(renderer);
         const auto modelData = loader.LoadFromFile(starshipFile);
@@ -52,12 +52,13 @@ public:
         _material->SetAlbedo({1.0f, 0.0f, 0.5f});
 
         auto& camera = state.GetMainCamera();
-        camera.SetPosition(XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f));
+        camera.SetPosition(XMVectorSet(0.0f, 5.0f, -20.0f, 0.0f));
 
         auto& sun     = state.GetLightState().Sun;
+        sun.enabled   = HLSL_TRUE;
         sun.intensity = 1.0f;
-        sun.color     = {1.0f, 1.0f, 1.0f};
-        sun.direction = {-0.57f, 0.57f, -0.57f};
+        sun.color     = {1.0f, 1.0f, 1.0f, 1.0f};
+        sun.direction = {-0.57f, 0.37f, 0.97f, 1.0f};
 
         renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
 
@@ -72,15 +73,18 @@ public:
     void UnloadContent() override {}
 
     void Update(GameState& state, const Clock& clock) override {
-        _rotationY += CAST<f32>(clock.GetDeltaTime());
-        _modelMatrix = XMMatrixRotationY(_rotationY);
+        _modelMatrix = XMMatrixRotationX(XMConvertToRadians(90.0f));
+        _modelMatrix = XMMatrixMultiply(_modelMatrix, XMMatrixRotationY(XMConvertToRadians(-180.0f)));
+        _modelMatrix = XMMatrixMultiply(_modelMatrix, XMMatrixTranslation(0.0f, -5.0f, 0.0f));
     }
 
     void Render(const GameState& state) override {
         auto view = state.GetMainCamera().GetViewMatrix();
         auto proj = state.GetMainCamera().GetProjectionMatrix();
 
-        TransformMatrices transformMatrices(_modelMatrix, view, proj);
+        TransformMatrices transformMatrices(_modelMatrix,
+                                            view,
+                                            proj);
 
         _albedoMap->Bind(0);
         _metallicMap->Bind(1);

@@ -59,3 +59,6 @@ namespace x {
     #define DCAST dynamic_cast
     #define RCAST reinterpret_cast
 } // namespace x
+
+constexpr auto HLSL_TRUE  = 1;
+constexpr auto HLSL_FALSE = 0;

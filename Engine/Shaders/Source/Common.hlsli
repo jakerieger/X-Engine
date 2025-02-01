@@ -24,12 +24,13 @@ struct TransformMatrices {
 };
 
 struct DirectionalLight {
-    float3 direction;
-    float3 color;
+    float4 direction;
+    float4 color;
     float intensity;
+    float3 _pad1;
     bool castsShadow;
     bool enabled;
-    float2 _pad;
+    float2 _pad2;
 };
 
 struct PointLight {

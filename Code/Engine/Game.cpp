@@ -10,7 +10,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 namespace x {
     IGame::IGame(const HINSTANCE instance, str title, const u32 width, const u32 height): _instance(instance),
         _hwnd(None), _currentWidth(width), _currentHeight(height),
-        _title(std::move(title)) {}
+        _title(std::move(title)), renderer() {}
 
     IGame::~IGame() {
         if (_consoleEnabled) { ::FreeConsole(); }
@@ -200,20 +200,15 @@ namespace x {
 
         devConsole.RegisterCommand("r_Resume", [this](auto) { Resume(); });
 
-        devConsole.RegisterCommand("r_FillMode",
+        devConsole.RegisterCommand("r_DrawMode",
                                    [this](auto args) {
                                        auto type = args.at(0);
-                                       if (type == "fill") {
+                                       if (type == "solid") {
                                            renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
                                        } else if (type == "wireframe") {
                                            renderer.GetContext()->RSSetState(RasterizerStates::Wireframe.Get());
                                        }
                                    });
-
-        // devConsole.RegisterCommand("r_Lighting",
-        //                            [this](auto) {
-        //                                _state.GetLightState().Sun.enabled = false;
-        //                            });
     }
 
     void IGame::Shutdown() {

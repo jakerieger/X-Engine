@@ -53,7 +53,7 @@ float4 PS_Main(VSOutputPBR input) : SV_Target {
     float3 Lo = albedoSample.rgb * 0.01f;
 
     // SUN
-    {
+    if (Sun.enabled) {
         float3 L = normalize(-Sun.direction);
         float3 H = normalize(V + L); // Half vector for specular
         
@@ -62,9 +62,7 @@ float4 PS_Main(VSOutputPBR input) : SV_Target {
 
         float NdotL = max(dot(N, L), 0.01f);
         
-        // Use a strong white light to ensure color preservation
-        float3 sunColor = float3(1.0f, 0.98f, 0.95f); // Slightly warm white light
-        float3 radiance = sunColor * 10.0f;
+        float3 radiance = Sun.color * Sun.intensity;
 
         Lo += (diffuse / PI + specular) * radiance * NdotL;
     }
