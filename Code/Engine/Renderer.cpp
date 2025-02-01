@@ -180,7 +180,7 @@ namespace x {
     }
 
     void Renderer::BeginFrame() {
-        constexpr float clearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+        constexpr float clearColor[4] = {0.01f, 0.01f, 0.01f, 1.0f};
         BeginFrame(clearColor);
     }
 

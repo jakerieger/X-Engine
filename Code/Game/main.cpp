@@ -37,7 +37,7 @@ public:
     void LoadContent(GameState& state) override {
         RasterizerStates::SetupRasterizerStates(renderer);
 
-        const auto starshipFile = ContentPath("Ship_V2.glb");
+        const auto starshipFile = ContentPath("Monke.glb");
 
         GenericLoader loader(renderer);
         const auto modelData = loader.LoadFromFile(starshipFile);
@@ -52,7 +52,7 @@ public:
         _material->SetAlbedo({1.0f, 0.0f, 0.5f});
 
         auto& camera = state.GetMainCamera();
-        camera.SetPosition(XMVectorSet(0.0f, 5.0f, -20.0f, 0.0f));
+        camera.SetPosition(XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f));
 
         auto& sun     = state.GetLightState().Sun;
         sun.enabled   = HLSL_TRUE;
@@ -73,9 +73,11 @@ public:
     void UnloadContent() override {}
 
     void Update(GameState& state, const Clock& clock) override {
-        _modelMatrix = XMMatrixRotationX(XMConvertToRadians(90.0f));
-        _modelMatrix = XMMatrixMultiply(_modelMatrix, XMMatrixRotationY(XMConvertToRadians(-180.0f)));
-        _modelMatrix = XMMatrixMultiply(_modelMatrix, XMMatrixTranslation(0.0f, -5.0f, 0.0f));
+        // _modelMatrix = XMMatrixRotationX(XMConvertToRadians(90.0f));
+        // _modelMatrix = XMMatrixMultiply(_modelMatrix, XMMatrixRotationY(XMConvertToRadians(-180.0f)));
+        // _modelMatrix = XMMatrixMultiply(_modelMatrix, XMMatrixTranslation(0.0f, -5.0f, 0.0f));
+        _rotationY += clock.GetDeltaTime();
+        _modelMatrix = XMMatrixRotationY(_rotationY);
     }
 
     void Render(const GameState& state) override {

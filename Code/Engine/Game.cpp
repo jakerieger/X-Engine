@@ -2,6 +2,7 @@
 
 #include <Vendor/imgui/imgui.h>
 #include <stdexcept>
+#include <thread>
 
 #include "RasterizerState.hpp"
 
