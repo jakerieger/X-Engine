@@ -102,6 +102,10 @@ namespace x {
     void IGame::DrawDebugUI() {}
 
     void IGame::Initialize() {
+        // Initialize COM (for DirectXTex)
+        const auto hr = ::CoInitializeEx(None, COINIT_MULTITHREADED);
+        PANIC_IF_FAILED(hr, "Failed to initialize COM");
+
         WNDCLASSEXA wc{};
         wc.cbSize        = sizeof(WNDCLASSEXA);
         wc.style         = CS_HREDRAW | CS_VREDRAW;
@@ -199,6 +203,8 @@ namespace x {
         UnloadContent();
         renderSystem.reset();
         debugUI.reset();
+
+        ::CoUninitialize();
     }
 
     void IGame::Pause() {

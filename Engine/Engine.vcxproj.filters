@@ -517,5 +517,6 @@
     <None Include="Shaders\Source\Phong.hlsl">
       <Filter>Shaders\Source</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
