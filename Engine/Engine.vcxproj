@@ -175,7 +175,6 @@
     <ClCompile Include="..\Code\Vendor\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\Code\Vendor\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\Code\Vendor\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="..\Code\Vendor\tiny_gltf.cpp" />
     <ClCompile Include="..\Code\Vendor\ufbx.c" />
   </ItemGroup>
   <ItemGroup>
@@ -303,7 +302,6 @@
     <ClInclude Include="..\Code\Vendor\json.hpp" />
     <ClInclude Include="..\Code\Vendor\stb_image.h" />
     <ClInclude Include="..\Code\Vendor\stb_image_write.h" />
-    <ClInclude Include="..\Code\Vendor\tiny_gltf.h" />
     <ClInclude Include="..\Code\Vendor\ufbx.h" />
   </ItemGroup>
   <ItemGroup>
