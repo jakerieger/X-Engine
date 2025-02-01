@@ -24,7 +24,15 @@ namespace x {
                                      0,
                                      &_shaderBlob,
                                      &errorBlob);
-        PANIC_IF_FAILED(hr, "Failed to compile shader from file: %s", filename.c_str())
+        if (FAILED(hr)) {
+            if (errorBlob) {
+                const char* msg = CAST<const char*>(errorBlob->GetBufferPointer());
+                size_t msgSize  = errorBlob->GetBufferSize();
+                PANIC("Shader file failed to compile: %s\n - Error: %s", filename.c_str(), msg);
+                errorBlob->Release();
+            }
+        }
+
         hr = D3DReflect(_shaderBlob->GetBufferPointer(),
                         _shaderBlob->GetBufferSize(),
                         IID_ID3D11ShaderReflection,

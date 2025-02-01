@@ -524,5 +524,8 @@
       <Filter>Shaders\Source</Filter>
     </None>
     <None Include="packages.config" />
+    <None Include="Shaders\Source\PBR_TexMaps.hlsl">
+      <Filter>Shaders\Source</Filter>
+    </None>
   </ItemGroup>
 </Project>

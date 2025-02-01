@@ -5,7 +5,7 @@ namespace x {
         _vertexShader = make_unique<VertexShader>(renderer);
         _pixelShader  = make_unique<PixelShader>(renderer);
 
-        const auto pbrShader = R"(C:\Users\conta\Code\SpaceGame\Engine\Shaders\Source\Phong.hlsl)";
+        const auto pbrShader = R"(C:\Users\conta\Code\SpaceGame\Engine\Shaders\Source\PBR_TexMaps.hlsl)";
         _vertexShader->LoadFromFile(pbrShader);
         _pixelShader->LoadFromFile(pbrShader);
         CreateBuffers();
