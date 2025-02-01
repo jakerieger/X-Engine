@@ -10,7 +10,7 @@ VSOutputPBR VS_Main(VSInputPBR input) {
     output.position = mvp;
     output.texCoord0 = input.texCoord0;
     
-    output.normal = mul(input.normal, (float3x3)Transforms.model);
+    output.normal = TransformNormal(input.normal, Transforms.model);
     output.normal = normalize(output.normal);
 
     return output;

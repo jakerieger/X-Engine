@@ -143,6 +143,7 @@ namespace x {
             EndWindowTransparent();
 
             ImGui::Text("Frame Info");
+            ImGui::Text("==========");
 
             auto frameTime = std::format("Frame time : {:.8f}ms", clock.GetDeltaTime() / 1000.0);
             auto frameRate = std::format("Frame rate : {:.0f} FPS", clock.GetFramesPerSecond());

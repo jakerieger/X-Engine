@@ -514,7 +514,7 @@
     <None Include="Shaders\Source\Common.hlsli">
       <Filter>Shaders\Source</Filter>
     </None>
-    <None Include="Shaders\Source\Unlit.hlsl">
+    <None Include="Shaders\Source\Phong.hlsl">
       <Filter>Shaders\Source</Filter>
     </None>
   </ItemGroup>

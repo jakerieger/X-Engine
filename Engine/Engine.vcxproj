@@ -320,7 +320,7 @@
     <None Include="Shaders\Source\IO.hlsli" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Source\Unlit.hlsl">
+    <None Include="Shaders\Source\Phong.hlsl">
       <FileType>Document</FileType>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS_Main</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
