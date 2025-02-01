@@ -20,7 +20,7 @@ VSOutputPBR VS_Main(VSInputPBR input) {
     output.tangent = TransformNormal(input.tangent, Transforms.model);
     output.tangent = normalize(output.tangent);
 
-    output.bitangent = cross(output.normal, output.tangent);
+    output.bitangent = CalculateBitangent(output.normal, output.tangent, 1.0f);
 
     return output;
 }
@@ -65,22 +65,12 @@ float4 PS_Main(VSOutputPBR input) : SV_Target {
 
     // TODO: Calculate other light sources
 
+    // Final color calculation
     float3 color = Lo * ao;
 
     float exposure = 1.0f;
     color *= exposure;
-    
-    // Use ACES tone mapping for better color preservation
-    float3 x = color * 0.6f;
-    float a = 2.51f;
-    float b = 0.03f;
-    float c = 2.43f;
-    float d = 0.59f;
-    float e = 0.14f;
-    color = (x * (a * x + b)) / (x * (c * x + d) + e);
-    
-    // Gamma correction
-    color = pow(saturate(color), float3(1.0f / 2.2f, 1.0f / 2.2f, 1.0f / 2.2f));
+    color = TonemapACES(color);
     
     return float4(color, albedoSample.a);
 }

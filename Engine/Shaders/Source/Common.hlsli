@@ -287,4 +287,19 @@ float3 CalculateIBLSpecular(float3 N, float3 V, float roughness, float3 F0)
     
     return prefilteredColor * (F0 * envBRDF.x + envBRDF.y);
 }
+
+float3 TonemapACES(float3 color) {
+    float3 x = color * 0.6f;
+    float a = 2.51f;
+    float b = 0.03f;
+    float c = 2.43f;
+    float d = 0.59f;
+    float e = 0.14f;
+    color = (x * (a * x + b)) / (x * (c * x + d) + e);
+    
+    // Gamma correction
+    color = pow(saturate(color), float3(1.0f / 2.2f, 1.0f / 2.2f, 1.0f / 2.2f));
+
+    return color;
+}
 #endif
