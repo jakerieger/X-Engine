@@ -166,6 +166,7 @@
     <ClCompile Include="..\Code\Engine\Renderer.cpp" />
     <ClCompile Include="..\Code\Engine\RenderSystem.cpp" />
     <ClCompile Include="..\Code\Engine\Shader.cpp" />
+    <ClCompile Include="..\Code\Engine\Texture.cpp" />
     <ClCompile Include="..\Code\Engine\TransformComponent.cpp" />
     <ClCompile Include="..\Code\Vendor\imgui\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="..\Code\Vendor\imgui\backends\imgui_impl_win32.cpp" />
@@ -202,6 +203,7 @@
     <ClInclude Include="..\Code\Engine\RenderSystem.hpp" />
     <ClInclude Include="..\Code\Engine\Resource.hpp" />
     <ClInclude Include="..\Code\Engine\Shader.hpp" />
+    <ClInclude Include="..\Code\Engine\Texture.hpp" />
     <ClInclude Include="..\Code\Engine\TransformComponent.hpp" />
     <ClInclude Include="..\Code\Engine\TransformMatrices.hpp" />
     <ClInclude Include="..\Code\Engine\Volatile.hpp" />

@@ -3,6 +3,8 @@
 #include "Engine/GenericLoader.hpp"
 #include "Engine/Material.hpp"
 #include "Engine/RasterizerState.hpp"
+#include "Common/Str.hpp"
+#include "Engine/Texture.hpp"
 
 using namespace x;
 
@@ -11,11 +13,21 @@ struct Vertex {
     XMFLOAT4 color;
 };
 
+static str ContentPath(const str& filename) {
+    const str root = R"(C:\Users\conta\Code\SpaceGame\Engine\Content\)";
+    return root + filename;
+}
+
 class SpaceGame final : public IGame {
     shared_ptr<PBRMaterial> _material;
     ModelHandle _modelHandle;
     f32 _rotationY = 0.f;
     Matrix _modelMatrix;
+    TextureHandle<Texture2D> _albedoMap;
+    TextureHandle<Texture2D> _metallicMap;
+    TextureHandle<Texture2D> _roughnessMap;
+    TextureHandle<Texture2D> _aoMap;
+    TextureHandle<Texture2D> _normalMap;
 
 public:
     explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {
@@ -25,7 +37,7 @@ public:
     void LoadContent(GameState& state) override {
         RasterizerStates::SetupRasterizerStates(renderer);
 
-        const auto starshipFile = R"(C:\Users\conta\Documents\3D Assets\monke_subdiv.glb)";
+        const auto starshipFile = ContentPath("Monke.glb");
 
         GenericLoader loader(renderer);
         const auto modelData = loader.LoadFromFile(starshipFile);
@@ -48,6 +60,10 @@ public:
         sun.direction = {-0.57f, 0.57f, -0.57f};
 
         renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
+
+        // Test texture abstraction(s)
+        TextureLoader texLoader(renderer);
+        _albedoMap = texLoader.LoadFromFile2D(ContentPath("checkerboard.dds"));
     }
 
     void UnloadContent() override {}
@@ -62,6 +78,8 @@ public:
         auto proj = state.GetMainCamera().GetProjectionMatrix();
 
         TransformMatrices transformMatrices(_modelMatrix, view, proj);
+
+        _albedoMap->Bind(0);
         _material->Apply(transformMatrices, state.GetLightState(), state.GetMainCamera().GetPosition());
         _modelHandle.Draw();
     }
