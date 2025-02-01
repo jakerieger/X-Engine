@@ -19,6 +19,12 @@ namespace x {
         _vertexShader->Bind();
         _pixelShader->Bind();
 
+        _albedoMap->Bind(0);
+        _metallicMap->Bind(1);
+        _roughnessMap->Bind(2);
+        // Ambient Occlusion map is bound to slot 3
+        _normalMap->Bind(4);
+
         auto* context = _renderer.GetContext();
         context->VSSetConstantBuffers(0, 1, _transformsCB.GetAddressOf());
         context->PSSetConstantBuffers(1, 1, _lightsCB.GetAddressOf());
@@ -45,6 +51,32 @@ namespace x {
     void PBRMaterial::SetEmissive(const Float3& emissive, f32 strength) {
         _materialProperties.emissive         = emissive;
         _materialProperties.emissiveStrength = strength;
+    }
+
+    void PBRMaterial::SetAlbedoMap(const TextureHandle<Texture2D>& albedo) {
+        _albedoMap = albedo;
+    }
+
+    void PBRMaterial::SetMetallicMap(const TextureHandle<Texture2D>& metallic) {
+        _metallicMap = metallic;
+    }
+
+    void PBRMaterial::SetRoughnessMap(const TextureHandle<Texture2D>& roughness) {
+        _roughnessMap = roughness;
+    }
+
+    void PBRMaterial::SetNormalMap(const TextureHandle<Texture2D>& normal) {
+        _normalMap = normal;
+    }
+
+    void PBRMaterial::SetTextureMaps(const TextureHandle<Texture2D>& albedo,
+                                     const TextureHandle<Texture2D>& metallic,
+                                     const TextureHandle<Texture2D>& roughness,
+                                     const TextureHandle<Texture2D>& normal) {
+        SetAlbedoMap(albedo);
+        SetMetallicMap(metallic);
+        SetRoughnessMap(roughness);
+        SetNormalMap(normal);
     }
 
     void PBRMaterial::CreateBuffers() {

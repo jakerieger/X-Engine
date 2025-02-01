@@ -318,6 +318,7 @@
     <None Include="..\Code\Vendor\assimp\SmoothingGroups.inl" />
     <None Include="..\Code\Vendor\assimp\vector2.inl" />
     <None Include="..\Code\Vendor\assimp\vector3.inl" />
+    <None Include="Content\Monke.glb" />
     <None Include="packages.config" />
     <None Include="Shaders\Source\Common.hlsli" />
     <None Include="Shaders\Source\IO.hlsli" />
@@ -337,6 +338,13 @@
     <None Include="Shaders\Source\PBR_TexMaps.hlsl">
       <FileType>Document</FileType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Content\checkerboard.dds" />
+    <Image Include="Content\Metal_Albedo.dds" />
+    <Image Include="Content\Metal_Metallic.dds" />
+    <Image Include="Content\Metal_Normal.dds" />
+    <Image Include="Content\Metal_Roughness.dds" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

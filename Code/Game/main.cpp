@@ -23,11 +23,6 @@ class SpaceGame final : public IGame {
     ModelHandle _modelHandle;
     f32 _rotationY = 0.f;
     Matrix _modelMatrix;
-    TextureHandle<Texture2D> _albedoMap;
-    TextureHandle<Texture2D> _metallicMap;
-    TextureHandle<Texture2D> _roughnessMap;
-    // TextureHandle<Texture2D> _aoMap;
-    TextureHandle<Texture2D> _normalMap;
 
 public:
     explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {
@@ -49,7 +44,12 @@ public:
         }
 
         _material = make_shared<PBRMaterial>(renderer);
-        _material->SetAlbedo({1.0f, 0.0f, 0.5f});
+        TextureLoader texLoader(renderer);
+        const auto albedo    = texLoader.LoadFromFile2D(ContentPath("Gold_Albedo.dds"));
+        const auto normal    = texLoader.LoadFromFile2D(ContentPath("Gold_Normal.dds"));
+        const auto metallic  = texLoader.LoadFromFile2D(ContentPath("Gold_Metallic.dds"));
+        const auto roughness = texLoader.LoadFromFile2D(ContentPath("Gold_Roughness.dds"));
+        _material->SetTextureMaps(albedo, metallic, roughness, normal);
 
         auto& camera = state.GetMainCamera();
         camera.SetPosition(XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f));
@@ -61,21 +61,11 @@ public:
         sun.direction = {-0.57f, 0.37f, 0.97f, 1.0f};
 
         renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
-
-        // Test texture abstraction(s)
-        TextureLoader texLoader(renderer);
-        _albedoMap    = texLoader.LoadFromFile2D(ContentPath("Metal_Albedo.dds"));
-        _normalMap    = texLoader.LoadFromFile2D(ContentPath("Metal_Normal.dds"));
-        _metallicMap  = texLoader.LoadFromFile2D(ContentPath("Metal_Metallic.dds"));
-        _roughnessMap = texLoader.LoadFromFile2D(ContentPath("Metal_Roughness.dds"));
     }
 
     void UnloadContent() override {}
 
     void Update(GameState& state, const Clock& clock) override {
-        // _modelMatrix = XMMatrixRotationX(XMConvertToRadians(90.0f));
-        // _modelMatrix = XMMatrixMultiply(_modelMatrix, XMMatrixRotationY(XMConvertToRadians(-180.0f)));
-        // _modelMatrix = XMMatrixMultiply(_modelMatrix, XMMatrixTranslation(0.0f, -5.0f, 0.0f));
         _rotationY += clock.GetDeltaTime();
         _modelMatrix = XMMatrixRotationY(_rotationY);
     }
@@ -87,11 +77,6 @@ public:
         TransformMatrices transformMatrices(_modelMatrix,
                                             view,
                                             proj);
-
-        _albedoMap->Bind(0);
-        _metallicMap->Bind(1);
-        _roughnessMap->Bind(2);
-        _normalMap->Bind(4);
 
         _material->Apply(transformMatrices, state.GetLightState(), state.GetMainCamera().GetPosition());
         _modelHandle.Draw();

@@ -479,6 +479,9 @@
     <Filter Include="Vendor\assimp">
       <UniqueIdentifier>{5410eaed-8296-475b-a9cd-d7d847acaec5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Content">
+      <UniqueIdentifier>{83111351-af2e-4cbb-83cb-63ae4b490e84}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Source\IO.hlsli">
@@ -527,5 +530,25 @@
     <None Include="Shaders\Source\PBR_TexMaps.hlsl">
       <Filter>Shaders\Source</Filter>
     </None>
+    <None Include="Content\Monke.glb">
+      <Filter>Content</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Content\checkerboard.dds">
+      <Filter>Content</Filter>
+    </Image>
+    <Image Include="Content\Metal_Albedo.dds">
+      <Filter>Content</Filter>
+    </Image>
+    <Image Include="Content\Metal_Metallic.dds">
+      <Filter>Content</Filter>
+    </Image>
+    <Image Include="Content\Metal_Normal.dds">
+      <Filter>Content</Filter>
+    </Image>
+    <Image Include="Content\Metal_Roughness.dds">
+      <Filter>Content</Filter>
+    </Image>
   </ItemGroup>
 </Project>
