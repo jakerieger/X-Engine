@@ -206,7 +206,7 @@ namespace x {
                                        auto type = args.at(0);
                                        if (type == "solid") {
                                            renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
-                                       } else if (type == "wireframe") {
+                                       } else if (type == "wire") {
                                            renderer.GetContext()->RSSetState(RasterizerStates::Wireframe.Get());
                                        }
                                    });

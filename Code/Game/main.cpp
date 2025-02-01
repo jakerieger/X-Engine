@@ -56,7 +56,7 @@ public:
 
         auto& sun     = state.GetLightState().Sun;
         sun.enabled   = HLSL_TRUE;
-        sun.intensity = 1.0f;
+        sun.intensity = 5.0f;
         sun.color     = {1.0f, 1.0f, 1.0f, 1.0f};
         sun.direction = {-0.57f, 0.37f, 0.97f, 1.0f};
 

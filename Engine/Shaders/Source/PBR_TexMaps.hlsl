@@ -52,7 +52,14 @@ float4 PS_Main(VSOutputPBR input) : SV_Target {
     float3 F0 = lerp(float3(0.04f, 0.04f, 0.04f), albedoSample.rgb, metallicSample);
     float3 Lo = albedoSample.rgb * 0.01f;
 
-    // SUN
+    PBRMaterial mat;
+    mat.albedo = albedoSample.rgb;
+    mat.metallic = metallicSample;
+    mat.roughness = roughnessSample;
+    mat.ao = ao;
+    mat.emissive = float3(0.0, 0.0, 0.0);
+    mat.emissiveStrength = 0.0;
+
     if (Sun.enabled) {
         float3 L = normalize(-Sun.direction);
         float3 specular = SpecularBRDF(N, V, L, roughnessSample, F0);
@@ -61,12 +68,23 @@ float4 PS_Main(VSOutputPBR input) : SV_Target {
         float3 radiance = Sun.color * Sun.intensity;
         Lo += (diffuse / PI + specular) * radiance * NdotL;
     }
-    // END SUN
 
-    // TODO: Calculate other light sources
+    // for (uint i = 0; i < MAX_POINT_LIGHTS; ++i) {
+    //     PointLight light = PointLights[i];
+    //     if (light.enabled) {
+    //         Lo += CalculatePointLightPBR(light, input.worldPos, N, V, mat);
+    //     }
+    // }
+    //
+    // for (uint j = 0; j < MAX_AREA_LIGHTS; ++j) {
+    //     AreaLight light = AreaLights[j];
+    //     if (light.enabled) {
+    //         Lo += CalculateAreaLightPBR(light, input.worldPos, N, V, mat);
+    //     }
+    // }
 
     // Final color calculation
-    float3 color = Lo * ao;
+        float3 color = Lo * ao;
 
     float exposure = 1.0f;
     color *= exposure;
