@@ -3,6 +3,8 @@
 #include <Vendor/imgui/imgui.h>
 #include <stdexcept>
 
+#include "RasterizerState.hpp"
+
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace x {
@@ -197,6 +199,21 @@ namespace x {
                                    });
 
         devConsole.RegisterCommand("r_Resume", [this](auto) { Resume(); });
+
+        devConsole.RegisterCommand("r_FillMode",
+                                   [this](auto args) {
+                                       auto type = args.at(0);
+                                       if (type == "fill") {
+                                           renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
+                                       } else if (type == "wireframe") {
+                                           renderer.GetContext()->RSSetState(RasterizerStates::Wireframe.Get());
+                                       }
+                                   });
+
+        // devConsole.RegisterCommand("r_Lighting",
+        //                            [this](auto) {
+        //                                _state.GetLightState().Sun.enabled = false;
+        //                            });
     }
 
     void IGame::Shutdown() {
