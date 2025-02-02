@@ -43,8 +43,10 @@ namespace x {
                 renderer.BeginScenePass();
                 Render(_state);
                 renderer.EndScenePass();
+
                 renderer.RenderPostProcess();
 
+                // Draw debug UI last (on top of everything else)
                 if (_debugUIEnabled) {
                     debugUI->BeginFrame(); // begin ImGui frame
                     debugUI->Draw(renderer, _clock); // draw built-in debug ui
