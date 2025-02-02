@@ -20,11 +20,7 @@ namespace x {
         try {
             Initialize();
         } catch (const std::runtime_error& e) {
-            if (_consoleEnabled) {
-                _i_ = fprintf(stderr, "Exception thrown when initializing IGame instance: %s\n", e.what());
-            } else {
-                OutputDebugStringA(e.what());
-            }
+            ::MessageBoxA(_hwnd, "An unknown error occured while initializing the engine.", "SpaceGame", MB_OK);
             return;
         }
 

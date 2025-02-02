@@ -1,11 +1,10 @@
 #include "Renderer.hpp"
 #include "Common/Str.hpp"
-#include "Shader.hpp"
+#include "PostProcessSystem.hpp"
 
 namespace x {
     Renderer::~Renderer() {
-        delete _postProcessVS;
-        delete _postProcessPS;
+        _postProcess.reset();
     }
 
     bool Renderer::Initialize(HWND hwnd, int width, int height) {
@@ -195,12 +194,13 @@ namespace x {
     }
 
     void Renderer::BeginScenePass(const f32 clearColor[4]) {
-        _context->OMSetRenderTargets(1, _sceneRTV.GetAddressOf(), _depthStencilView.Get());
         _context->ClearRenderTargetView(_sceneRTV.Get(), clearColor);
         _context->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
         _frameInfo.drawCallsPerFrame = 0; // reset frame draw call count
         _frameInfo.numTriangles      = 0;
+
+        _context->OMSetRenderTargets(1, _sceneRTV.GetAddressOf(), _depthStencilView.Get());
     }
 
     void Renderer::EndScenePass() {
@@ -209,21 +209,7 @@ namespace x {
     }
 
     void Renderer::RenderPostProcess() {
-        _context->OMSetRenderTargets(1, _renderTargetView.GetAddressOf(), None);
-
-        _postProcessVS->Bind();
-        _postProcessPS->Bind();
-
-        _context->PSSetShaderResources(0, 1, _sceneSRV.GetAddressOf());
-
-        _context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        _context->IASetInputLayout(None);
-        _context->IASetVertexBuffers(0, 0, None, None, None);
-
-        _context->Draw(3, 0);
-
-        ID3D11ShaderResourceView* nullSRV = nullptr;
-        _context->PSSetShaderResources(0, 1, &nullSRV);
+        _postProcess->Execute(_sceneSRV.Get(), _renderTargetView.Get());
     }
 
     void Renderer::EndFrame() {
@@ -246,15 +232,14 @@ namespace x {
 
     bool Renderer::CreatePostProcessResources(u32 width, u32 height) {
         D3D11_TEXTURE2D_DESC sceneDesc{};
-        sceneDesc.Width              = width;
-        sceneDesc.Height             = height;
-        sceneDesc.MipLevels          = 1;
-        sceneDesc.ArraySize          = 1;
-        sceneDesc.Format             = DXGI_FORMAT_R8G8B8A8_UNORM;
-        sceneDesc.SampleDesc.Count   = 1;
-        sceneDesc.SampleDesc.Quality = 0;
-        sceneDesc.Usage              = D3D11_USAGE_DEFAULT;
-        sceneDesc.BindFlags          = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+        sceneDesc.Width            = width;
+        sceneDesc.Height           = height;
+        sceneDesc.MipLevels        = 1;
+        sceneDesc.ArraySize        = 1;
+        sceneDesc.Format           = DXGI_FORMAT_R8G8B8A8_UNORM;
+        sceneDesc.SampleDesc.Count = 1;
+        sceneDesc.Usage            = D3D11_USAGE_DEFAULT;
+        sceneDesc.BindFlags        = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
         auto hr = _device->CreateTexture2D(&sceneDesc, None, &_sceneTexture);
         if (FAILED(hr)) { return false; }
@@ -265,14 +250,15 @@ namespace x {
         hr = _device->CreateShaderResourceView(_sceneTexture.Get(), None, &_sceneSRV);
         if (FAILED(hr)) { return false; }
 
-        const auto ppShader = R"(C:\Users\conta\Code\SpaceGame\Engine\Shaders\Source\ScreenTexture.hlsl)";
-        _postProcessVS      = new VertexShader(*this);
-        _postProcessVS->LoadFromFile(ppShader);
+        // Create the post process system if it doesn't already exist
+        if (!_postProcess) {
+            _postProcess = make_unique<PostProcessSystem>(*this);
+            if (!_postProcess->Initialize(width, height)) { return false; }
+        }
 
-        _postProcessPS = new PixelShader(*this);
-        _postProcessPS->LoadFromFile(ppShader);
+        // At this point, effects can be added to the post process chain
 
-        return (_postProcessVS && _postProcessPS);
+        return true;
     }
 
     void Renderer::OnResize(u32 width, u32 height) {
@@ -282,6 +268,7 @@ namespace x {
 
         ResizeSwapchainBuffers(width, height);
         CreatePostProcessResources(width, height);
+        _postProcess->OnResize(width, height);
 
         D3D11_VIEWPORT viewport;
         viewport.Width    = CAST<f32>(width);

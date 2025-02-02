@@ -22,9 +22,5 @@ SamplerState SceneState : register(s0);
 
 float4 PS_Main(VSOutputPosTex input) : SV_Target {
     float4 color = SceneTexture.Sample(SceneState, input.texCoord);
-
-    // post processing here
-    // color.rgb *= 10.0f;
-
     return color;
 }

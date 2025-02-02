@@ -4,7 +4,6 @@
 #include "D3D.hpp"
 #include "Renderer.hpp"
 #include "Shader.hpp"
-#include "Volatile.hpp"
 
 namespace x {
     class IComputeEffect {
