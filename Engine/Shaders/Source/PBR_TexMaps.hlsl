@@ -85,10 +85,6 @@ float4 PS_Main(VSOutputPBR input) : SV_Target {
 
     // Final color calculation
     float3 color = Lo * ao;
-
-    // float exposure = 1.0f;
-    // color *= exposure;
-    // color = TonemapACES(color);
     
     return float4(color, albedoSample.a);
 }

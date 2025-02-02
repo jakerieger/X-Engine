@@ -64,6 +64,10 @@ namespace x {
             return _renderTargetView.Get();
         }
 
+        [[nodiscard]] PostProcessSystem* GetPostProcess() const {
+            return _postProcess.get();
+        }
+
         [[nodiscard]] DeviceInfo GetDeviceInfo() const {
             return _deviceInfo;
         }

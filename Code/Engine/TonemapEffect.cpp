@@ -6,11 +6,27 @@ namespace x {
         return CreateResources();
     }
 
+    void TonemapEffect::SetExposure(const f32 exposure) {
+        _exposure = exposure;
+    }
+
+    void TonemapEffect::SetOperator(const TonemapOperator op) {
+        _op = op;
+    }
+
     bool TonemapEffect::CreateResources() {
-        return IComputeEffect::CreateResources();
+        return CreateConstantBuffer<TonemapParams>();
     }
 
     void TonemapEffect::UpdateConstants() {
-        IComputeEffect::UpdateConstants();
+        D3D11_MAPPED_SUBRESOURCE mapped;
+        if (SUCCEEDED(_renderer.GetContext()->Map(_constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped))) {
+            auto* params = CAST<TonemapParams*>(mapped.pData);
+
+            params->exposure = _exposure;
+            params->op       = CAST<u32>(_op);
+
+            _renderer.GetContext()->Unmap(_constantBuffer.Get(), 0);
+        }
     }
 }

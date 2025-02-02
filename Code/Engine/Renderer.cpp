@@ -216,7 +216,7 @@ namespace x {
     }
 
     void Renderer::EndFrame() {
-        PANIC_IF_FAILED(_swapChain->Present(0, 0), "Failed to present swapchain image.");
+        PANIC_IF_FAILED(_swapChain->Present(1, 0), "Failed to present swapchain image.");
     }
 
     void Renderer::Draw(const u32 vertexCount) {
@@ -239,7 +239,7 @@ namespace x {
         sceneDesc.Height           = height;
         sceneDesc.MipLevels        = 1;
         sceneDesc.ArraySize        = 1;
-        sceneDesc.Format           = DXGI_FORMAT_R8G8B8A8_UNORM;
+        sceneDesc.Format           = DXGI_FORMAT_R16G16B16A16_FLOAT;
         sceneDesc.SampleDesc.Count = 1;
         sceneDesc.Usage            = D3D11_USAGE_DEFAULT;
         sceneDesc.BindFlags        = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
@@ -259,7 +259,9 @@ namespace x {
             if (!_postProcess->Initialize(width, height)) { return false; }
 
             // _postProcess->AddEffect<BloomEffect>(0.2f, 10.5f);
-            _postProcess->AddEffect<TonemapEffect>();
+            auto tonemap = _postProcess->AddEffect<TonemapEffect>();
+            tonemap->SetOperator(TonemapOperator::ACES);
+            tonemap->SetExposure(1.2f);
         }
 
         // At this point, effects can be added to the post process chain
