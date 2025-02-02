@@ -1,10 +1,9 @@
 #include "Game.hpp"
+#include "RasterizerState.hpp"
 
 #include <Vendor/imgui/imgui.h>
 #include <stdexcept>
 #include <thread>
-
-#include "RasterizerState.hpp"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -46,8 +45,11 @@ namespace x {
                 }
 
                 // Continue rendering whether we're paused or not
-                renderer.BeginFrame();
+                renderer.BeginScenePass();
                 Render(_state);
+                renderer.EndScenePass();
+                renderer.RenderPostProcess();
+
                 if (_debugUIEnabled) {
                     debugUI->BeginFrame(); // begin ImGui frame
                     debugUI->Draw(renderer, _clock); // draw built-in debug ui
@@ -55,6 +57,7 @@ namespace x {
                     devConsole.Draw(); // draw developer console last so it overlaps correctly
                     debugUI->EndFrame(); // end imgui frame
                 }
+
                 renderer.EndFrame();
             }
         }
@@ -140,11 +143,7 @@ namespace x {
             throw std::runtime_error("Failed to intialize renderer.");
         }
 
-        renderSystem = make_unique<RenderSystem>(renderer);
-        renderSystem->Initialize();
-
         // Tell the engine that these classes need to handle resizing when the window size changes
-        RegisterVolatile(renderSystem.get());
         RegisterVolatile(&renderer);
         RegisterVolatile(&_state.GetMainCamera());
 
@@ -214,7 +213,6 @@ namespace x {
 
     void IGame::Shutdown() {
         UnloadContent();
-        renderSystem.reset();
         debugUI.reset();
 
         ::CoUninitialize();

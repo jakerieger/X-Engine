@@ -7,7 +7,6 @@
 #include "Common/Types.hpp"
 #include "Platform.hpp"
 #include "Renderer.hpp"
-#include "RenderSystem.hpp"
 #include "Volatile.hpp"
 
 namespace x {
@@ -63,7 +62,6 @@ namespace x {
 
     protected:
         Renderer renderer;
-        unique_ptr<RenderSystem> renderSystem;
         std::unique_ptr<DebugUI> debugUI;
         vector<Volatile*> volatiles;
         DevConsole devConsole;

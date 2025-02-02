@@ -18,6 +18,9 @@ namespace x {
         u32 numTriangles      = 0;
     };
 
+    class VertexShader;
+    class PixelShader;
+
     class Renderer final : public Volatile {
         ComPtr<IDXGISwapChain> _swapChain;
         ComPtr<ID3D11Device> _device;
@@ -27,11 +30,19 @@ namespace x {
         ComPtr<ID3D11RenderTargetView> _renderTargetView;
         ComPtr<ID3D11DepthStencilView> _depthStencilView;
         ComPtr<ID3D11DepthStencilState> _depthStencilState;
+
+        ComPtr<ID3D11Texture2D> _sceneTexture;
+        ComPtr<ID3D11RenderTargetView> _sceneRTV;
+        ComPtr<ID3D11ShaderResourceView> _sceneSRV;
+        VertexShader* _postProcessVS;
+        PixelShader* _postProcessPS;
+
         DeviceInfo _deviceInfo;
         FrameInfo _frameInfo;
 
     public:
         Renderer() = default;
+        ~Renderer();
 
         // Prevent moves or copies
         Renderer(const Renderer& other)            = delete;
@@ -64,8 +75,10 @@ namespace x {
         }
 
         bool Initialize(HWND hwnd, int width, int height);
-        void BeginFrame();
-        void BeginFrame(const f32 clearColor[4]);
+        void BeginScenePass();
+        void BeginScenePass(const f32 clearColor[4]);
+        void EndScenePass();
+        void RenderPostProcess();
         void EndFrame();
 
         void Draw(u32 vertexCount);
@@ -79,5 +92,6 @@ namespace x {
         void ResizeSwapchainBuffers(u32 width, u32 height);
         void QueryDeviceInfo();
         void AddTriangleCountToFrame(u32 count);
+        bool CreatePostProcessResources(u32 width, u32 height);
     };
 }

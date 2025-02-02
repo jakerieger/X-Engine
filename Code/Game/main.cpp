@@ -6,6 +6,9 @@
 #include "Common/Str.hpp"
 #include "Engine/Texture.hpp"
 
+#include <SearchTex.h>
+#include <AreaTex.h>
+
 using namespace x;
 
 struct Vertex {

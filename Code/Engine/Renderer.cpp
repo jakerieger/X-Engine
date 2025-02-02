@@ -1,7 +1,13 @@
 #include "Renderer.hpp"
 #include "Common/Str.hpp"
+#include "Shader.hpp"
 
 namespace x {
+    Renderer::~Renderer() {
+        delete _postProcessVS;
+        delete _postProcessPS;
+    }
+
     bool Renderer::Initialize(HWND hwnd, int width, int height) {
         // Create device and swap chain
         DXGI_SWAP_CHAIN_DESC swapChainDesc               = {};
@@ -102,6 +108,10 @@ namespace x {
 
         _context->RSSetViewports(1, &viewport);
 
+        if (!CreatePostProcessResources(width, height)) {
+            return false;
+        }
+
         QueryDeviceInfo(); // Cache device information
 
         return true;
@@ -179,17 +189,21 @@ namespace x {
         factory->Release();
     }
 
-    void Renderer::BeginFrame() {
+    void Renderer::BeginScenePass() {
         constexpr float clearColor[4] = {0.01f, 0.01f, 0.01f, 1.0f};
-        BeginFrame(clearColor);
+        BeginScenePass(clearColor);
     }
 
-    void Renderer::BeginFrame(const f32 clearColor[4]) {
+    void Renderer::BeginScenePass(const f32 clearColor[4]) {
         _context->ClearRenderTargetView(_renderTargetView.Get(), clearColor);
         _context->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
         _frameInfo.drawCallsPerFrame = 0; // reset frame draw call count
         _frameInfo.numTriangles      = 0;
     }
+
+    void Renderer::EndScenePass() {}
+
+    void Renderer::RenderPostProcess() {}
 
     void Renderer::EndFrame() {
         PANIC_IF_FAILED(_swapChain->Present(0, 0), "Failed to present swapchain image.");
@@ -209,8 +223,44 @@ namespace x {
         _frameInfo.numTriangles += count;
     }
 
+    bool Renderer::CreatePostProcessResources(u32 width, u32 height) {
+        D3D11_TEXTURE2D_DESC sceneDesc{};
+        sceneDesc.Width              = width;
+        sceneDesc.Height             = height;
+        sceneDesc.MipLevels          = 1;
+        sceneDesc.ArraySize          = 1;
+        sceneDesc.Format             = DXGI_FORMAT_R8G8B8A8_UNORM;
+        sceneDesc.SampleDesc.Count   = 1;
+        sceneDesc.SampleDesc.Quality = 0;
+        sceneDesc.Usage              = D3D11_USAGE_DEFAULT;
+        sceneDesc.BindFlags          = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+
+        auto hr = _device->CreateTexture2D(&sceneDesc, None, &_sceneTexture);
+        if (FAILED(hr)) { return false; }
+
+        hr = _device->CreateRenderTargetView(_sceneTexture.Get(), None, &_sceneRTV);
+        if (FAILED(hr)) { return false; }
+
+        hr = _device->CreateShaderResourceView(_sceneTexture.Get(), None, &_sceneSRV);
+        if (FAILED(hr)) { return false; }
+
+        const auto ppShader = R"(C:\Users\conta\Code\SpaceGame\Engine\Shaders\Source\ScreenTexture.hlsl)";
+        _postProcessVS      = new VertexShader(*this);
+        _postProcessVS->LoadFromFile(ppShader);
+
+        _postProcessPS = new PixelShader(*this);
+        _postProcessPS->LoadFromFile(ppShader);
+
+        return true;
+    }
+
     void Renderer::OnResize(u32 width, u32 height) {
+        _sceneTexture.Reset();
+        _sceneRTV.Reset();
+        _sceneSRV.Reset();
+
         ResizeSwapchainBuffers(width, height);
+        CreatePostProcessResources(width, height);
 
         D3D11_VIEWPORT viewport;
         viewport.Width    = CAST<f32>(width);
