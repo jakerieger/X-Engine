@@ -195,15 +195,36 @@ namespace x {
     }
 
     void Renderer::BeginScenePass(const f32 clearColor[4]) {
-        _context->ClearRenderTargetView(_renderTargetView.Get(), clearColor);
+        _context->OMSetRenderTargets(1, _sceneRTV.GetAddressOf(), _depthStencilView.Get());
+        _context->ClearRenderTargetView(_sceneRTV.Get(), clearColor);
         _context->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
         _frameInfo.drawCallsPerFrame = 0; // reset frame draw call count
         _frameInfo.numTriangles      = 0;
     }
 
-    void Renderer::EndScenePass() {}
+    void Renderer::EndScenePass() {
+        ID3D11RenderTargetView* nullRTV = None;
+        _context->OMSetRenderTargets(1, &nullRTV, None);
+    }
 
-    void Renderer::RenderPostProcess() {}
+    void Renderer::RenderPostProcess() {
+        _context->OMSetRenderTargets(1, _renderTargetView.GetAddressOf(), None);
+
+        _postProcessVS->Bind();
+        _postProcessPS->Bind();
+
+        _context->PSSetShaderResources(0, 1, _sceneSRV.GetAddressOf());
+
+        _context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        _context->IASetInputLayout(None);
+        _context->IASetVertexBuffers(0, 0, None, None, None);
+
+        _context->Draw(3, 0);
+
+        ID3D11ShaderResourceView* nullSRV = nullptr;
+        _context->PSSetShaderResources(0, 1, &nullSRV);
+    }
 
     void Renderer::EndFrame() {
         PANIC_IF_FAILED(_swapChain->Present(0, 0), "Failed to present swapchain image.");
@@ -251,7 +272,7 @@ namespace x {
         _postProcessPS = new PixelShader(*this);
         _postProcessPS->LoadFromFile(ppShader);
 
-        return true;
+        return (_postProcessVS && _postProcessPS);
     }
 
     void Renderer::OnResize(u32 width, u32 height) {

@@ -1,5 +1,4 @@
 #include "Game.hpp"
-#include "RasterizerState.hpp"
 
 #include <Vendor/imgui/imgui.h>
 #include <stdexcept>
@@ -199,16 +198,6 @@ namespace x {
                                    });
 
         devConsole.RegisterCommand("r_Resume", [this](auto) { Resume(); });
-
-        devConsole.RegisterCommand("r_DrawMode",
-                                   [this](auto args) {
-                                       auto type = args.at(0);
-                                       if (type == "solid") {
-                                           renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
-                                       } else if (type == "wire") {
-                                           renderer.GetContext()->RSSetState(RasterizerStates::Wireframe.Get());
-                                       }
-                                   });
     }
 
     void IGame::Shutdown() {

@@ -24,7 +24,7 @@ float4 PS_Main(VSOutputPosTex input) : SV_Target {
     float4 color = SceneTexture.Sample(SceneState, input.texCoord);
 
     // post processing here
-    color.rgb = float3(1.0 - color.r, 1.0 - color.g, 1.0 - color.b);
+    // color.rgb *= 10.0f;
 
     return color;
 }

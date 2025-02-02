@@ -28,9 +28,6 @@
     <ClCompile Include="..\Code\Vendor\imgui\backends\imgui_impl_win32.cpp">
       <Filter>Vendor\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="..\Code\Engine\Shader.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="..\Code\Engine\TransformComponent.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -67,7 +64,7 @@
     <ClCompile Include="..\Code\Engine\Texture.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\Code\Engine\Pipeline.cpp">
+    <ClCompile Include="..\Code\Engine\Shader.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -112,9 +109,6 @@
       <Filter>Vendor\imgui</Filter>
     </ClInclude>
     <ClInclude Include="..\Code\Engine\DebugUI.hpp">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Code\Engine\Shader.hpp">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Code\Engine\ComponentManager.hpp">
@@ -450,7 +444,7 @@
     <ClInclude Include="..\Code\Vendor\AreaTex.h">
       <Filter>Vendor</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\Engine\Pipeline.hpp">
+    <ClInclude Include="..\Code\Engine\Shader.hpp">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
@@ -481,6 +475,9 @@
     </Filter>
     <Filter Include="Content">
       <UniqueIdentifier>{83111351-af2e-4cbb-83cb-63ae4b490e84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\PostProcessing">
+      <UniqueIdentifier>{f240dd6b-0ca8-478c-98ab-a48c626ebfb5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -537,6 +534,9 @@
       <Filter>Shaders\Source</Filter>
     </None>
     <None Include="Shaders\Source\ScreenTexture.hlsl">
+      <Filter>Shaders\Source</Filter>
+    </None>
+    <None Include="Shaders\Source\Bloom.hlsl">
       <Filter>Shaders\Source</Filter>
     </None>
   </ItemGroup>

@@ -42,7 +42,7 @@ namespace x {
 
     public:
         Renderer() = default;
-        ~Renderer();
+        ~Renderer() override;
 
         // Prevent moves or copies
         Renderer(const Renderer& other)            = delete;
