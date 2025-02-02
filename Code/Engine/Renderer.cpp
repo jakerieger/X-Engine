@@ -1,12 +1,12 @@
 #include "Renderer.hpp"
+
+#include "ColorGradeEffect.hpp"
 #include "Common/Str.hpp"
 #include "PostProcessSystem.hpp"
 #include "TonemapEffect.hpp"
 
 namespace x {
-    Renderer::~Renderer() {
-        _postProcess.reset();
-    }
+    Renderer::~Renderer() = default;
 
     bool Renderer::Initialize(HWND hwnd, int width, int height) {
         // Create device and swap chain
@@ -25,7 +25,7 @@ namespace x {
 
         D3D_FEATURE_LEVEL featureLevels[] = {D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_10_0};
 
-        UINT numFeatureLevels = ARRAYSIZE(featureLevels);
+        UINT numFeatureLevels             = ARRAYSIZE(featureLevels);
         D3D_FEATURE_LEVEL featureLevel;
 
         UINT createDeviceFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
@@ -211,9 +211,7 @@ namespace x {
         _postProcess->Execute(_sceneSRV.Get(), _renderTargetView.Get());
     }
 
-    void Renderer::EndFrame() {
-        PANIC_IF_FAILED(_swapChain->Present(0, 0), "Failed to present swapchain image.");
-    }
+    void Renderer::EndFrame() { PANIC_IF_FAILED(_swapChain->Present(0, 0), "Failed to present swapchain image."); }
 
     void Renderer::Draw(const u32 vertexCount) {
         _context->Draw(vertexCount, 0);
@@ -225,9 +223,7 @@ namespace x {
         _frameInfo.drawCallsPerFrame++;
     }
 
-    void Renderer::AddTriangleCountToFrame(u32 count) {
-        _frameInfo.numTriangles += count;
-    }
+    void Renderer::AddTriangleCountToFrame(u32 count) { _frameInfo.numTriangles += count; }
 
     bool Renderer::CreatePostProcessResources(u32 width, u32 height) {
         D3D11_TEXTURE2D_DESC sceneDesc {};
@@ -240,7 +236,7 @@ namespace x {
         sceneDesc.Usage            = D3D11_USAGE_DEFAULT;
         sceneDesc.BindFlags        = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
-        auto hr = _device->CreateTexture2D(&sceneDesc, None, &_sceneTexture);
+        auto hr                    = _device->CreateTexture2D(&sceneDesc, None, &_sceneTexture);
         if (FAILED(hr)) { return false; }
 
         hr = _device->CreateRenderTargetView(_sceneTexture.Get(), None, &_sceneRTV);
@@ -256,10 +252,13 @@ namespace x {
 
             const auto tonemap = _postProcess->AddEffect<TonemapEffect>();
             tonemap->SetOperator(TonemapOperator::ACES);
-            tonemap->SetExposure(1.2f);
-        }
+            tonemap->SetExposure(1.0f);
 
-        // At this point, effects can be added to the post process chain
+            const auto colorGrade = _postProcess->AddEffect<ColorGradeEffect>();
+            colorGrade->SetContrast(1.0f);
+            colorGrade->SetSaturation(2.0f);
+            colorGrade->SetTemperature(6500.0f);
+        }
 
         return true;
     }

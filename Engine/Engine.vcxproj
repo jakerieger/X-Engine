@@ -155,6 +155,7 @@
     <ItemGroup>
         <ClCompile Include="..\Code\Engine\Camera.cpp"/>
         <ClCompile Include="..\Code\Engine\Clock.cpp"/>
+        <ClCompile Include="..\Code\Engine\ColorGradeEffect.cpp"/>
         <ClCompile Include="..\Code\Engine\DevConsole.cpp"/>
         <ClCompile Include="..\Code\Engine\FBXLoader.cpp"/>
         <ClCompile Include="..\Code\Engine\Game.cpp"/>
@@ -177,10 +178,12 @@
         <ClCompile Include="..\Code\Vendor\imgui\imgui_tables.cpp"/>
         <ClCompile Include="..\Code\Vendor\imgui\imgui_widgets.cpp"/>
         <ClCompile Include="..\Code\Vendor\ufbx.c"/>
+        <None Include="Shaders\Source\ColorGrade.hlsl" />
     </ItemGroup>
     <ItemGroup>
         <ClInclude Include="..\Code\Engine\Camera.hpp"/>
         <ClInclude Include="..\Code\Engine\Clock.hpp"/>
+        <ClInclude Include="..\Code\Engine\ColorGradeEffect.hpp"/>
         <ClInclude Include="..\Code\Engine\ComponentManager.hpp"/>
         <ClInclude Include="..\Code\Engine\ComputeEffect.hpp"/>
         <ClInclude Include="..\Code\Engine\D3D.hpp"/>

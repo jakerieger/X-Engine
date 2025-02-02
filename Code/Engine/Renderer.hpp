@@ -48,33 +48,21 @@ namespace x {
         Renderer& operator=(const Renderer& other) = delete;
         Renderer& operator=(Renderer&& other)      = delete;
 
-        [[nodiscard]] ID3D11Device* GetDevice() const {
-            return _device.Get();
-        }
+        // clang-format off
+        // D3D objects
+        [[nodiscard]] ID3D11Device* GetDevice() const { return _device.Get(); }
+        [[nodiscard]] ID3D11DeviceContext* GetContext() const { return _context.Get(); }
+        [[nodiscard]] ID3D11Texture2D* GetBackBuffer() const { return _backBuffer.Get(); }
+        [[nodiscard]] ID3D11RenderTargetView* GetRTV() const { return _renderTargetView.Get(); }
 
-        [[nodiscard]] ID3D11DeviceContext* GetContext() const {
-            return _context.Get();
-        }
+        // Post-process system & effects
+        [[nodiscard]] PostProcessSystem* GetPostProcess() const { return _postProcess.get(); }
 
-        [[nodiscard]] ID3D11Texture2D* GetBackBuffer() const {
-            return _backBuffer.Get();
-        }
-
-        [[nodiscard]] ID3D11RenderTargetView* GetRTV() const {
-            return _renderTargetView.Get();
-        }
-
-        [[nodiscard]] PostProcessSystem* GetPostProcess() const {
-            return _postProcess.get();
-        }
-
-        [[nodiscard]] DeviceInfo GetDeviceInfo() const {
-            return _deviceInfo;
-        }
-
-        [[nodiscard]] FrameInfo GetFrameInfo() const {
-            return _frameInfo;
-        }
+        // Debug information / profiler
+        [[nodiscard]] DeviceInfo GetDeviceInfo() const { return _deviceInfo; }
+        [[nodiscard]] FrameInfo GetFrameInfo() const { return _frameInfo; }
+        //
+        // clang-format on
 
         bool Initialize(HWND hwnd, int width, int height);
         void BeginScenePass();
@@ -96,4 +84,4 @@ namespace x {
         void AddTriangleCountToFrame(u32 count);
         bool CreatePostProcessResources(u32 width, u32 height);
     };
-}
+}  // namespace x
