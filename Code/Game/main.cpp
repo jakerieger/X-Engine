@@ -48,10 +48,10 @@ public:
 
         _material = make_shared<PBRMaterial>(renderer);
         TextureLoader texLoader(renderer);
-        const auto albedo    = texLoader.LoadFromFile2D(ContentPath("Gold_Albedo.dds"));
-        const auto normal    = texLoader.LoadFromFile2D(ContentPath("Gold_Normal.dds"));
-        const auto metallic  = texLoader.LoadFromFile2D(ContentPath("Gold_Metallic.dds"));
-        const auto roughness = texLoader.LoadFromFile2D(ContentPath("Gold_Roughness.dds"));
+        const auto albedo    = texLoader.LoadFromFile2D(ContentPath("Metal_Albedo.dds"));
+        const auto normal    = texLoader.LoadFromFile2D(ContentPath("Metal_Normal.dds"));
+        const auto metallic  = texLoader.LoadFromFile2D(ContentPath("Metal_Metallic.dds"));
+        const auto roughness = texLoader.LoadFromFile2D(ContentPath("Metal_Roughness.dds"));
         _material->SetTextureMaps(albedo, metallic, roughness, normal);
 
         auto& camera = state.GetMainCamera();
@@ -59,7 +59,7 @@ public:
 
         auto& sun     = state.GetLightState().Sun;
         sun.enabled   = HLSL_TRUE;
-        sun.intensity = 5.0f;
+        sun.intensity = 2.0f;
         sun.color     = {1.0f, 1.0f, 1.0f, 1.0f};
         sun.direction = {-0.57f, 0.37f, 0.97f, 1.0f};
 
