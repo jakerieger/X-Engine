@@ -1,0 +1,3 @@
+*.rc linguist-vendored
+Code/Vendor/* linguist-vendored
+*.h linguist-language=C++

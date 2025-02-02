@@ -321,6 +321,9 @@
         <None Include="..\Code\Vendor\assimp\SmoothingGroups.inl"/>
         <None Include="..\Code\Vendor\assimp\vector2.inl"/>
         <None Include="..\Code\Vendor\assimp\vector3.inl"/>
+        <None Include="..\Code\Vendor\SMAA.hlsl">
+            <FileType>Document</FileType>
+        </None>
         <None Include="Content\Monke.glb"/>
         <None Include="packages.config"/>
         <None Include="Shaders\Source\Common.hlsli"/>
@@ -350,17 +353,7 @@
         <Image Include="Content\Metal_Roughness.dds"/>
     </ItemGroup>
     <ItemGroup>
-        <None Include="Shaders\Source\SMAA.hlsl">
-            <FileType>Document</FileType>
-        </None>
-    </ItemGroup>
-    <ItemGroup>
         <None Include="Shaders\Source\ScreenTexture.hlsl">
-            <FileType>Document</FileType>
-        </None>
-    </ItemGroup>
-    <ItemGroup>
-        <None Include="Shaders\Source\Bloom.hlsl">
             <FileType>Document</FileType>
         </None>
     </ItemGroup>

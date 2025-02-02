@@ -17,6 +17,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{D9CDE4
 		Code\Common\Types.hpp = Code\Common\Types.hpp
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{36EF6A05-530D-4F32-A94C-E37D3BCEB327}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		.clang-format = .clang-format
+		README.md = README.md
+		.gitattributes = .gitattributes
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
