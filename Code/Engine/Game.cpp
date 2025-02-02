@@ -196,6 +196,8 @@ namespace x {
                                    });
 
         devConsole.RegisterCommand("r_Resume", [this](auto) { Resume(); });
+
+        devConsole.AddLog("Initialized engine");
     }
 
     void IGame::Shutdown() {

@@ -73,6 +73,11 @@ namespace x {
 
         buffer[IM_ARRAYSIZE(buffer) - 1] = 0;
         va_end(args);
+
+        const auto msg = str(buffer);
+        memset(buffer, 0, sizeof(buffer));
+
+        _i_ = snprintf(buffer, sizeof(buffer), "[LOG] %s", msg.c_str());
         _items.emplace_back(buffer);
     }
 

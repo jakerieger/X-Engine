@@ -216,7 +216,7 @@ namespace x {
     }
 
     void Renderer::EndFrame() {
-        PANIC_IF_FAILED(_swapChain->Present(1, 0), "Failed to present swapchain image.");
+        PANIC_IF_FAILED(_swapChain->Present(0, 0), "Failed to present swapchain image.");
     }
 
     void Renderer::Draw(const u32 vertexCount) {
