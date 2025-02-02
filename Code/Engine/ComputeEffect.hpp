@@ -11,15 +11,7 @@ namespace x {
         explicit IComputeEffect(Renderer& renderer) : _renderer(renderer), _computeShader(renderer) {}
         virtual ~IComputeEffect() = default;
 
-        virtual bool Initialize(const str& shaderPath) {
-            try {
-                _computeShader.LoadFromFile(shaderPath);
-                return CreateResources();
-            } catch (const std::exception& e) {
-                _i_ = fprintf(stderr, "Failed to initialize compute effect: %s\n", e.what());
-                return false;
-            }
-        }
+        virtual bool Initialize() = 0;
 
         virtual void Execute(ID3D11ShaderResourceView* input, ID3D11UnorderedAccessView* output) {
             _computeShader.Bind();

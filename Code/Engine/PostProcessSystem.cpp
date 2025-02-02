@@ -49,31 +49,34 @@ namespace x {
         ID3D11ShaderResourceView* currentInput = sceneInput;
         size_t targetIndex                     = 0;
 
-        // Process all effects using compute shaders
+        // Process every enabled effect using compute shaders
         for (size_t i = 0; i < _effects.size(); ++i) {
-            if (!_effects[i]->IsEnabled())
-                continue;
+            if (!_effects[i]->IsEnabled()) { continue; }
 
-            const bool isLastEffect =
+            // Select the appropriate output target
+            bool isLastEffect =
                 (i == _effects.size() - 1) || std::none_of(std::next(_effects.begin(), i + 1),
                                                            _effects.end(),
                                                            [](const auto& effect) { return effect->IsEnabled(); });
 
-            if (!isLastEffect) {
-                // Use compute shader for intermediate effect
-                _effects[i]->Execute(currentInput, _intermediateTargets[targetIndex].uav.Get());
+            // For the last effect, we'll write to our final intermediate target
+            ID3D11UnorderedAccessView* currentOutput = _intermediateTargets[targetIndex].uav.Get();
 
-                currentInput = _intermediateTargets[targetIndex].srv.Get();
-                targetIndex  = (targetIndex + 1) % _intermediateTargets.size();
-            } else {
-                // For the last effect, render directly to screen using pixel shader
-                RenderToScreen(currentInput, finalOutput);
-                break;
-            }
+            // Process this effect
+            _effects[i]->Execute(currentInput, currentOutput);
+
+            // Set up for next iteration
+            currentInput = _intermediateTargets[targetIndex].srv.Get();
+            targetIndex  = (targetIndex + 1) % _intermediateTargets.size();
         }
+
+        // After all effects have been processed, render the final result to screen
+        RenderToScreen(currentInput, finalOutput);
     }
 
     bool PostProcessSystem::CreateIntermediateTargets() {
+        if (_effects.empty()) { return true; }
+
         _intermediateTargets.resize(_effects.size());
 
         for (auto& target : _intermediateTargets) {

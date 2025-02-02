@@ -42,10 +42,10 @@ namespace x {
 
         template<typename T, typename... Args>
             requires std::is_base_of_v<IComputeEffect, T>
-        T* AddEffect(const str& shaderPath, Args&&... args) {
+        T* AddEffect(Args&&... args) {
             auto effect = make_unique<T>(_renderer, std::forward<Args>(args)...);
 
-            if (!effect->Initialize(shaderPath)) {
+            if (!effect->Initialize()) {
                 return None;
             }
 
@@ -53,6 +53,8 @@ namespace x {
 
             T* ptr = effect.get();
             _effects.push_back(std::move(effect));
+            CreateIntermediateTargets();
+
             return ptr;
         }
     };

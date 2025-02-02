@@ -96,10 +96,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
     SpaceGame game(hInstance);
 
     #ifndef NDEBUG
-    if (!game.EnableConsole()) { return EXIT_FAILURE; }
+    game.EnableConsole();
     game.EnableDebugUI();
     #endif
 
     game.Run();
-    return 0;
+
+    return 0; // I know you don't have to, but I like the explicit nature of this.
 }

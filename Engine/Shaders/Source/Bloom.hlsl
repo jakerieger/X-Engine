@@ -18,8 +18,6 @@ void CS_Main(uint3 DTid : SV_DispatchThreadID) {
 
     if (luminance > threshold) {
         color.rgb *= intensity;
-    } else {
-        color.rgb = 0;
     }
 
     OutputTexture[DTid.xy] = color;

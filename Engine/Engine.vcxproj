@@ -153,6 +153,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Code\Engine\BloomEffect.cpp" />
     <ClCompile Include="..\Code\Engine\Camera.cpp" />
     <ClCompile Include="..\Code\Engine\Clock.cpp" />
     <ClCompile Include="..\Code\Engine\DevConsole.cpp" />
@@ -167,6 +168,7 @@
     <ClCompile Include="..\Code\Engine\Renderer.cpp" />
     <ClCompile Include="..\Code\Engine\Shader.cpp" />
     <ClCompile Include="..\Code\Engine\Texture.cpp" />
+    <ClCompile Include="..\Code\Engine\TonemapEffect.cpp" />
     <ClCompile Include="..\Code\Engine\TransformComponent.cpp" />
     <ClCompile Include="..\Code\Vendor\imgui\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="..\Code\Vendor\imgui\backends\imgui_impl_win32.cpp" />
@@ -178,6 +180,7 @@
     <ClCompile Include="..\Code\Vendor\ufbx.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Code\Engine\BloomEffect.hpp" />
     <ClInclude Include="..\Code\Engine\Camera.hpp" />
     <ClInclude Include="..\Code\Engine\Clock.hpp" />
     <ClInclude Include="..\Code\Engine\ComponentManager.hpp" />
@@ -204,6 +207,7 @@
     <ClInclude Include="..\Code\Engine\Resource.hpp" />
     <ClInclude Include="..\Code\Engine\Shader.hpp" />
     <ClInclude Include="..\Code\Engine\Texture.hpp" />
+    <ClInclude Include="..\Code\Engine\TonemapEffect.hpp" />
     <ClInclude Include="..\Code\Engine\TransformComponent.hpp" />
     <ClInclude Include="..\Code\Engine\TransformMatrices.hpp" />
     <ClInclude Include="..\Code\Engine\Volatile.hpp" />
@@ -359,6 +363,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Source\Bloom.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\Source\Tonemap.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
