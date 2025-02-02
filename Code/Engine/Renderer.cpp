@@ -1,6 +1,4 @@
 #include "Renderer.hpp"
-
-#include "BloomEffect.hpp"
 #include "Common/Str.hpp"
 #include "PostProcessSystem.hpp"
 #include "TonemapEffect.hpp"
@@ -31,9 +29,9 @@ namespace x {
         D3D_FEATURE_LEVEL featureLevel;
 
         UINT createDeviceFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-        #ifdef _DEBUG
+#ifdef _DEBUG
         createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-        #endif
+#endif
 
         // Create device and swap chain
         HRESULT hr = D3D11CreateDeviceAndSwapChain(nullptr,
@@ -110,11 +108,9 @@ namespace x {
 
         _context->RSSetViewports(1, &viewport);
 
-        if (!CreatePostProcessResources(width, height)) {
-            return false;
-        }
+        if (!CreatePostProcessResources(width, height)) { return false; }
 
-        QueryDeviceInfo(); // Cache device information
+        QueryDeviceInfo();  // Cache device information
 
         return true;
     }
@@ -201,7 +197,7 @@ namespace x {
         _context->ClearRenderTargetView(_sceneRTV.Get(), clearColor);
         _context->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-        _frameInfo.drawCallsPerFrame = 0; // reset frame draw call count
+        _frameInfo.drawCallsPerFrame = 0;  // reset frame draw call count
         _frameInfo.numTriangles      = 0;
     }
 
@@ -234,7 +230,7 @@ namespace x {
     }
 
     bool Renderer::CreatePostProcessResources(u32 width, u32 height) {
-        D3D11_TEXTURE2D_DESC sceneDesc{};
+        D3D11_TEXTURE2D_DESC sceneDesc {};
         sceneDesc.Width            = width;
         sceneDesc.Height           = height;
         sceneDesc.MipLevels        = 1;
@@ -258,8 +254,7 @@ namespace x {
             _postProcess = make_unique<PostProcessSystem>(*this);
             if (!_postProcess->Initialize(width, height)) { return false; }
 
-            // _postProcess->AddEffect<BloomEffect>(0.2f, 10.5f);
-            auto tonemap = _postProcess->AddEffect<TonemapEffect>();
+            const auto tonemap = _postProcess->AddEffect<TonemapEffect>();
             tonemap->SetOperator(TonemapOperator::ACES);
             tonemap->SetExposure(1.2f);
         }
@@ -288,4 +283,4 @@ namespace x {
 
         _context->RSSetViewports(1, &viewport);
     }
-}
+}  // namespace x
