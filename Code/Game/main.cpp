@@ -42,9 +42,7 @@ public:
 
         _modelHandle.SetModelData(modelData);
 
-        if (!_modelHandle.Valid()) {
-            throw std::runtime_error("Failed to load model data.");
-        }
+        if (!_modelHandle.Valid()) { throw std::runtime_error("Failed to load model data."); }
 
         _material = make_shared<PBRMaterial>(renderer);
         TextureLoader texLoader(renderer);
@@ -77,9 +75,7 @@ public:
         auto view = state.GetMainCamera().GetViewMatrix();
         auto proj = state.GetMainCamera().GetProjectionMatrix();
 
-        TransformMatrices transformMatrices(_modelMatrix,
-                                            view,
-                                            proj);
+        TransformMatrices transformMatrices(_modelMatrix, view, proj);
 
         _material->Apply(transformMatrices, state.GetLightState(), state.GetMainCamera().GetPosition());
         _modelHandle.Draw();
@@ -95,12 +91,12 @@ public:
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow) {
     SpaceGame game(hInstance);
 
-    #ifndef NDEBUG
+#ifndef NDEBUG
     game.EnableConsole();
     game.EnableDebugUI();
-    #endif
+#endif
 
     game.Run();
 
-    return 0; // I know you don't have to, but I like the explicit nature of this.
+    return 0;  // I know you don't have to, but I like the explicit nature of this.
 }

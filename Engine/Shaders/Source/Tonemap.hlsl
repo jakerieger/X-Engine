@@ -4,7 +4,7 @@ cbuffer TonemapParams : register(b0) {
     float2 _pad;
 }
 
-Texture2D<float4> InputTexture : register(t0);
+Texture2D InputTexture : register(t0);
 RWTexture2D<float4> OutputTexture : register(u0);
 
 float4 TonemapACES(float3 color) {
