@@ -1,4 +1,5 @@
 #include "Texture.hpp"
+#include "Renderer.hpp"
 #include "Common/Str.hpp"
 
 namespace x {

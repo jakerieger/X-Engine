@@ -1,4 +1,5 @@
 #include "Material.hpp"
+#include "Renderer.hpp"
 
 namespace x {
     PBRMaterial::PBRMaterial(Renderer& renderer) : _renderer(renderer) {

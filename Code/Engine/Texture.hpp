@@ -1,10 +1,11 @@
 #pragma once
 
+#include "Common/Types.hpp"
 #include "D3D.hpp"
-#include "Renderer.hpp"
 #include <DirectXTex.h>
 
 namespace x {
+    class Renderer;
     class Texture1D;
     class Texture2D;
     class Texture3D;

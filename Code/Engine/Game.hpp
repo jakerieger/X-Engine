@@ -6,6 +6,7 @@
 #include "GameState.hpp"
 #include "Common/Types.hpp"
 #include "Platform.hpp"
+#include "PostProcessSystem.hpp"
 #include "Renderer.hpp"
 #include "Volatile.hpp"
 

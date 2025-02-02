@@ -67,6 +67,9 @@
     <ClCompile Include="..\Code\Engine\Shader.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Code\Engine\PostProcessSystem.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Code\Engine\Game.hpp">
@@ -445,6 +448,12 @@
       <Filter>Vendor</Filter>
     </ClInclude>
     <ClInclude Include="..\Code\Engine\Shader.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\PostProcessSystem.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\ComputeEffect.hpp">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,5 +1,7 @@
 #include "Shader.hpp"
 #include "Common/Str.hpp"
+#include "Renderer.hpp"
+
 
 #ifdef NDEBUG
 static constexpr auto kCompileFlags = D3DCOMPILE_OPTIMIZATION_LEVEL3;

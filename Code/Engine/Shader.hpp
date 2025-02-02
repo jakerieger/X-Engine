@@ -2,9 +2,10 @@
 
 #include "Common/Types.hpp"
 #include "D3D.hpp"
-#include "Renderer.hpp"
 
 namespace x {
+    class Renderer;
+
     #pragma region IShader
     class IShader {
     protected:

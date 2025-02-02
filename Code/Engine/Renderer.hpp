@@ -3,6 +3,7 @@
 #include "Common/Types.hpp"
 #include "Common/Panic.hpp"
 #include "D3D.hpp"
+// #include "PostProcessSystem.hpp"
 #include "Volatile.hpp"
 
 namespace x {
@@ -31,6 +32,7 @@ namespace x {
         ComPtr<ID3D11DepthStencilView> _depthStencilView;
         ComPtr<ID3D11DepthStencilState> _depthStencilState;
 
+        // unique_ptr<PostProcessSystem> _postProcess;
         ComPtr<ID3D11Texture2D> _sceneTexture;
         ComPtr<ID3D11RenderTargetView> _sceneRTV;
         ComPtr<ID3D11ShaderResourceView> _sceneSRV;
