@@ -19,7 +19,7 @@ namespace x {
         Float3 _pad1     = {0.0f, 0.0f, 0.0f};
         u32 castsShadow  = HLSL_TRUE;  // 4 bytes
         u32 enabled      = HLSL_TRUE;  // 4 bytes
-        Float2 _pad2     = {0.0f, 0.0f};
+        f32 _pad2[2]     = {0.0f, 0.0f};
     };
 
     struct alignas(16) PointLight {
