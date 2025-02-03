@@ -42,7 +42,9 @@ public:
 
         _modelHandle.SetModelData(modelData);
 
-        if (!_modelHandle.Valid()) { throw std::runtime_error("Failed to load model data."); }
+        if (!_modelHandle.Valid()) {
+            PANIC("Failed to load model data.");
+        }
 
         _material = make_shared<PBRMaterial>(renderer);
         TextureLoader texLoader(renderer);
@@ -56,26 +58,26 @@ public:
         camera.SetPosition(XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f));
 
         auto& sun     = state.GetLightState().Sun;
-        sun.enabled   = HLSL_TRUE;
+        sun.enabled   = true;
         sun.intensity = 2.0f;
         sun.color     = {1.0f, 1.0f, 1.0f, 1.0f};
         sun.direction = {-0.57f, 0.37f, 0.97f, 1.0f};
 
         auto& pointLight0     = state.GetLightState().PointLights[0];
         pointLight0.enabled   = true;
-        pointLight0.intensity = 1.0f;
+        pointLight0.intensity = 10.0f;
         pointLight0.color     = {1.0f, 0.0f, 0.0f};
         pointLight0.position  = pointLight0.color;
 
         auto& pointLight1     = state.GetLightState().PointLights[1];
         pointLight1.enabled   = true;
-        pointLight1.intensity = 1.0f;
+        pointLight1.intensity = 10.0f;
         pointLight1.color     = {0.0f, 1.0f, 0.0f};
         pointLight1.position  = pointLight1.color;
 
         auto& pointLight2     = state.GetLightState().PointLights[2];
         pointLight2.enabled   = true;
-        pointLight2.intensity = 1.0f;
+        pointLight2.intensity = 10.0f;
         pointLight2.color     = {0.0f, 0.0f, 1.0f};
         pointLight2.position  = {0.0f, 0.0f, -1.0f};
 

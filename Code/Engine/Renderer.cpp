@@ -24,13 +24,13 @@ namespace x {
 
         D3D_FEATURE_LEVEL featureLevels[] = {D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_10_0};
 
-        UINT numFeatureLevels             = ARRAYSIZE(featureLevels);
+        UINT numFeatureLevels = ARRAYSIZE(featureLevels);
         D3D_FEATURE_LEVEL featureLevel;
 
         UINT createDeviceFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-#ifdef _DEBUG
+        #ifdef _DEBUG
         createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-#endif
+        #endif
 
         // Create device and swap chain
         HRESULT hr = D3D11CreateDeviceAndSwapChain(nullptr,
@@ -109,7 +109,7 @@ namespace x {
 
         if (!CreatePostProcessResources(width, height)) { return false; }
 
-        QueryDeviceInfo();  // Cache device information
+        QueryDeviceInfo(); // Cache device information
 
         return true;
     }
@@ -196,7 +196,7 @@ namespace x {
         _context->ClearRenderTargetView(_sceneRTV.Get(), clearColor);
         _context->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-        _frameInfo.drawCallsPerFrame = 0;  // reset frame draw call count
+        _frameInfo.drawCallsPerFrame = 0; // reset frame draw call count
         _frameInfo.numTriangles      = 0;
     }
 
@@ -228,7 +228,7 @@ namespace x {
     void Renderer::AddTriangleCountToFrame(u32 count) { _frameInfo.numTriangles += count; }
 
     bool Renderer::CreatePostProcessResources(u32 width, u32 height) {
-        D3D11_TEXTURE2D_DESC sceneDesc {};
+        D3D11_TEXTURE2D_DESC sceneDesc{};
         sceneDesc.Width            = width;
         sceneDesc.Height           = height;
         sceneDesc.MipLevels        = 1;
@@ -238,7 +238,7 @@ namespace x {
         sceneDesc.Usage            = D3D11_USAGE_DEFAULT;
         sceneDesc.BindFlags        = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
-        auto hr                    = _device->CreateTexture2D(&sceneDesc, None, &_sceneTexture);
+        auto hr = _device->CreateTexture2D(&sceneDesc, None, &_sceneTexture);
         if (FAILED(hr)) { return false; }
 
         hr = _device->CreateRenderTargetView(_sceneTexture.Get(), None, &_sceneRTV);
@@ -253,7 +253,7 @@ namespace x {
             if (!_postProcess->Initialize(width, height)) { return false; }
 
             const auto tonemap = _postProcess->AddEffect<TonemapEffect>();
-            tonemap->SetOperator(TonemapOperator::ACES);
+            tonemap->SetOperator(TonemapOperator::Filmic);
             tonemap->SetExposure(1.0f);
 
             const auto colorGrade = _postProcess->AddEffect<ColorGradeEffect>();
@@ -284,4 +284,4 @@ namespace x {
 
         _context->RSSetViewports(1, &viewport);
     }
-}  // namespace x
+} // namespace x
