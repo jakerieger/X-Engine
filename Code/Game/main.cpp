@@ -55,11 +55,11 @@ public:
         auto& camera = state.GetMainCamera();
         camera.SetPosition(XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f));
 
-        auto& sun             = state.GetLightState().Sun;
-        sun.enabled           = HLSL_TRUE;
-        sun.intensity         = 2.0f;
-        sun.color             = {1.0f, 1.0f, 1.0f, 1.0f};
-        sun.direction         = {-0.57f, 0.37f, 0.97f, 1.0f};
+        auto& sun     = state.GetLightState().Sun;
+        sun.enabled   = HLSL_TRUE;
+        sun.intensity = 2.0f;
+        sun.color     = {1.0f, 1.0f, 1.0f, 1.0f};
+        sun.direction = {-0.57f, 0.37f, 0.97f, 1.0f};
 
         auto& pointLight0     = state.GetLightState().PointLights[0];
         pointLight0.enabled   = true;
@@ -109,12 +109,12 @@ public:
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow) {
     SpaceGame game(hInstance);
 
-#ifndef NDEBUG
+    #ifndef NDEBUG
     game.EnableConsole();
-    game.EnableDebugUI();
-#endif
+    #endif
 
+    game.EnableDebugUI();
     game.Run();
 
-    return 0;  // I know you don't have to, but I like the explicit nature of this.
+    return 0; // I know you don't have to, but I like the explicit nature of this.
 }

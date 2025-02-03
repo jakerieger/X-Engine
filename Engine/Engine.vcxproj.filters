@@ -70,10 +70,10 @@
     <ClCompile Include="..\Code\Engine\PostProcessSystem.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\Code\Engine\BloomEffect.cpp">
+    <ClCompile Include="..\Code\Engine\TonemapEffect.cpp">
       <Filter>Source\PostProcessing</Filter>
     </ClCompile>
-    <ClCompile Include="..\Code\Engine\TonemapEffect.cpp">
+    <ClCompile Include="..\Code\Engine\ColorGradeEffect.cpp">
       <Filter>Source\PostProcessing</Filter>
     </ClCompile>
   </ItemGroup>
@@ -462,10 +462,10 @@
     <ClInclude Include="..\Code\Engine\ComputeEffect.hpp">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\Engine\BloomEffect.hpp">
+    <ClInclude Include="..\Code\Engine\TonemapEffect.hpp">
       <Filter>Source\PostProcessing</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\Engine\TonemapEffect.hpp">
+    <ClInclude Include="..\Code\Engine\ColorGradeEffect.hpp">
       <Filter>Source\PostProcessing</Filter>
     </ClInclude>
   </ItemGroup>
@@ -551,16 +551,16 @@
     <None Include="Content\Monke.glb">
       <Filter>Content</Filter>
     </None>
-    <None Include="Shaders\Source\SMAA.hlsl">
-      <Filter>Shaders\Source</Filter>
-    </None>
     <None Include="Shaders\Source\ScreenTexture.hlsl">
       <Filter>Shaders\Source</Filter>
     </None>
-    <None Include="Shaders\Source\Bloom.hlsl">
+    <None Include="Shaders\Source\Tonemap.hlsl">
       <Filter>Shaders\Source</Filter>
     </None>
-    <None Include="Shaders\Source\Tonemap.hlsl">
+    <None Include="..\Code\Vendor\SMAA.hlsl">
+      <Filter>Vendor</Filter>
+    </None>
+    <None Include="Shaders\Source\ColorGrade.hlsl">
       <Filter>Shaders\Source</Filter>
     </None>
   </ItemGroup>
