@@ -21,8 +21,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{36EF6A
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		.clang-format = .clang-format
-		README.md = README.md
 		.gitattributes = .gitattributes
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global

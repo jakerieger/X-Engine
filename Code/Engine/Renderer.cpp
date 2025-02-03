@@ -1,8 +1,7 @@
 #include "Renderer.hpp"
-
-#include "ColorGradeEffect.hpp"
 #include "Common/Str.hpp"
 #include "PostProcessSystem.hpp"
+#include "ColorGradeEffect.hpp"
 #include "TonemapEffect.hpp"
 
 namespace x {
@@ -211,7 +210,10 @@ namespace x {
         _postProcess->Execute(_sceneSRV.Get(), _renderTargetView.Get());
     }
 
-    void Renderer::EndFrame() { PANIC_IF_FAILED(_swapChain->Present(0, 0), "Failed to present swapchain image."); }
+    void Renderer::EndFrame() {
+        const auto hr = _swapChain->Present(0, 0);
+        if (FAILED(hr)) { _i_ = fprintf(stderr, "Failed to present.\n"); }
+    }
 
     void Renderer::Draw(const u32 vertexCount) {
         _context->Draw(vertexCount, 0);

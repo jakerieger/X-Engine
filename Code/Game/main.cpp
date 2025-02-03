@@ -55,11 +55,26 @@ public:
         auto& camera = state.GetMainCamera();
         camera.SetPosition(XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f));
 
-        auto& sun     = state.GetLightState().Sun;
-        sun.enabled   = HLSL_TRUE;
-        sun.intensity = 2.0f;
-        sun.color     = {1.0f, 1.0f, 1.0f, 1.0f};
-        sun.direction = {-0.57f, 0.37f, 0.97f, 1.0f};
+        auto& sun             = state.GetLightState().Sun;
+        sun.enabled           = HLSL_TRUE;
+        sun.intensity         = 2.0f;
+        sun.color             = {1.0f, 1.0f, 1.0f, 1.0f};
+        sun.direction         = {-0.57f, 0.37f, 0.97f, 1.0f};
+
+        auto& pointLight0     = state.GetLightState().PointLights[0];
+        pointLight0.enabled   = true;
+        pointLight0.intensity = 1.0f;
+        pointLight0.color     = {1.0f, 0.0f, 0.0f};
+
+        auto& pointLight1     = state.GetLightState().PointLights[1];
+        pointLight1.enabled   = true;
+        pointLight1.intensity = 1.0f;
+        pointLight1.color     = {0.0f, 1.0f, 0.0f};
+
+        auto& pointLight2     = state.GetLightState().PointLights[2];
+        pointLight2.enabled   = true;
+        pointLight2.intensity = 1.0f;
+        pointLight2.color     = {0.0f, 0.0f, 1.0f};
 
         renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
     }

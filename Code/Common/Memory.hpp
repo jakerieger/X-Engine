@@ -4,11 +4,11 @@
 
 namespace x {
     enum class MemoryResult : u8 {
-        Success = 0U,
+        Success,
         NullPtr,
         ZeroSize,
         BufferOverflow,
-        OverlappingBuffers
+        OverlappingBuffers,
     };
 
     class Memory {
@@ -35,4 +35,4 @@ namespace x {
             return Copy(CAST<void*>(dst), CAST<const void*>(src), count * sizeof(T), dstCount * sizeof(T));
         }
     };
-}
+}  // namespace x

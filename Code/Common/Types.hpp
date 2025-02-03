@@ -6,7 +6,6 @@
 #pragma warning(disable : 4267)
 
 #include <cstdint>
-#include <cstring>
 #include <optional>
 #include <string>
 #include <vector>
@@ -27,20 +26,20 @@ namespace x {
     using i64  = int64_t;
     using iptr = intptr_t;
 
-    #if defined(__GNUC__) || defined(__clang__)
+#if defined(__GNUC__) || defined(__clang__)
     using u128 = __uint128_t;
     using i128 = __int128_t;
-    #endif
+#endif
 
-    using f32 = float;
-    using f64 = double;
+    using f32                      = float;
+    using f64                      = double;
 
-    using cstr = const char*;
-    using str  = std::string;
-    using wstr = std::wstring;
-    using sv   = std::string_view;
+    using cstr                     = const char*;
+    using str                      = std::string;
+    using wstr                     = std::wstring;
+    using sv                       = std::string_view;
 
-    constexpr std::nullptr_t None  = nullptr;
+    constexpr auto None            = nullptr;
     constexpr std::nullopt_t Empty = std::nullopt;
     constexpr std::_Ignore _i_     = std::ignore;
 
@@ -54,11 +53,11 @@ namespace x {
     using std::vector;
     using std::weak_ptr;
 
-    #define CAST static_cast
-    #define CCAST const_cast
-    #define DCAST dynamic_cast
-    #define RCAST reinterpret_cast
-} // namespace x
+#define CAST static_cast
+#define CCAST const_cast
+#define DCAST dynamic_cast
+#define RCAST reinterpret_cast
+}  // namespace x
 
-constexpr auto HLSL_TRUE  = 1;
-constexpr auto HLSL_FALSE = 0;
+constexpr auto HLSL_TRUE  = 1U;
+constexpr auto HLSL_FALSE = 0U;
