@@ -65,16 +65,19 @@ public:
         pointLight0.enabled   = true;
         pointLight0.intensity = 1.0f;
         pointLight0.color     = {1.0f, 0.0f, 0.0f};
+        pointLight0.position  = {0.33f, -0.67f, 0.55f};
 
         auto& pointLight1     = state.GetLightState().PointLights[1];
         pointLight1.enabled   = true;
         pointLight1.intensity = 1.0f;
         pointLight1.color     = {0.0f, 1.0f, 0.0f};
+        pointLight1.position  = {0.1f, 0.23f, -0.88f};
 
         auto& pointLight2     = state.GetLightState().PointLights[2];
         pointLight2.enabled   = true;
         pointLight2.intensity = 1.0f;
         pointLight2.color     = {0.0f, 0.0f, 1.0f};
+        pointLight2.position  = {-0.346f, -0.756f, 0.835f};
 
         renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
     }
