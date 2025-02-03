@@ -3,11 +3,9 @@
 #include "Engine/GenericLoader.hpp"
 #include "Engine/Material.hpp"
 #include "Engine/RasterizerState.hpp"
-#include "Common/Str.hpp"
 #include "Engine/Texture.hpp"
-
-#include <SearchTex.h>
-#include <AreaTex.h>
+#include "Common/Str.hpp"
+#include "Common/Timer.hpp"
 
 using namespace x;
 
@@ -33,6 +31,8 @@ public:
     }
 
     void LoadContent(GameState& state) override {
+        ScopedTimer timer("LoadContent");
+
         RasterizerStates::SetupRasterizerStates(renderer);
 
         const auto starshipFile = ContentPath("Monke.glb");

@@ -15,6 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{D9CDE4
 		Code\Common\Panic.hpp = Code\Common\Panic.hpp
 		Code\Common\Str.hpp = Code\Common\Str.hpp
 		Code\Common\Types.hpp = Code\Common\Types.hpp
+		Code\Common\Timer.hpp = Code\Common\Timer.hpp
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{36EF6A05-530D-4F32-A94C-E37D3BCEB327}"
