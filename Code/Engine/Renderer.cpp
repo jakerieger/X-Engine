@@ -258,7 +258,7 @@ namespace x {
 
             const auto colorGrade = _postProcess->AddEffect<ColorGradeEffect>();
             colorGrade->SetContrast(1.0f);
-            colorGrade->SetSaturation(2.0f);
+            colorGrade->SetSaturation(1.0f);
             colorGrade->SetTemperature(6500.0f);
         }
 
