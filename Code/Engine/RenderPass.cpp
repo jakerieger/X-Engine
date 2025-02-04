@@ -59,10 +59,11 @@ namespace x {
     void ShadowPass::Begin() {
         _renderer.GetContext()->OMSetRenderTargets(0, None, _depthStencilView.Get());
         _renderer.GetContext()->OMSetDepthStencilState(_depthStencilState.Get(), 0);
-
         _renderer.GetContext()->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
         _vertexShader.Bind();
         _pixelShader.Bind();
+
         _renderer.GetContext()->VSSetConstantBuffers(0, 1, _shadowParamsCB.GetAddressOf());
     }
 
