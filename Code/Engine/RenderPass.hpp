@@ -9,21 +9,23 @@
 namespace x {
     class Renderer;
 
+    // TODO: Support resizing
     class ShadowPass {
         Renderer& _renderer;
         VertexShader _vertexShader;
         PixelShader _pixelShader;
         ComPtr<ID3D11Buffer> _shadowParamsCB;
+        ComPtr<ID3D11DepthStencilView> _depthStencilView;
+        ComPtr<ID3D11DepthStencilState> _depthStencilState;
 
         struct alignas(16) ShadowMapParams {
             Matrix lightViewProj;
             Matrix world;
         };
 
-        void Initialize();
-
     public:
         explicit ShadowPass(Renderer& renderer);
+        void Initialize(u32 width, u32 height);
 
         void Begin();
         void End();

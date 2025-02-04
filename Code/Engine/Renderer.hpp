@@ -54,6 +54,8 @@ namespace x {
         [[nodiscard]] ID3D11DeviceContext* GetContext() const { return _context.Get(); }
         [[nodiscard]] ID3D11Texture2D* GetBackBuffer() const { return _backBuffer.Get(); }
         [[nodiscard]] ID3D11RenderTargetView* GetRTV() const { return _renderTargetView.Get(); }
+        [[nodiscard]] ID3D11DepthStencilState* GetDepthStencilState() const { return _depthStencilState.Get(); }
+        [[nodiscard]] ID3D11DepthStencilView* GetDSV() const { return _depthStencilView.Get(); }
 
         // Post-process system & effects
         [[nodiscard]] PostProcessSystem* GetPostProcess() const { return _postProcess.get(); }

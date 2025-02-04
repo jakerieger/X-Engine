@@ -67,7 +67,7 @@ namespace x {
         depthStencilDesc.SampleDesc.Count     = 1;
         depthStencilDesc.SampleDesc.Quality   = 0;
         depthStencilDesc.Usage                = D3D11_USAGE_DEFAULT;
-        depthStencilDesc.BindFlags            = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+        depthStencilDesc.BindFlags            = D3D11_BIND_DEPTH_STENCIL;
 
         ComPtr<ID3D11Texture2D> depthStencilTexture;
         hr = _device->CreateTexture2D(&depthStencilDesc, nullptr, &depthStencilTexture);

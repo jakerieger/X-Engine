@@ -46,6 +46,7 @@ public:
 
     void LoadContent(GameState& state) override {
         _shadowPass = make_unique<ShadowPass>(renderer);
+        _shadowPass->Initialize(GetWidth(), GetHeight());
 
         devConsole.RegisterCommand("r_ShowPostProcess",
                                    [this](auto args) {
@@ -156,16 +157,16 @@ public:
         }
         _shadowPass->End();
 
-        TransformMatrices floorMatrices(_floorModelMatrix, view, proj);
-        TransformMatrices monkeMatrices(_monkeModelMatrix, view, proj);
-
-        _floorMaterial->Apply(floorMatrices, state.GetLightState(), state.GetMainCamera().GetPosition());
-        _floorModel.Draw();
-        _floorMaterial->Clear();
-
-        _monkeMaterial->Apply(monkeMatrices, state.GetLightState(), state.GetMainCamera().GetPosition());
-        _monkeModel.Draw();
-        _monkeMaterial->Clear();
+        // TransformMatrices floorMatrices(_floorModelMatrix, view, proj);
+        // TransformMatrices monkeMatrices(_monkeModelMatrix, view, proj);
+        //
+        // _floorMaterial->Apply(floorMatrices, state.GetLightState(), state.GetMainCamera().GetPosition());
+        // _floorModel.Draw();
+        // _floorMaterial->Clear();
+        //
+        // _monkeMaterial->Apply(monkeMatrices, state.GetLightState(), state.GetMainCamera().GetPosition());
+        // _monkeModel.Draw();
+        // _monkeMaterial->Clear();
     }
 
     void DrawDebugUI() override {
@@ -217,7 +218,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
     game.EnableConsole();
     #endif
 
-    game.EnableDebugUI();
+    // game.EnableDebugUI();
     game.Run();
 
     return 0; // I know you don't have to, but I like the explicit nature of this.
