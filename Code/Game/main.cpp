@@ -42,9 +42,7 @@ class SpaceGame final : public IGame {
 public:
     explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {
         _monkeModelMatrix = XMMatrixIdentity();
-
         _floorModelMatrix = XMMatrixTranslation(0.0f, -1.0f, 0.0f); // move floor down below suzan
-        // _floorModelMatrix = XMMatrixMultiply(_floorModelMatrix, XMMatrixScaling(100.0f, 100.0f, 100.0f));
     }
 
     void LoadContent(GameState& state) override {
@@ -77,8 +75,6 @@ public:
 
         const auto floorAlbedo = texLoader.LoadFromFile2D(ContentPath("checkerboard.dds"));
         const auto floorNormal = texLoader.LoadFromFile2D(ContentPath("Gold_Normal.dds"));
-        // const auto floorMetallic  = texLoader.LoadFromFile2D(ContentPath("Gold_Metallic.dds"));
-        // const auto floorRoughness = texLoader.LoadFromFile2D(ContentPath("Gold_Roughness.dds"));
 
         _monkeMaterial = PBRMaterial::Create(renderer);
         _monkeMaterial->SetTextureMaps(monkeAlbedo, monkeMetallic, monkeRoughness, monkeNormal);
