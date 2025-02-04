@@ -8,7 +8,7 @@
 #include "Common/Timer.hpp"
 #include "Engine/TonemapEffect.hpp"
 #include "Engine/ColorGradeEffect.hpp"
-#include "imgui/imgui_internal.h"
+#include <Vendor/imgui/imgui.h>
 
 using namespace x;
 
