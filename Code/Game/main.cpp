@@ -12,11 +12,6 @@
 
 using namespace x;
 
-struct Vertex {
-    XMFLOAT3 position;
-    XMFLOAT4 color;
-};
-
 static str ContentPath(const str& filename) {
     const str root = R"(C:\Users\conta\Code\SpaceGame\Engine\Content\)";
     return root + filename;
