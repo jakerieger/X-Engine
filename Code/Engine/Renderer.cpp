@@ -5,7 +5,7 @@
 namespace x {
     Renderer::~Renderer() = default;
 
-    bool Renderer::Initialize(HWND hwnd, int width, int height) {
+    void Renderer::Initialize(HWND hwnd, int width, int height) {
         // Create device and swap chain
         DXGI_SWAP_CHAIN_DESC swapChainDesc               = {};
         swapChainDesc.BufferCount                        = 1;
@@ -48,14 +48,14 @@ namespace x {
                                                    &featureLevel,
                                                    &_context);
 
-        if (FAILED(hr)) { return false; }
+        PANIC_IF_FAILED(hr, "Failed to create device and swapchain.")
 
         // Create render target view
         hr = _swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &_backBuffer);
-        if (FAILED(hr)) { return false; }
+        PANIC_IF_FAILED(hr, "Failed to get swapchain back buffer.")
 
         hr = _device->CreateRenderTargetView(_backBuffer.Get(), nullptr, &_renderTargetView);
-        if (FAILED(hr)) { return false; }
+        PANIC_IF_FAILED(hr, "Failed to create Render Target View")
 
         // Create depth stencil texture
         D3D11_TEXTURE2D_DESC depthStencilDesc = {};
@@ -63,33 +63,44 @@ namespace x {
         depthStencilDesc.Height               = height;
         depthStencilDesc.MipLevels            = 1;
         depthStencilDesc.ArraySize            = 1;
-        depthStencilDesc.Format               = DXGI_FORMAT_D24_UNORM_S8_UINT;
+        depthStencilDesc.Format               = DXGI_FORMAT_R24G8_TYPELESS;
         depthStencilDesc.SampleDesc.Count     = 1;
         depthStencilDesc.SampleDesc.Quality   = 0;
         depthStencilDesc.Usage                = D3D11_USAGE_DEFAULT;
-        depthStencilDesc.BindFlags            = D3D11_BIND_DEPTH_STENCIL;
+        depthStencilDesc.BindFlags            = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 
         ComPtr<ID3D11Texture2D> depthStencilTexture;
         hr = _device->CreateTexture2D(&depthStencilDesc, nullptr, &depthStencilTexture);
-        if (FAILED(hr)) { return false; }
+        PANIC_IF_FAILED(hr, "Failed to create Depth Stencil Texture")
 
         // Create depth stencil view
         D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
-        depthStencilViewDesc.Format                        = depthStencilDesc.Format;
+        depthStencilViewDesc.Format                        = DXGI_FORMAT_D24_UNORM_S8_UINT;
         depthStencilViewDesc.ViewDimension                 = D3D11_DSV_DIMENSION_TEXTURE2D;
+        depthStencilViewDesc.Texture2D.MipSlice            = 0;
 
         hr = _device->CreateDepthStencilView(depthStencilTexture.Get(), &depthStencilViewDesc, &_depthStencilView);
-        if (FAILED(hr)) { return false; }
+        PANIC_IF_FAILED(hr, "Failed to create Depth Stencil View")
 
         // Create depth stencil state
-        D3D11_DEPTH_STENCIL_DESC depthStencilStateDesc = {};
-        depthStencilStateDesc.DepthEnable              = TRUE;
-        depthStencilStateDesc.DepthWriteMask           = D3D11_DEPTH_WRITE_MASK_ALL;
-        depthStencilStateDesc.DepthFunc                = D3D11_COMPARISON_LESS;
-        depthStencilStateDesc.StencilEnable            = FALSE;
+        D3D11_DEPTH_STENCIL_DESC depthStencilStateDesc     = {};
+        depthStencilStateDesc.DepthEnable                  = TRUE;
+        depthStencilStateDesc.DepthWriteMask               = D3D11_DEPTH_WRITE_MASK_ALL;
+        depthStencilStateDesc.DepthFunc                    = D3D11_COMPARISON_LESS;
+        depthStencilStateDesc.StencilEnable                = TRUE;
+        depthStencilStateDesc.StencilReadMask              = 0xFF; // Read all 8 bits
+        depthStencilStateDesc.StencilWriteMask             = 0xFF; // Write to all 8 bits
+        depthStencilStateDesc.FrontFace.StencilFailOp      = D3D11_STENCIL_OP_KEEP;
+        depthStencilStateDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+        depthStencilStateDesc.FrontFace.StencilPassOp      = D3D11_STENCIL_OP_KEEP;
+        depthStencilStateDesc.FrontFace.StencilFunc        = D3D11_COMPARISON_ALWAYS;
+        depthStencilStateDesc.BackFace.StencilFailOp       = D3D11_STENCIL_OP_KEEP;
+        depthStencilStateDesc.BackFace.StencilDepthFailOp  = D3D11_STENCIL_OP_KEEP;
+        depthStencilStateDesc.BackFace.StencilPassOp       = D3D11_STENCIL_OP_KEEP;
+        depthStencilStateDesc.BackFace.StencilFunc         = D3D11_COMPARISON_ALWAYS;
 
         hr = _device->CreateDepthStencilState(&depthStencilStateDesc, &_depthStencilState);
-        if (FAILED(hr)) { return false; }
+        PANIC_IF_FAILED(hr, "Failed to create Depth Stencil State")
 
         // Set render targets and viewport
         _context->OMSetRenderTargets(1, _renderTargetView.GetAddressOf(), _depthStencilView.Get());
@@ -105,11 +116,9 @@ namespace x {
 
         _context->RSSetViewports(1, &viewport);
 
-        if (!CreatePostProcessResources(width, height)) { return false; }
+        if (!CreatePostProcessResources(width, height)) { PANIC("Failed to create post process resources."); }
 
         QueryDeviceInfo(); // Cache device information
-
-        return true;
     }
 
     void Renderer::ResizeSwapchainBuffers(u32 width, u32 height) {
@@ -191,8 +200,8 @@ namespace x {
 
     void Renderer::BeginScenePass(const f32 clearColor[4]) {
         _context->OMSetRenderTargets(1, _sceneRTV.GetAddressOf(), _depthStencilView.Get());
-        _context->ClearRenderTargetView(_sceneRTV.Get(), clearColor);
-        _context->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+        // _context->ClearRenderTargetView(_sceneRTV.Get(), clearColor);
+        // _context->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
         _frameInfo.drawCallsPerFrame = 0; // reset frame draw call count
         _frameInfo.numTriangles      = 0;
@@ -221,6 +230,14 @@ namespace x {
     void Renderer::DrawIndexed(const u32 indexCount) {
         _context->DrawIndexed(indexCount, 0, 0);
         _frameInfo.drawCallsPerFrame++;
+    }
+
+    void Renderer::ClearDepthStencil() {
+        _context->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    }
+
+    void Renderer::ClearColor() {
+        _context->ClearRenderTargetView(_sceneRTV.Get(), Colors::Black);
     }
 
     void Renderer::AddTriangleCountToFrame(u32 count) { _frameInfo.numTriangles += count; }

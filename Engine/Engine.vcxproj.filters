@@ -76,6 +76,9 @@
     <ClCompile Include="..\Code\Engine\ColorGradeEffect.cpp">
       <Filter>Source\PostProcessing</Filter>
     </ClCompile>
+    <ClCompile Include="..\Code\Engine\RenderPass.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Code\Engine\Game.hpp">
@@ -468,6 +471,9 @@
     <ClInclude Include="..\Code\Engine\ColorGradeEffect.hpp">
       <Filter>Source\PostProcessing</Filter>
     </ClInclude>
+    <ClInclude Include="..\Code\Engine\RenderPass.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Configuration">
@@ -565,6 +571,9 @@
     </None>
     <None Include="Content\Floor.glb">
       <Filter>Content</Filter>
+    </None>
+    <None Include="Shaders\Source\ShadowPass.hlsl">
+      <Filter>Shaders\Source</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

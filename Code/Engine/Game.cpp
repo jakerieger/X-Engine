@@ -128,9 +128,7 @@ namespace x {
         ShowWindow(_hwnd, SW_SHOWDEFAULT);
         UpdateWindow(_hwnd);
 
-        if (!renderer.Initialize(_hwnd, _currentWidth, _currentHeight)) {
-            throw std::runtime_error("Failed to intialize renderer.");
-        }
+        renderer.Initialize(_hwnd, _currentWidth, _currentHeight);
 
         // Tell the engine that these classes need to handle resizing when the window size changes
         RegisterVolatile(&renderer);

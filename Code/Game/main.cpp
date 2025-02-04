@@ -10,8 +10,11 @@
 #include "Engine/ColorGradeEffect.hpp"
 #include <Vendor/imgui/imgui.h>
 
-using namespace x;
+#include "Engine/RenderPass.hpp"
 
+using namespace x; // engine namespace
+
+// TODO: Make this relative to the executable path, this is simply for testing (and because I'm lazy)
 static str ContentPath(const str& filename) {
     const str root = R"(C:\Users\conta\Code\SpaceGame\Engine\Content\)";
     return root + filename;
@@ -33,6 +36,7 @@ class SpaceGame final : public IGame {
     TonemapOperator _tonemapOp    = TonemapOperator::ACES;
     f32 _tonemapExposure          = 1.0f;
     bool _showPostProcessUI       = false;
+    unique_ptr<ShadowPass> _shadowPass;
 
 public:
     explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {
@@ -41,6 +45,8 @@ public:
     }
 
     void LoadContent(GameState& state) override {
+        _shadowPass = make_unique<ShadowPass>(renderer);
+
         devConsole.RegisterCommand("r_ShowPostProcess",
                                    [this](auto args) {
                                        if (args.size() < 1) { return; }
@@ -85,25 +91,25 @@ public:
         sun.enabled   = true;
         sun.intensity = 2.0f;
         sun.color     = {1.0f, 1.0f, 1.0f, 1.0f};
-        sun.direction = {-0.57f, 0.37f, 0.97f, 1.0f};
+        sun.direction = {-0.57f, 0.57f, 0.97f, 0.0f};
 
-        auto& pointLight0     = state.GetLightState().PointLights[0];
-        pointLight0.enabled   = true;
-        pointLight0.intensity = 20.0f;
-        pointLight0.color     = {1.0f, 0.0f, 0.0f};
-        pointLight0.position  = {5.0f, 3.0f, 0.0f};
-
-        auto& pointLight1     = state.GetLightState().PointLights[1];
-        pointLight1.enabled   = false;
-        pointLight1.intensity = 20.0f;
-        pointLight1.color     = {0.0f, 1.0f, 0.0f};
-        pointLight1.position  = {-5.0f, 3.0f, 0.0f};
-
-        auto& pointLight2     = state.GetLightState().PointLights[2];
-        pointLight2.enabled   = false;
-        pointLight2.intensity = 20.0f;
-        pointLight2.color     = {0.0f, 0.0f, 1.0f};
-        pointLight2.position  = {0.0f, 3.0f, 0.0f};
+        // auto& pointLight0     = state.GetLightState().PointLights[0];
+        // pointLight0.enabled   = true;
+        // pointLight0.intensity = 20.0f;
+        // pointLight0.color     = {1.0f, 0.0f, 0.0f};
+        // pointLight0.position  = {5.0f, 3.0f, 0.0f};
+        //
+        // auto& pointLight1     = state.GetLightState().PointLights[1];
+        // pointLight1.enabled   = false;
+        // pointLight1.intensity = 20.0f;
+        // pointLight1.color     = {0.0f, 1.0f, 0.0f};
+        // pointLight1.position  = {-5.0f, 3.0f, 0.0f};
+        //
+        // auto& pointLight2     = state.GetLightState().PointLights[2];
+        // pointLight2.enabled   = false;
+        // pointLight2.intensity = 20.0f;
+        // pointLight2.color     = {0.0f, 0.0f, 1.0f};
+        // pointLight2.position  = {0.0f, 3.0f, 0.0f};
 
         // auto& areaLight0      = state.GetLightState().AreaLights[0];
         // areaLight0.enabled    = true;
@@ -115,15 +121,15 @@ public:
 
         renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
 
-        PostProcessSystem* postProcess = renderer.GetPostProcess();
-        _tonemap                       = postProcess->AddEffect<TonemapEffect>();
-        _tonemap->SetOperator(_tonemapOp);
-        _tonemap->SetExposure(_tonemapExposure);
-
-        _colorGrade = postProcess->AddEffect<ColorGradeEffect>();
-        _colorGrade->SetContrast(_contrast);
-        _colorGrade->SetSaturation(_saturation);
-        _colorGrade->SetTemperature(_temperature);
+        // PostProcessSystem* postProcess = renderer.GetPostProcess();
+        // _tonemap                       = postProcess->AddEffect<TonemapEffect>();
+        // _tonemap->SetOperator(_tonemapOp);
+        // _tonemap->SetExposure(_tonemapExposure);
+        //
+        // _colorGrade = postProcess->AddEffect<ColorGradeEffect>();
+        // _colorGrade->SetContrast(_contrast);
+        // _colorGrade->SetSaturation(_saturation);
+        // _colorGrade->SetTemperature(_temperature);
     }
 
     void UnloadContent() override {}
@@ -131,19 +137,33 @@ public:
     void Update(GameState& state, const Clock& clock) override {
         _monkeRotationY += CAST<f32>(clock.GetDeltaTime());
         _monkeModelMatrix = XMMatrixRotationY(_monkeRotationY);
+
+        const auto lvp = XMMatrixTranspose(
+            DirectionalLightViewProjection(state.GetLightState().Sun, state.GetMainCamera()));
+        const auto world = XMMatrixTranspose(XMMatrixScaling(1, 1, 1));
+        _shadowPass->UpdateParams(lvp, world);
     }
 
     void Render(const GameState& state) override {
         auto view = state.GetMainCamera().GetViewMatrix();
         auto proj = state.GetMainCamera().GetProjectionMatrix();
 
-        TransformMatrices transformMatrices(_floorModelMatrix, view, proj);
-        _floorMaterial->Apply(transformMatrices, state.GetLightState(), state.GetMainCamera().GetPosition());
+        // Shadow pass
+        _shadowPass->Begin();
+        {
+            _floorModel.Draw();
+            _monkeModel.Draw();
+        }
+        _shadowPass->End();
+
+        TransformMatrices floorMatrices(_floorModelMatrix, view, proj);
+        TransformMatrices monkeMatrices(_monkeModelMatrix, view, proj);
+
+        _floorMaterial->Apply(floorMatrices, state.GetLightState(), state.GetMainCamera().GetPosition());
         _floorModel.Draw();
         _floorMaterial->Clear();
 
-        transformMatrices = TransformMatrices(_monkeModelMatrix, view, proj);
-        _monkeMaterial->Apply(transformMatrices, state.GetLightState(), state.GetMainCamera().GetPosition());
+        _monkeMaterial->Apply(monkeMatrices, state.GetLightState(), state.GetMainCamera().GetPosition());
         _monkeModel.Draw();
         _monkeMaterial->Clear();
     }

@@ -6,6 +6,7 @@
 
 #include "Common/Types.hpp"
 #include "Math.hpp"
+#include "Camera.hpp"
 
 namespace x {
     inline constexpr size_t kMaxPointLights = 16;
@@ -71,4 +72,31 @@ namespace x {
         SpotLight SpotLights[kMaxSpotLights];
         AreaLight AreaLights[kMaxAreaLights];
     };
+
+    inline Matrix
+    CalculateLightViewProjection(const DirectionalLight& light,
+                                 f32 viewWidth,
+                                 f32 viewHeight,
+                                 const Float3& sceneCenter = {0.f, 0.f, 0.f}) {
+        Vector direction = XMLoadFloat4(&light.direction);
+        direction        = XMVector3Normalize(-direction);
+
+        Vector center        = XMLoadFloat3(&sceneCenter);
+        Vector lightPosition = center - (direction * viewHeight);
+        Vector worldUp       = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+        if (abs(XMVectorGetY(direction)) > 0.99f) {
+            worldUp = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+        }
+
+        Matrix lightView = XMMatrixLookAtLH(lightPosition, center, worldUp);
+        Matrix lightProj = XMMatrixOrthographicLH(viewWidth, viewHeight, 0.01f, 10.0f);
+
+        return lightView * lightProj;
+    }
+
+    inline Matrix DirectionalLightViewProjection(const DirectionalLight& light, const Camera& camera) {
+        const auto sceneRadius = camera.GetSceneRadius();
+        return CalculateLightViewProjection(light, 16.0f, 9.0f);
+    }
 } // namespace x

@@ -64,7 +64,7 @@ namespace x {
         //
         // clang-format on
 
-        bool Initialize(HWND hwnd, int width, int height);
+        void Initialize(HWND hwnd, int width, int height);
         void BeginScenePass();
         void BeginScenePass(const f32 clearColor[4]);
         void EndScenePass();
@@ -73,6 +73,8 @@ namespace x {
 
         void Draw(u32 vertexCount);
         void DrawIndexed(u32 indexCount);
+        void ClearDepthStencil();
+        void ClearColor();
 
         void OnResize(u32 width, u32 height) override;
 
@@ -84,4 +86,4 @@ namespace x {
         void AddTriangleCountToFrame(u32 count);
         bool CreatePostProcessResources(u32 width, u32 height);
     };
-}  // namespace x
+} // namespace x

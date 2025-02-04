@@ -11,7 +11,7 @@ namespace x {
         UpdateProjectionMatrix();
     }
 
-    void Camera::SetPosition(const VectorSet& position) {
+    void Camera::SetPosition(const Vector& position) {
         _position = position;
         UpdateViewMatrix();
     }
@@ -48,6 +48,21 @@ namespace x {
         Float3 pos;
         XMStoreFloat3(&pos, _position);
         return pos;
+    }
+
+    void Camera::GetFrustumDimensions(f32& width, f32& height) const {
+        height = 2.0f * _zFar * tanf(_fovY * 0.5f);
+        width  = height * _aspectRatio;
+    }
+
+    f32 Camera::GetSceneRadius() const {
+        f32 width, height;
+        GetFrustumDimensions(width, height);
+
+        if (width <= 0 || height <= 0)
+            return std::numeric_limits<f32>::infinity();
+
+        return sqrtf((width * width) + (height * height) + (_zFar * _zFar)) * 0.5f;
     }
 
     void Camera::UpdateViewMatrix() {

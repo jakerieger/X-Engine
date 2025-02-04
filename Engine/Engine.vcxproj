@@ -166,6 +166,7 @@
     <ClCompile Include="..\Code\Engine\PostProcessSystem.cpp" />
     <ClCompile Include="..\Code\Engine\RasterizerState.cpp" />
     <ClCompile Include="..\Code\Engine\Renderer.cpp" />
+    <ClCompile Include="..\Code\Engine\RenderPass.cpp" />
     <ClCompile Include="..\Code\Engine\Shader.cpp" />
     <ClCompile Include="..\Code\Engine\Texture.cpp" />
     <ClCompile Include="..\Code\Engine\TonemapEffect.cpp" />
@@ -206,6 +207,7 @@
     <ClInclude Include="..\Code\Engine\PostProcessSystem.hpp" />
     <ClInclude Include="..\Code\Engine\RasterizerState.hpp" />
     <ClInclude Include="..\Code\Engine\Renderer.hpp" />
+    <ClInclude Include="..\Code\Engine\RenderPass.hpp" />
     <ClInclude Include="..\Code\Engine\Resource.hpp" />
     <ClInclude Include="..\Code\Engine\Shader.hpp" />
     <ClInclude Include="..\Code\Engine\Texture.hpp" />
@@ -367,6 +369,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Source\Tonemap.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\Source\ShadowPass.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
