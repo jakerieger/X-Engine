@@ -1,10 +1,12 @@
 #pragma once
 
 #include "DirectXMath.h"
+#include <intrin.h>
 
 namespace x {
     using namespace DirectX;
 
+    // DirectXMath Aliases
     using Matrix    = XMMATRIX;
     using VectorSet = XMVECTOR;
     using Float4x4  = XMFLOAT4X4;
@@ -17,4 +19,8 @@ namespace x {
     using Uint4     = XMUINT4;
     using Uint3     = XMUINT3;
     using Uint2     = XMUINT2;
+
+    inline float Fractional(const float x) {
+        return x - static_cast<float>(static_cast<int>(x));
+    }
 }
