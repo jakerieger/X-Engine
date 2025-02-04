@@ -161,13 +161,14 @@ public:
             ImGui::Separator();
             ImGui::SliderFloat("Exposure", &_tonemapExposure, 0.0f, 2.0f);
 
-            if (ImGui::BeginCombo("Tonemap Operator", tonemapOpNames[(u32)_tonemapOp])) {
+            if (ImGui::BeginCombo("Tonemap Operator", tonemapOpNames[CAST<u32>(_tonemapOp)])) {
                 for (size_t i = 0; i < tonemapOpNames.size(); i++) {
-                    auto opName           = tonemapOpNames[i];
-                    const bool isSelected = (_tonemapOp == CAST<TonemapOperator>(i));
+                    const auto opName     = tonemapOpNames[i];
+                    const auto currentOp  = CAST<TonemapOperator>(i);
+                    const bool isSelected = (_tonemapOp == currentOp);
 
                     if (ImGui::Selectable(opName, isSelected)) {
-                        _tonemapOp           = CAST<TonemapOperator>(i);
+                        _tonemapOp           = currentOp;
                         dropdownValueChanged = true;
                     }
 
