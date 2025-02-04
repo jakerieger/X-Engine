@@ -27,7 +27,7 @@ namespace x {
         _isRunning = true;
         LoadContent(_state);
 
-        MSG msg {};
+        MSG msg{};
         while (msg.message != WM_QUIT && _isRunning) {
             if (PeekMessageA(&msg, None, 0, 0, PM_REMOVE)) {
                 TranslateMessage(&msg);
@@ -48,11 +48,11 @@ namespace x {
 
                 // Draw debug UI last (on top of everything else)
                 if (_debugUIEnabled) {
-                    debugUI->BeginFrame();            // begin ImGui frame
-                    debugUI->Draw(renderer, _clock);  // draw built-in debug ui
-                    DrawDebugUI();                    // draw user-defined debug ui
-                    devConsole.Draw();                // draw developer console last so it overlaps correctly
-                    debugUI->EndFrame();              // end imgui frame
+                    debugUI->BeginFrame(); // begin ImGui frame
+                    debugUI->Draw(renderer, _clock); // draw built-in debug ui
+                    DrawDebugUI(); // draw user-defined debug ui
+                    devConsole.Draw(); // draw developer console last so it overlaps correctly
+                    debugUI->EndFrame(); // end imgui frame
                 }
 
                 renderer.EndFrame();
@@ -74,7 +74,7 @@ namespace x {
         FILE* pStdout = stdout;
         FILE* pStderr = stderr;
 
-        errno_t res   = freopen_s(&pStdin, "CONIN$", "r", stdin);
+        errno_t res = freopen_s(&pStdin, "CONIN$", "r", stdin);
         if (res) { return false; }
         res = freopen_s(&pStdout, "CONOUT$", "w", stdout);
         if (res) { return false; }
@@ -101,7 +101,7 @@ namespace x {
         const auto hr = CoInitializeEx(None, COINIT_MULTITHREADED);
         PANIC_IF_FAILED(hr, "Failed to initialize COM");
 
-        WNDCLASSEXA wc {};
+        WNDCLASSEXA wc{};
         wc.cbSize        = sizeof(WNDCLASSEXA);
         wc.style         = CS_HREDRAW | CS_VREDRAW;
         wc.lpfnWndProc   = WndProc;
@@ -142,49 +142,39 @@ namespace x {
 
         devConsole.RegisterCommand("close", [this](auto) { devConsole.ToggleVisible(); });
 
-        devConsole.RegisterCommand("r_FrameGraph", [this](auto args) {
-            if (args.size() < 1) { return; }
-            const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
-            debugUI->SetShowFrameGraph(CAST<bool>(show));
-        });
+        devConsole.RegisterCommand("p_ShowFrameGraph",
+                                   [this](auto args) {
+                                       if (args.size() < 1) { return; }
+                                       const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                                       debugUI->SetShowFrameGraph(CAST<bool>(show));
+                                   });
 
-        devConsole.RegisterCommand("r_DeviceInfo", [this](auto args) {
-            if (args.size() < 1) { return; }
-            const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
-            debugUI->SetShowDeviceInfo(CAST<bool>(show));
-        });
+        devConsole.RegisterCommand("p_ShowDeviceInfo",
+                                   [this](auto args) {
+                                       if (args.size() < 1) { return; }
+                                       const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                                       debugUI->SetShowDeviceInfo(CAST<bool>(show));
+                                   });
 
-        devConsole.RegisterCommand("r_FrameInfo", [this](auto args) {
-            if (args.size() < 1) { return; }
-            const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
-            debugUI->SetShowFrameInfo(CAST<bool>(show));
-        });
+        devConsole.RegisterCommand("p_ShowFrameInfo",
+                                   [this](auto args) {
+                                       if (args.size() < 1) { return; }
+                                       const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                                       debugUI->SetShowFrameInfo(CAST<bool>(show));
+                                   });
 
-        devConsole.RegisterCommand("r_ToggleAll", [this](auto args) {
-            if (args.size() < 1) { return; }
-            const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
-            debugUI->SetShowFrameGraph(CAST<bool>(show));
-            debugUI->SetShowDeviceInfo(CAST<bool>(show));
-            debugUI->SetShowFrameInfo(CAST<bool>(show));
-        });
+        devConsole.RegisterCommand("p_ShowAll",
+                                   [this](auto args) {
+                                       if (args.size() < 1) { return; }
+                                       const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                                       debugUI->SetShowFrameGraph(CAST<bool>(show));
+                                       debugUI->SetShowDeviceInfo(CAST<bool>(show));
+                                       debugUI->SetShowFrameInfo(CAST<bool>(show));
+                                   });
 
         devConsole.RegisterCommand("r_Pause", [this](auto) { Pause(); });
 
         devConsole.RegisterCommand("r_Resume", [this](auto) { Resume(); });
-
-        // devConsole.RegisterCommand("pp_Tonemap", [this](auto args) {
-        //     if (args.size() < 1) { return; }
-        //     const auto enabled = CAST<int>(strtol(args[0].c_str(), None, 10));
-        //     renderer.GetTonemap()->SetEnabled(enabled);
-        // });
-        //
-        // devConsole.RegisterCommand("pp_ColorGrade", [this](auto args) {
-        //     if (args.size() < 1) { return; }
-        //     const auto enabled = CAST<int>(strtol(args[0].c_str(), None, 10));
-        //     renderer.GetColorGrade()->SetEnabled(enabled);
-        // });
-
-        devConsole.AddLog("Initialized engine");
     }
 
     void IGame::Shutdown() {
@@ -211,7 +201,8 @@ namespace x {
     }
 
     LRESULT IGame::MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) {
-        if (_debugUIEnabled && ImGui_ImplWin32_WndProcHandler(_hwnd, msg, wParam, lParam)) return true;
+        if (_debugUIEnabled && ImGui_ImplWin32_WndProcHandler(_hwnd, msg, wParam, lParam))
+            return true;
 
         switch (msg) {
             case WM_DESTROY:
@@ -247,4 +238,4 @@ namespace x {
 
         return DefWindowProcA(hwnd, msg, wParam, lParam);
     }
-}  // namespace x
+} // namespace x

@@ -6,6 +6,9 @@
 #include "Engine/Texture.hpp"
 #include "Common/Str.hpp"
 #include "Common/Timer.hpp"
+#include "Engine/TonemapEffect.hpp"
+#include "Engine/ColorGradeEffect.hpp"
+#include "imgui/imgui_internal.h"
 
 using namespace x;
 
@@ -27,6 +30,14 @@ class SpaceGame final : public IGame {
     f32 _monkeRotationY = 0.f;
     Matrix _monkeModelMatrix;
     Matrix _floorModelMatrix;
+    TonemapEffect* _tonemap       = None;
+    ColorGradeEffect* _colorGrade = None;
+    f32 _contrast                 = 1.0f;
+    f32 _saturation               = 1.0f;
+    f32 _temperature              = 6500.0f;
+    TonemapOperator _tonemapOp    = TonemapOperator::ACES;
+    f32 _tonemapExposure          = 1.0f;
+    bool _showPostProcessUI       = false;
 
 public:
     explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {
@@ -37,7 +48,12 @@ public:
     }
 
     void LoadContent(GameState& state) override {
-        ScopedTimer timer("LoadContent");
+        devConsole.RegisterCommand("r_ShowPostProcess",
+                                   [this](auto args) {
+                                       if (args.size() < 1) { return; }
+                                       const auto show    = CAST<int>(strtol(args[0].c_str(), None, 10));
+                                       _showPostProcessUI = show;
+                                   });
 
         RasterizerStates::SetupRasterizerStates(renderer);
 
@@ -107,6 +123,16 @@ public:
         // areaLight0.direction  = {0.0f, 0.0f, 5.0f};
 
         renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
+
+        PostProcessSystem* postProcess = renderer.GetPostProcess();
+        _tonemap                       = postProcess->AddEffect<TonemapEffect>();
+        _tonemap->SetOperator(_tonemapOp);
+        _tonemap->SetExposure(_tonemapExposure);
+
+        _colorGrade = postProcess->AddEffect<ColorGradeEffect>();
+        _colorGrade->SetContrast(_contrast);
+        _colorGrade->SetSaturation(_saturation);
+        _colorGrade->SetTemperature(_temperature);
     }
 
     void UnloadContent() override {}
@@ -132,7 +158,41 @@ public:
     }
 
     void DrawDebugUI() override {
-        // Draw custom debug UI with ImGui
+        static constexpr std::array<const char*, 4> tonemapOpNames = {"ACES", "Reinhard", "Filmic", "Linear"};
+        static bool dropdownValueChanged                           = false;
+
+        if (_showPostProcessUI) {
+            ImGui::Begin("Post Processing");
+
+            ImGui::SliderFloat("Contrast", &_contrast, 0.0f, 2.0f);
+            ImGui::SliderFloat("Saturation", &_saturation, 0.0f, 2.0f);
+            ImGui::SliderFloat("Temperature", &_temperature, 1000.0f, 10000.0f);
+            ImGui::Separator();
+            ImGui::SliderFloat("Exposure", &_tonemapExposure, 0.0f, 2.0f);
+
+            if (ImGui::BeginCombo("Tonemap Operator", tonemapOpNames[(u32)_tonemapOp])) {
+                for (size_t i = 0; i < tonemapOpNames.size(); i++) {
+                    auto opName           = tonemapOpNames[i];
+                    const bool isSelected = (_tonemapOp == CAST<TonemapOperator>(i));
+
+                    if (ImGui::Selectable(opName, isSelected)) {
+                        _tonemapOp           = CAST<TonemapOperator>(i);
+                        dropdownValueChanged = true;
+                    }
+
+                    if (isSelected) { ImGui::SetItemDefaultFocus(); }
+                }
+                ImGui::EndCombo();
+            }
+
+            ImGui::End();
+
+            _colorGrade->SetContrast(_contrast);
+            _colorGrade->SetSaturation(_saturation);
+            _colorGrade->SetTemperature(_temperature);
+            _tonemap->SetExposure(_tonemapExposure);
+            _tonemap->SetOperator(_tonemapOp);
+        }
     }
 
     void OnResize(u32 width, u32 height) override {}
