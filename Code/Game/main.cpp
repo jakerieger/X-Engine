@@ -82,30 +82,29 @@ public:
 
         auto& pointLight0     = state.GetLightState().PointLights[0];
         pointLight0.enabled   = true;
-        pointLight0.intensity = 100.0f;
+        pointLight0.intensity = 20.0f;
         pointLight0.color     = {1.0f, 0.0f, 0.0f};
-        pointLight0.position  = pointLight0.color;
-        pointLight0.radius    = 10.0f;
+        pointLight0.position  = {5.0f, 3.0f, 0.0f};
 
         auto& pointLight1     = state.GetLightState().PointLights[1];
-        pointLight1.enabled   = true;
-        pointLight1.intensity = 100.0f;
+        pointLight1.enabled   = false;
+        pointLight1.intensity = 20.0f;
         pointLight1.color     = {0.0f, 1.0f, 0.0f};
-        pointLight1.position  = pointLight1.color;
+        pointLight1.position  = {-5.0f, 3.0f, 0.0f};
 
         auto& pointLight2     = state.GetLightState().PointLights[2];
-        pointLight2.enabled   = true;
-        pointLight2.intensity = 100.0f;
+        pointLight2.enabled   = false;
+        pointLight2.intensity = 20.0f;
         pointLight2.color     = {0.0f, 0.0f, 1.0f};
-        pointLight2.position  = {0.0f, 0.0f, -1.0f};
+        pointLight2.position  = {0.0f, 3.0f, 0.0f};
 
-        auto& areaLight0      = state.GetLightState().AreaLights[0];
-        areaLight0.enabled    = true;
-        areaLight0.intensity  = 1.0f;
-        areaLight0.color      = {1.0f, 0.0f, 1.0f};
-        areaLight0.dimensions = {10.f, 10.f};
-        areaLight0.position   = {0.0f, 0.0f, -5.0f};
-        areaLight0.direction  = {0.0f, 0.0f, 5.0f};
+        // auto& areaLight0      = state.GetLightState().AreaLights[0];
+        // areaLight0.enabled    = true;
+        // areaLight0.intensity  = 1.0f;
+        // areaLight0.color      = {1.0f, 0.0f, 1.0f};
+        // areaLight0.dimensions = {10.f, 10.f};
+        // areaLight0.position   = {0.0f, 0.0f, -5.0f};
+        // areaLight0.direction  = {0.0f, 0.0f, 5.0f};
 
         renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
     }

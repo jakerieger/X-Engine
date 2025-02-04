@@ -253,13 +253,13 @@ namespace x {
             if (!_postProcess->Initialize(width, height)) { return false; }
 
             const auto tonemap = _postProcess->AddEffect<TonemapEffect>();
-            tonemap->SetOperator(TonemapOperator::Filmic);
+            tonemap->SetOperator(TonemapOperator::ACES);
             tonemap->SetExposure(1.0f);
 
             const auto colorGrade = _postProcess->AddEffect<ColorGradeEffect>();
             colorGrade->SetContrast(1.0f);
             colorGrade->SetSaturation(1.0f);
-            colorGrade->SetTemperature(6500.0f);
+            colorGrade->SetTemperature(6500);
         }
 
         return true;

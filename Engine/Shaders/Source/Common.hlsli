@@ -198,25 +198,27 @@ float3 CalculatePointLightPBR(PointLight light, float3 worldPos, float3 normal, 
     float3 lightDir = light.position - worldPos;
     float distance  = length(lightDir);
     lightDir        = normalize(lightDir);
-
-    // Early out if beyond radius
-    if (distance > light.radius) return float3(0, 0, 0);
-
-    // Calculate attenuation
-    float attenuation = CalculateAttenuation(distance, light.constant, light.lin, light.quadratic);
-
-    // Calculate base reflectivity (F0)
+    
+    float falloffStart = light.radius * 0.4;
+    float falloffRange = light.radius - falloffStart;
+    float falloffFactor = 1.0;
+    
+    if (distance > falloffStart) {
+        float x = (distance - falloffStart) / falloffRange;
+        float smoothFalloff = pow(1.0 - x, 3.0);
+        float expFalloff = exp(-x * 2.0);
+        falloffFactor = saturate(lerp(smoothFalloff, expFalloff, 0.6));
+    }
+    
+    float baseAttenuation = 1.0 / (light.constant + light.lin * distance + light.quadratic * distance * distance);
+    float finalAttenuation = baseAttenuation * falloffFactor;
+    
     float3 F0 = lerp(float3(0.04, 0.04, 0.04), material.albedo, material.metallic);
-
-    // Calculate specular BRDF
     float3 specular = SpecularBRDF(normal, viewDir, lightDir, material.roughness, F0);
-
-    // Calculate diffuse BRDF
     float3 diffuse = EnergyConservation(specular, material.metallic, material.albedo);
-
-    // Combine everything
+    
     float NdotL     = max(dot(normal, lightDir), 0.0);
-    float3 radiance = light.color * light.intensity * attenuation;
+    float3 radiance = light.color * light.intensity * finalAttenuation;
 
     return (diffuse / PI + specular) * radiance * NdotL;
 }

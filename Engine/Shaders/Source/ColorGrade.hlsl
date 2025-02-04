@@ -9,6 +9,8 @@ Texture2D InputTexture : register(t0);
 RWTexture2D<float4> OutputTexture : register(u0);
 
 static const float3 RGB_6500K = float3(1.0, 0.9687, 0.9228);
+static const float MIDDLE_GRAY = 0.5;
+static const float CONTRAST_FACTOR = 1.015686;
 
 float3 KelvinToRGB(float temperature) {
     temperature = clamp(temperature, 1000.0, 40000.0);
@@ -51,9 +53,14 @@ float3 KelvinToRGB(float temperature) {
 
     float4 color      = InputTexture[DTid.xy];
 
+    // color temperature / white balance adjustment
     float3 tempAdjust = KelvinToRGB(temperature);
     color.rgb *= tempAdjust;
 
+    // contrast adjustment
+    color.rgb = ((color.rgb - MIDDLE_GRAY) * max(contrast, 0.0)) + MIDDLE_GRAY;
+
+    // saturation adjustment
     float luminance        = dot(color.rgb, float3(0.2126, 0.7152, 0.0722));
     color.rgb              = lerp(luminance.xxx, color.rgb, saturation);
 

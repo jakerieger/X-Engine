@@ -19,7 +19,7 @@ namespace x {
     void ColorGradeEffect::UpdateConstants() {
         D3D11_MAPPED_SUBRESOURCE mapped;
         if (SUCCEEDED(_renderer.GetContext()->Map(_constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped))) {
-            auto* params               = CAST<ColorGradeParams*>(mapped.pData);
+            auto* params = CAST<ColorGradeParams*>(mapped.pData);
 
             params->saturation         = _saturation;
             params->contrast           = _contrast;
@@ -29,4 +29,4 @@ namespace x {
             _renderer.GetContext()->Unmap(_constantBuffer.Get(), 0);
         }
     }
-}  // namespace x
+} // namespace x
