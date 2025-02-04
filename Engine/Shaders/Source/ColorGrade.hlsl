@@ -10,7 +10,6 @@ RWTexture2D<float4> OutputTexture : register(u0);
 
 static const float3 RGB_6500K = float3(1.0, 0.9687, 0.9228);
 static const float MIDDLE_GRAY = 0.5;
-static const float CONTRAST_FACTOR = 1.015686;
 
 float3 KelvinToRGB(float temperature) {
     temperature = clamp(temperature, 1000.0, 40000.0);
