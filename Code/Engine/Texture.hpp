@@ -32,6 +32,7 @@ namespace x {
 
     public:
         void Bind(u32 slot) const;
+        void Unbind(u32 slot) const;
     };
 
     class TextureLoader {

@@ -9,14 +9,13 @@ namespace x {
     class ModelData;
     class ModelHandle;
 
-    class ModelHandle final : public Resource {
+    class ModelHandle final {
         shared_ptr<ModelData> _modelData;
 
     public:
         ModelHandle() = default;
 
         void Draw();
-        void Release() override;
         [[nodiscard]] bool Valid() const;
 
         void SetModelData(const shared_ptr<ModelData>& modelData) {

@@ -9,6 +9,14 @@
 #include "TransformMatrices.hpp"
 
 namespace x {
+    enum class TextureMapSlot : u32 {
+        Albedo,
+        Metallic,
+        Roughness,
+        AmbientOcclusion,
+        Normal,
+    };
+
     class PBRMaterial {
         Renderer& _renderer;
         ComPtr<ID3D11Buffer> _transformsCB;
@@ -34,6 +42,7 @@ namespace x {
     public:
         explicit PBRMaterial(Renderer& renderer);
         void Apply(const TransformMatrices& transformMatrices, const LightState& lightState, const Float3& cameraPos);
+        void Clear();
 
         void SetAlbedo(const Float3& albedo);
         void SetMetallic(f32 metallic);
@@ -49,6 +58,8 @@ namespace x {
                             const TextureHandle<Texture2D>& metallic,
                             const TextureHandle<Texture2D>& roughness,
                             const TextureHandle<Texture2D>& normal);
+
+        static shared_ptr<PBRMaterial> Create(Renderer& renderer);
 
     private:
         void CreateBuffers();

@@ -563,6 +563,9 @@
     <None Include="Shaders\Source\ColorGrade.hlsl">
       <Filter>Shaders\Source</Filter>
     </None>
+    <None Include="Content\Floor.glb">
+      <Filter>Content</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Content\checkerboard.dds">
@@ -578,6 +581,18 @@
       <Filter>Content</Filter>
     </Image>
     <Image Include="Content\Metal_Roughness.dds">
+      <Filter>Content</Filter>
+    </Image>
+    <Image Include="Content\Gold_Roughness.dds">
+      <Filter>Content</Filter>
+    </Image>
+    <Image Include="Content\Gold_Normal.dds">
+      <Filter>Content</Filter>
+    </Image>
+    <Image Include="Content\Gold_Metallic.dds">
+      <Filter>Content</Filter>
+    </Image>
+    <Image Include="Content\Gold_Albedo.dds">
       <Filter>Content</Filter>
     </Image>
   </ItemGroup>

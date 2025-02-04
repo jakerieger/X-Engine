@@ -20,14 +20,20 @@ static str ContentPath(const str& filename) {
 }
 
 class SpaceGame final : public IGame {
-    shared_ptr<PBRMaterial> _material;
-    ModelHandle _modelHandle;
-    f32 _rotationY = 0.f;
-    Matrix _modelMatrix;
+    shared_ptr<PBRMaterial> _monkeMaterial;
+    shared_ptr<PBRMaterial> _floorMaterial;
+    ModelHandle _monkeModel;
+    ModelHandle _floorModel;
+    f32 _monkeRotationY = 0.f;
+    Matrix _monkeModelMatrix;
+    Matrix _floorModelMatrix;
 
 public:
     explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {
-        _modelMatrix = XMMatrixIdentity();
+        _monkeModelMatrix = XMMatrixIdentity();
+
+        _floorModelMatrix = XMMatrixTranslation(0.0f, -1.0f, 0.0f); // move floor down below suzan
+        // _floorModelMatrix = XMMatrixMultiply(_floorModelMatrix, XMMatrixScaling(100.0f, 100.0f, 100.0f));
     }
 
     void LoadContent(GameState& state) override {
@@ -35,26 +41,37 @@ public:
 
         RasterizerStates::SetupRasterizerStates(renderer);
 
-        const auto starshipFile = ContentPath("Monke.glb");
-
         GenericLoader loader(renderer);
-        const auto modelData = loader.LoadFromFile(starshipFile);
+        const auto monkeData = loader.LoadFromFile(ContentPath("Monke.glb"));
+        _monkeModel.SetModelData(monkeData);
 
-        _modelHandle.SetModelData(modelData);
+        const auto floorData = loader.LoadFromFile(ContentPath("Floor.glb"));
+        _floorModel.SetModelData(floorData);
 
-        if (!_modelHandle.Valid()) {
+        if (!_monkeModel.Valid()) {
             PANIC("Failed to load model data.");
         }
 
-        _material = make_shared<PBRMaterial>(renderer);
         TextureLoader texLoader(renderer);
-        const auto albedo    = texLoader.LoadFromFile2D(ContentPath("Metal_Albedo.dds"));
-        const auto normal    = texLoader.LoadFromFile2D(ContentPath("Metal_Normal.dds"));
-        const auto metallic  = texLoader.LoadFromFile2D(ContentPath("Metal_Metallic.dds"));
-        const auto roughness = texLoader.LoadFromFile2D(ContentPath("Metal_Roughness.dds"));
-        _material->SetTextureMaps(albedo, metallic, roughness, normal);
+
+        const auto monkeAlbedo    = texLoader.LoadFromFile2D(ContentPath("Metal_Albedo.dds"));
+        const auto monkeNormal    = texLoader.LoadFromFile2D(ContentPath("Metal_Normal.dds"));
+        const auto monkeMetallic  = texLoader.LoadFromFile2D(ContentPath("Metal_Metallic.dds"));
+        const auto monkeRoughness = texLoader.LoadFromFile2D(ContentPath("Metal_Roughness.dds"));
+
+        const auto floorAlbedo = texLoader.LoadFromFile2D(ContentPath("checkerboard.dds"));
+        const auto floorNormal = texLoader.LoadFromFile2D(ContentPath("Gold_Normal.dds"));
+        // const auto floorMetallic  = texLoader.LoadFromFile2D(ContentPath("Gold_Metallic.dds"));
+        // const auto floorRoughness = texLoader.LoadFromFile2D(ContentPath("Gold_Roughness.dds"));
+
+        _monkeMaterial = PBRMaterial::Create(renderer);
+        _monkeMaterial->SetTextureMaps(monkeAlbedo, monkeMetallic, monkeRoughness, monkeNormal);
+
+        _floorMaterial = PBRMaterial::Create(renderer);
+        _floorMaterial->SetTextureMaps(floorAlbedo, None, None, floorNormal);
 
         auto& camera = state.GetMainCamera();
+        camera.SetFOV(70.0f);
         camera.SetPosition(XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f));
 
         auto& sun     = state.GetLightState().Sun;
@@ -65,21 +82,30 @@ public:
 
         auto& pointLight0     = state.GetLightState().PointLights[0];
         pointLight0.enabled   = true;
-        pointLight0.intensity = 10.0f;
+        pointLight0.intensity = 100.0f;
         pointLight0.color     = {1.0f, 0.0f, 0.0f};
         pointLight0.position  = pointLight0.color;
+        pointLight0.radius    = 10.0f;
 
         auto& pointLight1     = state.GetLightState().PointLights[1];
         pointLight1.enabled   = true;
-        pointLight1.intensity = 10.0f;
+        pointLight1.intensity = 100.0f;
         pointLight1.color     = {0.0f, 1.0f, 0.0f};
         pointLight1.position  = pointLight1.color;
 
         auto& pointLight2     = state.GetLightState().PointLights[2];
         pointLight2.enabled   = true;
-        pointLight2.intensity = 10.0f;
+        pointLight2.intensity = 100.0f;
         pointLight2.color     = {0.0f, 0.0f, 1.0f};
         pointLight2.position  = {0.0f, 0.0f, -1.0f};
+
+        auto& areaLight0      = state.GetLightState().AreaLights[0];
+        areaLight0.enabled    = true;
+        areaLight0.intensity  = 1.0f;
+        areaLight0.color      = {1.0f, 0.0f, 1.0f};
+        areaLight0.dimensions = {10.f, 10.f};
+        areaLight0.position   = {0.0f, 0.0f, -5.0f};
+        areaLight0.direction  = {0.0f, 0.0f, 5.0f};
 
         renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
     }
@@ -87,18 +113,23 @@ public:
     void UnloadContent() override {}
 
     void Update(GameState& state, const Clock& clock) override {
-        _rotationY += CAST<f32>(clock.GetDeltaTime());
-        _modelMatrix = XMMatrixRotationY(_rotationY);
+        _monkeRotationY += CAST<f32>(clock.GetDeltaTime());
+        _monkeModelMatrix = XMMatrixRotationY(_monkeRotationY);
     }
 
     void Render(const GameState& state) override {
         auto view = state.GetMainCamera().GetViewMatrix();
         auto proj = state.GetMainCamera().GetProjectionMatrix();
 
-        TransformMatrices transformMatrices(_modelMatrix, view, proj);
+        TransformMatrices transformMatrices(_floorModelMatrix, view, proj);
+        _floorMaterial->Apply(transformMatrices, state.GetLightState(), state.GetMainCamera().GetPosition());
+        _floorModel.Draw();
+        _floorMaterial->Clear();
 
-        _material->Apply(transformMatrices, state.GetLightState(), state.GetMainCamera().GetPosition());
-        _modelHandle.Draw();
+        transformMatrices = TransformMatrices(_monkeModelMatrix, view, proj);
+        _monkeMaterial->Apply(transformMatrices, state.GetLightState(), state.GetMainCamera().GetPosition());
+        _monkeModel.Draw();
+        _monkeMaterial->Clear();
     }
 
     void DrawDebugUI() override {

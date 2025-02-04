@@ -8,10 +8,6 @@ namespace x {
         }
     }
 
-    void ModelHandle::Release() {
-        _modelData.reset();
-    }
-
     bool ModelHandle::Valid() const {
         return _modelData && _modelData->Valid();
     }

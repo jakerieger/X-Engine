@@ -52,13 +52,17 @@ namespace x {
     };
 
     struct alignas(16) AreaLight {
-        Float3 position   = {0.0f, 0.0f, 0.0f}; // Center position
-        Float3 direction  = {0.0f, -1.0f, 0.0f}; // Normal direction
-        Float3 color      = {1.0f, 1.0f, 1.0f}; // Light's color
+        Float3 position = {0.0f, 0.0f, 0.0f}; // Center position
+        f32 _pad1;
+        Float3 direction = {0.0f, -1.0f, 0.0f}; // Normal direction
+        f32 _pad2;
+        Float3 color = {1.0f, 1.0f, 1.0f}; // Light's color
+        f32 _pad3;
         Float2 dimensions = {1.0f, 1.0f}; // Width and height of the area
         f32 intensity     = 1.0f; // Overall brightness
         u32 castsShadow   = HLSL_TRUE;
         u32 enabled       = HLSL_FALSE;
+        f32 _pad4[3];
     };
 
     struct LightState {

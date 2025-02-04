@@ -5,7 +5,7 @@
 #include "Volatile.hpp"
 
 namespace x {
-    class Camera : public Volatile {
+    class Camera final : public Volatile {
         VectorSet _position = XMVectorSet(0.0f, 0.0f, -5.0f, 1.0f);
         VectorSet _at       = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
         VectorSet _up       = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
@@ -25,10 +25,10 @@ namespace x {
         void SetAspectRatio(f32 ratio);
         void SetClipPlanes(f32 near, f32 far);
 
-        Matrix GetViewMatrix() const;
-        Matrix GetProjectionMatrix() const;
-        Matrix GetViewProjectionMatrix() const;
-        Float3 GetPosition() const;
+        [[nodiscard]] Matrix GetViewMatrix() const;
+        [[nodiscard]] Matrix GetProjectionMatrix() const;
+        [[nodiscard]] Matrix GetViewProjectionMatrix() const;
+        [[nodiscard]] Float3 GetPosition() const;
 
     private:
         void UpdateViewMatrix();

@@ -20,17 +20,28 @@ namespace x {
         _vertexShader->Bind();
         _pixelShader->Bind();
 
-        _albedoMap->Bind(0);
-        _metallicMap->Bind(1);
-        _roughnessMap->Bind(2);
+        // ReSharper disable CppCStyleCast
+        if (_albedoMap.get()) { _albedoMap->Bind((u32)TextureMapSlot::Albedo); }
+        if (_metallicMap.get()) { _metallicMap->Bind((u32)TextureMapSlot::Metallic); }
+        if (_roughnessMap.get()) { _roughnessMap->Bind((u32)TextureMapSlot::Roughness); }
+        if (_normalMap.get()) { _normalMap->Bind((u32)TextureMapSlot::Normal); }
+        // ReSharper restore CppCStyleCast
         // Ambient Occlusion map is bound to slot 3
-        _normalMap->Bind(4);
 
         auto* context = _renderer.GetContext();
         context->VSSetConstantBuffers(0, 1, _transformsCB.GetAddressOf());
         context->PSSetConstantBuffers(1, 1, _lightsCB.GetAddressOf());
         context->PSSetConstantBuffers(2, 1, _materialCB.GetAddressOf());
         context->PSSetConstantBuffers(3, 1, _cameraCB.GetAddressOf());
+    }
+
+    void PBRMaterial::Clear() {
+        // ReSharper disable CppCStyleCast
+        if (_albedoMap.get()) { _albedoMap->Unbind((u32)TextureMapSlot::Albedo); }
+        if (_metallicMap.get()) { _metallicMap->Unbind((u32)TextureMapSlot::Metallic); }
+        if (_roughnessMap.get()) { _roughnessMap->Unbind((u32)TextureMapSlot::Roughness); }
+        if (_normalMap.get()) { _normalMap->Unbind((u32)TextureMapSlot::Normal); }
+        // ReSharper restore CppCStyleCast
     }
 
     void PBRMaterial::SetAlbedo(const Float3& albedo) {
@@ -78,6 +89,10 @@ namespace x {
         SetMetallicMap(metallic);
         SetRoughnessMap(roughness);
         SetNormalMap(normal);
+    }
+
+    shared_ptr<PBRMaterial> PBRMaterial::Create(Renderer& renderer) {
+        return make_shared<PBRMaterial>(renderer);
     }
 
     void PBRMaterial::CreateBuffers() {

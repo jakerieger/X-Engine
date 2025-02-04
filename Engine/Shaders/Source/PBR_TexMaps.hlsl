@@ -70,12 +70,12 @@ float4 PS_Main(VSOutputPBR input) : SV_Target {
         if (light.enabled) { Lo += CalculatePointLightPBR(light, input.worldPos, N, V, mat); }
     }
 
-    // for (uint j = 0; j < MAX_AREA_LIGHTS; ++j) {
-    //     AreaLight light = AreaLights[j];
-    //     if (light.enabled) {
-    //         Lo += CalculateAreaLightPBR(light, input.worldPos, N, V, mat);
-    //     }
-    // }
+    for (uint j = 0; j < MAX_AREA_LIGHTS; ++j) {
+        AreaLight light = AreaLights[j];
+        if (light.enabled) {
+            Lo += CalculateAreaLightPBR(light, input.worldPos, N, V, mat);
+        }
+    }
 
     // Final color calculation
     float3 color = Lo * ao;

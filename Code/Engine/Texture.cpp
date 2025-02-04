@@ -69,4 +69,11 @@ namespace x {
         _renderer.GetContext()->PSSetShaderResources(slot, 1, _textureView.GetAddressOf());
         _renderer.GetContext()->PSSetSamplers(slot, 1, _samplerState.GetAddressOf());
     }
+
+    void Texture2D::Unbind(const u32 slot) const {
+        ID3D11ShaderResourceView* nullSRV = None;
+        ID3D11SamplerState* nullSS        = None;
+        _renderer.GetContext()->PSSetShaderResources(slot, 1, &nullSRV);
+        _renderer.GetContext()->PSSetSamplers(slot, 1, &nullSS);
+    }
 }

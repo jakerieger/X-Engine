@@ -71,13 +71,16 @@ struct SpotLight {
 
 struct AreaLight {
     float3 position;
+    float _pad1;
     float3 direction;
+    float _pad2;
     float3 color;
+    float _pad3;
     float2 dimensions;
     float intensity;
     bool castsShadow;
     bool enabled;
-    float2 _pad;
+    float3 _pad;
 };
 
 struct PBRMaterial {
