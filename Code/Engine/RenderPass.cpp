@@ -56,7 +56,7 @@ namespace x {
         PANIC_IF_FAILED(hr, "Failed to create Depth Stencil State")
     }
 
-    void ShadowPass::Begin() {
+    void ShadowPass::Draw() {
         _renderer.GetContext()->OMSetRenderTargets(0, None, _depthStencilView.Get());
         _renderer.GetContext()->OMSetDepthStencilState(_depthStencilState.Get(), 0);
         _renderer.GetContext()->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
@@ -65,11 +65,10 @@ namespace x {
         _pixelShader.Bind();
 
         _renderer.GetContext()->VSSetConstantBuffers(0, 1, _shadowParamsCB.GetAddressOf());
-    }
 
-    void ShadowPass::End() {
-        // _renderer.ClearDepthStencil();
-        // _renderer.ClearColor();
+        for (auto& mesh : _occluders) {
+            mesh.Draw();
+        }
     }
 
     void ShadowPass::UpdateParams(const Matrix& lightViewProj, const Matrix& world) {
@@ -82,5 +81,9 @@ namespace x {
 
             _renderer.GetContext()->Unmap(_shadowParamsCB.Get(), 0);
         }
+    }
+
+    void ShadowPass::AddOccluder(const ModelHandle& occluder) {
+        _occluders.push_back(occluder);
     }
 }

@@ -131,6 +131,9 @@ public:
         // _colorGrade->SetContrast(_contrast);
         // _colorGrade->SetSaturation(_saturation);
         // _colorGrade->SetTemperature(_temperature);
+
+        _shadowPass->AddOccluder(_floorModel);
+        _shadowPass->AddOccluder(_monkeModel);
     }
 
     void UnloadContent() override {}
@@ -150,12 +153,7 @@ public:
         auto proj = state.GetMainCamera().GetProjectionMatrix();
 
         // Shadow pass
-        _shadowPass->Begin();
-        {
-            _floorModel.Draw();
-            _monkeModel.Draw();
-        }
-        _shadowPass->End();
+        _shadowPass->Draw();
 
         // TransformMatrices floorMatrices(_floorModelMatrix, view, proj);
         // TransformMatrices monkeMatrices(_monkeModelMatrix, view, proj);
