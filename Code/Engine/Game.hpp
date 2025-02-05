@@ -6,9 +6,8 @@
 #include "GameState.hpp"
 #include "Common/Types.hpp"
 #include "Platform.hpp"
-#include "PostProcessSystem.hpp"
-#include "Renderer.hpp"
 #include "Volatile.hpp"
+#include "RenderSystem.hpp"
 
 namespace x {
     /// @brief Base interface for implementing a game application.
@@ -25,6 +24,7 @@ namespace x {
         std::atomic<bool> _isPaused{false};
         GameState _state;
         Clock _clock;
+        unique_ptr<RenderSystem> _renderSystem;
 
     public:
         explicit IGame(HINSTANCE instance, str title, u32 width, u32 height);
@@ -57,15 +57,14 @@ namespace x {
         virtual void LoadContent(GameState& state) = 0;
         virtual void UnloadContent() = 0;
         virtual void Update(GameState& state, const Clock& clock) = 0;
-        virtual void Render(const GameState& state) = 0;
         virtual void OnResize(u32 width, u32 height) = 0;
         virtual void DrawDebugUI();
 
     protected:
-        Renderer renderer;
         std::unique_ptr<DebugUI> debugUI;
         vector<Volatile*> volatiles;
         DevConsole devConsole;
+        Renderer _renderer;
 
         void RegisterVolatile(Volatile* vol) {
             volatiles.push_back(vol);
@@ -76,6 +75,8 @@ namespace x {
         void Shutdown();
         void Pause();
         void Resume();
+
+        void RenderScene(bool depthOnly = false);
 
         LRESULT ResizeHandler(u32 width, u32 height);
         LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam);

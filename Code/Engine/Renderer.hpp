@@ -18,7 +18,7 @@ namespace x {
         u32 numTriangles      = 0;
     };
 
-    class PostProcessSystem;
+    // class PostProcessSystem;
 
     class Renderer final : public Volatile {
         ComPtr<IDXGISwapChain> _swapChain;
@@ -29,11 +29,6 @@ namespace x {
         ComPtr<ID3D11RenderTargetView> _renderTargetView;
         ComPtr<ID3D11DepthStencilView> _depthStencilView;
         ComPtr<ID3D11DepthStencilState> _depthStencilState;
-
-        ComPtr<ID3D11Texture2D> _sceneTexture;
-        ComPtr<ID3D11RenderTargetView> _sceneRTV;
-        ComPtr<ID3D11ShaderResourceView> _sceneSRV;
-        unique_ptr<PostProcessSystem> _postProcess;
 
         DeviceInfo _deviceInfo;
         FrameInfo _frameInfo;
@@ -57,9 +52,6 @@ namespace x {
         [[nodiscard]] ID3D11DepthStencilState* GetDepthStencilState() const { return _depthStencilState.Get(); }
         [[nodiscard]] ID3D11DepthStencilView* GetDSV() const { return _depthStencilView.Get(); }
 
-        // Post-process system & effects
-        [[nodiscard]] PostProcessSystem* GetPostProcess() const { return _postProcess.get(); }
-
         // Debug information / profiler
         [[nodiscard]] DeviceInfo GetDeviceInfo() const { return _deviceInfo; }
         [[nodiscard]] FrameInfo GetFrameInfo() const { return _frameInfo; }
@@ -67,16 +59,11 @@ namespace x {
         // clang-format on
 
         void Initialize(HWND hwnd, int width, int height);
-        void BeginScenePass();
-        void BeginScenePass(const f32 clearColor[4]);
-        void EndScenePass();
-        void RenderPostProcess();
+        void BeginFrame();
         void EndFrame();
 
         void Draw(u32 vertexCount);
         void DrawIndexed(u32 indexCount);
-        void ClearDepthStencil();
-        void ClearColor();
 
         void OnResize(u32 width, u32 height) override;
 
@@ -86,6 +73,5 @@ namespace x {
         void ResizeSwapchainBuffers(u32 width, u32 height);
         void QueryDeviceInfo();
         void AddTriangleCountToFrame(u32 count);
-        bool CreatePostProcessResources(u32 width, u32 height);
     };
 } // namespace x

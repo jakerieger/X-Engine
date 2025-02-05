@@ -1,4 +1,5 @@
 #include "Game.hpp"
+#include "Renderer.hpp"
 
 #include <Vendor/imgui/imgui.h>
 #include <stdexcept>
@@ -9,7 +10,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 namespace x {
     IGame::IGame(const HINSTANCE instance, str title, const u32 width, const u32 height)
         : _instance(instance), _hwnd(None), _currentWidth(width), _currentHeight(height), _title(std::move(title)),
-          renderer() {}
+          _state(), _renderer() {}
 
     IGame::~IGame() {
         if (_consoleEnabled) { FreeConsole(); }
@@ -37,25 +38,42 @@ namespace x {
                 if (!_isPaused) {
                     _clock.Tick();
                     Update(_state, _clock);
+
+                    const auto lvp = CalculateLightViewProjection(_state.GetLightState().Sun, 16.f, 9.f);
+                    _renderSystem->UpdateShadowPassParameters(XMMatrixTranspose(lvp), XMMatrixScaling(1, 1, 1));
                 }
 
                 // Continue rendering whether we're paused or not
-                renderer.BeginScenePass();
-                Render(_state);
-                renderer.EndScenePass();
+                _renderer.BeginFrame();
+                {
+                    // Do our depth-only shadow pass first
+                    _renderSystem->BeginShadowPass();
+                    RenderScene(true); // Disable material binding
+                    auto depthSRV = _renderSystem->EndShadowPass();
 
-                renderer.RenderPostProcess();
+                    // Do our fully lit pass using our previous depth-only pass as input for our shadow mapping shader
+                    _renderSystem->BeginLightPass(depthSRV);
+                    RenderScene();
+                    auto sceneLitSRV = _renderSystem->EndLightPass();
+
+                    // We can now pass our fully lit scene texture to the post processing pipeline to be processed and displayed on screen
+                }
+                _renderer.EndFrame();
+
+                continue;
+
+                // TODO: Pass `sceneOutput` to post process system for further processing
 
                 // Draw debug UI last (on top of everything else)
                 if (_debugUIEnabled) {
                     debugUI->BeginFrame(); // begin ImGui frame
-                    debugUI->Draw(renderer, _clock); // draw built-in debug ui
+                    debugUI->Draw(_renderer, _clock); // draw built-in debug ui
                     DrawDebugUI(); // draw user-defined debug ui
                     devConsole.Draw(); // draw developer console last so it overlaps correctly
                     debugUI->EndFrame(); // end imgui frame
                 }
 
-                renderer.EndFrame();
+                // End frame
             }
         }
 
@@ -94,6 +112,13 @@ namespace x {
 
     f32 IGame::GetAspect() const { return CAST<f32>(_currentWidth) / CAST<f32>(_currentHeight); }
 
+    // This should never modify game state (always iterate as const)
+    void IGame::RenderScene(bool depthOnly) {
+        for (const auto& [entity, model] : _state.GetComponents<ModelComponent>()) {
+            model.Draw(!depthOnly);
+        }
+    }
+
     void IGame::DrawDebugUI() {}
 
     void IGame::Initialize() {
@@ -128,13 +153,16 @@ namespace x {
         ShowWindow(_hwnd, SW_SHOWDEFAULT);
         UpdateWindow(_hwnd);
 
-        renderer.Initialize(_hwnd, _currentWidth, _currentHeight);
+        _renderer.Initialize(_hwnd, _currentWidth, _currentHeight);
+        _renderSystem = make_unique<RenderSystem>(_renderer);
+        _renderSystem->Initialize(_currentWidth, _currentHeight);
 
         // Tell the engine that these classes need to handle resizing when the window size changes
-        RegisterVolatile(&renderer);
+        RegisterVolatile(&_renderer);
+        RegisterVolatile(_renderSystem.get());
         RegisterVolatile(&_state.GetMainCamera());
 
-        if (_debugUIEnabled) { debugUI = make_unique<DebugUI>(_hwnd, renderer); }
+        if (_debugUIEnabled) { debugUI = make_unique<DebugUI>(_hwnd, _renderer); }
 
         devConsole.RegisterCommand("quit", [this](auto) { Quit(); });
 

@@ -8,9 +8,8 @@
 #include "Common/Timer.hpp"
 #include "Engine/TonemapEffect.hpp"
 #include "Engine/ColorGradeEffect.hpp"
-#include <Vendor/imgui/imgui.h>
 
-#include "Engine/RenderPass.hpp"
+#include <Vendor/imgui/imgui.h>
 
 using namespace x; // engine namespace
 
@@ -23,56 +22,46 @@ static str ContentPath(const str& filename) {
 class SpaceGame final : public IGame {
     shared_ptr<PBRMaterial> _monkeMaterial;
     shared_ptr<PBRMaterial> _floorMaterial;
-    ModelHandle _monkeModel;
-    ModelHandle _floorModel;
-    f32 _monkeRotationY = 0.f;
-    Matrix _monkeModelMatrix;
-    Matrix _floorModelMatrix;
+
     TonemapEffect* _tonemap       = None;
     ColorGradeEffect* _colorGrade = None;
-    f32 _contrast                 = 1.0f;
-    f32 _saturation               = 1.0f;
-    f32 _temperature              = 6500.0f;
-    TonemapOperator _tonemapOp    = TonemapOperator::ACES;
-    f32 _tonemapExposure          = 1.0f;
-    bool _showPostProcessUI       = false;
 
-    unique_ptr<RenderSystem> _renderSystem;
+    f32 _contrast              = 1.0f;
+    f32 _saturation            = 1.0f;
+    f32 _temperature           = 6500.0f;
+    TonemapOperator _tonemapOp = TonemapOperator::ACES;
+    f32 _tonemapExposure       = 1.0f;
+    bool _showPostProcessUI    = false;
 
     EntityId _monkeEntity;
     EntityId _floorEntity;
 
 public:
-    explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {
-        _monkeModelMatrix = XMMatrixIdentity();
-        _floorModelMatrix = XMMatrixTranslation(0.0f, -1.0f, 0.0f); // move floor down below suzan
-    }
+    explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {}
 
     void LoadContent(GameState& state) override {
-        _renderSystem = make_unique<RenderSystem>(renderer);
-        // _renderSystem->Initialize(GetWidth(), GetHeight());
         devConsole.RegisterCommand("r_ShowPostProcess",
                                    [this](auto args) {
                                        if (args.size() < 1) { return; }
                                        const auto show    = CAST<int>(strtol(args[0].c_str(), None, 10));
                                        _showPostProcessUI = show;
                                    });
-        RasterizerStates::SetupRasterizerStates(renderer);
+        RasterizerStates::SetupRasterizerStates(_renderer);
 
         _monkeEntity         = state.CreateEntity();
         auto& monkeTransform = state.AddComponent<TransformComponent>(_monkeEntity);
         auto& monkeModel     = state.AddComponent<ModelComponent>(_monkeEntity);
 
-        GenericLoader loader(renderer);
+        GenericLoader loader(_renderer);
         const auto monkeData = loader.LoadFromFile(ContentPath("Monke.glb"));
 
-        TextureLoader texLoader(renderer);
+        TextureLoader texLoader(_renderer);
         const auto monkeAlbedo    = texLoader.LoadFromFile2D(ContentPath("Metal_Albedo.dds"));
         const auto monkeNormal    = texLoader.LoadFromFile2D(ContentPath("Metal_Normal.dds"));
         const auto monkeMetallic  = texLoader.LoadFromFile2D(ContentPath("Metal_Metallic.dds"));
         const auto monkeRoughness = texLoader.LoadFromFile2D(ContentPath("Metal_Roughness.dds"));
 
-        _monkeMaterial = PBRMaterial::Create(renderer);
+        _monkeMaterial = PBRMaterial::Create(_renderer);
         _monkeMaterial->SetTextureMaps(monkeAlbedo, monkeMetallic, monkeRoughness, monkeNormal);
 
         monkeModel.SetModelHandle(monkeData)
@@ -84,7 +73,7 @@ public:
         const auto floorAlbedo = texLoader.LoadFromFile2D(ContentPath("checkerboard.dds"));
         const auto floorNormal = texLoader.LoadFromFile2D(ContentPath("Gold_Normal.dds"));
 
-        _floorMaterial = PBRMaterial::Create(renderer);
+        _floorMaterial = PBRMaterial::Create(_renderer);
         _floorMaterial->SetTextureMaps(floorAlbedo, None, None, floorNormal);
 
         _floorEntity         = state.CreateEntity();
@@ -106,17 +95,17 @@ public:
         sun.color     = {1.0f, 1.0f, 1.0f, 1.0f};
         sun.direction = {-0.57f, 0.57f, 0.97f, 0.0f};
 
-        renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
+        _renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
 
-        PostProcessSystem* postProcess = renderer.GetPostProcess();
-        _tonemap                       = postProcess->AddEffect<TonemapEffect>();
-        _tonemap->SetOperator(_tonemapOp);
-        _tonemap->SetExposure(_tonemapExposure);
-
-        _colorGrade = postProcess->AddEffect<ColorGradeEffect>();
-        _colorGrade->SetContrast(_contrast);
-        _colorGrade->SetSaturation(_saturation);
-        _colorGrade->SetTemperature(_temperature);
+        // PostProcessSystem* postProcess = renderer.GetPostProcess();
+        // _tonemap                       = postProcess->AddEffect<TonemapEffect>();
+        // _tonemap->SetOperator(_tonemapOp);
+        // _tonemap->SetExposure(_tonemapExposure);
+        //
+        // _colorGrade = postProcess->AddEffect<ColorGradeEffect>();
+        // _colorGrade->SetContrast(_contrast);
+        // _colorGrade->SetSaturation(_saturation);
+        // _colorGrade->SetTemperature(_temperature);
 
         // _renderSystem->RegisterOccluders(_floorModel, _monkeModel);
         // _renderSystem->RegisterOpaqueObjects(_floorModel, _monkeModel);
@@ -125,11 +114,6 @@ public:
     void UnloadContent() override {}
 
     void Update(GameState& state, const Clock& clock) override {
-        _monkeRotationY += CAST<f32>(clock.GetDeltaTime());
-        _monkeModelMatrix = XMMatrixRotationY(_monkeRotationY);
-
-        // _renderSystem->UpdateShadowParams(state.GetLightState());
-
         auto view = state.GetMainCamera().GetViewMatrix();
         auto proj = state.GetMainCamera().GetProjectionMatrix();
 
@@ -154,15 +138,6 @@ public:
                                            state.GetLightState(),
                                            state.GetMainCamera().GetPosition());
             }
-        }
-    }
-
-    void Render(const GameState& state) override {
-        // _renderSystem->DrawShadowPass();
-        // _renderSystem->DrawLightingPass();
-
-        for (const auto& [entity, model] : state.GetComponents<ModelComponent>()) {
-            model.Draw();
         }
     }
 

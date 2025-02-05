@@ -1,6 +1,5 @@
 #include "Renderer.hpp"
 #include "Common/Str.hpp"
-#include "PostProcessSystem.hpp"
 
 namespace x {
     Renderer::~Renderer() = default;
@@ -116,8 +115,6 @@ namespace x {
 
         _context->RSSetViewports(1, &viewport);
 
-        if (!CreatePostProcessResources(width, height)) { PANIC("Failed to create post process resources."); }
-
         QueryDeviceInfo(); // Cache device information
     }
 
@@ -193,28 +190,33 @@ namespace x {
         factory->Release();
     }
 
-    void Renderer::BeginScenePass() {
-        constexpr float clearColor[4] = {0.01f, 0.01f, 0.01f, 1.0f};
-        BeginScenePass(clearColor);
-    }
+    // void Renderer::BeginScenePass() {
+    //     constexpr float clearColor[4] = {0.01f, 0.01f, 0.01f, 1.0f};
+    //     BeginScenePass(clearColor);
+    // }
+    //
+    // void Renderer::BeginScenePass(const f32 clearColor[4]) {
+    //     _context->OMSetRenderTargets(1, _renderTargetView.GetAddressOf(), _depthStencilView.Get());
+    //     _context->ClearRenderTargetView(_renderTargetView.Get(), clearColor);
+    //     _context->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    //
+    //     _frameInfo.drawCallsPerFrame = 0; // reset frame draw call count
+    //     _frameInfo.numTriangles      = 0;
+    // }
+    //
+    // void Renderer::EndScenePass() {
+    //     ID3D11RenderTargetView* nullRTV = None;
+    //     _context->OMSetRenderTargets(1, &nullRTV, None);
+    // }
+    //
+    // void Renderer::RenderPostProcess() {
+    //     _context->OMSetRenderTargets(1, _renderTargetView.GetAddressOf(), None);
+    //     // _postProcess->Execute(_sceneSRV.Get(), _renderTargetView.Get());
+    // }
 
-    void Renderer::BeginScenePass(const f32 clearColor[4]) {
-        _context->OMSetRenderTargets(1, _sceneRTV.GetAddressOf(), _depthStencilView.Get());
-        _context->ClearRenderTargetView(_sceneRTV.Get(), clearColor);
+    void Renderer::BeginFrame() {
+        _context->ClearRenderTargetView(_renderTargetView.Get(), Colors::Black);
         _context->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-        _frameInfo.drawCallsPerFrame = 0; // reset frame draw call count
-        _frameInfo.numTriangles      = 0;
-    }
-
-    void Renderer::EndScenePass() {
-        ID3D11RenderTargetView* nullRTV = None;
-        _context->OMSetRenderTargets(1, &nullRTV, None);
-    }
-
-    void Renderer::RenderPostProcess() {
-        _context->OMSetRenderTargets(1, _renderTargetView.GetAddressOf(), None);
-        _postProcess->Execute(_sceneSRV.Get(), _renderTargetView.Get());
     }
 
     void Renderer::EndFrame() {
@@ -232,53 +234,10 @@ namespace x {
         _frameInfo.drawCallsPerFrame++;
     }
 
-    void Renderer::ClearDepthStencil() {
-        _context->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-    }
-
-    void Renderer::ClearColor() {
-        _context->ClearRenderTargetView(_sceneRTV.Get(), Colors::Black);
-    }
-
     void Renderer::AddTriangleCountToFrame(u32 count) { _frameInfo.numTriangles += count; }
 
-    bool Renderer::CreatePostProcessResources(u32 width, u32 height) {
-        D3D11_TEXTURE2D_DESC sceneDesc{};
-        sceneDesc.Width            = width;
-        sceneDesc.Height           = height;
-        sceneDesc.MipLevels        = 1;
-        sceneDesc.ArraySize        = 1;
-        sceneDesc.Format           = DXGI_FORMAT_R16G16B16A16_FLOAT;
-        sceneDesc.SampleDesc.Count = 1;
-        sceneDesc.Usage            = D3D11_USAGE_DEFAULT;
-        sceneDesc.BindFlags        = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-
-        auto hr = _device->CreateTexture2D(&sceneDesc, None, &_sceneTexture);
-        if (FAILED(hr)) { return false; }
-
-        hr = _device->CreateRenderTargetView(_sceneTexture.Get(), None, &_sceneRTV);
-        if (FAILED(hr)) { return false; }
-
-        hr = _device->CreateShaderResourceView(_sceneTexture.Get(), None, &_sceneSRV);
-        if (FAILED(hr)) { return false; }
-
-        // Create the post process system if it doesn't already exist
-        if (!_postProcess) {
-            _postProcess = make_unique<PostProcessSystem>(*this);
-            if (!_postProcess->Initialize(width, height)) { return false; }
-        }
-
-        return true;
-    }
-
     void Renderer::OnResize(u32 width, u32 height) {
-        _sceneTexture.Reset();
-        _sceneRTV.Reset();
-        _sceneSRV.Reset();
-
         ResizeSwapchainBuffers(width, height);
-        CreatePostProcessResources(width, height);
-        _postProcess->OnResize(width, height);
 
         D3D11_VIEWPORT viewport;
         viewport.Width    = CAST<f32>(width);

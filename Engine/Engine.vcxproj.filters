@@ -73,7 +73,7 @@
     <ClCompile Include="..\Code\Engine\ColorGradeEffect.cpp">
       <Filter>Source\PostProcessing</Filter>
     </ClCompile>
-    <ClCompile Include="..\Code\Engine\RenderPass.cpp">
+    <ClCompile Include="..\Code\Engine\RenderSystem.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\Code\Engine\ModelComponent.cpp">
@@ -471,7 +471,7 @@
     <ClInclude Include="..\Code\Engine\ColorGradeEffect.hpp">
       <Filter>Source\PostProcessing</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\Engine\RenderPass.hpp">
+    <ClInclude Include="..\Code\Engine\RenderSystem.hpp">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Code\Engine\ModelComponent.hpp">
