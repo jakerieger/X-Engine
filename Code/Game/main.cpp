@@ -95,20 +95,33 @@ public:
         sun.color     = {1.0f, 1.0f, 1.0f, 1.0f};
         sun.direction = {-0.57f, 0.57f, 0.97f, 0.0f};
 
+        auto& pointLight0     = state.GetLightState().PointLights[0];
+        pointLight0.enabled   = true;
+        pointLight0.intensity = 20.0f;
+        pointLight0.color     = {1.0f, 0.0f, 0.0f};
+        pointLight0.position  = {5.0f, 3.0f, 0.0f};
+
+        auto& pointLight1     = state.GetLightState().PointLights[1];
+        pointLight1.enabled   = false;
+        pointLight1.intensity = 20.0f;
+        pointLight1.color     = {0.0f, 1.0f, 0.0f};
+        pointLight1.position  = {-5.0f, 3.0f, 0.0f};
+
+        auto& pointLight2     = state.GetLightState().PointLights[2];
+        pointLight2.enabled   = false;
+        pointLight2.intensity = 20.0f;
+        pointLight2.color     = {0.0f, 0.0f, 1.0f};
+        pointLight2.position  = {0.0f, 3.0f, 0.0f};
+
+        auto& areaLight0      = state.GetLightState().AreaLights[0];
+        areaLight0.enabled    = true;
+        areaLight0.intensity  = 1.0f;
+        areaLight0.color      = {1.0f, 0.0f, 1.0f};
+        areaLight0.dimensions = {10.f, 10.f};
+        areaLight0.position   = {0.0f, 0.0f, -5.0f};
+        areaLight0.direction  = {0.0f, 0.0f, 5.0f};
+
         _renderContext.GetDeviceContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
-
-        // PostProcessSystem* postProcess = renderer.GetPostProcess();
-        // _tonemap                       = postProcess->AddEffect<TonemapEffect>();
-        // _tonemap->SetOperator(_tonemapOp);
-        // _tonemap->SetExposure(_tonemapExposure);
-        //
-        // _colorGrade = postProcess->AddEffect<ColorGradeEffect>();
-        // _colorGrade->SetContrast(_contrast);
-        // _colorGrade->SetSaturation(_saturation);
-        // _colorGrade->SetTemperature(_temperature);
-
-        // _renderSystem->RegisterOccluders(_floorModel, _monkeModel);
-        // _renderSystem->RegisterOpaqueObjects(_floorModel, _monkeModel);
     }
 
     void UnloadContent() override {}
