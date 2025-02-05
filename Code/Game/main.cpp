@@ -8,15 +8,18 @@
 #include "Common/Timer.hpp"
 #include "Engine/TonemapEffect.hpp"
 #include "Engine/ColorGradeEffect.hpp"
+#include "Common/Filesystem.hpp"
 
 #include <Vendor/imgui/imgui.h>
 
 using namespace x; // engine namespace
+using namespace x::Filesystem;
 
 // TODO: Make this relative to the executable path, this is simply for testing (and because I'm lazy)
 static str ContentPath(const str& filename) {
-    const str root = R"(C:\Users\conta\Code\SpaceGame\Engine\Content\)";
-    return root + filename;
+    auto filePath    = Path(__FILE__).Parent();
+    auto contentPath = filePath / ".." / ".." / "Engine" / "Content";
+    return (contentPath / filename).Str();
 }
 
 class SpaceGame final : public IGame {

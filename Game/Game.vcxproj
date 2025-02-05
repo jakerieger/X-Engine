@@ -146,6 +146,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Code\Common\Filesystem.cpp" />
     <ClCompile Include="..\Code\Game\main.cpp" />
   </ItemGroup>
   <ItemGroup>

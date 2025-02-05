@@ -3,32 +3,32 @@
 //
 
 #include "Filesystem.hpp"
-#include "Panic.inl"
+#include "Panic.hpp"
 
 #include <sstream>
 
 #ifdef _WIN32
-    // Windows does not define the S_ISREG and S_ISDIR macros in stat.h, so we do.
-    // We have to define _CRT_INTERNAL_NONSTDC_NAMES 1 before #including sys/stat.h
-    // in order for Microsoft's stat.h to define names like S_IFMT, S_IFREG, and S_IFDIR,
-    // rather than just defining  _S_IFMT, _S_IFREG, and _S_IFDIR as it normally does.
-    #define _CRT_INTERNAL_NONSTDC_NAMES 1
-    #define WIN32_LEAN_AND_MEAN
-    #define NOMINMAX
-    #include <Windows.h>
-    #include <sys/stat.h>
-    #if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
-        #define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
-    #endif
-    #if !defined(S_ISDIR) && defined(S_IFMT) && defined(S_IFDIR)
-        #define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
-    #endif
+// Windows does not define the S_ISREG and S_ISDIR macros in stat.h, so we do.
+// We have to define _CRT_INTERNAL_NONSTDC_NAMES 1 before #including sys/stat.h
+// in order for Microsoft's stat.h to define names like S_IFMT, S_IFREG, and S_IFDIR,
+// rather than just defining  _S_IFMT, _S_IFREG, and _S_IFDIR as it normally does.
+#define _CRT_INTERNAL_NONSTDC_NAMES 1
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <Windows.h>
+#include <sys/stat.h>
+#if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
+#define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
+#endif
+#if !defined(S_ISDIR) && defined(S_IFMT) && defined(S_IFDIR)
+#define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
+#endif
 #else
     #include <sys/stat.h>
 #endif
 
 namespace x::Filesystem {
-#pragma region FileReader
+    #pragma region FileReader
     std::vector<u8> FileReader::ReadAllBytes(const Path& path) {
         std::ifstream file(path.Str(), std::ios::binary | std::ios::ate);
         if (!file.is_open()) { return {}; }
@@ -78,27 +78,30 @@ namespace x::Filesystem {
         const std::streamsize fileSize = file.tellg();
         return fileSize;
     }
-#pragma endregion
+    #pragma endregion
 
-#pragma region FileWriter
+    #pragma region FileWriter
     bool FileWriter::WriteAllBytes(const Path& path, const std::vector<u8>& data) {
         std::ofstream file(path.Str(),
-                           std::ios::binary | std::ios::trunc);  // Overwrite existing file
-        if (!file) return false;
+                           std::ios::binary | std::ios::trunc); // Overwrite existing file
+        if (!file)
+            return false;
         file.write(RCAST<const char*>(data.data()), CAST<std::streamsize>(data.size()));
         return file.good();
     }
 
     bool FileWriter::WriteAllText(const Path& path, const str& text) {
         std::ofstream file(path.Str(), std::ios::out | std::ios::trunc);
-        if (!file) return false;
+        if (!file)
+            return false;
         file << text;
         return file.good();
     }
 
     bool FileWriter::WriteAllLines(const Path& path, const std::vector<str>& lines) {
         std::ofstream file(path.Str(), std::ios::out | std::ios::trunc);
-        if (!file) return false;
+        if (!file)
+            return false;
         for (const auto& line : lines) {
             file << line << '\n';
             if (!file.good()) { return false; }
@@ -109,10 +112,12 @@ namespace x::Filesystem {
     bool FileWriter::WriteBlock(const Path& path, const std::vector<u8>& data, u64 offset) {
         std::ofstream file(path.Str(),
                            std::ios::binary | std::ios::in |
-                             std::ios::out);  // Open in binary read/write mode
-        if (!file) return false;
-        file.seekp(CAST<std::streampos>(offset), std::ios::beg);  // seek to offset
-        if (!file) return false;                                  // Failed to seek
+                           std::ios::out); // Open in binary read/write mode
+        if (!file)
+            return false;
+        file.seekp(CAST<std::streampos>(offset), std::ios::beg); // seek to offset
+        if (!file)
+            return false; // Failed to seek
         file.write(RCAST<const char*>(data.data()), CAST<std::streamsize>(data.size()));
         return file.good();
     }
@@ -132,7 +137,7 @@ namespace x::Filesystem {
     std::future<std::vector<u8>>
     AsyncFileReader::ReadBlock(const Path& path, size_t size, u64 offset) {
         return runAsync(
-          [path, size, offset]() { return FileReader::ReadBlock(path, size, offset); });
+            [path, size, offset]() { return FileReader::ReadBlock(path, size, offset); });
     }
 
     std::future<bool> AsyncFileWriter::WriteAllBytes(const Path& path,
@@ -152,11 +157,11 @@ namespace x::Filesystem {
     std::future<bool>
     AsyncFileWriter::WriteBlock(const Path& path, const std::vector<u8>& data, u64 offset) {
         return runAsync(
-          [path, data, offset]() { return FileWriter::WriteBlock(path, data, offset); });
+            [path, data, offset]() { return FileWriter::WriteBlock(path, data, offset); });
     }
-#pragma endregion
+    #pragma endregion
 
-#pragma region Stream IO
+    #pragma region Stream IO
     StreamReader::StreamReader(const Path& path)
         : _stream(path.Str(), std::ios::binary | std::ios::ate) {
         if (_stream.is_open()) {
@@ -187,7 +192,8 @@ namespace x::Filesystem {
     }
 
     bool StreamReader::Read(vector<u8>& data, size_t size) {
-        if (!IsOpen() || size == 0) return false;
+        if (!IsOpen() || size == 0)
+            return false;
         const auto currentPos = Position();
         if (currentPos + size > _size) { size = CAST<size_t>(_size - currentPos); }
         data.resize(size);
@@ -196,7 +202,8 @@ namespace x::Filesystem {
     }
 
     bool StreamReader::ReadAll(vector<u8>& data) {
-        if (!IsOpen()) return false;
+        if (!IsOpen())
+            return false;
 
         const auto size = Size();
         if (size == 0) {
@@ -211,7 +218,8 @@ namespace x::Filesystem {
     }
 
     bool StreamReader::ReadLine(str& line) {
-        if (!IsOpen()) return false;
+        if (!IsOpen())
+            return false;
         return CAST<bool>(std::getline(_stream, line));
     }
 
@@ -220,13 +228,15 @@ namespace x::Filesystem {
     }
 
     bool StreamReader::Seek(u64 offset) {
-        if (!IsOpen()) return false;
+        if (!IsOpen())
+            return false;
         _stream.seekg(offset);
         return _stream.good();
     }
 
     u64 StreamReader::Position() {
-        if (!IsOpen()) return 0;
+        if (!IsOpen())
+            return 0;
         return CAST<u64>(_stream.tellg());
     }
 
@@ -260,20 +270,24 @@ namespace x::Filesystem {
     }
 
     bool StreamWriter::Write(const vector<u8>& buffer, size_t size) {
-        if (!IsOpen() || size == 0) return false;
-        if (size > buffer.size()) size = buffer.size();
+        if (!IsOpen() || size == 0)
+            return false;
+        if (size > buffer.size())
+            size = buffer.size();
         _stream.write(RCAST<cstr>(buffer.data()), size);
         return _stream.good();
     }
 
     bool StreamWriter::WriteLine(const str& line) {
-        if (!IsOpen()) return false;
+        if (!IsOpen())
+            return false;
         _stream << line << '\n';
         return _stream.good();
     }
 
     bool StreamWriter::Flush() {
-        if (!IsOpen()) return false;
+        if (!IsOpen())
+            return false;
         _stream.flush();
         return _stream.good();
     }
@@ -283,13 +297,15 @@ namespace x::Filesystem {
     }
 
     bool StreamWriter::Seek(u64 offset) {
-        if (!IsOpen()) return false;
+        if (!IsOpen())
+            return false;
         _stream.seekp(offset);
         return _stream.good();
     }
 
     u64 StreamWriter::Position() {
-        if (!IsOpen()) return 0;
+        if (!IsOpen())
+            return 0;
         return CAST<u64>(_stream.tellp());
     }
 
@@ -299,9 +315,9 @@ namespace x::Filesystem {
             _stream.close();
         }
     }
-#pragma endregion
+    #pragma endregion
 
-#pragma region Path
+    #pragma region Path
     Path Path::Current() {
         char buffer[1024];
         if (!getcwd(buffer, sizeof(buffer))) {
@@ -319,12 +335,12 @@ namespace x::Filesystem {
     }
 
     bool Path::Exists() const {
-        struct stat info {};
+        struct stat info{};
         return stat(path.c_str(), &info) == 0;
     }
 
     bool Path::IsFile() const {
-        struct stat info {};
+        struct stat info{};
         if (stat(path.c_str(), &info) != 0) {
             std::perror(path.c_str());
             return false;
@@ -333,7 +349,7 @@ namespace x::Filesystem {
     }
 
     bool Path::IsDirectory() const {
-        struct stat info {};
+        struct stat info{};
         if (stat(path.c_str(), &info) != 0) {
             std::perror(path.c_str());
             return false;
@@ -353,7 +369,8 @@ namespace x::Filesystem {
     }
 
     Path Path::ReplaceExtension(const str& ext) const {
-        if (!HasExtension()) return Path(path + "." + ext);
+        if (!HasExtension())
+            return Path(path + "." + ext);
         return Path(path.substr(0, path.find_last_of('.')) + "." + ext);
     }
 
@@ -378,28 +395,31 @@ namespace x::Filesystem {
     }
 
     bool Path::Create() const {
-        if (Exists()) return true;
+        if (Exists())
+            return true;
 
-#ifdef _WIN32
+        #ifdef _WIN32
         if (!CreateDirectoryA(path.c_str(), nullptr)) {
             const DWORD error = GetLastError();
             if (error != ERROR_ALREADY_EXISTS) { return false; }
         }
-#else
+        #else
         if (mkdir(path.c_str(), 0755) != 0) {
             if (errno != EEXIST) { return false; }
         }
-#endif
+        #endif
         return true;
     }
 
     bool Path::CreateAll() const {
-        if (Exists()) return true;
+        if (Exists())
+            return true;
 
         if (path != str(1, PATH_SEPARATOR)) {
             Path parentPath = Parent();
             if (!parentPath.Exists()) {
-                if (!parentPath.CreateAll()) return false;
+                if (!parentPath.CreateAll())
+                    return false;
             }
         }
 
@@ -409,7 +429,8 @@ namespace x::Filesystem {
     str Path::Join(const str& lhs, const str& rhs) {
         if (lhs.empty()) { return lhs; }
         if (rhs.empty()) { return rhs; }
-        if (lhs.back() == PATH_SEPARATOR) return lhs + rhs;
+        if (lhs.back() == PATH_SEPARATOR)
+            return lhs + rhs;
         return lhs + PATH_SEPARATOR + rhs;
     }
 
@@ -432,12 +453,12 @@ namespace x::Filesystem {
             result += PATH_SEPARATOR + part;
         }
 
-#ifdef _WIN32
+        #ifdef _WIN32
         // Remove the first '/' if Windows path
         result = result.substr(1, result.size() - 1);
-#endif
+        #endif
 
         return result.empty() ? str(1, PATH_SEPARATOR) : result;
     }
-#pragma endregion
-}  // namespace x::Filesystem
+    #pragma endregion
+} // namespace x::Filesystem
