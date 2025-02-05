@@ -46,22 +46,22 @@ public:
                                        const auto show    = CAST<int>(strtol(args[0].c_str(), None, 10));
                                        _showPostProcessUI = show;
                                    });
-        RasterizerStates::SetupRasterizerStates(_renderer);
+        RasterizerStates::SetupRasterizerStates(_renderContext);
 
         _monkeEntity         = state.CreateEntity();
         auto& monkeTransform = state.AddComponent<TransformComponent>(_monkeEntity);
         auto& monkeModel     = state.AddComponent<ModelComponent>(_monkeEntity);
 
-        GenericLoader loader(_renderer);
+        GenericLoader loader(_renderContext);
         const auto monkeData = loader.LoadFromFile(ContentPath("Monke.glb"));
 
-        TextureLoader texLoader(_renderer);
+        TextureLoader texLoader(_renderContext);
         const auto monkeAlbedo    = texLoader.LoadFromFile2D(ContentPath("Metal_Albedo.dds"));
         const auto monkeNormal    = texLoader.LoadFromFile2D(ContentPath("Metal_Normal.dds"));
         const auto monkeMetallic  = texLoader.LoadFromFile2D(ContentPath("Metal_Metallic.dds"));
         const auto monkeRoughness = texLoader.LoadFromFile2D(ContentPath("Metal_Roughness.dds"));
 
-        _monkeMaterial = PBRMaterial::Create(_renderer);
+        _monkeMaterial = PBRMaterial::Create(_renderContext);
         _monkeMaterial->SetTextureMaps(monkeAlbedo, monkeMetallic, monkeRoughness, monkeNormal);
 
         monkeModel.SetModelHandle(monkeData)
@@ -73,7 +73,7 @@ public:
         const auto floorAlbedo = texLoader.LoadFromFile2D(ContentPath("checkerboard.dds"));
         const auto floorNormal = texLoader.LoadFromFile2D(ContentPath("Gold_Normal.dds"));
 
-        _floorMaterial = PBRMaterial::Create(_renderer);
+        _floorMaterial = PBRMaterial::Create(_renderContext);
         _floorMaterial->SetTextureMaps(floorAlbedo, None, None, floorNormal);
 
         _floorEntity         = state.CreateEntity();
@@ -95,7 +95,7 @@ public:
         sun.color     = {1.0f, 1.0f, 1.0f, 1.0f};
         sun.direction = {-0.57f, 0.57f, 0.97f, 0.0f};
 
-        _renderer.GetContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
+        _renderContext.GetDeviceContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
 
         // PostProcessSystem* postProcess = renderer.GetPostProcess();
         // _tonemap                       = postProcess->AddEffect<TonemapEffect>();

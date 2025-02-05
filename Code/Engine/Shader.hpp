@@ -4,18 +4,18 @@
 #include "D3D.hpp"
 
 namespace x {
-    class Renderer;
+    class RenderContext;
 
     #pragma region IShader
     class IShader {
     protected:
-        Renderer& _renderer;
+        RenderContext& _renderer;
         ComPtr<ID3DBlob> _shaderBlob;
         ComPtr<ID3D11ShaderReflection> _reflection;
         ComPtr<ID3D11DeviceChild> _shader;
 
     public:
-        explicit IShader(Renderer& renderer) : _renderer(renderer) {}
+        explicit IShader(RenderContext& renderer) : _renderer(renderer) {}
         virtual ~IShader() = default;
 
     protected:
@@ -30,7 +30,7 @@ namespace x {
         ComPtr<ID3D11InputLayout> _inputLayout;
 
     public:
-        explicit VertexShader(Renderer& renderer) : IShader(renderer) {}
+        explicit VertexShader(RenderContext& renderer) : IShader(renderer) {}
         void LoadFromFile(const str& filename, const char* entryPoint = "VS_Main");
         void LoadFromMemory(const u8* data, size_t size);
         void Bind() const;
@@ -44,7 +44,7 @@ namespace x {
     #pragma region PixelShader
     class PixelShader final : public IShader {
     public:
-        explicit PixelShader(Renderer& renderer) : IShader(renderer) {}
+        explicit PixelShader(RenderContext& renderer) : IShader(renderer) {}
         void LoadFromFile(const str& filename, const char* entryPoint = "PS_Main");
         void LoadFromMemory(const u8* data, size_t size);
         void Bind();
@@ -58,7 +58,7 @@ namespace x {
         u32 _threadGroupSizeZ = 0;
 
     public:
-        explicit ComputeShader(Renderer& renderer) : IShader(renderer) {}
+        explicit ComputeShader(RenderContext& renderer) : IShader(renderer) {}
         void LoadFromFile(const str& filename, const char* entryPoint = "CS_Main");
         void LoadFromMemory(const u8* data, size_t size);
         void Bind() const;

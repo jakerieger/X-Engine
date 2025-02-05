@@ -1,6 +1,6 @@
 #include "Shader.hpp"
 #include "Common/Str.hpp"
-#include "Renderer.hpp"
+#include "RenderContext.hpp"
 
 
 #ifdef NDEBUG
@@ -89,7 +89,7 @@ namespace x {
             printf("Vertex shader is null.\n");
             return;
         }
-        auto* context = _renderer.GetContext();
+        auto* context = _renderer.GetDeviceContext();
         context->VSSetShader(vs, None, 0);
         context->IASetInputLayout(_inputLayout.Get());
     }
@@ -195,7 +195,7 @@ namespace x {
             printf("Pixel shader is null.\n");
             return;
         }
-        _renderer.GetContext()->PSSetShader(pixelShader, None, 0);
+        _renderer.GetDeviceContext()->PSSetShader(pixelShader, None, 0);
     }
     #pragma endregion
 
@@ -223,11 +223,11 @@ namespace x {
     }
 
     void ComputeShader::Bind() const {
-        _renderer.GetContext()->CSSetShader(CAST<ID3D11ComputeShader*>(_shader.Get()), None, 0);
+        _renderer.GetDeviceContext()->CSSetShader(CAST<ID3D11ComputeShader*>(_shader.Get()), None, 0);
     }
 
     void ComputeShader::Dispatch(const u32 groupSizeX, const u32 groupSizeY, const u32 groupSizeZ) const {
-        _renderer.GetContext()->Dispatch(groupSizeX, groupSizeY, groupSizeZ);
+        _renderer.GetDeviceContext()->Dispatch(groupSizeX, groupSizeY, groupSizeZ);
     }
 
     void ComputeShader::DispatchWithThreadCount(const u32 threadCountX,

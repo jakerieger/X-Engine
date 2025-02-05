@@ -4,7 +4,7 @@
     <ClCompile Include="..\Code\Engine\Game.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\Code\Engine\Renderer.cpp">
+    <ClCompile Include="..\Code\Engine\RenderContext.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\Code\Vendor\imgui\imgui.cpp">
@@ -93,7 +93,7 @@
     <ClInclude Include="..\Code\Engine\D3D.hpp">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\Engine\Renderer.hpp">
+    <ClInclude Include="..\Code\Engine\RenderContext.hpp">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Code\Engine\Volatile.hpp">

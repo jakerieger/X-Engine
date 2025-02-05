@@ -20,37 +20,29 @@ namespace x {
 
     // class PostProcessSystem;
 
-    class Renderer final : public Volatile {
+    class RenderContext final {
         ComPtr<IDXGISwapChain> _swapChain;
         ComPtr<ID3D11Device> _device;
         ComPtr<ID3D11DeviceContext> _context;
         ComPtr<ID3D11Texture2D> _backBuffer;
-        ComPtr<ID3D11RasterizerState> _rasterizerState;
-        ComPtr<ID3D11RenderTargetView> _renderTargetView;
-        ComPtr<ID3D11DepthStencilView> _depthStencilView;
-        ComPtr<ID3D11DepthStencilState> _depthStencilState;
 
         DeviceInfo _deviceInfo;
         FrameInfo _frameInfo;
 
     public:
-        Renderer() = default;
-        ~Renderer() override;
+        RenderContext() = default;
 
         // Prevent moves or copies
-        Renderer(const Renderer& other)            = delete;
-        Renderer(Renderer&& other)                 = delete;
-        Renderer& operator=(const Renderer& other) = delete;
-        Renderer& operator=(Renderer&& other)      = delete;
+        RenderContext(const RenderContext& other)            = delete;
+        RenderContext(RenderContext&& other)                 = delete;
+        RenderContext& operator=(const RenderContext& other) = delete;
+        RenderContext& operator=(RenderContext&& other)      = delete;
 
         // clang-format off
         // D3D objects
         [[nodiscard]] ID3D11Device* GetDevice() const { return _device.Get(); }
-        [[nodiscard]] ID3D11DeviceContext* GetContext() const { return _context.Get(); }
+        [[nodiscard]] ID3D11DeviceContext* GetDeviceContext() const { return _context.Get(); }
         [[nodiscard]] ID3D11Texture2D* GetBackBuffer() const { return _backBuffer.Get(); }
-        [[nodiscard]] ID3D11RenderTargetView* GetRTV() const { return _renderTargetView.Get(); }
-        [[nodiscard]] ID3D11DepthStencilState* GetDepthStencilState() const { return _depthStencilState.Get(); }
-        [[nodiscard]] ID3D11DepthStencilView* GetDSV() const { return _depthStencilView.Get(); }
 
         // Debug information / profiler
         [[nodiscard]] DeviceInfo GetDeviceInfo() const { return _deviceInfo; }
@@ -59,17 +51,16 @@ namespace x {
         // clang-format on
 
         void Initialize(HWND hwnd, int width, int height);
-        void BeginFrame();
-        void EndFrame();
+        void Present();
 
         void Draw(u32 vertexCount);
         void DrawIndexed(u32 indexCount);
 
-        void OnResize(u32 width, u32 height) override;
-
         friend class Mesh;
 
     private:
+        friend class RenderSystem;
+
         void ResizeSwapchainBuffers(u32 width, u32 height);
         void QueryDeviceInfo();
         void AddTriangleCountToFrame(u32 count);

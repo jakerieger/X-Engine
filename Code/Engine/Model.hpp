@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Common/Types.hpp"
-#include "Renderer.hpp"
+#include "RenderContext.hpp"
 #include "Mesh.hpp"
 
 namespace x {
@@ -29,11 +29,11 @@ namespace x {
         friend class GenericLoader;
 
     public:
-        explicit ModelData(Renderer& renderer) : _renderer(renderer) {}
+        explicit ModelData(RenderContext& renderer) : _renderer(renderer) {}
         bool Valid() const;
 
     private:
-        Renderer& _renderer;
+        RenderContext& _renderer;
         vector<unique_ptr<Mesh>> _meshes;
 
         void Draw();

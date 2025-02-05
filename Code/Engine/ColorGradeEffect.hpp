@@ -18,7 +18,7 @@ namespace x {
         f32 _exposureAdjustment = 0.0f;
 
     public:
-        explicit ColorGradeEffect(Renderer& renderer) : IComputeEffect(renderer) {}
+        explicit ColorGradeEffect(RenderContext& renderer) : IComputeEffect(renderer) {}
 
         bool Initialize() override;
 
@@ -31,4 +31,4 @@ namespace x {
         bool CreateResources() override;
         void UpdateConstants() override;
     };
-}  // namespace x
+} // namespace x

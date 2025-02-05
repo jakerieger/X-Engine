@@ -7,14 +7,15 @@
 #include "Shader.hpp"
 #include "Lights.hpp"
 #include "Material.hpp"
+#include "PostProcessSystem.hpp"
 #include "Volatile.hpp"
 #include "Common/Panic.hpp"
 
 namespace x {
-    class Renderer;
+    class RenderContext;
 
     class ShadowPass {
-        Renderer& _renderer;
+        RenderContext& _renderContext;
         VertexShader _vertexShader;
         PixelShader _pixelShader;
         ComPtr<ID3D11Buffer> _shadowParamsCB;
@@ -28,7 +29,7 @@ namespace x {
         };
 
     public:
-        explicit ShadowPass(Renderer& renderer);
+        explicit ShadowPass(RenderContext& context);
         void Initialize(u32 width, u32 height);
 
         void BeginPass();
@@ -38,7 +39,7 @@ namespace x {
     };
 
     class LightPass {
-        Renderer& _renderer;
+        RenderContext& _renderContext;
         ComPtr<ID3D11RenderTargetView> _renderTargetView;
         ComPtr<ID3D11DepthStencilView> _depthStencilView;
         ComPtr<ID3D11DepthStencilState> _depthStencilState;
@@ -46,7 +47,7 @@ namespace x {
         ComPtr<ID3D11Texture2D> _sceneTexture;
 
     public:
-        explicit LightPass(Renderer& renderer) : _renderer(renderer) {}
+        explicit LightPass(RenderContext& context) : _renderContext(context) {}
         void Initialize(u32 width, u32 height);
         void BeginPass(ID3D11ShaderResourceView* depthSRV);
         ID3D11ShaderResourceView* EndPass();
@@ -54,8 +55,11 @@ namespace x {
 
     class RenderSystem final : public Volatile {
     public:
-        explicit RenderSystem(Renderer& renderer);
+        explicit RenderSystem(RenderContext& context);
         void Initialize(u32 width, u32 height);
+
+        void BeginFrame();
+        void EndFrame();
 
         void BeginShadowPass();
         ID3D11ShaderResourceView* EndShadowPass();
@@ -63,14 +67,26 @@ namespace x {
         void BeginLightPass(ID3D11ShaderResourceView* depthSRV);
         ID3D11ShaderResourceView* EndLightPass();
 
-        void UpdateShadowPassParameters(const Matrix& lightViewProj, const Matrix& world);
+        void PostProcessPass(ID3D11ShaderResourceView* input);
 
         void OnResize(u32 width, u32 height) override;
 
     private:
+        friend class IGame;
+
+        RenderContext& _renderContext;
         ShadowPass _shadowPass;
         LightPass _lightPass;
+        PostProcessSystem _postProcess;
+
         u32 _width  = 0;
         u32 _height = 0;
+
+        ComPtr<ID3D11RenderTargetView> _renderTargetView;
+        ComPtr<ID3D11DepthStencilView> _depthStencilView;
+        ComPtr<ID3D11DepthStencilState> _depthStencilState;
+
+        void UpdateShadowPassParameters(const Matrix& lightViewProj, const Matrix& world);
+        void ResizeViews(u32 width, u32 height);
     };
 }

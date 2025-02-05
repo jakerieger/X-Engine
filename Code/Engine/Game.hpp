@@ -64,7 +64,7 @@ namespace x {
         std::unique_ptr<DebugUI> debugUI;
         vector<Volatile*> volatiles;
         DevConsole devConsole;
-        Renderer _renderer;
+        RenderContext _renderContext;
 
         void RegisterVolatile(Volatile* vol) {
             volatiles.push_back(vol);

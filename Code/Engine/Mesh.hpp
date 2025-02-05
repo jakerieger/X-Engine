@@ -7,11 +7,11 @@
 
 namespace x {
     class Mesh {
-        Renderer& _renderer;
+        RenderContext& _renderer;
         GeometryBuffer _geometryBuffers{};
 
     public:
-        Mesh(Renderer& renderer, const vector<VSInputPBR>& vertices, const vector<u32>& indices);
+        Mesh(RenderContext& renderer, const vector<VSInputPBR>& vertices, const vector<u32>& indices);
         void Draw();
     };
 }

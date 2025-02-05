@@ -1,5 +1,5 @@
 #include "PostProcessSystem.hpp"
-#include "Renderer.hpp"
+#include "RenderContext.hpp"
 
 #include <algorithm>
 
@@ -106,7 +106,7 @@ namespace x {
     }
 
     void PostProcessSystem::RenderToScreen(ID3D11ShaderResourceView* input, ID3D11RenderTargetView* output) {
-        auto* context = _renderer.GetContext();
+        auto* context = _renderer.GetDeviceContext();
         context->OMSetRenderTargets(1, &output, None);
 
         _fullscreenVS.Bind();

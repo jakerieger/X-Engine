@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer.hpp"
+#include "RenderContext.hpp"
 #include "D3D.hpp"
 
 namespace x {
@@ -12,7 +12,7 @@ namespace x {
         static inline ComPtr<ID3D11RasterizerState> CullFront;
         static inline ComPtr<ID3D11RasterizerState> ScissorTest;
 
-        static void SetupRasterizerStates(const Renderer& renderer) noexcept;
+        static void SetupRasterizerStates(const RenderContext& renderer) noexcept;
 
     private:
         RasterizerStates() = default;

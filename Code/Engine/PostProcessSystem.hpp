@@ -6,7 +6,7 @@
 #include "Volatile.hpp"
 
 namespace x {
-    class Renderer;
+    class RenderContext;
 
     struct RenderTarget {
         ComPtr<ID3D11Texture2D> texture;
@@ -21,7 +21,7 @@ namespace x {
     };
 
     class PostProcessSystem final : public Volatile {
-        Renderer& _renderer;
+        RenderContext& _renderer;
         VertexShader _fullscreenVS;
         PixelShader _fullscreenPS;
         u32 _width  = 0;
@@ -33,8 +33,8 @@ namespace x {
         void RenderToScreen(ID3D11ShaderResourceView* input, ID3D11RenderTargetView* output);
 
     public:
-        explicit PostProcessSystem(Renderer& renderer) : _renderer(renderer), _fullscreenVS(renderer),
-                                                         _fullscreenPS(renderer) {}
+        explicit PostProcessSystem(RenderContext& renderer) : _renderer(renderer), _fullscreenVS(renderer),
+                                                              _fullscreenPS(renderer) {}
 
         bool Initialize(u32 width, u32 height);
         void OnResize(u32 width, u32 height) override;

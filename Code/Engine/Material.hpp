@@ -18,7 +18,7 @@ namespace x {
     };
 
     class PBRMaterial {
-        Renderer& _renderer;
+        RenderContext& _renderer;
         ComPtr<ID3D11Buffer> _transformsCB;
         ComPtr<ID3D11Buffer> _lightsCB;
         ComPtr<ID3D11Buffer> _materialCB;
@@ -40,7 +40,7 @@ namespace x {
         } _materialProperties;
 
     public:
-        explicit PBRMaterial(Renderer& renderer);
+        explicit PBRMaterial(RenderContext& renderer);
         void Apply();
         void Clear();
 
@@ -63,7 +63,7 @@ namespace x {
                            const LightState& lights,
                            const Float3& eyePosition);
 
-        static shared_ptr<PBRMaterial> Create(Renderer& renderer);
+        static shared_ptr<PBRMaterial> Create(RenderContext& renderer);
 
     private:
         void CreateBuffers();

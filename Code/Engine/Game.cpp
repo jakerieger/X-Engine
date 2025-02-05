@@ -1,5 +1,5 @@
 #include "Game.hpp"
-#include "Renderer.hpp"
+#include "RenderContext.hpp"
 
 #include <Vendor/imgui/imgui.h>
 #include <stdexcept>
@@ -12,7 +12,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 namespace x {
     IGame::IGame(const HINSTANCE instance, str title, const u32 width, const u32 height)
         : _instance(instance), _hwnd(None), _currentWidth(width), _currentHeight(height), _title(std::move(title)),
-          _state(), _renderer() {}
+          _state(), _renderContext() {}
 
     IGame::~IGame() {
         if (_consoleEnabled) { FreeConsole(); }
@@ -47,10 +47,10 @@ namespace x {
                 }
 
                 // Continue rendering whether we're paused or not
-                _renderer.BeginFrame();
+                _renderSystem->BeginFrame();
                 {
                     // Do our depth-only shadow pass first
-                    ID3D11ShaderResourceView* depthSRV = None;
+                    ID3D11ShaderResourceView* depthSRV;
                     {
                         ScopedTimer timer("ShadowPass");
                         _renderSystem->BeginShadowPass();
@@ -59,23 +59,28 @@ namespace x {
                     }
 
                     // Do our fully lit pass using our previous depth-only pass as input for our shadow mapping shader
+                    ID3D11ShaderResourceView* sceneSRV;
                     {
                         ScopedTimer timer("LightPass");
                         _renderSystem->BeginLightPass(depthSRV);
                         RenderScene();
-                        auto sceneLitSRV = _renderSystem->EndLightPass();
+                        sceneSRV = _renderSystem->EndLightPass();
                     }
 
                     // We can now pass our fully lit scene texture to the post processing pipeline to be processed and displayed on screen
+                    {
+                        ScopedTimer timer("PostProcessPass");
+                        _renderSystem->PostProcessPass(sceneSRV);
+                    }
                 }
-                _renderer.EndFrame();
+                _renderSystem->EndFrame();
 
                 continue; // Skip rendering debug ui for now
 
                 // Draw debug UI last (on top of everything else)
                 if (_debugUIEnabled) {
                     debugUI->BeginFrame(); // begin ImGui frame
-                    debugUI->Draw(_renderer, _clock); // draw built-in debug ui
+                    debugUI->Draw(_renderContext, _clock); // draw built-in debug ui
                     DrawDebugUI(); // draw user-defined debug ui
                     devConsole.Draw(); // draw developer console last so it overlaps correctly
                     debugUI->EndFrame(); // end imgui frame
@@ -161,16 +166,15 @@ namespace x {
         ShowWindow(_hwnd, SW_SHOWDEFAULT);
         UpdateWindow(_hwnd);
 
-        _renderer.Initialize(_hwnd, _currentWidth, _currentHeight);
-        _renderSystem = make_unique<RenderSystem>(_renderer);
+        _renderContext.Initialize(_hwnd, _currentWidth, _currentHeight);
+        _renderSystem = make_unique<RenderSystem>(_renderContext);
         _renderSystem->Initialize(_currentWidth, _currentHeight);
 
         // Tell the engine that these classes need to handle resizing when the window size changes
-        RegisterVolatile(&_renderer);
         RegisterVolatile(_renderSystem.get());
         RegisterVolatile(&_state.GetMainCamera());
 
-        if (_debugUIEnabled) { debugUI = make_unique<DebugUI>(_hwnd, _renderer); }
+        if (_debugUIEnabled) { debugUI = make_unique<DebugUI>(_hwnd, _renderContext); }
 
         devConsole.RegisterCommand("quit", [this](auto) { Quit(); });
 

@@ -20,13 +20,14 @@ namespace x {
 
     void TonemapEffect::UpdateConstants() {
         D3D11_MAPPED_SUBRESOURCE mapped;
-        if (SUCCEEDED(_renderer.GetContext()->Map(_constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped))) {
+        if (SUCCEEDED(
+            _renderer.GetDeviceContext()->Map(_constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped))) {
             auto* params = CAST<TonemapParams*>(mapped.pData);
 
             params->exposure = _exposure;
             params->op       = CAST<u32>(_op);
 
-            _renderer.GetContext()->Unmap(_constantBuffer.Get(), 0);
+            _renderer.GetDeviceContext()->Unmap(_constantBuffer.Get(), 0);
         }
     }
 }

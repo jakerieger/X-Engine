@@ -166,7 +166,7 @@
     <ClCompile Include="..\Code\Engine\ModelComponent.cpp" />
     <ClCompile Include="..\Code\Engine\PostProcessSystem.cpp" />
     <ClCompile Include="..\Code\Engine\RasterizerState.cpp" />
-    <ClCompile Include="..\Code\Engine\Renderer.cpp" />
+    <ClCompile Include="..\Code\Engine\RenderContext.cpp" />
     <ClCompile Include="..\Code\Engine\RenderSystem.cpp" />
     <ClCompile Include="..\Code\Engine\Shader.cpp" />
     <ClCompile Include="..\Code\Engine\Texture.cpp" />
@@ -208,7 +208,7 @@
     <ClInclude Include="..\Code\Engine\Platform.hpp" />
     <ClInclude Include="..\Code\Engine\PostProcessSystem.hpp" />
     <ClInclude Include="..\Code\Engine\RasterizerState.hpp" />
-    <ClInclude Include="..\Code\Engine\Renderer.hpp" />
+    <ClInclude Include="..\Code\Engine\RenderContext.hpp" />
     <ClInclude Include="..\Code\Engine\RenderSystem.hpp" />
     <ClInclude Include="..\Code\Engine\Resource.hpp" />
     <ClInclude Include="..\Code\Engine\Shader.hpp" />

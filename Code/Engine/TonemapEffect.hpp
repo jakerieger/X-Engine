@@ -21,7 +21,7 @@ namespace x {
         TonemapOperator _op = TonemapOperator::ACES;
 
     public:
-        explicit TonemapEffect(Renderer& renderer)
+        explicit TonemapEffect(RenderContext& renderer)
             : IComputeEffect(renderer) {}
 
         bool Initialize() override;

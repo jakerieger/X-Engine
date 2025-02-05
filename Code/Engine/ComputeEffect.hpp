@@ -2,13 +2,13 @@
 
 #include "Common/Types.hpp"
 #include "D3D.hpp"
-#include "Renderer.hpp"
+#include "RenderContext.hpp"
 #include "Shader.hpp"
 
 namespace x {
     class IComputeEffect {
     public:
-        explicit IComputeEffect(Renderer& renderer) : _renderer(renderer), _computeShader(renderer) {}
+        explicit IComputeEffect(RenderContext& renderer) : _renderer(renderer), _computeShader(renderer) {}
         virtual ~IComputeEffect() = default;
 
         virtual bool Initialize() = 0;
@@ -16,7 +16,7 @@ namespace x {
         virtual void Execute(ID3D11ShaderResourceView* input, ID3D11UnorderedAccessView* output) {
             _computeShader.Bind();
 
-            auto* context = _renderer.GetContext();
+            auto* context = _renderer.GetDeviceContext();
             context->CSSetShaderResources(0, 1, &input);
             context->CSSetUnorderedAccessViews(0, 1, &output, None);
 
@@ -42,7 +42,7 @@ namespace x {
         void SetEnabled(const bool enabled) { _enabled = enabled; }
 
     protected:
-        Renderer& _renderer;
+        RenderContext& _renderer;
         ComputeShader _computeShader;
         ComPtr<ID3D11Buffer> _constantBuffer;
         bool _enabled = true;

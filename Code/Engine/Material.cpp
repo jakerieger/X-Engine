@@ -1,8 +1,8 @@
 #include "Material.hpp"
-#include "Renderer.hpp"
+#include "RenderContext.hpp"
 
 namespace x {
-    PBRMaterial::PBRMaterial(Renderer& renderer) : _renderer(renderer) {
+    PBRMaterial::PBRMaterial(RenderContext& renderer) : _renderer(renderer) {
         _vertexShader = make_unique<VertexShader>(renderer);
         _pixelShader  = make_unique<PixelShader>(renderer);
 
@@ -24,7 +24,7 @@ namespace x {
         // ReSharper restore CppCStyleCast
         // Ambient Occlusion map is bound to slot 3
 
-        auto* context = _renderer.GetContext();
+        auto* context = _renderer.GetDeviceContext();
         context->VSSetConstantBuffers(0, 1, _transformsCB.GetAddressOf());
         context->PSSetConstantBuffers(1, 1, _lightsCB.GetAddressOf());
         context->PSSetConstantBuffers(2, 1, _materialCB.GetAddressOf());
@@ -87,7 +87,7 @@ namespace x {
         SetNormalMap(normal);
     }
 
-    shared_ptr<PBRMaterial> PBRMaterial::Create(Renderer& renderer) {
+    shared_ptr<PBRMaterial> PBRMaterial::Create(RenderContext& renderer) {
         return make_shared<PBRMaterial>(renderer);
     }
 
@@ -140,7 +140,7 @@ namespace x {
     void PBRMaterial::UpdateBuffers(const TransformMatrices& transforms,
                                     const LightState& lights,
                                     const Float3& eyePosition) {
-        auto* context = _renderer.GetContext();
+        auto* context = _renderer.GetDeviceContext();
 
         // Update transform buffer
         D3D11_MAPPED_SUBRESOURCE mapped;

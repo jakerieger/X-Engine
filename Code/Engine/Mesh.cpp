@@ -1,7 +1,7 @@
 #include "Mesh.hpp"
 
 namespace x {
-    Mesh::Mesh(Renderer& renderer,
+    Mesh::Mesh(RenderContext& renderer,
                const vector<VSInputPBR>& vertices,
                const vector<u32>& indices): _renderer(renderer) {
         _geometryBuffers.Create(renderer,

@@ -5,7 +5,7 @@
 #include <DirectXTex.h>
 
 namespace x {
-    class Renderer;
+    class RenderContext;
     class Texture1D;
     class Texture2D;
     class Texture3D;
@@ -26,9 +26,9 @@ namespace x {
         ComPtr<ID3D11ShaderResourceView> _textureView;
         ComPtr<ID3D11Resource> _textureResource;
         ComPtr<ID3D11SamplerState> _samplerState;
-        Renderer& _renderer;
+        RenderContext& _renderer;
 
-        explicit Texture2D(Renderer& renderer) : _renderer(renderer) {}
+        explicit Texture2D(RenderContext& renderer) : _renderer(renderer) {}
 
     public:
         void Bind(u32 slot) const;
@@ -36,14 +36,14 @@ namespace x {
     };
 
     class TextureLoader {
-        Renderer& _renderer;
+        RenderContext& _renderer;
 
         TextureHandle<Texture2D> CreateTexture2D() {
             return TextureHandle<Texture2D>(new Texture2D(_renderer));
         }
 
     public:
-        explicit TextureLoader(Renderer& renderer) : _renderer(renderer) {}
+        explicit TextureLoader(RenderContext& renderer) : _renderer(renderer) {}
 
         /// @brief Load a 2D texture from a .DDS file
         /// @param filename Path of .DDS texture file

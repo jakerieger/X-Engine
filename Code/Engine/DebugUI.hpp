@@ -5,19 +5,19 @@
 #include "Vendor/imgui/imgui.h"
 #include "Vendor/imgui/backends/imgui_impl_win32.h"
 #include "Vendor/imgui/backends/imgui_impl_dx11.h"
-#include "Renderer.hpp"
+#include "RenderContext.hpp"
 #include <JetBrainsMono.h>
 
 namespace x {
     class DebugUI {
-        Renderer& _renderer;
+        RenderContext& _renderer;
         bool _showFrameGraph = false;
         bool _showDeviceInfo = false;
         bool _showFrameInfo  = true;
         ImFont* _font        = None;
 
     public:
-        explicit DebugUI(const HWND hwnd, Renderer& renderer) : _renderer(renderer) {
+        explicit DebugUI(const HWND hwnd, RenderContext& renderer) : _renderer(renderer) {
             Initialize(hwnd);
         }
 
@@ -49,7 +49,7 @@ namespace x {
         }
 
         /// Make sure to call this between BeginFrame() and EndFrame()
-        void Draw(const Renderer& renderer, const Clock& clock) {
+        void Draw(const RenderContext& renderer, const Clock& clock) {
             if (_showFrameGraph) { DrawFrameGraph(clock); }
             if (_showDeviceInfo) { DrawDeviceInfo(renderer.GetDeviceInfo()); }
             if (_showFrameInfo) { DrawFrameInfo(clock, renderer.GetFrameInfo()); }
@@ -69,7 +69,7 @@ namespace x {
 
             ImGui::StyleColorsDark();
             ImGui_ImplWin32_Init(hwnd);
-            ImGui_ImplDX11_Init(_renderer.GetDevice(), _renderer.GetContext());
+            ImGui_ImplDX11_Init(_renderer.GetDevice(), _renderer.GetDeviceContext());
         }
 
         void Shutdown() {

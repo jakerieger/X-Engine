@@ -1,5 +1,5 @@
 #include "Texture.hpp"
-#include "Renderer.hpp"
+#include "RenderContext.hpp"
 #include "Common/Str.hpp"
 
 namespace x {
@@ -66,14 +66,14 @@ namespace x {
     }
 
     void Texture2D::Bind(const u32 slot) const {
-        _renderer.GetContext()->PSSetShaderResources(slot, 1, _textureView.GetAddressOf());
-        _renderer.GetContext()->PSSetSamplers(slot, 1, _samplerState.GetAddressOf());
+        _renderer.GetDeviceContext()->PSSetShaderResources(slot, 1, _textureView.GetAddressOf());
+        _renderer.GetDeviceContext()->PSSetSamplers(slot, 1, _samplerState.GetAddressOf());
     }
 
     void Texture2D::Unbind(const u32 slot) const {
         ID3D11ShaderResourceView* nullSRV = None;
         ID3D11SamplerState* nullSS        = None;
-        _renderer.GetContext()->PSSetShaderResources(slot, 1, &nullSRV);
-        _renderer.GetContext()->PSSetSamplers(slot, 1, &nullSS);
+        _renderer.GetDeviceContext()->PSSetShaderResources(slot, 1, &nullSRV);
+        _renderer.GetDeviceContext()->PSSetSamplers(slot, 1, &nullSS);
     }
 }

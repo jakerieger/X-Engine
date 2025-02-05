@@ -2,7 +2,7 @@
 
 #include "Common/Types.hpp"
 #include "D3D.hpp"
-#include "Renderer.hpp"
+#include "RenderContext.hpp"
 
 namespace x {
     class GeometryBuffer {
@@ -16,7 +16,7 @@ namespace x {
     public:
         GeometryBuffer() = default;
 
-        void Create(const Renderer& renderer,
+        void Create(const RenderContext& renderer,
                     const void* vertexData,
                     size_t vertexStride,
                     size_t vertexCount,
@@ -49,8 +49,8 @@ namespace x {
             _vertexCount = vertexCount;
         }
 
-        void Bind(const Renderer& renderer) {
-            auto* context = renderer.GetContext();
+        void Bind(const RenderContext& renderer) {
+            auto* context = renderer.GetDeviceContext();
             context->IASetVertexBuffers(0, 1, _vertexBuffer.GetAddressOf(), &_stride, &_offset);
             context->IASetIndexBuffer(_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
             context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
