@@ -40,7 +40,6 @@ class SpaceGame final : public IGame {
     unique_ptr<RenderSystem> _renderSystem;
 
     EntityId _monkeEntity;
-
     EntityId _floorEntity;
 
 public:
