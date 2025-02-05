@@ -2,7 +2,7 @@
 
 namespace x {
     #pragma region ModelHandle
-    void ModelHandle::Draw() {
+    void ModelHandle::Draw() const {
         if (_modelData) {
             _modelData->Draw();
         }
@@ -10,6 +10,10 @@ namespace x {
 
     bool ModelHandle::Valid() const {
         return _modelData && _modelData->Valid();
+    }
+
+    size_t ModelHandle::NumMeshes() const {
+        return _modelData->_meshes.size();
     }
     #pragma endregion
 

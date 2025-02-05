@@ -3,7 +3,6 @@
 #include "Common/Types.hpp"
 #include "Renderer.hpp"
 #include "Mesh.hpp"
-#include "Resource.hpp"
 
 namespace x {
     class ModelData;
@@ -15,8 +14,9 @@ namespace x {
     public:
         ModelHandle() = default;
 
-        void Draw();
-        [[nodiscard]] bool Valid() const;
+        void Draw() const;
+        bool Valid() const;
+        size_t NumMeshes() const;
 
         void SetModelData(const shared_ptr<ModelData>& modelData) {
             _modelData = modelData;
@@ -30,7 +30,7 @@ namespace x {
 
     public:
         explicit ModelData(Renderer& renderer) : _renderer(renderer) {}
-        [[nodiscard]] bool Valid() const;
+        bool Valid() const;
 
     private:
         Renderer& _renderer;

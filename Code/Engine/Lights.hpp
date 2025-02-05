@@ -94,9 +94,4 @@ namespace x {
 
         return lightView * lightProj;
     }
-
-    inline Matrix DirectionalLightViewProjection(const DirectionalLight& light, const Camera& camera) {
-        const auto sceneRadius = camera.GetSceneRadius();
-        return CalculateLightViewProjection(light, 16.0f, 9.0f);
-    }
 } // namespace x

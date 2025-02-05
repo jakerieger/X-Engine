@@ -28,9 +28,6 @@
     <ClCompile Include="..\Code\Vendor\imgui\backends\imgui_impl_win32.cpp">
       <Filter>Vendor\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="..\Code\Engine\TransformComponent.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="..\Code\Engine\Material.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -78,6 +75,12 @@
     </ClCompile>
     <ClCompile Include="..\Code\Engine\RenderPass.cpp">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Code\Engine\ModelComponent.cpp">
+      <Filter>Source\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Code\Engine\TransformComponent.cpp">
+      <Filter>Source\Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -136,9 +139,6 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Code\Engine\Resource.hpp">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Code\Engine\TransformComponent.hpp">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Code\Engine\TransformMatrices.hpp">
@@ -474,6 +474,12 @@
     <ClInclude Include="..\Code\Engine\RenderPass.hpp">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="..\Code\Engine\ModelComponent.hpp">
+      <Filter>Source\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\TransformComponent.hpp">
+      <Filter>Source\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Configuration">
@@ -505,6 +511,9 @@
     </Filter>
     <Filter Include="Source\PostProcessing">
       <UniqueIdentifier>{f240dd6b-0ca8-478c-98ab-a48c626ebfb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Components">
+      <UniqueIdentifier>{1ea51b91-db66-4830-888d-dc7a38a49efd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

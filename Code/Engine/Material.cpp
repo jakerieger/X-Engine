@@ -12,11 +12,7 @@ namespace x {
         CreateBuffers();
     }
 
-    void PBRMaterial::Apply(const TransformMatrices& transformMatrices,
-                            const LightState& lightState,
-                            const Float3& cameraPos) {
-        UpdateBuffers(transformMatrices, lightState, cameraPos);
-
+    void PBRMaterial::Apply() {
         _vertexShader->Bind();
         _pixelShader->Bind();
 
@@ -141,22 +137,22 @@ namespace x {
         PANIC_IF_FAILED(hr, "Failed to create camera constant buffer.")
     }
 
-    void PBRMaterial::UpdateBuffers(const TransformMatrices& transformMatrices,
-                                    const LightState& lightState,
-                                    const Float3& cameraPos) {
+    void PBRMaterial::UpdateBuffers(const TransformMatrices& transforms,
+                                    const LightState& lights,
+                                    const Float3& eyePosition) {
         auto* context = _renderer.GetContext();
 
         // Update transform buffer
         D3D11_MAPPED_SUBRESOURCE mapped;
         auto hr = context->Map(_transformsCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
         PANIC_IF_FAILED(hr, "Failed to map transforms buffer.")
-        memcpy(mapped.pData, &transformMatrices, sizeof(transformMatrices));
+        memcpy(mapped.pData, &transforms, sizeof(transforms));
         context->Unmap(_transformsCB.Get(), 0);
 
         // Update light state buffer
         hr = context->Map(_lightsCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
         PANIC_IF_FAILED(hr, "Failed to map lights buffer.")
-        memcpy(mapped.pData, &lightState, sizeof(lightState));
+        memcpy(mapped.pData, &lights, sizeof(lights));
         context->Unmap(_lightsCB.Get(), 0);
 
         // Update material properties buffer
@@ -168,7 +164,7 @@ namespace x {
         // Camera buffer
         hr = context->Map(_cameraCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
         PANIC_IF_FAILED(hr, "Failed to map camera buffer.")
-        Float4 paddedPos = Float4(cameraPos.x, cameraPos.y, cameraPos.z, 0.0f);
+        Float4 paddedPos = Float4(eyePosition.x, eyePosition.y, eyePosition.z, 0.0f);
         memcpy(mapped.pData, &paddedPos, sizeof(paddedPos));
         context->Unmap(_cameraCB.Get(), 0);
     }

@@ -41,7 +41,7 @@ namespace x {
 
     public:
         explicit PBRMaterial(Renderer& renderer);
-        void Apply(const TransformMatrices& transformMatrices, const LightState& lightState, const Float3& cameraPos);
+        void Apply();
         void Clear();
 
         void SetAlbedo(const Float3& albedo);
@@ -59,12 +59,13 @@ namespace x {
                             const TextureHandle<Texture2D>& roughness,
                             const TextureHandle<Texture2D>& normal);
 
+        void UpdateBuffers(const TransformMatrices& transforms,
+                           const LightState& lights,
+                           const Float3& eyePosition);
+
         static shared_ptr<PBRMaterial> Create(Renderer& renderer);
 
     private:
         void CreateBuffers();
-        void UpdateBuffers(const TransformMatrices& transformMatrices,
-                           const LightState& lightState,
-                           const Float3& cameraPos);
     };
 }

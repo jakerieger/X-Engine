@@ -200,8 +200,8 @@ namespace x {
 
     void Renderer::BeginScenePass(const f32 clearColor[4]) {
         _context->OMSetRenderTargets(1, _sceneRTV.GetAddressOf(), _depthStencilView.Get());
-        // _context->ClearRenderTargetView(_sceneRTV.Get(), clearColor);
-        // _context->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+        _context->ClearRenderTargetView(_sceneRTV.Get(), clearColor);
+        _context->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
         _frameInfo.drawCallsPerFrame = 0; // reset frame draw call count
         _frameInfo.numTriangles      = 0;

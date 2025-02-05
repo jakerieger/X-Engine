@@ -3,6 +3,7 @@
 #include "Common/Types.hpp"
 #include "GeometryBuffer.hpp"
 #include "InputLayouts.hpp"
+#include "Material.hpp"
 
 namespace x {
     class Mesh {
@@ -10,21 +11,7 @@ namespace x {
         GeometryBuffer _geometryBuffers{};
 
     public:
-        Mesh(Renderer& renderer, const vector<VSInputPBR>& vertices, const vector<u32>& indices)
-            : _renderer(renderer) {
-            _geometryBuffers.Create(renderer,
-                                    vertices.data(),
-                                    sizeof(VSInputPBR),
-                                    vertices.size(),
-                                    indices.data(),
-                                    indices.size());
-        }
-
-        void Draw() {
-            const auto indexCount = _geometryBuffers.GetIndexCount();
-            _geometryBuffers.Bind(_renderer);
-            _renderer.AddTriangleCountToFrame(indexCount / 3); // for debug purposes
-            _renderer.DrawIndexed(indexCount);
-        }
+        Mesh(Renderer& renderer, const vector<VSInputPBR>& vertices, const vector<u32>& indices);
+        void Draw();
     };
 }

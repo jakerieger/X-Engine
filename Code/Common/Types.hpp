@@ -26,22 +26,22 @@ namespace x {
     using i64  = int64_t;
     using iptr = intptr_t;
 
-#if defined(__GNUC__) || defined(__clang__)
+    #if defined(__GNUC__) || defined(__clang__)
     using u128 = __uint128_t;
     using i128 = __int128_t;
-#endif
+    #endif
 
-    using f32                      = float;
-    using f64                      = double;
+    using f32 = float;
+    using f64 = double;
 
-    using cstr                     = const char*;
-    using str                      = std::string;
-    using wstr                     = std::wstring;
-    using sv                       = std::string_view;
+    using cstr = const char*;
+    using str  = std::string;
+    using wstr = std::wstring;
+    using sv   = std::string_view;
 
-    constexpr auto None            = nullptr;
-    constexpr std::nullopt_t Empty = std::nullopt;
-    constexpr std::_Ignore _i_     = std::ignore;
+    inline constexpr auto None            = nullptr;
+    inline constexpr std::nullopt_t Empty = std::nullopt;
+    inline constexpr std::_Ignore _i_     = std::ignore;
 
     // Most used STL objects included for convenience
     using std::array;
@@ -53,11 +53,18 @@ namespace x {
     using std::vector;
     using std::weak_ptr;
 
-#define CAST static_cast
-#define CCAST const_cast
-#define DCAST dynamic_cast
-#define RCAST reinterpret_cast
-}  // namespace x
+    // Static assert and concept aliases
+    template<class A, class B>
+    inline constexpr bool Same = std::is_same_v<A, B>;
+
+    template<class B, class D>
+    inline constexpr bool BaseOf = std::is_base_of_v<B, D>;
+
+    #define CAST static_cast
+    #define CCAST const_cast
+    #define DCAST dynamic_cast
+    #define RCAST reinterpret_cast
+} // namespace x
 
 constexpr auto HLSL_TRUE  = 1U;
 constexpr auto HLSL_FALSE = 0U;

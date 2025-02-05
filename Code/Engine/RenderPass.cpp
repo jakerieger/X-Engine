@@ -2,6 +2,53 @@
 #include "Renderer.hpp"
 
 namespace x {
+    #pragma region RenderSystem
+    RenderSystem::RenderSystem(Renderer& renderer) : _shadowPass(renderer), _lightingPass(renderer) {}
+
+    void RenderSystem::Initialize(u32 width, u32 height) {
+        OnResize(width, height);
+
+        _shadowPass.Initialize(width, height);
+        _lightingPass.Initialize(width, height);
+    }
+
+    void RenderSystem::DrawShadowPass() {
+        _shadowPass.Draw();
+    }
+
+    void RenderSystem::DrawLightingPass() {
+        _lightingPass.Draw(_shadowPass.GetDepthSRV());
+    }
+
+    void RenderSystem::UpdateShadowParams(const LightState& lights) {
+        const Matrix lvp   = XMMatrixTranspose(CalculateLightViewProjection(lights.Sun, 16.0f, 9.0f));
+        const Matrix world = XMMatrixTranspose(XMMatrixScaling(1, 1, 1));
+
+        const ShadowPassState state = {.lightViewProj = lvp, .world = world};
+        _shadowPass.UpdateState(state);
+    }
+
+    void RenderSystem::UpdateLightingParams() {}
+
+    void RenderSystem::RegisterOccluder(const ModelHandle& occluder) {
+        _shadowPass.AddOccluder(occluder);
+    }
+
+    void RenderSystem::RegisterOpaqueObject(const ModelHandle& object) {
+        _lightingPass.AddOpaqueObject(object);
+    }
+
+    void RenderSystem::RegisterTransparentObject(const ModelHandle& object) {
+        _lightingPass.AddTransparentObject(object);
+    }
+
+    void RenderSystem::OnResize(u32 width, u32 height) {
+        _width  = width;
+        _height = height;
+    }
+    #pragma endregion
+
+    #pragma region ShadowPass
     ShadowPass::ShadowPass(Renderer& renderer): _renderer(renderer), _vertexShader(renderer),
                                                 _pixelShader(renderer) {}
 
@@ -71,13 +118,13 @@ namespace x {
         }
     }
 
-    void ShadowPass::UpdateParams(const Matrix& lightViewProj, const Matrix& world) {
+    void ShadowPass::UpdateState(const ShadowPassState& state) {
         D3D11_MAPPED_SUBRESOURCE mapped;
         const auto hr = _renderer.GetContext()->Map(_shadowParamsCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
         if (SUCCEEDED(hr)) {
             auto* params          = CAST<ShadowMapParams*>(mapped.pData);
-            params->lightViewProj = lightViewProj;
-            params->world         = world;
+            params->lightViewProj = state.lightViewProj;
+            params->world         = state.world;
 
             _renderer.GetContext()->Unmap(_shadowParamsCB.Get(), 0);
         }
@@ -86,4 +133,37 @@ namespace x {
     void ShadowPass::AddOccluder(const ModelHandle& occluder) {
         _occluders.push_back(occluder);
     }
+    #pragma endregion
+
+    #pragma region LightingPass
+    void LightingPass::Initialize(u32 width, u32 height) {}
+
+    void LightingPass::Draw(ID3D11ShaderResourceView* depthSRV) {
+        _renderer.GetContext()->OMSetRenderTargets(1, _renderTargetView.GetAddressOf(), _depthStencilView.Get());
+        _renderer.GetContext()->OMSetDepthStencilState(_depthStencilState.Get(), 0);
+
+        _renderer.GetContext()->ClearRenderTargetView(_renderTargetView.Get(), Colors::Black);
+        _renderer.GetContext()->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+        // Iterate over opaque meshes first
+        for (auto& object : _opaqueObjects) {
+            // TODO: This method needs to apply the material in this pass
+            object.Draw();
+        }
+
+        for (auto& object : _transparentObjects) {
+            object.Draw();
+        }
+    }
+
+    void LightingPass::UpdateState(const LightingPassState& state) {}
+
+    void LightingPass::AddOpaqueObject(const ModelHandle& object) {
+        _opaqueObjects.push_back(object);
+    }
+
+    void LightingPass::AddTransparentObject(const ModelHandle& object) {
+        _transparentObjects.push_back(object);
+    }
+    #pragma endregion
 }

@@ -7,13 +7,15 @@
 #include "Common/Types.hpp"
 #include "EntityId.hpp"
 #include "ComponentManager.hpp"
-#include "TransformComponent.hpp"
 #include "Lights.hpp"
 #include "Camera.hpp"
 
+#include "TransformComponent.hpp"
+#include "ModelComponent.hpp"
+
 namespace x {
     template<typename T>
-    concept IsValidComponent = std::is_same_v<T, TransformComponent>;
+    concept IsValidComponent = Same<T, TransformComponent> || Same<T, ModelComponent>;
 
     class GameState {
     public:
@@ -30,9 +32,15 @@ namespace x {
 
         [[nodiscard]] GameState Clone() const {
             GameState newState;
-            newState._nextId     = _nextId;
-            newState._transforms = _transforms;
+
+            newState._nextId = _nextId;
+
             newState._lightState = _lightState;
+            newState._mainCamera = _mainCamera;
+
+            newState._transforms = _transforms;
+            newState._models     = _models;
+
             return newState;
         }
 
@@ -43,8 +51,12 @@ namespace x {
         template<typename T>
             requires IsValidComponent<T>
         const T* GetComponent(EntityId entity) const {
-            if constexpr (std::is_same_v<T, TransformComponent>) {
+            if constexpr (Same<T, TransformComponent>) {
                 return _transforms.GetComponent(entity);
+            }
+
+            if constexpr (Same<T, ModelComponent>) {
+                return _models.GetComponent(entity);
             }
 
             return None;
@@ -53,8 +65,12 @@ namespace x {
         template<typename T>
             requires IsValidComponent<T>
         T* GetComponentMutable(EntityId entity) {
-            if constexpr (std::is_same_v<T, TransformComponent>) {
+            if constexpr (Same<T, TransformComponent>) {
                 return _transforms.GetComponentMutable(entity);
+            }
+
+            if constexpr (Same<T, ModelComponent>) {
+                return _models.GetComponentMutable(entity);
             }
 
             return None;
@@ -63,21 +79,27 @@ namespace x {
         template<typename T>
             requires IsValidComponent<T>
         T& AddComponent(EntityId entity) {
-            if constexpr (std::is_same_v<T, TransformComponent>) {
+            if constexpr (Same<T, TransformComponent>) {
                 return _transforms.AddComponent(entity).component;
+            }
+
+            if constexpr (Same<T, ModelComponent>) {
+                return _models.AddComponent(entity).component;
             }
         }
 
         template<typename T>
             requires IsValidComponent<T>
         const ComponentManager<T>& GetComponents() const {
-            if constexpr (std::is_same_v<T, TransformComponent>) { return _transforms; }
+            if constexpr (Same<T, TransformComponent>) { return _transforms; }
+            if constexpr (Same<T, ModelComponent>) { return _models; }
         }
 
         template<typename T>
             requires IsValidComponent<T>
         ComponentManager<T>& GetComponents() {
-            if constexpr (std::is_same_v<T, TransformComponent>) { return _transforms; }
+            if constexpr (Same<T, TransformComponent>) { return _transforms; }
+            if constexpr (Same<T, ModelComponent>) { return _models; }
         }
 
         LightState& GetLightState() {
@@ -105,6 +127,7 @@ namespace x {
 
         // Component managers
         ComponentManager<TransformComponent> _transforms;
+        ComponentManager<ModelComponent> _models;
 
         template<typename T>
         void ReleaseComponentResources() {
