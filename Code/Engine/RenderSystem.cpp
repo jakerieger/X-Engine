@@ -1,5 +1,6 @@
 #include "RenderSystem.hpp"
 #include "RenderContext.hpp"
+#include "TonemapEffect.hpp"
 
 namespace x {
     #pragma region RenderSystem
@@ -15,6 +16,8 @@ namespace x {
         _shadowPass.Initialize(width, height);
         _lightPass.Initialize(width, height);
         _postProcess.Initialize(width, height);
+
+        _postProcess.AddEffect<TonemapEffect>()->SetOperator(TonemapOperator::ACES);
     }
 
     void RenderSystem::BeginFrame() {
