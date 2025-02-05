@@ -134,9 +134,18 @@ public:
         auto view = state.GetMainCamera().GetViewMatrix();
         auto proj = state.GetMainCamera().GetProjectionMatrix();
 
+        // Update transform components
+        std::unordered_map<EntityId, TransformComponent*> entitiesWithTransform;
+        for (auto [entity, transform] : state.GetComponents<TransformComponent>().GetMutable()) {
+            transform.Update();
+            entitiesWithTransform[entity] = &transform;
+        }
+
         // Iterate entities and update model material params
         for (auto [entity, model] : state.GetComponents<ModelComponent>().GetMutable()) {
-            const auto transform = state.GetComponent<TransformComponent>(entity);
+            TransformComponent* transform = None;
+            if (entitiesWithTransform.contains(entity)) { transform = entitiesWithTransform[entity]; }
+
             if (transform) {
                 model.UpdateMaterialParams({transform->GetTransformMatrix(), view, proj},
                                            state.GetLightState(),
