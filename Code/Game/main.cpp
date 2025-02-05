@@ -36,7 +36,9 @@ class SpaceGame final : public IGame {
     TonemapOperator _tonemapOp    = TonemapOperator::ACES;
     f32 _tonemapExposure          = 1.0f;
     bool _showPostProcessUI       = false;
+
     unique_ptr<ShadowPass> _shadowPass;
+    unique_ptr<LightingPass> _lightingPass;
 
 public:
     explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {
@@ -47,6 +49,9 @@ public:
     void LoadContent(GameState& state) override {
         _shadowPass = make_unique<ShadowPass>(renderer);
         _shadowPass->Initialize(GetWidth(), GetHeight());
+
+        _lightingPass = make_unique<LightingPass>(renderer);
+        _lightingPass->Initialize(GetWidth(), GetHeight());
 
         devConsole.RegisterCommand("r_ShowPostProcess",
                                    [this](auto args) {
@@ -165,6 +170,9 @@ public:
         // _monkeMaterial->Apply(monkeMatrices, state.GetLightState(), state.GetMainCamera().GetPosition());
         // _monkeModel.Draw();
         // _monkeMaterial->Clear();
+
+        // TODO: I need a struct that contains the mesh data, material data, and transform matrices to pass to the lighting render pass.
+        _lightingPass->Draw(_shadowPass->GetDepthSRV());
     }
 
     void DrawDebugUI() override {

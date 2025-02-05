@@ -46,5 +46,8 @@ namespace x {
 
     public:
         LightingPass(Renderer& renderer) : _renderer(renderer) {}
+        void Initialize(u32 width, u32 height);
+
+        void Draw(ID3D11ShaderResourceView* depthSRV);
     };
 }
