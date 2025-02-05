@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <thread>
 
+#include "Common/Timer.hpp"
+
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace x {
@@ -36,6 +38,7 @@ namespace x {
             } else {
                 // Only tick engine forward if we're not currently paused
                 if (!_isPaused) {
+                    ScopedTimer timer("Update()");
                     _clock.Tick();
                     Update(_state, _clock);
 
@@ -47,22 +50,27 @@ namespace x {
                 _renderer.BeginFrame();
                 {
                     // Do our depth-only shadow pass first
-                    _renderSystem->BeginShadowPass();
-                    RenderScene(true); // Disable material binding
-                    auto depthSRV = _renderSystem->EndShadowPass();
+                    ID3D11ShaderResourceView* depthSRV = None;
+                    {
+                        ScopedTimer timer("ShadowPass");
+                        _renderSystem->BeginShadowPass();
+                        RenderScene(true); // Disable material binding
+                        depthSRV = _renderSystem->EndShadowPass();
+                    }
 
                     // Do our fully lit pass using our previous depth-only pass as input for our shadow mapping shader
-                    _renderSystem->BeginLightPass(depthSRV);
-                    RenderScene();
-                    auto sceneLitSRV = _renderSystem->EndLightPass();
+                    {
+                        ScopedTimer timer("LightPass");
+                        _renderSystem->BeginLightPass(depthSRV);
+                        RenderScene();
+                        auto sceneLitSRV = _renderSystem->EndLightPass();
+                    }
 
                     // We can now pass our fully lit scene texture to the post processing pipeline to be processed and displayed on screen
                 }
                 _renderer.EndFrame();
 
-                continue;
-
-                // TODO: Pass `sceneOutput` to post process system for further processing
+                continue; // Skip rendering debug ui for now
 
                 // Draw debug UI last (on top of everything else)
                 if (_debugUIEnabled) {
