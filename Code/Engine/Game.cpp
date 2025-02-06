@@ -140,7 +140,7 @@ namespace x {
     // This should never modify game state (always iterate as const)
     void IGame::RenderScene() {
         for (const auto& [entity, model] : _state.GetComponents<ModelComponent>()) {
-            model.Draw();
+            model.Draw(true);
         }
     }
 

@@ -29,6 +29,10 @@ namespace x {
             return *this;
         }
 
+        shared_ptr<PBRMaterial> GetMaterialHandle() const {
+            return _materialHandle;
+        }
+
         void UpdateMaterialParams(const TransformMatrices& transforms,
                                   const LightState& lights,
                                   const Float3& eyePosition) {

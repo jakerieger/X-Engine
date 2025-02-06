@@ -15,6 +15,39 @@
 using namespace x; // engine namespace
 using namespace x::Filesystem;
 
+struct GridPosition {
+    Float3 position;
+    int row;
+    int column;
+};
+
+static vector<GridPosition> GenerateGrid(const int rows = 3,
+                                         const int cols = 3,
+                                         const f32 xMin = -5.0f,
+                                         const f32 xMax = 5.0f,
+                                         const f32 zMin = 0.0f,
+                                         const f32 zMax = 5.0f) {
+    f32 xStep = (xMax - xMin) / (CAST<f32>(cols) - 1);
+    f32 zStep = (zMax - zMin) / (CAST<f32>(rows) - 1);
+    vector<GridPosition> positions;
+    positions.reserve(rows * cols);
+
+    for (auto row = 0; row < rows; row++) {
+        for (auto col = 0; col < cols; col++) {
+            f32 x = xMin + (col * xStep);
+            f32 z = zMin + (row * zStep);
+
+            GridPosition pos;
+            pos.position = {x, 0.0f, z};
+            pos.row      = row;
+            pos.column   = col;
+            positions.push_back(pos);
+        }
+    }
+
+    return positions;
+}
+
 // TODO: Make this relative to the executable path, this is simply for testing (and because I'm lazy)
 static str ContentPath(const str& filename) {
     auto filePath    = Path(__FILE__).Parent();
@@ -36,11 +69,9 @@ class SpaceGame final : public IGame {
     f32 _tonemapExposure       = 1.0f;
     bool _showPostProcessUI    = false;
 
-    EntityId _monkeEntity;
-    EntityId _floorEntity;
-    f32 _rotY = 0.0f;
 
-    TransformComponent* _monkeTransform = None;
+    EntityId _floorEntity;
+    vector<EntityId> _monkeEntities;
 
 public:
     explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {}
@@ -56,10 +87,10 @@ public:
 
         _tonemap = GetPostProcess()->GetEffect<TonemapEffect>();
 
-        GenericLoader loader(_renderContext);
+        GenericLoader modelLoader(_renderContext);
         TextureLoader texLoader(_renderContext);
 
-        const auto floorData = loader.LoadFromFile(ContentPath("Floor.glb"));
+        const auto floorData = modelLoader.LoadFromFile(ContentPath("Floor.glb"));
 
         const auto floorAlbedo = texLoader.LoadFromFile2D(ContentPath("checkerboard.dds"));
         const auto floorNormal = texLoader.LoadFromFile2D(ContentPath("Gold_Normal.dds"));
@@ -71,27 +102,32 @@ public:
         auto& floorTransform = state.AddComponent<TransformComponent>(_floorEntity);
         auto& floorModel     = state.AddComponent<ModelComponent>(_floorEntity);
 
-        floorTransform.SetPosition({0.0f, -1.0f, 0.0f});
+        floorTransform.SetPosition({0.0f, -1.4f, 0.0f});
         floorModel.SetModelHandle(floorData)
                   .SetMaterialHandle(_floorMaterial)
                   .SetCastsShadows(true);
-
-        _monkeEntity         = state.CreateEntity();
-        auto& monkeTransform = state.AddComponent<TransformComponent>(_monkeEntity);
-        _monkeTransform      = &monkeTransform;
-        auto& monkeModel     = state.AddComponent<ModelComponent>(_monkeEntity);
-
-        const auto monkeData = loader.LoadFromFile(ContentPath("Monke.glb"));
 
         const auto monkeAlbedo    = texLoader.LoadFromFile2D(ContentPath("Metal_Albedo.dds"));
         const auto monkeNormal    = texLoader.LoadFromFile2D(ContentPath("Metal_Normal.dds"));
         const auto monkeMetallic  = texLoader.LoadFromFile2D(ContentPath("Metal_Metallic.dds"));
         const auto monkeRoughness = texLoader.LoadFromFile2D(ContentPath("Metal_Roughness.dds"));
-
-        _monkeMaterial = PBRMaterial::Create(_renderContext);
+        _monkeMaterial            = PBRMaterial::Create(_renderContext);
         _monkeMaterial->SetTextureMaps(monkeAlbedo, monkeMetallic, monkeRoughness, monkeNormal);
 
-        monkeModel.SetModelHandle(monkeData).SetMaterialHandle(_monkeMaterial).SetCastsShadows(true);
+        const auto monkeData     = modelLoader.LoadFromFile(ContentPath("Monke.glb"));
+        const auto gridPositions = GenerateGrid(3, 3, -3, 3, 0, 3);
+        for (size_t i = 0; i < gridPositions.size(); ++i) {
+            const auto monkeEntity = state.CreateEntity();
+            auto& transform        = state.AddComponent<TransformComponent>(monkeEntity);
+            auto& model            = state.AddComponent<ModelComponent>(monkeEntity);
+
+            model.SetModelHandle(monkeData);
+            model.SetMaterialHandle(_monkeMaterial);
+            model.SetCastsShadows(true);
+
+            transform.SetPosition(gridPositions[i].position);
+            _monkeEntities.push_back(monkeEntity);
+        }
 
         auto& camera = state.GetMainCamera();
         camera.SetFOV(70.0f);
@@ -101,7 +137,7 @@ public:
         sun.enabled     = true;
         sun.intensity   = 2.0f;
         sun.color       = {1.0f, 1.0f, 1.0f, 1.0f};
-        sun.direction   = {0.57f, 0.57f, -0.57f, 0.0f};
+        sun.direction   = {0.6f, 0.6f, -0.6f, 0.0f};
         sun.castsShadow = true;
 
         // Calculate our light view projection for shadow mapping
@@ -144,9 +180,6 @@ public:
     void Update(GameState& state, const Clock& clock) override {
         auto view = state.GetMainCamera().GetViewMatrix();
         auto proj = state.GetMainCamera().GetProjectionMatrix();
-
-        _rotY += (f32)clock.GetDeltaTime();
-        _monkeTransform->SetRotation({0.0f, _rotY * 45.0f, 0.0f});
 
         // Update transform components
         std::unordered_map<EntityId, TransformComponent*> entitiesWithTransform;
