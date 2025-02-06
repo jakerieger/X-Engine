@@ -21,7 +21,7 @@ Building requires [Visual Studio 2022](https://visualstudio.microsoft.com/vs/). 
 ### Dependencies
 
 Most of the third party dependencies are included in the [Code/Vendor](Code/Vendor) directory.
-However, `Engine` requires [DirectXTex](https://github.com/microsoft/DirectXTex) which must be installed via [NuGet](https://www.nuget.org/).
+However, `Engine` requires [DirectXTex](https://github.com/microsoft/DirectXTex) (directxtex_desktop_win10) which must be installed via [NuGet](https://www.nuget.org/).
 
 [Assimp](https://github.com/assimp/assimp) must also be built or installed locally and the `Additional Libraries` property of the `Engine` project updated to link to this. The headers
 are already included in [Code/Vendor](Code/Vendor).
