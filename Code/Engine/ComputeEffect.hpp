@@ -41,6 +41,11 @@ namespace x {
         bool IsEnabled() const { return _enabled; }
         void SetEnabled(const bool enabled) { _enabled = enabled; }
 
+        template<typename T>
+        T* As() {
+            return DCAST<T*>(this);
+        }
+
     protected:
         RenderContext& _renderer;
         ComputeShader _computeShader;

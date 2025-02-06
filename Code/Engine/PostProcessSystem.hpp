@@ -57,5 +57,15 @@ namespace x {
 
             return ptr;
         }
+
+        template<typename T>
+        T* GetEffect() {
+            for (auto& effect : _effects) {
+                T* ptr = effect->As<T>();
+                if (ptr)
+                    return ptr;
+            }
+            return nullptr;
+        }
     };
 }

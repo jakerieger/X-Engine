@@ -54,6 +54,8 @@ public:
                                     });
         RasterizerStates::SetupRasterizerStates(_renderContext); // Setup our rasterizer states for future use
 
+        _tonemap = GetPostProcess()->GetEffect<TonemapEffect>();
+
         GenericLoader loader(_renderContext);
         TextureLoader texLoader(_renderContext);
 
@@ -175,37 +177,37 @@ public:
         static bool dropdownValueChanged                           = false;
 
         if (_showPostProcessUI) {
-            // ImGui::Begin("Post Processing");
-            //
+            ImGui::Begin("Post Processing");
+
             // ImGui::SliderFloat("Contrast", &_contrast, 0.0f, 2.0f);
             // ImGui::SliderFloat("Saturation", &_saturation, 0.0f, 2.0f);
             // ImGui::SliderFloat("Temperature", &_temperature, 1000.0f, 10000.0f);
             // ImGui::Separator();
-            // ImGui::SliderFloat("Exposure", &_tonemapExposure, 0.0f, 2.0f);
-            //
-            // if (ImGui::BeginCombo("Tonemap Operator", tonemapOpNames[CAST<u32>(_tonemapOp)])) {
-            //     for (size_t i = 0; i < tonemapOpNames.size(); i++) {
-            //         const auto opName     = tonemapOpNames[i];
-            //         const auto currentOp  = CAST<TonemapOperator>(i);
-            //         const bool isSelected = (_tonemapOp == currentOp);
-            //
-            //         if (ImGui::Selectable(opName, isSelected)) {
-            //             _tonemapOp           = currentOp;
-            //             dropdownValueChanged = true;
-            //         }
-            //
-            //         if (isSelected) { ImGui::SetItemDefaultFocus(); }
-            //     }
-            //     ImGui::EndCombo();
-            // }
-            //
-            // ImGui::End();
-            //
+            ImGui::SliderFloat("Exposure", &_tonemapExposure, 0.0f, 2.0f);
+
+            if (ImGui::BeginCombo("Tonemap Operator", tonemapOpNames[CAST<u32>(_tonemapOp)])) {
+                for (size_t i = 0; i < tonemapOpNames.size(); i++) {
+                    const auto opName     = tonemapOpNames[i];
+                    const auto currentOp  = CAST<TonemapOperator>(i);
+                    const bool isSelected = (_tonemapOp == currentOp);
+
+                    if (ImGui::Selectable(opName, isSelected)) {
+                        _tonemapOp           = currentOp;
+                        dropdownValueChanged = true;
+                    }
+
+                    if (isSelected) { ImGui::SetItemDefaultFocus(); }
+                }
+                ImGui::EndCombo();
+            }
+
+            ImGui::End();
+
             // _colorGrade->SetContrast(_contrast);
             // _colorGrade->SetSaturation(_saturation);
             // _colorGrade->SetTemperature(_temperature);
-            // _tonemap->SetExposure(_tonemapExposure);
-            // _tonemap->SetOperator(_tonemapOp);
+            _tonemap->SetExposure(_tonemapExposure);
+            _tonemap->SetOperator(_tonemapOp);
         }
     }
 
