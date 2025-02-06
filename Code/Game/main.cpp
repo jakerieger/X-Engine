@@ -38,6 +38,9 @@ class SpaceGame final : public IGame {
 
     EntityId _monkeEntity;
     EntityId _floorEntity;
+    f32 _rotY = 0.0f;
+
+    TransformComponent* _monkeTransform = None;
 
 public:
     explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {}
@@ -73,6 +76,7 @@ public:
 
         _monkeEntity         = state.CreateEntity();
         auto& monkeTransform = state.AddComponent<TransformComponent>(_monkeEntity);
+        _monkeTransform      = &monkeTransform;
         auto& monkeModel     = state.AddComponent<ModelComponent>(_monkeEntity);
 
         const auto monkeData = loader.LoadFromFile(ContentPath("Monke.glb"));
@@ -138,6 +142,9 @@ public:
     void Update(GameState& state, const Clock& clock) override {
         auto view = state.GetMainCamera().GetViewMatrix();
         auto proj = state.GetMainCamera().GetProjectionMatrix();
+
+        _rotY += (f32)clock.GetDeltaTime();
+        _monkeTransform->SetRotation({0.0f, _rotY * 45.0f, 0.0f});
 
         // Update transform components
         std::unordered_map<EntityId, TransformComponent*> entitiesWithTransform;

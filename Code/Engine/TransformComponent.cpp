@@ -11,15 +11,18 @@ namespace x {
           _transform(XMMatrixIdentity()), _needsUpdate(true) {}
 
     void TransformComponent::SetPosition(const Float3& position) {
-        _position = position;
+        _position    = position;
+        _needsUpdate = true;
     }
 
     void TransformComponent::SetRotation(const Float3& rotation) {
-        _rotation = rotation;
+        _rotation    = rotation;
+        _needsUpdate = true;
     }
 
     void TransformComponent::SetScale(const Float3& scale) {
-        _scale = scale;
+        _scale       = scale;
+        _needsUpdate = true;
     }
 
     Float3 TransformComponent::GetPosition() const {
