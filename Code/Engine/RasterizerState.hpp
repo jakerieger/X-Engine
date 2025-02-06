@@ -4,6 +4,7 @@
 #include "D3D.hpp"
 
 namespace x {
+    // This should probably just be a namespace
     class RasterizerStates {
     public:
         static inline ComPtr<ID3D11RasterizerState> DefaultSolid;

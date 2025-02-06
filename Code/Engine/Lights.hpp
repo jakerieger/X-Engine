@@ -14,13 +14,14 @@ namespace x {
     inline constexpr size_t kMaxAreaLights  = 16;
 
     struct alignas(16) DirectionalLight {
-        Float4 direction = {0.0f, 0.0f, 0.0f, 1.0f}; // 16 bytes
-        Float4 color     = {1.0f, 1.0f, 1.0f, 1.0f}; // 16 bytes
-        f32 intensity    = 1.0f; // 4 bytes
-        f32 _pad1[3]     = {0.0f, 0.0f, 0.0f};
-        u32 castsShadow  = HLSL_TRUE; // 4 bytes
-        u32 enabled      = HLSL_TRUE; // 4 bytes
-        f32 _pad2[2]     = {0.0f, 0.0f};
+        Float4 direction     = {0.0f, 0.0f, 0.0f, 1.0f}; // 16 bytes
+        Float4 color         = {1.0f, 1.0f, 1.0f, 1.0f}; // 16 bytes
+        f32 intensity        = 1.0f; // 4 bytes
+        f32 _pad1[3]         = {0.0f, 0.0f, 0.0f};
+        u32 castsShadow      = HLSL_TRUE; // 4 bytes
+        u32 enabled          = HLSL_TRUE; // 4 bytes
+        f32 _pad2[2]         = {0.0f, 0.0f};
+        Matrix lightViewProj = XMMatrixIdentity();
     };
 
     struct alignas(16) PointLight {
@@ -91,7 +92,7 @@ namespace x {
         }
 
         Matrix lightView = XMMatrixLookAtLH(lightPosition, center, worldUp);
-        Matrix lightProj = XMMatrixOrthographicLH(viewWidth, viewHeight, 0.01f, 10.0f);
+        Matrix lightProj = XMMatrixOrthographicLH(viewWidth, viewHeight, 0.01f, 100.0f);
 
         return lightView * lightProj;
     }

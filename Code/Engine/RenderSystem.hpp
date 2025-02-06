@@ -46,6 +46,7 @@ namespace x {
         ComPtr<ID3D11DepthStencilState> _depthStencilState;
         ComPtr<ID3D11ShaderResourceView> _outputSRV;
         ComPtr<ID3D11Texture2D> _sceneTexture;
+        ComPtr<ID3D11SamplerState> _depthSamplerState;
 
     public:
         explicit LightPass(RenderContext& context) : _renderContext(context) {}

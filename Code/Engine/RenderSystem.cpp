@@ -227,6 +227,20 @@ namespace x {
 
     #pragma region LightingPass
     void LightPass::Initialize(u32 width, u32 height) {
+        D3D11_SAMPLER_DESC comparisonSamplerDesc{};
+        comparisonSamplerDesc.Filter         = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+        comparisonSamplerDesc.AddressU       = D3D11_TEXTURE_ADDRESS_BORDER;
+        comparisonSamplerDesc.AddressV       = D3D11_TEXTURE_ADDRESS_BORDER;
+        comparisonSamplerDesc.AddressW       = D3D11_TEXTURE_ADDRESS_BORDER;
+        comparisonSamplerDesc.BorderColor[0] = 1.0f; // Use 1.0f for all components
+        comparisonSamplerDesc.BorderColor[1] = 1.0f; // This means "not in shadow" for
+        comparisonSamplerDesc.BorderColor[2] = 1.0f; // areas outside the shadow map
+        comparisonSamplerDesc.BorderColor[3] = 1.0f;
+        comparisonSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS; // Key setting!
+
+        auto hr = _renderContext.GetDevice()->CreateSamplerState(&comparisonSamplerDesc, &_depthSamplerState);
+        PANIC_IF_FAILED(hr, "Failed to create sampler state for shadow pass");
+
         Resize(width, height);
     }
 
@@ -240,6 +254,7 @@ namespace x {
         _renderContext.GetDeviceContext()->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
         _renderContext.GetDeviceContext()->PSSetShaderResources(5, 1, &depthSRV);
+        _renderContext.GetDeviceContext()->PSSetSamplers(5, 1, _depthSamplerState.GetAddressOf());
     }
 
     ID3D11ShaderResourceView* LightPass::EndPass() {

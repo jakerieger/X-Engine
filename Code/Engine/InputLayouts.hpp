@@ -23,7 +23,6 @@ namespace x {
         Float3 normal;
         Float3 tangent;
         Float2 texCoord;
-        Float2 texCoord1;
     };
 
     struct VSInputSkinned {

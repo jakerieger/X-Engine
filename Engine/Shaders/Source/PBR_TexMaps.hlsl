@@ -9,10 +9,11 @@ VSOutputPBR VS_Main(VSInputPBR input) {
 
     output.position   = mvp;
     output.positionCS = output.position;
-    output.worldPos   = mul(pos, Transforms.model).xyz;
+    float4 worldPos = mul(pos, Transforms.model);
+    output.worldPos = worldPos.xyz;
+    output.lightSpacePos = mul(worldPos, Sun.lightViewProj);
 
     output.texCoord0  = input.texCoord0;
-    output.texCoord1  = input.texCoord1;
 
     output.normal     = TransformNormal(input.normal, Transforms.model);
     output.normal     = normalize(output.normal);
@@ -49,33 +50,44 @@ float4 PS_Main(VSOutputPBR input) : SV_Target {
     float3 Lo             = albedoSample.rgb * 0.01f;
 
     if (Sun.enabled) {
-        float3 L        = normalize(-Sun.direction);
+        float3 L        = normalize(Sun.direction);
         float3 specular = SpecularBRDF(N, V, L, roughnessSample, F0);
         float3 diffuse  = EnergyConservation(specular, metallicSample, albedoSample.rgb);
         float NdotL     = max(dot(N, L), 0.01f);
         float3 radiance = Sun.color * Sun.intensity;
-        Lo += (diffuse / PI + specular) * radiance * NdotL;
-    }
 
-    PBRMaterial mat;
-    mat.albedo           = albedoSample.rgb;
-    mat.metallic         = metallicSample;
-    mat.roughness        = roughnessSample;
-    mat.ao               = ao;
-    mat.emissive         = float3(0.0, 0.0, 0.0);
-    mat.emissiveStrength = 0.0;
-
-    for (uint i = 0; i < MAX_POINT_LIGHTS; ++i) {
-        PointLight light = PointLights[i];
-        if (light.enabled) { Lo += CalculatePointLightPBR(light, input.worldPos, N, V, mat); }
-    }
-
-    for (uint j = 0; j < MAX_AREA_LIGHTS; ++j) {
-        AreaLight light = AreaLights[j];
-        if (light.enabled) {
-            Lo += CalculateAreaLightPBR(light, input.worldPos, N, V, mat);
+        float shadowFactor = 1.0f;
+        if (Sun.castsShadow) {
+            float3 projCoords = input.lightSpacePos.xyz / input.lightSpacePos.w;
+            float2 shadowTexCoords = float2(0.5f + (projCoords.x * 0.5f),
+                                  0.5f - (projCoords.y * 0.5f));
+            float bias = 0.001f; // helps prevent shadow acne
+            shadowFactor = ShadowZBuffer.SampleCmpLevelZero(ShadowZBufferState, shadowTexCoords, projCoords.z - bias);
         }
+
+        float3 lighting = (diffuse / PI + specular);
+        Lo += (lighting * shadowFactor) * radiance * NdotL;
     }
+
+    // PBRMaterial mat;
+    // mat.albedo           = albedoSample.rgb;
+    // mat.metallic         = metallicSample;
+    // mat.roughness        = roughnessSample;
+    // mat.ao               = ao;
+    // mat.emissive         = float3(0.0, 0.0, 0.0);
+    // mat.emissiveStrength = 0.0;
+    //
+    // for (uint i = 0; i < MAX_POINT_LIGHTS; ++i) {
+    //     PointLight light = PointLights[i];
+    //     if (light.enabled) { Lo += CalculatePointLightPBR(light, input.worldPos, N, V, mat); }
+    // }
+    //
+    // for (uint j = 0; j < MAX_AREA_LIGHTS; ++j) {
+    //     AreaLight light = AreaLights[j];
+    //     if (light.enabled) {
+    //         Lo += CalculateAreaLightPBR(light, input.worldPos, N, V, mat);
+    //     }
+    // }
 
     // Final color calculation
     float3 color = Lo * ao;

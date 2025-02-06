@@ -24,7 +24,6 @@ struct VSInputPBR {
     float3 normal : NORMAL; // Object space normal
     float3 tangent : TANGENT; // Object space tangent
     float2 texCoord0 : TEXCOORD0; // Diffuse/normal map coordinates
-    float2 texCoord1 : TEXCOORD1; // Additional texture coordinates (lightmap UVs, etc)
 };
 
 struct VSInputSkinned {
@@ -76,6 +75,7 @@ struct VSOutputPBR {
     float3 bitangent : BINORMAL; // World space bitangent
     float3 worldPos : TEXCOORD2; // World space position
     float4 positionCS : TEXCOORD3; // Clip space position for post-process effects
+    float4 lightSpacePos : TEXCOORD4; // Position from light's perspective
 };
 
 // For deferred pipeline

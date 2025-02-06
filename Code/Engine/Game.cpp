@@ -38,44 +38,39 @@ namespace x {
             } else {
                 // Only tick engine forward if we're not currently paused
                 if (!_isPaused) {
-                    ScopedTimer updateTimer("UpdateTime");
+                    // ScopedTimer updateTimer("UpdateTime");
 
                     _clock.Tick();
                     Update(_state, _clock);
-
-                    const auto lvp = CalculateLightViewProjection(_state.GetLightState().Sun,
-                                                                  10.0f,
-                                                                  _state.GetMainCamera().GetAspectRatio());
-                    _renderSystem->UpdateShadowPassParameters(XMMatrixTranspose(lvp), XMMatrixScaling(1, 1, 1));
                 }
 
                 // Continue rendering whether we're paused or not
                 _renderSystem->BeginFrame();
                 {
-                    ScopedTimer frameTimer("FrameTime");
+                    // ScopedTimer frameTimer("FrameTime");
 
                     // Do our depth-only shadow pass first
                     ID3D11ShaderResourceView* depthSRV;
                     {
-                        ScopedTimer _("  - ShadowPass");
+                        // ScopedTimer _("  - ShadowPass");
                         _renderSystem->BeginShadowPass();
                         RenderDepthOnly();
                         depthSRV = _renderSystem->EndShadowPass();
                     }
 
                     // Do our fully lit pass using our previous depth-only pass as input for our shadow mapping shader
-                    // ID3D11ShaderResourceView* sceneSRV;
-                    // {
-                    //     ScopedTimer _("  - LightPass");
-                    //     _renderSystem->BeginLightPass(depthSRV);
-                    //     RenderScene();
-                    //     sceneSRV = _renderSystem->EndLightPass();
-                    // }
+                    ID3D11ShaderResourceView* sceneSRV;
+                    {
+                        // ScopedTimer _("  - LightPass");
+                        _renderSystem->BeginLightPass(depthSRV);
+                        RenderScene();
+                        sceneSRV = _renderSystem->EndLightPass();
+                    }
 
                     // We can now pass our fully lit scene texture to the post processing pipeline to be processed and displayed on screen
                     {
-                        ScopedTimer _("  - PostProcessPass");
-                        _renderSystem->PostProcessPass(depthSRV);
+                        // ScopedTimer _("  - PostProcessPass");
+                        _renderSystem->PostProcessPass(sceneSRV);
                     }
 
                     // Draw debug UI last (on top of everything else)
@@ -130,6 +125,14 @@ namespace x {
 
     void IGame::RenderDepthOnly() {
         for (const auto& [entity, model] : _state.GetComponents<ModelComponent>()) {
+            Matrix world                  = XMMatrixIdentity();
+            const auto transformComponent = _state.GetComponent<TransformComponent>(entity);
+            if (transformComponent) {
+                world = transformComponent->GetTransformMatrix();
+            }
+            _renderSystem->UpdateShadowPassParameters(_state.GetLightState().Sun.lightViewProj,
+                                                      XMMatrixTranspose(world));
+
             model.Draw(false);
         }
     }

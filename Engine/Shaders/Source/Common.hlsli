@@ -31,6 +31,7 @@ struct DirectionalLight {
     bool castsShadow;
     bool enabled;
     float2 _pad2;
+    matrix lightViewProj;
 };
 
 struct PointLight {
@@ -125,6 +126,9 @@ SamplerState AOState : register(s3);
 
 Texture2D NormalMap : register(t4);
 SamplerState NormalState : register(s4);
+
+Texture2D ShadowZBuffer : register(t5);
+SamplerComparisonState ShadowZBufferState : register(s5);
 
 //-----------------------------------------------------------------------------
 // Helper Functions

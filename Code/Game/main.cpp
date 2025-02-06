@@ -49,8 +49,10 @@ public:
                                        const auto show    = CAST<int>(strtol(args[0].c_str(), None, 10));
                                        _showPostProcessUI = show;
                                    });
-        RasterizerStates::SetupRasterizerStates(_renderContext);
+        RasterizerStates::SetupRasterizerStates(_renderContext); // Setup our rasterizer states for future use
 
+        // All of this will eventually be transferred to some kind of resource management system.
+        // For now, you get to enjoy this lovely mess of code :)
         _monkeEntity         = state.CreateEntity();
         auto& monkeTransform = state.AddComponent<TransformComponent>(_monkeEntity);
         auto& monkeModel     = state.AddComponent<ModelComponent>(_monkeEntity);
@@ -92,11 +94,18 @@ public:
         camera.SetFOV(70.0f);
         camera.SetPosition(XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f));
 
-        auto& sun     = state.GetLightState().Sun;
-        sun.enabled   = true;
-        sun.intensity = 2.0f;
-        sun.color     = {1.0f, 1.0f, 1.0f, 1.0f};
-        sun.direction = {-0.57f, 0.57f, 0.97f, 0.0f};
+        auto& sun       = state.GetLightState().Sun;
+        sun.enabled     = true;
+        sun.intensity   = 2.0f;
+        sun.color       = {1.0f, 1.0f, 1.0f, 1.0f};
+        sun.direction   = {0.57f, 0.57f, -0.57f, 0.0f};
+        sun.castsShadow = true;
+
+        // Calculate our light view projection for shadow mapping
+        // viewWidth was set by trial and error, 10.0 just looked the best to me
+        const auto lvp    = CalculateLightViewProjection(sun, 10.0f, state.GetMainCamera().GetAspectRatio());
+        sun.lightViewProj = XMMatrixTranspose(lvp);
+        // Functions that return matrices will never transpose them (for consistency-sake)
 
         auto& pointLight0     = state.GetLightState().PointLights[0];
         pointLight0.enabled   = true;

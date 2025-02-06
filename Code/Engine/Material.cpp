@@ -27,6 +27,7 @@ namespace x {
         auto* context = _renderer.GetDeviceContext();
         context->VSSetConstantBuffers(0, 1, _transformsCB.GetAddressOf());
         context->PSSetConstantBuffers(1, 1, _lightsCB.GetAddressOf());
+        context->VSSetConstantBuffers(1, 1, _lightsCB.GetAddressOf());
         context->PSSetConstantBuffers(2, 1, _materialCB.GetAddressOf());
         context->PSSetConstantBuffers(3, 1, _cameraCB.GetAddressOf());
     }
