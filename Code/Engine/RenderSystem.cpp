@@ -10,7 +10,6 @@ namespace x {
     void RenderSystem::Initialize(u32 width, u32 height) {
         // Update our width and height, as well as recreate our view objects (RTV, DSV).
         // In the case of the call here, this will just create them for the first time.
-        // TODO: This appears to no longer be working with the changes to render pass resizing
         OnResize(width, height);
 
         // Initialize all our render passes
@@ -62,6 +61,11 @@ namespace x {
     void RenderSystem::OnResize(u32 width, u32 height) {
         _renderTargetView.Reset();
         _depthStencilView.Reset();
+        _depthStencilState.Reset();
+
+        auto* ctx                       = _renderContext.GetDeviceContext();
+        ID3D11RenderTargetView* nullRTV = nullptr;
+        ctx->OMSetRenderTargets(1, &nullRTV, nullptr);
 
         _width  = width;
         _height = height;
@@ -121,6 +125,7 @@ namespace x {
         // Resize the other passes
         _shadowPass.Resize(width, height);
         _lightPass.Resize(width, height);
+        _postProcess.Resize(width, height);
     }
     #pragma endregion
 
@@ -253,8 +258,10 @@ namespace x {
         _renderContext.GetDeviceContext()->ClearRenderTargetView(_renderTargetView.Get(), Colors::Black);
         _renderContext.GetDeviceContext()->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-        _renderContext.GetDeviceContext()->PSSetShaderResources(5, 1, &depthSRV);
-        _renderContext.GetDeviceContext()->PSSetSamplers(5, 1, _depthSamplerState.GetAddressOf());
+        _renderContext.GetDeviceContext()->PSSetShaderResources((u32)TextureMapSlot::ShadowZBuffer, 1, &depthSRV);
+        _renderContext.GetDeviceContext()->PSSetSamplers((u32)TextureMapSlot::ShadowZBuffer,
+                                                         1,
+                                                         _depthSamplerState.GetAddressOf());
     }
 
     ID3D11ShaderResourceView* LightPass::EndPass() {

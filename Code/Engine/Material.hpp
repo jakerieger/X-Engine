@@ -15,6 +15,7 @@ namespace x {
         Roughness,
         AmbientOcclusion,
         Normal,
+        ShadowZBuffer,
     };
 
     class PBRMaterial {

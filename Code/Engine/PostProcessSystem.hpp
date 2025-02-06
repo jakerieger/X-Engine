@@ -20,7 +20,7 @@ namespace x {
         }
     };
 
-    class PostProcessSystem final : public Volatile {
+    class PostProcessSystem final {
         RenderContext& _renderer;
         VertexShader _fullscreenVS;
         PixelShader _fullscreenPS;
@@ -37,7 +37,7 @@ namespace x {
                                                               _fullscreenPS(renderer) {}
 
         bool Initialize(u32 width, u32 height);
-        void OnResize(u32 width, u32 height) override;
+        void Resize(u32 width, u32 height);
         void Execute(ID3D11ShaderResourceView* sceneInput, ID3D11RenderTargetView* finalOutput);
 
         template<typename T, typename... Args>

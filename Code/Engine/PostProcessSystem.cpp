@@ -15,7 +15,7 @@ namespace x {
         return CreateIntermediateTargets();
     }
 
-    void PostProcessSystem::OnResize(const u32 width, const u32 height) {
+    void PostProcessSystem::Resize(const u32 width, const u32 height) {
         _width  = width;
         _height = height;
 
