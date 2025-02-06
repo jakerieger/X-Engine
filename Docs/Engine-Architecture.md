@@ -56,14 +56,22 @@ _renderSystem->EndFrame();
 
 ## What **isn't** implemented:
 
-This is a list of things that are planned but not currently implemented:
+In its current state, this would be better described as a *rendering* engine and not a *game* engine, as rendering has been my focus from the beginning of development, and the part I personally find the most interesting.
+There is an entity component system but the only components that have been created so far are for rendering. No scripting, input handling, audio, or physics components exist at the moment.
+
+Once the rendering system has reached a point I'd consider acceptable, I'll move on to the actual runtime game systems.
+
+That being said, this is a list of things that are planned but not currently implemented:
 
 1. Opaque/transparent mesh sorting
-2. Anti-aliasing of any kind
-3. Resource management
-	- Resources are simply loaded from disk using hard-coded paths at the moment. No system for loading and managing these exists right now.
-4. Scenes
-5. Input handling
-6. Lock-free multi-threading
+2. Soft shadows (PCF)
+3. Anti-aliasing of any kind
+4. Resource management
+	- Resources are simply loaded from disk using **solution**-relative paths at the moment. No system for loading and managing these exists right now.
+    - Content is located in [Engine/Content](../Engine/Content).
+5. Scenes
+6. Input handling
+7. Lock-free multi-threading
+8. Some kind of 3D physics engine (likely Bullet, honestly)
 
 ...and a whole hell of a lot more :D
