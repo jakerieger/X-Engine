@@ -75,21 +75,19 @@ namespace x {
                         ScopedTimer _("  - PostProcessPass");
                         _renderSystem->PostProcessPass(sceneSRV);
                     }
+
+                    // Draw debug UI last (on top of everything else)
+                    {
+                        if (_debugUIEnabled) {
+                            debugUI->BeginFrame(); // begin ImGui frame
+                            debugUI->Draw(_renderContext, _clock); // draw built-in debug ui
+                            DrawDebugUI(); // draw user-defined debug ui
+                            devConsole.Draw(); // draw developer console last so it overlaps correctly
+                            debugUI->EndFrame(); // end imgui frame
+                        }
+                    }
                 }
                 _renderSystem->EndFrame();
-
-                continue; // Skip rendering debug ui for now
-
-                // Draw debug UI last (on top of everything else)
-                if (_debugUIEnabled) {
-                    debugUI->BeginFrame(); // begin ImGui frame
-                    debugUI->Draw(_renderContext, _clock); // draw built-in debug ui
-                    DrawDebugUI(); // draw user-defined debug ui
-                    devConsole.Draw(); // draw developer console last so it overlaps correctly
-                    debugUI->EndFrame(); // end imgui frame
-                }
-
-                // End frame
             }
         }
 

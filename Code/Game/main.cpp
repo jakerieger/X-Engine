@@ -206,7 +206,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
     game.EnableConsole();
     #endif
 
-    // game.EnableDebugUI();
+    game.EnableDebugUI();
     game.Run();
 
     return 0; // I know you don't have to, but I like the explicit nature of this.

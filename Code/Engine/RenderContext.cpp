@@ -110,13 +110,11 @@ namespace x {
 
     void RenderContext::Draw(const u32 vertexCount) {
         _context->Draw(vertexCount, 0);
-        _frameInfo.drawCallsPerFrame++;
     }
 
     void RenderContext::DrawIndexed(const u32 indexCount) {
         _context->DrawIndexed(indexCount, 0, 0);
-        _frameInfo.drawCallsPerFrame++;
     }
 
-    void RenderContext::AddTriangleCountToFrame(u32 count) { _frameInfo.numTriangles += count; }
+    void RenderContext::AddTriangleCountToFrame(u32 count) {}
 } // namespace x
