@@ -51,27 +51,8 @@ public:
                                    });
         RasterizerStates::SetupRasterizerStates(_renderContext); // Setup our rasterizer states for future use
 
-        // All of this will eventually be transferred to some kind of resource management system.
-        // For now, you get to enjoy this lovely mess of code :)
-        _monkeEntity         = state.CreateEntity();
-        auto& monkeTransform = state.AddComponent<TransformComponent>(_monkeEntity);
-        auto& monkeModel     = state.AddComponent<ModelComponent>(_monkeEntity);
-
         GenericLoader loader(_renderContext);
-        const auto monkeData = loader.LoadFromFile(ContentPath("Monke.glb"));
-
         TextureLoader texLoader(_renderContext);
-        const auto monkeAlbedo    = texLoader.LoadFromFile2D(ContentPath("Metal_Albedo.dds"));
-        const auto monkeNormal    = texLoader.LoadFromFile2D(ContentPath("Metal_Normal.dds"));
-        const auto monkeMetallic  = texLoader.LoadFromFile2D(ContentPath("Metal_Metallic.dds"));
-        const auto monkeRoughness = texLoader.LoadFromFile2D(ContentPath("Metal_Roughness.dds"));
-
-        _monkeMaterial = PBRMaterial::Create(_renderContext);
-        _monkeMaterial->SetTextureMaps(monkeAlbedo, monkeMetallic, monkeRoughness, monkeNormal);
-
-        monkeModel.SetModelHandle(monkeData)
-                  .SetMaterialHandle(_monkeMaterial)
-                  .SetCastsShadows(true);
 
         const auto floorData = loader.LoadFromFile(ContentPath("Floor.glb"));
 
@@ -89,6 +70,22 @@ public:
         floorModel.SetModelHandle(floorData)
                   .SetMaterialHandle(_floorMaterial)
                   .SetCastsShadows(true);
+
+        _monkeEntity         = state.CreateEntity();
+        auto& monkeTransform = state.AddComponent<TransformComponent>(_monkeEntity);
+        auto& monkeModel     = state.AddComponent<ModelComponent>(_monkeEntity);
+
+        const auto monkeData = loader.LoadFromFile(ContentPath("Monke.glb"));
+
+        const auto monkeAlbedo    = texLoader.LoadFromFile2D(ContentPath("Metal_Albedo.dds"));
+        const auto monkeNormal    = texLoader.LoadFromFile2D(ContentPath("Metal_Normal.dds"));
+        const auto monkeMetallic  = texLoader.LoadFromFile2D(ContentPath("Metal_Metallic.dds"));
+        const auto monkeRoughness = texLoader.LoadFromFile2D(ContentPath("Metal_Roughness.dds"));
+
+        _monkeMaterial = PBRMaterial::Create(_renderContext);
+        _monkeMaterial->SetTextureMaps(monkeAlbedo, monkeMetallic, monkeRoughness, monkeNormal);
+
+        monkeModel.SetModelHandle(monkeData).SetMaterialHandle(_monkeMaterial).SetCastsShadows(true);
 
         auto& camera = state.GetMainCamera();
         camera.SetFOV(70.0f);
