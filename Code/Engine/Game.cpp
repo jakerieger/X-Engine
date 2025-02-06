@@ -38,7 +38,8 @@ namespace x {
             } else {
                 // Only tick engine forward if we're not currently paused
                 if (!_isPaused) {
-                    ScopedTimer timer("Update()");
+                    ScopedTimer updateTimer("UpdateTime");
+
                     _clock.Tick();
                     Update(_state, _clock);
 
@@ -49,10 +50,12 @@ namespace x {
                 // Continue rendering whether we're paused or not
                 _renderSystem->BeginFrame();
                 {
+                    ScopedTimer frameTimer("FrameTime");
+
                     // Do our depth-only shadow pass first
                     ID3D11ShaderResourceView* depthSRV;
                     {
-                        ScopedTimer timer("ShadowPass");
+                        ScopedTimer _("  - ShadowPass");
                         _renderSystem->BeginShadowPass();
                         RenderScene(true); // Disable material binding
                         depthSRV = _renderSystem->EndShadowPass();
@@ -61,7 +64,7 @@ namespace x {
                     // Do our fully lit pass using our previous depth-only pass as input for our shadow mapping shader
                     ID3D11ShaderResourceView* sceneSRV;
                     {
-                        ScopedTimer timer("LightPass");
+                        ScopedTimer _("  - LightPass");
                         _renderSystem->BeginLightPass(depthSRV);
                         RenderScene();
                         sceneSRV = _renderSystem->EndLightPass();
@@ -69,7 +72,7 @@ namespace x {
 
                     // We can now pass our fully lit scene texture to the post processing pipeline to be processed and displayed on screen
                     {
-                        ScopedTimer timer("PostProcessPass");
+                        ScopedTimer _("  - PostProcessPass");
                         _renderSystem->PostProcessPass(sceneSRV);
                     }
                 }
