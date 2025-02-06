@@ -64,4 +64,6 @@ This is a list of things that are planned but not currently implemented:
 	- Resources are simply loaded from disk using hard-coded paths at the moment. No system for loading and managing these exists right now.
 4. Scenes
 5. Input handling
-6. ...and a whole hell of a lot more :D
+6. Lock-free multi-threading
+
+...and a whole hell of a lot more :D
