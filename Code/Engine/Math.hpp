@@ -1,7 +1,7 @@
 #pragma once
 
+#include <bit>
 #include "DirectXMath.h"
-#include <intrin.h>
 
 namespace x {
     using namespace DirectX;
@@ -22,5 +22,11 @@ namespace x {
 
     inline float Fractional(const float x) {
         return x - static_cast<float>(static_cast<int>(x));
+    }
+
+    inline float Abs(const float x) {
+        if (x < 0.0f)
+            return -x;
+        return x;
     }
 }

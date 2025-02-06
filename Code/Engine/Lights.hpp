@@ -76,16 +76,17 @@ namespace x {
     inline Matrix
     CalculateLightViewProjection(const DirectionalLight& light,
                                  f32 viewWidth,
-                                 f32 viewHeight,
+                                 f32 aspectRatio,
                                  const Float3& sceneCenter = {0.f, 0.f, 0.f}) {
         Vector direction = XMLoadFloat4(&light.direction);
-        direction        = XMVector3Normalize(-direction);
+        direction        = XMVector3Normalize(direction);
 
-        Vector center        = XMLoadFloat3(&sceneCenter);
-        Vector lightPosition = center - (direction * viewHeight);
-        Vector worldUp       = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+        const auto viewHeight = viewWidth / aspectRatio;
+        Vector center         = XMLoadFloat3(&sceneCenter);
+        Vector lightPosition  = center + (direction * viewHeight);
+        Vector worldUp        = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
-        if (abs(XMVectorGetY(direction)) > 0.99f) {
+        if (Abs(XMVectorGetY(direction)) > 0.99f) {
             worldUp = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
         }
 

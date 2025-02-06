@@ -25,6 +25,14 @@ namespace x {
         void SetAspectRatio(f32 ratio);
         void SetClipPlanes(f32 near, f32 far);
 
+        f32 GetFovY() const {
+            return _fovY;
+        }
+
+        f32 GetAspectRatio() const {
+            return _aspectRatio;
+        }
+
         [[nodiscard]] Matrix GetViewMatrix() const;
         [[nodiscard]] Matrix GetProjectionMatrix() const;
         [[nodiscard]] Matrix GetViewProjectionMatrix() const;

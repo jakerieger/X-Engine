@@ -43,7 +43,9 @@ namespace x {
                     _clock.Tick();
                     Update(_state, _clock);
 
-                    const auto lvp = CalculateLightViewProjection(_state.GetLightState().Sun, 16.f, 9.f);
+                    const auto lvp = CalculateLightViewProjection(_state.GetLightState().Sun,
+                                                                  10.0f,
+                                                                  _state.GetMainCamera().GetAspectRatio());
                     _renderSystem->UpdateShadowPassParameters(XMMatrixTranspose(lvp), XMMatrixScaling(1, 1, 1));
                 }
 
@@ -62,18 +64,18 @@ namespace x {
                     }
 
                     // Do our fully lit pass using our previous depth-only pass as input for our shadow mapping shader
-                    ID3D11ShaderResourceView* sceneSRV;
-                    {
-                        ScopedTimer _("  - LightPass");
-                        _renderSystem->BeginLightPass(depthSRV);
-                        RenderScene();
-                        sceneSRV = _renderSystem->EndLightPass();
-                    }
+                    // ID3D11ShaderResourceView* sceneSRV;
+                    // {
+                    //     ScopedTimer _("  - LightPass");
+                    //     _renderSystem->BeginLightPass(depthSRV);
+                    //     RenderScene();
+                    //     sceneSRV = _renderSystem->EndLightPass();
+                    // }
 
                     // We can now pass our fully lit scene texture to the post processing pipeline to be processed and displayed on screen
                     {
                         ScopedTimer _("  - PostProcessPass");
-                        _renderSystem->PostProcessPass(sceneSRV);
+                        _renderSystem->PostProcessPass(depthSRV);
                     }
 
                     // Draw debug UI last (on top of everything else)
