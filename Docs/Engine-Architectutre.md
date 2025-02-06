@@ -4,11 +4,11 @@ The engine doesn't have a name, so I'll simply be referring to it as `x` since t
 
 As it currently stands, x is a rather simple forward rendered 3D engine with an Entity Component System (ECS).
 
-The root class of the engine is the [IGame](Code/Engine/Game.hpp) class. This class is responsible for the following:
+The root class of the engine is the [IGame](../Code/Engine/Game.hpp) class. This class is responsible for the following:
 
 1. Initializing and creating the window
-2. Initializing the rendering backend ([RenderContext](Code/Engine/RenderContext.hpp), [RenderSystem](Code/Engine/RenderSystem.hpp)).
-3. Managing the game state ([GameState](Code/Engine/GameState.hpp)):
+2. Initializing the rendering backend ([RenderContext](../Code/Engine/RenderContext.hpp), [RenderSystem](../Code/Engine/RenderSystem.hpp)).
+3. Managing the game state ([GameState](../Code/Engine/GameState.hpp)):
 	- *At the moment there is no "scene" system. All game state is globally owned and managed by the `IGame` instance. Although convenient for testing purposes, this is a terrible design in practice and will not remain like this.*
 4. Running the core game loop
 5. Shutting down and cleaning up
@@ -25,7 +25,7 @@ The scene is rendered for each pass except for the final post-processing pass, w
 2. Fully-lit pass
 3. Post-processing pass
 
-This can be seen with the following lines of code found in [Game.cpp](Code/Engine/Game.cpp):
+This can be seen with the following lines of code found in [Game.cpp](../Code/Engine/Game.cpp):
 
 ```cpp
 _renderSystem->BeginFrame();
