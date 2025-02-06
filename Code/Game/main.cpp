@@ -43,12 +43,12 @@ public:
     explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {}
 
     void LoadContent(GameState& state) override {
-        devConsole.RegisterCommand("r_ShowPostProcess",
-                                   [this](auto args) {
-                                       if (args.size() < 1) { return; }
-                                       const auto show    = CAST<int>(strtol(args[0].c_str(), None, 10));
-                                       _showPostProcessUI = show;
-                                   });
+        _devConsole.RegisterCommand("r_ShowPostProcess",
+                                    [this](auto args) {
+                                        if (args.size() < 1) { return; }
+                                        const auto show    = CAST<int>(strtol(args[0].c_str(), None, 10));
+                                        _showPostProcessUI = show;
+                                    });
         RasterizerStates::SetupRasterizerStates(_renderContext); // Setup our rasterizer states for future use
 
         GenericLoader loader(_renderContext);

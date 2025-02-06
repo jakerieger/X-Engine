@@ -76,11 +76,11 @@ namespace x {
                     // Draw debug UI last (on top of everything else)
                     {
                         if (_debugUIEnabled) {
-                            debugUI->BeginFrame(); // begin ImGui frame
-                            debugUI->Draw(_renderContext, _clock); // draw built-in debug ui
+                            _debugUI->BeginFrame(); // begin ImGui frame
+                            _debugUI->Draw(_renderContext, _clock); // draw built-in debug ui
                             DrawDebugUI(); // draw user-defined debug ui
-                            devConsole.Draw(); // draw developer console last so it overlaps correctly
-                            debugUI->EndFrame(); // end imgui frame
+                            _devConsole.Draw(); // draw developer console last so it overlaps correctly
+                            _debugUI->EndFrame(); // end imgui frame
                         }
                     }
                 }
@@ -154,7 +154,7 @@ namespace x {
 
     void IGame::Shutdown() {
         UnloadContent();
-        debugUI.reset();
+        _debugUI.reset();
 
         CoUninitialize();
     }
@@ -207,52 +207,52 @@ namespace x {
     }
 
     void IGame::InitializeEngine() {
-        if (_debugUIEnabled) { debugUI = make_unique<DebugUI>(_hwnd, _renderContext); }
+        if (_debugUIEnabled) { _debugUI = make_unique<DebugUI>(_hwnd, _renderContext); }
 
-        devConsole.RegisterCommand("quit", [this](auto) { Quit(); });
+        _devConsole.RegisterCommand("quit", [this](auto) { Quit(); });
 
-        devConsole.RegisterCommand("close", [this](auto) { devConsole.ToggleVisible(); });
+        _devConsole.RegisterCommand("close", [this](auto) { _devConsole.ToggleVisible(); });
 
-        devConsole.RegisterCommand("p_ShowFrameGraph",
-                                   [this](auto args) {
-                                       if (args.size() < 1) { return; }
-                                       const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
-                                       debugUI->SetShowFrameGraph(CAST<bool>(show));
-                                   });
+        _devConsole.RegisterCommand("p_ShowFrameGraph",
+                                    [this](auto args) {
+                                        if (args.size() < 1) { return; }
+                                        const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                                        _debugUI->SetShowFrameGraph(CAST<bool>(show));
+                                    });
 
-        devConsole.RegisterCommand("p_ShowDeviceInfo",
-                                   [this](auto args) {
-                                       if (args.size() < 1) { return; }
-                                       const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
-                                       debugUI->SetShowDeviceInfo(CAST<bool>(show));
-                                   });
+        _devConsole.RegisterCommand("p_ShowDeviceInfo",
+                                    [this](auto args) {
+                                        if (args.size() < 1) { return; }
+                                        const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                                        _debugUI->SetShowDeviceInfo(CAST<bool>(show));
+                                    });
 
-        devConsole.RegisterCommand("p_ShowFrameInfo",
-                                   [this](auto args) {
-                                       if (args.size() < 1) { return; }
-                                       const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
-                                       debugUI->SetShowFrameInfo(CAST<bool>(show));
-                                   });
+        _devConsole.RegisterCommand("p_ShowFrameInfo",
+                                    [this](auto args) {
+                                        if (args.size() < 1) { return; }
+                                        const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                                        _debugUI->SetShowFrameInfo(CAST<bool>(show));
+                                    });
 
-        devConsole.RegisterCommand("p_ShowAll",
-                                   [this](auto args) {
-                                       if (args.size() < 1) { return; }
-                                       const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
-                                       debugUI->SetShowFrameGraph(CAST<bool>(show));
-                                       debugUI->SetShowDeviceInfo(CAST<bool>(show));
-                                       debugUI->SetShowFrameInfo(CAST<bool>(show));
-                                   });
+        _devConsole.RegisterCommand("p_ShowAll",
+                                    [this](auto args) {
+                                        if (args.size() < 1) { return; }
+                                        const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                                        _debugUI->SetShowFrameGraph(CAST<bool>(show));
+                                        _debugUI->SetShowDeviceInfo(CAST<bool>(show));
+                                        _debugUI->SetShowFrameInfo(CAST<bool>(show));
+                                    });
 
-        devConsole.RegisterCommand("r_Pause", [this](auto) { Pause(); });
+        _devConsole.RegisterCommand("r_Pause", [this](auto) { Pause(); });
 
-        devConsole.RegisterCommand("r_Resume", [this](auto) { Resume(); });
+        _devConsole.RegisterCommand("r_Resume", [this](auto) { Resume(); });
     }
 
     LRESULT IGame::ResizeHandler(u32 width, u32 height) {
         _currentWidth  = width;
         _currentHeight = height;
 
-        for (const auto& vol : volatiles) {
+        for (const auto& vol : _volatiles) {
             vol->OnResize(width, height);
         }
 
@@ -274,7 +274,7 @@ namespace x {
 
             case WM_KEYDOWN: {
                 // Backtick/tilde key
-                if (wParam == VK_OEM_3) { devConsole.ToggleVisible(); }
+                if (wParam == VK_OEM_3) { _devConsole.ToggleVisible(); }
                 if (wParam == VK_ESCAPE) { Quit(); }
             }
                 return 0;

@@ -68,11 +68,13 @@ namespace x {
 
         void BeginShadowPass();
         ID3D11ShaderResourceView* EndShadowPass();
-
         void BeginLightPass(ID3D11ShaderResourceView* depthSRV);
         ID3D11ShaderResourceView* EndLightPass();
-
         void PostProcessPass(ID3D11ShaderResourceView* input);
+
+        PostProcessSystem* GetPostProcess() {
+            return &_postProcess;
+        }
 
         void OnResize(u32 width, u32 height) override;
 

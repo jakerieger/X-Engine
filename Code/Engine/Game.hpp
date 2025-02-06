@@ -49,10 +49,12 @@ namespace x {
         void EnableDebugUI();
 
         [[nodiscard]] u32 GetWidth() const;
-
         [[nodiscard]] u32 GetHeight() const;
-
         [[nodiscard]] f32 GetAspect() const;
+
+        PostProcessSystem* GetPostProcess() {
+            return _renderSystem->GetPostProcess();
+        }
 
         virtual void LoadContent(GameState& state) = 0;
         virtual void UnloadContent() = 0;
@@ -61,13 +63,13 @@ namespace x {
         virtual void DrawDebugUI();
 
     protected:
-        std::unique_ptr<DebugUI> debugUI;
-        vector<Volatile*> volatiles;
-        DevConsole devConsole;
+        std::unique_ptr<DebugUI> _debugUI;
+        vector<Volatile*> _volatiles;
+        DevConsole _devConsole;
         RenderContext _renderContext;
 
         void RegisterVolatile(Volatile* vol) {
-            volatiles.push_back(vol);
+            _volatiles.push_back(vol);
         }
 
     private:
