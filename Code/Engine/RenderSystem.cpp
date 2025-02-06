@@ -10,6 +10,7 @@ namespace x {
     void RenderSystem::Initialize(u32 width, u32 height) {
         // Update our width and height, as well as recreate our view objects (RTV, DSV).
         // In the case of the call here, this will just create them for the first time.
+        // TODO: This appears to no longer be working with the changes to render pass resizing
         OnResize(width, height);
 
         // Initialize all our render passes
@@ -116,6 +117,10 @@ namespace x {
         viewport.TopLeftY = 0.0f;
 
         _renderContext.GetDeviceContext()->RSSetViewports(1, &viewport);
+
+        // Resize the other passes
+        _shadowPass.Resize(width, height);
+        _lightPass.Resize(width, height);
     }
     #pragma endregion
 
@@ -137,6 +142,42 @@ namespace x {
         auto hr = _renderContext.GetDevice()->CreateBuffer(&desc, None, &_shadowParamsCB);
         PANIC_IF_FAILED(hr, "Failed to create shadow map constant buffer.")
 
+        Resize(width, height);
+    }
+
+    void ShadowPass::BeginPass() {
+        _renderContext.GetDeviceContext()->OMSetRenderTargets(0, None, _depthStencilView.Get());
+        _renderContext.GetDeviceContext()->OMSetDepthStencilState(_depthStencilState.Get(), 0);
+        _renderContext.GetDeviceContext()->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+        _vertexShader.Bind();
+        _pixelShader.Bind();
+
+        _renderContext.GetDeviceContext()->VSSetConstantBuffers(0, 1, _shadowParamsCB.GetAddressOf());
+    }
+
+    ID3D11ShaderResourceView* ShadowPass::EndPass() {
+        return _depthSRV.Get();
+    }
+
+    void ShadowPass::UpdateState(const ShadowMapParams& state) {
+        D3D11_MAPPED_SUBRESOURCE mapped;
+        const auto hr = _renderContext.GetDeviceContext()->
+                                       Map(_shadowParamsCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+        if (SUCCEEDED(hr)) {
+            auto* params          = CAST<ShadowMapParams*>(mapped.pData);
+            params->lightViewProj = state.lightViewProj;
+            params->world         = state.world;
+
+            _renderContext.GetDeviceContext()->Unmap(_shadowParamsCB.Get(), 0);
+        }
+    }
+
+    void ShadowPass::Resize(u32 width, u32 height) {
+        _depthSRV.Reset();
+        _depthStencilState.Reset();
+        _depthStencilView.Reset();
+
         D3D11_TEXTURE2D_DESC depthTexDesc = {};
         depthTexDesc.Width                = width;
         depthTexDesc.Height               = height;
@@ -149,7 +190,7 @@ namespace x {
         depthTexDesc.BindFlags            = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 
         ComPtr<ID3D11Texture2D> depthStencilTexture;
-        hr = _renderContext.GetDevice()->CreateTexture2D(&depthTexDesc, None, &depthStencilTexture);
+        auto hr = _renderContext.GetDevice()->CreateTexture2D(&depthTexDesc, None, &depthStencilTexture);
         PANIC_IF_FAILED(hr, "Failed to create Depth Stencil Texture")
 
         D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -182,38 +223,36 @@ namespace x {
         hr = _renderContext.GetDevice()->CreateDepthStencilState(&depthStencilStateDesc, &_depthStencilState);
         PANIC_IF_FAILED(hr, "Failed to create Depth Stencil State")
     }
-
-    void ShadowPass::BeginPass() {
-        _renderContext.GetDeviceContext()->OMSetRenderTargets(0, None, _depthStencilView.Get());
-        _renderContext.GetDeviceContext()->OMSetDepthStencilState(_depthStencilState.Get(), 0);
-        _renderContext.GetDeviceContext()->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
-
-        _vertexShader.Bind();
-        _pixelShader.Bind();
-
-        _renderContext.GetDeviceContext()->VSSetConstantBuffers(0, 1, _shadowParamsCB.GetAddressOf());
-    }
-
-    ID3D11ShaderResourceView* ShadowPass::EndPass() {
-        return _depthSRV.Get();
-    }
-
-    void ShadowPass::UpdateState(const ShadowMapParams& state) {
-        D3D11_MAPPED_SUBRESOURCE mapped;
-        const auto hr = _renderContext.GetDeviceContext()->
-                                       Map(_shadowParamsCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-        if (SUCCEEDED(hr)) {
-            auto* params          = CAST<ShadowMapParams*>(mapped.pData);
-            params->lightViewProj = state.lightViewProj;
-            params->world         = state.world;
-
-            _renderContext.GetDeviceContext()->Unmap(_shadowParamsCB.Get(), 0);
-        }
-    }
     #pragma endregion
 
     #pragma region LightingPass
     void LightPass::Initialize(u32 width, u32 height) {
+        Resize(width, height);
+    }
+
+    void LightPass::BeginPass(ID3D11ShaderResourceView* depthSRV) {
+        _renderContext.GetDeviceContext()->OMSetRenderTargets(1,
+                                                              _renderTargetView.GetAddressOf(),
+                                                              _depthStencilView.Get());
+        _renderContext.GetDeviceContext()->OMSetDepthStencilState(_depthStencilState.Get(), 0);
+
+        _renderContext.GetDeviceContext()->ClearRenderTargetView(_renderTargetView.Get(), Colors::Black);
+        _renderContext.GetDeviceContext()->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+        _renderContext.GetDeviceContext()->PSSetShaderResources(5, 1, &depthSRV);
+    }
+
+    ID3D11ShaderResourceView* LightPass::EndPass() {
+        return _outputSRV.Get();
+    }
+
+    void LightPass::Resize(u32 width, u32 height) {
+        _renderTargetView.Reset();
+        _depthStencilView.Reset();
+        _depthStencilState.Reset();
+        _outputSRV.Reset();
+        _sceneTexture.Reset();
+
         D3D11_TEXTURE2D_DESC depthStencilDesc = {};
         depthStencilDesc.Width                = width;
         depthStencilDesc.Height               = height;
@@ -269,22 +308,6 @@ namespace x {
 
         hr = _renderContext.GetDevice()->CreateShaderResourceView(_sceneTexture.Get(), None, &_outputSRV);
         PANIC_IF_FAILED(hr, "Failed to create shader resource view")
-    }
-
-    void LightPass::BeginPass(ID3D11ShaderResourceView* depthSRV) {
-        _renderContext.GetDeviceContext()->OMSetRenderTargets(1,
-                                                              _renderTargetView.GetAddressOf(),
-                                                              _depthStencilView.Get());
-        _renderContext.GetDeviceContext()->OMSetDepthStencilState(_depthStencilState.Get(), 0);
-
-        _renderContext.GetDeviceContext()->ClearRenderTargetView(_renderTargetView.Get(), Colors::Black);
-        _renderContext.GetDeviceContext()->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
-
-        _renderContext.GetDeviceContext()->PSSetShaderResources(5, 1, &depthSRV);
-    }
-
-    ID3D11ShaderResourceView* LightPass::EndPass() {
-        return _outputSRV.Get();
     }
     #pragma endregion
 }

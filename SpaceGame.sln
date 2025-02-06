@@ -25,6 +25,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{36EF6A
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{A8C58E1D-1276-463B-8D99-F4A8C6337EE0}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Design-Doc.md = Docs\Design-Doc.md
+		Docs\Engine-Architectutre.md = Docs\Engine-Architectutre.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64

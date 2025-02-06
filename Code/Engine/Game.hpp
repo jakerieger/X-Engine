@@ -76,7 +76,12 @@ namespace x {
         void Pause();
         void Resume();
 
-        void RenderScene(bool depthOnly = false);
+        void InitializeWindow();
+        void InitializeDX();
+        void InitializeEngine();
+
+        void RenderDepthOnly();
+        void RenderScene();
 
         LRESULT ResizeHandler(u32 width, u32 height);
         LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam);

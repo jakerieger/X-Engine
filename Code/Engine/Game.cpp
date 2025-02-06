@@ -57,7 +57,7 @@ namespace x {
                     {
                         ScopedTimer _("  - ShadowPass");
                         _renderSystem->BeginShadowPass();
-                        RenderScene(true); // Disable material binding
+                        RenderDepthOnly();
                         depthSRV = _renderSystem->EndShadowPass();
                     }
 
@@ -128,16 +128,39 @@ namespace x {
 
     f32 IGame::GetAspect() const { return CAST<f32>(_currentWidth) / CAST<f32>(_currentHeight); }
 
-    // This should never modify game state (always iterate as const)
-    void IGame::RenderScene(bool depthOnly) {
+    void IGame::RenderDepthOnly() {
         for (const auto& [entity, model] : _state.GetComponents<ModelComponent>()) {
-            model.Draw(!depthOnly);
+            model.Draw(false);
+        }
+    }
+
+    // This should never modify game state (always iterate as const)
+    void IGame::RenderScene() {
+        for (const auto& [entity, model] : _state.GetComponents<ModelComponent>()) {
+            model.Draw();
         }
     }
 
     void IGame::DrawDebugUI() {}
 
     void IGame::Initialize() {
+        InitializeWindow();
+        InitializeDX();
+        InitializeEngine();
+    }
+
+    void IGame::Shutdown() {
+        UnloadContent();
+        debugUI.reset();
+
+        CoUninitialize();
+    }
+
+    void IGame::Pause() { _isPaused = true; }
+
+    void IGame::Resume() { _isPaused = false; }
+
+    void IGame::InitializeWindow() {
         // Initialize COM (for DirectXTex)
         const auto hr = CoInitializeEx(None, COINIT_MULTITHREADED);
         PANIC_IF_FAILED(hr, "Failed to initialize COM");
@@ -168,7 +191,9 @@ namespace x {
 
         ShowWindow(_hwnd, SW_SHOWDEFAULT);
         UpdateWindow(_hwnd);
+    }
 
+    void IGame::InitializeDX() {
         _renderContext.Initialize(_hwnd, _currentWidth, _currentHeight);
         _renderSystem = make_unique<RenderSystem>(_renderContext);
         _renderSystem->Initialize(_currentWidth, _currentHeight);
@@ -176,7 +201,9 @@ namespace x {
         // Tell the engine that these classes need to handle resizing when the window size changes
         RegisterVolatile(_renderSystem.get());
         RegisterVolatile(&_state.GetMainCamera());
+    }
 
+    void IGame::InitializeEngine() {
         if (_debugUIEnabled) { debugUI = make_unique<DebugUI>(_hwnd, _renderContext); }
 
         devConsole.RegisterCommand("quit", [this](auto) { Quit(); });
@@ -217,17 +244,6 @@ namespace x {
 
         devConsole.RegisterCommand("r_Resume", [this](auto) { Resume(); });
     }
-
-    void IGame::Shutdown() {
-        UnloadContent();
-        debugUI.reset();
-
-        CoUninitialize();
-    }
-
-    void IGame::Pause() { _isPaused = true; }
-
-    void IGame::Resume() { _isPaused = false; }
 
     LRESULT IGame::ResizeHandler(u32 width, u32 height) {
         _currentWidth  = width;

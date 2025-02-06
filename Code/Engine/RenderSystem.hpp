@@ -36,6 +36,7 @@ namespace x {
         ID3D11ShaderResourceView* EndPass();
 
         void UpdateState(const ShadowMapParams& state);
+        void Resize(u32 width, u32 height);
     };
 
     class LightPass {
@@ -49,8 +50,11 @@ namespace x {
     public:
         explicit LightPass(RenderContext& context) : _renderContext(context) {}
         void Initialize(u32 width, u32 height);
+
         void BeginPass(ID3D11ShaderResourceView* depthSRV);
         ID3D11ShaderResourceView* EndPass();
+
+        void Resize(u32 width, u32 height);
     };
 
     class RenderSystem final : public Volatile {
@@ -87,6 +91,5 @@ namespace x {
         ComPtr<ID3D11DepthStencilState> _depthStencilState;
 
         void UpdateShadowPassParameters(const Matrix& lightViewProj, const Matrix& world);
-        void ResizeViews(u32 width, u32 height);
     };
 }
