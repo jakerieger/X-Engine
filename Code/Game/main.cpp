@@ -132,7 +132,7 @@ public:
         }
 
         auto& camera = state.GetMainCamera();
-        camera.SetFOV(70.0f);
+        camera.SetFOV(70.0f); // TODO: This appears to be completely broken with certain values (80,81,100) ???
         camera.SetPosition(XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f));
 
         auto& sun       = state.GetLightState().Sun;
