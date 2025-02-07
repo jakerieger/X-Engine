@@ -69,6 +69,7 @@ class SpaceGame final : public IGame {
     f32 _tonemapExposure       = 1.0f;
     bool _showPostProcessUI    = false;
 
+    f32 _rotY = 0.0f;
 
     EntityId _floorEntity;
     vector<EntityId> _monkeEntities;
@@ -95,27 +96,27 @@ public:
         const auto floorAlbedo = texLoader.LoadFromFile2D(ContentPath("checkerboard.dds"));
         const auto floorNormal = texLoader.LoadFromFile2D(ContentPath("Gold_Normal.dds"));
 
+        _monkeMaterial = PBRMaterial::Create(_renderContext);
         _floorMaterial = PBRMaterial::Create(_renderContext);
-        _floorMaterial->SetTextureMaps(floorAlbedo, None, None, floorNormal);
 
         _floorEntity         = state.CreateEntity();
         auto& floorTransform = state.AddComponent<TransformComponent>(_floorEntity);
         auto& floorModel     = state.AddComponent<ModelComponent>(_floorEntity);
 
-        floorTransform.SetPosition({0.0f, -1.4f, 0.0f});
+        floorTransform.SetPosition({0.0f, -1.f, 0.0f});
         floorModel.SetModelHandle(floorData)
                   .SetMaterialHandle(_floorMaterial)
-                  .SetCastsShadows(true);
+                  .SetCastsShadows(true)
+                  .GetMaterialInstance()
+                  .SetTextureMaps(floorAlbedo, None, None, floorNormal);
 
         const auto monkeAlbedo    = texLoader.LoadFromFile2D(ContentPath("Metal_Albedo.dds"));
         const auto monkeNormal    = texLoader.LoadFromFile2D(ContentPath("Metal_Normal.dds"));
         const auto monkeMetallic  = texLoader.LoadFromFile2D(ContentPath("Metal_Metallic.dds"));
         const auto monkeRoughness = texLoader.LoadFromFile2D(ContentPath("Metal_Roughness.dds"));
-        _monkeMaterial            = PBRMaterial::Create(_renderContext);
-        _monkeMaterial->SetTextureMaps(monkeAlbedo, monkeMetallic, monkeRoughness, monkeNormal);
 
         const auto monkeData     = modelLoader.LoadFromFile(ContentPath("Monke.glb"));
-        const auto gridPositions = GenerateGrid(3, 3, -3, 3, 0, 3);
+        const auto gridPositions = GenerateGrid(3, 3, -3, 3, 0, 5);
         for (size_t i = 0; i < gridPositions.size(); ++i) {
             const auto monkeEntity = state.CreateEntity();
             auto& transform        = state.AddComponent<TransformComponent>(monkeEntity);
@@ -124,6 +125,7 @@ public:
             model.SetModelHandle(monkeData);
             model.SetMaterialHandle(_monkeMaterial);
             model.SetCastsShadows(true);
+            model.GetMaterialInstance().SetTextureMaps(monkeAlbedo, monkeMetallic, monkeRoughness, monkeNormal);
 
             transform.SetPosition(gridPositions[i].position);
             _monkeEntities.push_back(monkeEntity);
@@ -178,30 +180,18 @@ public:
     void UnloadContent() override {}
 
     void Update(GameState& state, const Clock& clock) override {
-        auto view = state.GetMainCamera().GetViewMatrix();
-        auto proj = state.GetMainCamera().GetProjectionMatrix();
+        _rotY += (f32)clock.GetDeltaTime() * 45.f;
+
+        for (const auto& monke : _monkeEntities) {
+            auto transform = state.GetComponentMutable<TransformComponent>(monke);
+            transform->SetRotation({0.0f, _rotY, 0.0f});
+        }
 
         // Update transform components
         std::unordered_map<EntityId, TransformComponent*> entitiesWithTransform;
         for (auto [entity, transform] : state.GetComponents<TransformComponent>().GetMutable()) {
             transform.Update();
             entitiesWithTransform[entity] = &transform;
-        }
-
-        // Iterate entities and update model material params
-        for (auto [entity, model] : state.GetComponents<ModelComponent>().GetMutable()) {
-            TransformComponent* transform = None;
-            if (entitiesWithTransform.contains(entity)) { transform = entitiesWithTransform[entity]; }
-
-            if (transform) {
-                model.UpdateMaterialParams({transform->GetTransformMatrix(), view, proj},
-                                           state.GetLightState(),
-                                           state.GetMainCamera().GetPosition());
-            } else {
-                model.UpdateMaterialParams({XMMatrixIdentity(), view, proj},
-                                           state.GetLightState(),
-                                           state.GetMainCamera().GetPosition());
-            }
         }
     }
 

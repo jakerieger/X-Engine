@@ -35,20 +35,17 @@ struct DirectionalLight {
 };
 
 struct PointLight {
-    float3 position;  // Takes 12 bytes, needs 4-byte padding
-    float padding1;   // Add 4 bytes to align next float3
-
-    float3 color;     // Takes 12 bytes, needs 4-byte padding
-    float intensity;  // We can use this as natural padding
-
-    float constant;  // These scalars can be packed together
+    float3 position;
+    float padding1;
+    float3 color;
+    float intensity;
+    float constant;
     float lin;
     float quadratic;
-    float radius;  // All floats align naturally
-
-    bool castsShadow;  // Bools in HLSL typically use 4 bytes
-    bool enabled;      // Need 2 bytes padding to maintain alignment
-    float2 padding2;   // Add explicit padding to reach 16-byte alignment
+    float radius;
+    bool castsShadow;
+    bool enabled;
+    float2 padding2;
 };
 
 struct SpotLight {
@@ -89,6 +86,7 @@ struct PBRMaterial {
     float metallic;
     float roughness;
     float ao;
+    float2 _pad;
     float3 emissive;
     float emissiveStrength;
 };

@@ -8,7 +8,7 @@
 namespace x {
     class ModelComponent {
         ModelHandle _modelHandle;
-        shared_ptr<PBRMaterial> _materialHandle;
+        PBRMaterialInstance _materialInstance;
         bool _castsShadows = true;
 
     public:
@@ -20,7 +20,7 @@ namespace x {
         }
 
         ModelComponent& SetMaterialHandle(const shared_ptr<PBRMaterial>& material) {
-            _materialHandle = material;
+            _materialInstance.SetBaseMaterial(material);
             return *this;
         }
 
@@ -29,26 +29,20 @@ namespace x {
             return *this;
         }
 
-        shared_ptr<PBRMaterial> GetMaterialHandle() const {
-            return _materialHandle;
+        PBRMaterialInstance& GetMaterialInstance() {
+            return _materialInstance;
         }
 
-        void UpdateMaterialParams(const TransformMatrices& transforms,
-                                  const LightState& lights,
-                                  const Float3& eyePosition) {
-            if (_materialHandle) {
-                _materialHandle->UpdateBuffers(transforms, lights, eyePosition);
-            }
-        }
-
-        void Draw(const bool applyMaterial = true) const {
-            if (applyMaterial && _materialHandle) {
-                _materialHandle->Apply();
-            }
-
+        void DrawWithMaterial(const TransformMatrices& transforms,
+                              const LightState& lights,
+                              const Float3& eyePosition) const {
+            _materialInstance.Bind(transforms, lights, eyePosition);
             _modelHandle.Draw();
+            _materialInstance.Unbind();
+        }
 
-            if (applyMaterial && _materialHandle) { _materialHandle->Clear(); }
+        void Draw() const {
+            _modelHandle.Draw();
         }
     };
 }

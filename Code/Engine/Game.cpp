@@ -132,14 +132,20 @@ namespace x {
             _renderSystem->UpdateShadowPassParameters(_state.GetLightState().Sun.lightViewProj,
                                                       XMMatrixTranspose(world));
 
-            model.Draw(false);
+            model.Draw();
         }
     }
 
     // This should never modify game state (always iterate as const)
     void IGame::RenderScene() {
         for (const auto& [entity, model] : _state.GetComponents<ModelComponent>()) {
-            model.Draw(true);
+            Matrix world = XMMatrixIdentity();
+            auto view    = _state.GetMainCamera().GetViewMatrix();
+            auto proj    = _state.GetMainCamera().GetProjectionMatrix();
+
+            const auto transformComponent = _state.GetComponent<TransformComponent>(entity);
+            if (transformComponent) { world = transformComponent->GetTransformMatrix(); }
+            model.DrawWithMaterial({world, view, proj}, _state.GetLightState(), _state.GetMainCamera().GetPosition());
         }
     }
 

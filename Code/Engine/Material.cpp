@@ -12,82 +12,6 @@ namespace x {
         CreateBuffers();
     }
 
-    void PBRMaterial::Apply() {
-        _vertexShader->Bind();
-        _pixelShader->Bind();
-
-        // ReSharper disable CppCStyleCast
-        if (_albedoMap.get()) { _albedoMap->Bind((u32)TextureMapSlot::Albedo); }
-        if (_metallicMap.get()) { _metallicMap->Bind((u32)TextureMapSlot::Metallic); }
-        if (_roughnessMap.get()) { _roughnessMap->Bind((u32)TextureMapSlot::Roughness); }
-        if (_normalMap.get()) { _normalMap->Bind((u32)TextureMapSlot::Normal); }
-        // ReSharper restore CppCStyleCast
-        // Ambient Occlusion map is bound to slot 3
-
-        auto* context = _renderer.GetDeviceContext();
-        context->VSSetConstantBuffers(0, 1, _transformsCB.GetAddressOf());
-        context->PSSetConstantBuffers(1, 1, _lightsCB.GetAddressOf());
-        context->VSSetConstantBuffers(1, 1, _lightsCB.GetAddressOf());
-        context->PSSetConstantBuffers(2, 1, _materialCB.GetAddressOf());
-        context->PSSetConstantBuffers(3, 1, _cameraCB.GetAddressOf());
-    }
-
-    void PBRMaterial::Clear() {
-        // ReSharper disable CppCStyleCast
-        if (_albedoMap.get()) { _albedoMap->Unbind((u32)TextureMapSlot::Albedo); }
-        if (_metallicMap.get()) { _metallicMap->Unbind((u32)TextureMapSlot::Metallic); }
-        if (_roughnessMap.get()) { _roughnessMap->Unbind((u32)TextureMapSlot::Roughness); }
-        if (_normalMap.get()) { _normalMap->Unbind((u32)TextureMapSlot::Normal); }
-        // ReSharper restore CppCStyleCast
-    }
-
-    void PBRMaterial::SetAlbedo(const Float3& albedo) {
-        _materialProperties.albedo = albedo;
-    }
-
-    void PBRMaterial::SetMetallic(f32 metallic) {
-        _materialProperties.metallic = metallic;
-    }
-
-    void PBRMaterial::SetRoughness(f32 roughness) {
-        _materialProperties.roughness = roughness;
-    }
-
-    void PBRMaterial::SetAO(f32 ao) {
-        _materialProperties.ao = ao;
-    }
-
-    void PBRMaterial::SetEmissive(const Float3& emissive, f32 strength) {
-        _materialProperties.emissive         = emissive;
-        _materialProperties.emissiveStrength = strength;
-    }
-
-    void PBRMaterial::SetAlbedoMap(const TextureHandle<Texture2D>& albedo) {
-        _albedoMap = albedo;
-    }
-
-    void PBRMaterial::SetMetallicMap(const TextureHandle<Texture2D>& metallic) {
-        _metallicMap = metallic;
-    }
-
-    void PBRMaterial::SetRoughnessMap(const TextureHandle<Texture2D>& roughness) {
-        _roughnessMap = roughness;
-    }
-
-    void PBRMaterial::SetNormalMap(const TextureHandle<Texture2D>& normal) {
-        _normalMap = normal;
-    }
-
-    void PBRMaterial::SetTextureMaps(const TextureHandle<Texture2D>& albedo,
-                                     const TextureHandle<Texture2D>& metallic,
-                                     const TextureHandle<Texture2D>& roughness,
-                                     const TextureHandle<Texture2D>& normal) {
-        SetAlbedoMap(albedo);
-        SetMetallicMap(metallic);
-        SetRoughnessMap(roughness);
-        SetNormalMap(normal);
-    }
-
     shared_ptr<PBRMaterial> PBRMaterial::Create(RenderContext& renderer) {
         return make_shared<PBRMaterial>(renderer);
     }
@@ -140,6 +64,7 @@ namespace x {
 
     void PBRMaterial::UpdateBuffers(const TransformMatrices& transforms,
                                     const LightState& lights,
+                                    const MaterialProperties& matProps,
                                     const Float3& eyePosition) {
         auto* context = _renderer.GetDeviceContext();
 
@@ -159,7 +84,7 @@ namespace x {
         // Update material properties buffer
         hr = context->Map(_materialCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
         PANIC_IF_FAILED(hr, "Failed to map material buffer.")
-        memcpy(mapped.pData, &_materialProperties, sizeof(_materialProperties));
+        memcpy(mapped.pData, &matProps, sizeof(MaterialProperties));
         context->Unmap(_materialCB.Get(), 0);
 
         // Camera buffer
@@ -168,5 +93,109 @@ namespace x {
         Float4 paddedPos = Float4(eyePosition.x, eyePosition.y, eyePosition.z, 0.0f);
         memcpy(mapped.pData, &paddedPos, sizeof(paddedPos));
         context->Unmap(_cameraCB.Get(), 0);
+    }
+
+    void PBRMaterial::BindShaders() {
+        _vertexShader->Bind();
+        _pixelShader->Bind();
+    }
+
+    void PBRMaterial::BindBuffers() {
+        auto* context = _renderer.GetDeviceContext();
+        context->VSSetConstantBuffers(0, 1, _transformsCB.GetAddressOf());
+        context->PSSetConstantBuffers(1, 1, _lightsCB.GetAddressOf());
+        context->VSSetConstantBuffers(1, 1, _lightsCB.GetAddressOf());
+        context->PSSetConstantBuffers(2, 1, _materialCB.GetAddressOf());
+        context->PSSetConstantBuffers(3, 1, _cameraCB.GetAddressOf());
+    }
+
+    //=====================================================================================================================//
+    //=====================================================================================================================//
+
+    void PBRMaterialInstance::SetAlbedo(const Float3& albedo) {
+        _albedo = albedo;
+    }
+
+    void PBRMaterialInstance::SetMetallic(f32 metallic) {
+        _metallic = metallic;
+    }
+
+    void PBRMaterialInstance::SetRoughness(f32 roughness) {
+        _roughness = roughness;
+    }
+
+    void PBRMaterialInstance::SetAO(f32 ao) {
+        _ao = ao;
+    }
+
+    void PBRMaterialInstance::SetEmissive(const Float3& emissive, f32 strength) {
+        _emissive         = emissive;
+        _emissiveStrength = strength;
+    }
+
+    void PBRMaterialInstance::SetAlbedoMap(const TextureHandle<Texture2D>& albedo) {
+        _albedoMap = albedo;
+    }
+
+    void PBRMaterialInstance::SetMetallicMap(const TextureHandle<Texture2D>& metallic) {
+        _metallicMap = metallic;
+    }
+
+    void PBRMaterialInstance::SetRoughnessMap(const TextureHandle<Texture2D>& roughness) {
+        _roughnessMap = roughness;
+    }
+
+    void PBRMaterialInstance::SetNormalMap(const TextureHandle<Texture2D>& normal) {
+        _normalMap = normal;
+    }
+
+    void PBRMaterialInstance::SetTextureMaps(const TextureHandle<Texture2D>& albedo,
+                                             const TextureHandle<Texture2D>& metallic,
+                                             const TextureHandle<Texture2D>& roughness,
+                                             const TextureHandle<Texture2D>& normal) {
+        SetAlbedoMap(albedo);
+        SetMetallicMap(metallic);
+        SetRoughnessMap(roughness);
+        SetNormalMap(normal);
+    }
+
+    void PBRMaterialInstance::Bind(const TransformMatrices& transforms,
+                                   const LightState& lights,
+                                   const Float3 eyePos) const {
+        UpdateInstanceParams(transforms, lights, eyePos);
+
+        _baseMaterial->BindShaders();
+
+        // ReSharper disable CppCStyleCast
+        if (_albedoMap.get()) { _albedoMap->Bind((u32)TextureMapSlot::Albedo); }
+        if (_metallicMap.get()) { _metallicMap->Bind((u32)TextureMapSlot::Metallic); }
+        if (_roughnessMap.get()) { _roughnessMap->Bind((u32)TextureMapSlot::Roughness); }
+        if (_normalMap.get()) { _normalMap->Bind((u32)TextureMapSlot::Normal); }
+        // ReSharper restore CppCStyleCast
+
+        _baseMaterial->BindBuffers();
+    }
+
+    void PBRMaterialInstance::Unbind() const {
+        // ReSharper disable CppCStyleCast
+        if (_albedoMap.get()) { _albedoMap->Unbind((u32)TextureMapSlot::Albedo); }
+        if (_metallicMap.get()) { _metallicMap->Unbind((u32)TextureMapSlot::Metallic); }
+        if (_roughnessMap.get()) { _roughnessMap->Unbind((u32)TextureMapSlot::Roughness); }
+        if (_normalMap.get()) { _normalMap->Unbind((u32)TextureMapSlot::Normal); }
+        // ReSharper restore CppCStyleCast
+    }
+
+    void PBRMaterialInstance::UpdateInstanceParams(const TransformMatrices& transforms,
+                                                   const LightState& lights,
+                                                   const Float3 eyePos) const {
+        PBRMaterial::MaterialProperties materialProperties;
+        materialProperties.albedo           = _albedo;
+        materialProperties.metallic         = _metallic;
+        materialProperties.roughness        = _roughness;
+        materialProperties.ao               = _ao;
+        materialProperties.emissive         = _emissive;
+        materialProperties.emissiveStrength = _emissiveStrength;
+
+        _baseMaterial->UpdateBuffers(transforms, lights, materialProperties, eyePos);
     }
 }
