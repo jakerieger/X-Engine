@@ -82,6 +82,15 @@
     <ClCompile Include="..\Code\Engine\TransformComponent.cpp">
       <Filter>Source\Components</Filter>
     </ClCompile>
+    <ClCompile Include="..\Code\Engine\MaterialComponent.cpp">
+      <Filter>Source\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Code\Engine\ArenaAllocator.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Code\Engine\PoolAllocator.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Code\Engine\Game.hpp">
@@ -480,6 +489,15 @@
     <ClInclude Include="..\Code\Engine\TransformComponent.hpp">
       <Filter>Source\Components</Filter>
     </ClInclude>
+    <ClInclude Include="..\Code\Engine\MaterialComponent.hpp">
+      <Filter>Source\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\ArenaAllocator.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\PoolAllocator.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Configuration">
@@ -505,9 +523,6 @@
     </Filter>
     <Filter Include="Vendor\assimp">
       <UniqueIdentifier>{5410eaed-8296-475b-a9cd-d7d847acaec5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Content">
-      <UniqueIdentifier>{83111351-af2e-4cbb-83cb-63ae4b490e84}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source\PostProcessing">
       <UniqueIdentifier>{f240dd6b-0ca8-478c-98ab-a48c626ebfb5}</UniqueIdentifier>
@@ -563,9 +578,6 @@
     <None Include="Shaders\Source\PBR_TexMaps.hlsl">
       <Filter>Shaders\Source</Filter>
     </None>
-    <None Include="Content\Monke.glb">
-      <Filter>Content</Filter>
-    </None>
     <None Include="Shaders\Source\ScreenTexture.hlsl">
       <Filter>Shaders\Source</Filter>
     </None>
@@ -578,40 +590,11 @@
     <None Include="Shaders\Source\ColorGrade.hlsl">
       <Filter>Shaders\Source</Filter>
     </None>
-    <None Include="Content\Floor.glb">
-      <Filter>Content</Filter>
-    </None>
     <None Include="Shaders\Source\ShadowPass.hlsl">
       <Filter>Shaders\Source</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Content\checkerboard.dds">
-      <Filter>Content</Filter>
-    </Image>
-    <Image Include="Content\Metal_Albedo.dds">
-      <Filter>Content</Filter>
-    </Image>
-    <Image Include="Content\Metal_Metallic.dds">
-      <Filter>Content</Filter>
-    </Image>
-    <Image Include="Content\Metal_Normal.dds">
-      <Filter>Content</Filter>
-    </Image>
-    <Image Include="Content\Metal_Roughness.dds">
-      <Filter>Content</Filter>
-    </Image>
-    <Image Include="Content\Gold_Roughness.dds">
-      <Filter>Content</Filter>
-    </Image>
-    <Image Include="Content\Gold_Normal.dds">
-      <Filter>Content</Filter>
-    </Image>
-    <Image Include="Content\Gold_Metallic.dds">
-      <Filter>Content</Filter>
-    </Image>
-    <Image Include="Content\Gold_Albedo.dds">
-      <Filter>Content</Filter>
-    </Image>
+    <None Include="Shaders\manifest.json">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

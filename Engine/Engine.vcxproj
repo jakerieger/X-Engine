@@ -153,6 +153,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Code\Engine\ArenaAllocator.cpp" />
     <ClCompile Include="..\Code\Engine\Camera.cpp" />
     <ClCompile Include="..\Code\Engine\Clock.cpp" />
     <ClCompile Include="..\Code\Engine\ColorGradeEffect.cpp" />
@@ -161,9 +162,11 @@
     <ClCompile Include="..\Code\Engine\Game.cpp" />
     <ClCompile Include="..\Code\Engine\GenericLoader.cpp" />
     <ClCompile Include="..\Code\Engine\Material.cpp" />
+    <ClCompile Include="..\Code\Engine\MaterialComponent.cpp" />
     <ClCompile Include="..\Code\Engine\Mesh.cpp" />
     <ClCompile Include="..\Code\Engine\Model.cpp" />
     <ClCompile Include="..\Code\Engine\ModelComponent.cpp" />
+    <ClCompile Include="..\Code\Engine\PoolAllocator.cpp" />
     <ClCompile Include="..\Code\Engine\PostProcessSystem.cpp" />
     <ClCompile Include="..\Code\Engine\RasterizerState.cpp" />
     <ClCompile Include="..\Code\Engine\RenderContext.cpp" />
@@ -180,10 +183,11 @@
     <ClCompile Include="..\Code\Vendor\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\Code\Vendor\imgui\imgui_widgets.cpp" />
     <ClCompile Include="..\Code\Vendor\ufbx.c" />
-    <None Include="Content\Floor.glb" />
+    <None Include="Shaders\manifest.json" />
     <None Include="Shaders\Source\ColorGrade.hlsl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Code\Engine\ArenaAllocator.hpp" />
     <ClInclude Include="..\Code\Engine\Camera.hpp" />
     <ClInclude Include="..\Code\Engine\Clock.hpp" />
     <ClInclude Include="..\Code\Engine\ColorGradeEffect.hpp" />
@@ -201,11 +205,13 @@
     <ClInclude Include="..\Code\Engine\InputLayouts.hpp" />
     <ClInclude Include="..\Code\Engine\Lights.hpp" />
     <ClInclude Include="..\Code\Engine\Material.hpp" />
+    <ClInclude Include="..\Code\Engine\MaterialComponent.hpp" />
     <ClInclude Include="..\Code\Engine\Math.hpp" />
     <ClInclude Include="..\Code\Engine\Mesh.hpp" />
     <ClInclude Include="..\Code\Engine\Model.hpp" />
     <ClInclude Include="..\Code\Engine\ModelComponent.hpp" />
     <ClInclude Include="..\Code\Engine\Platform.hpp" />
+    <ClInclude Include="..\Code\Engine\PoolAllocator.hpp" />
     <ClInclude Include="..\Code\Engine\PostProcessSystem.hpp" />
     <ClInclude Include="..\Code\Engine\RasterizerState.hpp" />
     <ClInclude Include="..\Code\Engine\RenderContext.hpp" />
@@ -332,7 +338,6 @@
     <None Include="..\Code\Vendor\SMAA.hlsl">
       <FileType>Document</FileType>
     </None>
-    <None Include="Content\Monke.glb" />
     <None Include="packages.config" />
     <None Include="Shaders\Source\Common.hlsli" />
     <None Include="Shaders\Source\IO.hlsli" />
@@ -352,17 +357,6 @@
     <None Include="Shaders\Source\PBR_TexMaps.hlsl">
       <FileType>Document</FileType>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Content\checkerboard.dds" />
-    <Image Include="Content\Gold_Albedo.dds" />
-    <Image Include="Content\Gold_Metallic.dds" />
-    <Image Include="Content\Gold_Normal.dds" />
-    <Image Include="Content\Gold_Roughness.dds" />
-    <Image Include="Content\Metal_Albedo.dds" />
-    <Image Include="Content\Metal_Metallic.dds" />
-    <Image Include="Content\Metal_Normal.dds" />
-    <Image Include="Content\Metal_Roughness.dds" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Source\ScreenTexture.hlsl">
@@ -389,4 +383,9 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\directxtex_desktop_win10.2024.10.29.1\build\native\directxtex_desktop_win10.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtex_desktop_win10.2024.10.29.1\build\native\directxtex_desktop_win10.targets'))" />
   </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties Shaders_4manifest_1json__JsonSchema="" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

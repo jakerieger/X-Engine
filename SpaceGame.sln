@@ -31,6 +31,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{A8C58E1D-1
 		Docs\Engine-Architecture.md = Docs\Engine-Architecture.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{5D2C4A82-1118-4766-8627-F90E2618B5BA}"
+	ProjectSection(SolutionItems) = preProject
+		Scripts\CompileShaders.py = Scripts\CompileShaders.py
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64

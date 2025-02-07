@@ -51,7 +51,7 @@ static vector<GridPosition> GenerateGrid(const int rows = 3,
 // TODO: Make this relative to the executable path, this is simply for testing (and because I'm lazy)
 static str ContentPath(const str& filename) {
     auto filePath    = Path(__FILE__).Parent();
-    auto contentPath = filePath / ".." / ".." / "Engine" / "Content";
+    auto contentPath = filePath / ".." / ".." / "Game" / "Content";
     return (contentPath / filename).Str();
 }
 

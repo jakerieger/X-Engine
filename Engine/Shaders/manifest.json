@@ -1,0 +1,34 @@
+{
+  "compiler": {
+    "fxcPath": "C:/Tools/fxc.exe"
+  },
+  "shaderModel": 5,
+  "shaders": {
+    "output": "Engine/Shaders/Compiled",
+    "graphics": [
+      {
+        "name": "Lit",
+        "source": "PBR_TexMaps.hlsl"
+      },
+      {
+        "name": "ShadowPass",
+        "source": "ShadowPass.hlsl"
+      },
+      {
+        "name": "ScreenTexture",
+        "source": "ScreenTexture.hlsl"
+      }
+    ],
+    "compute": [
+      {
+        "name": "ColorGrade",
+        "source": "ColorGrade.hlsl"
+      },
+      {
+        "name": "Tonemap",
+        "source": "Tonemap.hlsl"
+      }
+    ]
+  },
+  "version": "1.0"
+}

@@ -7,7 +7,7 @@
 
 namespace x {
     class Mesh {
-        RenderContext& _renderer;
+        RenderContext& _renderContext;
         GeometryBuffer _geometryBuffers{};
 
     public:

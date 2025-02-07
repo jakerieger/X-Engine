@@ -6,5 +6,45 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Content\Floor.glb">
+      <Filter>Content</Filter>
+    </None>
+    <None Include="Content\Monke.glb">
+      <Filter>Content</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Content">
+      <UniqueIdentifier>{6d48e27d-7dd2-41c5-8efc-c9e00b65b1d3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Content\checkerboard.dds">
+      <Filter>Content</Filter>
+    </Image>
+    <Image Include="Content\Gold_Albedo.dds">
+      <Filter>Content</Filter>
+    </Image>
+    <Image Include="Content\Gold_Metallic.dds">
+      <Filter>Content</Filter>
+    </Image>
+    <Image Include="Content\Gold_Normal.dds">
+      <Filter>Content</Filter>
+    </Image>
+    <Image Include="Content\Gold_Roughness.dds">
+      <Filter>Content</Filter>
+    </Image>
+    <Image Include="Content\Metal_Albedo.dds">
+      <Filter>Content</Filter>
+    </Image>
+    <Image Include="Content\Metal_Metallic.dds">
+      <Filter>Content</Filter>
+    </Image>
+    <Image Include="Content\Metal_Normal.dds">
+      <Filter>Content</Filter>
+    </Image>
+    <Image Include="Content\Metal_Roughness.dds">
+      <Filter>Content</Filter>
+    </Image>
   </ItemGroup>
 </Project>
