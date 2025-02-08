@@ -77,7 +77,7 @@ namespace x {
                         if (_debugUIEnabled) {
                             _debugUI->BeginFrame(); // begin ImGui frame
                             _debugUI->Draw(_renderContext, _clock); // draw built-in debug ui
-                            DrawDebugUI(); // draw user-defined debug ui
+                            DrawDebugUI(_state); // draw user-defined debug ui
                             _devConsole.Draw(); // draw developer console last so it overlaps correctly
                             _debugUI->EndFrame(); // end imgui frame
                         }
@@ -148,8 +148,6 @@ namespace x {
             model.DrawWithMaterial({world, view, proj}, _state.GetLightState(), _state.GetMainCamera().GetPosition());
         }
     }
-
-    void IGame::DrawDebugUI() {}
 
     void IGame::Initialize() {
         InitializeWindow();

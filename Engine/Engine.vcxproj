@@ -126,6 +126,12 @@
       <AdditionalDependencies>d3d11.lib;dxguid.lib;assimp-vc143-mtd.lib;dxgi.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Users\conta\Libraries\assimp\build\lib\Debug</AdditionalLibraryDirectories>
     </Lib>
+    <PreBuildEvent>
+      <Command>python "$(SolutionDir)Scripts\compile_shaders.py" "$(ProjectDir)Shaders\manifest.json"</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Compile shaders</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -151,6 +157,12 @@
       <AdditionalDependencies>d3d11.lib;dxguid.lib;assimp-vc143-mtd.lib;dxgi.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Users\conta\Libraries\assimp\build\lib\Debug</AdditionalLibraryDirectories>
     </Lib>
+    <PreBuildEvent>
+      <Command>python "$(SolutionDir)Scripts\compile_shaders.py" "$(ProjectDir)Shaders\manifest.json"</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Compile shaders</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Code\Engine\ArenaAllocator.cpp" />

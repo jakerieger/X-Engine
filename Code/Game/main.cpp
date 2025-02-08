@@ -69,7 +69,8 @@ class SpaceGame final : public IGame {
     f32 _tonemapExposure       = 1.0f;
     bool _showPostProcessUI    = false;
 
-    f32 _rotY = 0.0f;
+    f32 _rotY      = 0.0f;
+    f32 _sunHeight = 0.6f;
 
     EntityId _floorEntity;
     vector<EntityId> _monkeEntities;
@@ -139,12 +140,12 @@ public:
         sun.enabled     = true;
         sun.intensity   = 2.0f;
         sun.color       = {1.0f, 1.0f, 1.0f, 1.0f};
-        sun.direction   = {0.6f, 0.6f, -0.6f, 0.0f};
+        sun.direction   = {0.6f, _sunHeight, -0.6f, 0.0f};
         sun.castsShadow = true;
 
         // Calculate our light view projection for shadow mapping
         // viewWidth was set by trial and error, 10.0 just looked the best to me
-        const auto lvp    = CalculateLightViewProjection(sun, 10.0f, state.GetMainCamera().GetAspectRatio());
+        const auto lvp    = CalculateLightViewProjection(sun, 16.f, state.GetMainCamera().GetAspectRatio());
         sun.lightViewProj = XMMatrixTranspose(lvp);
         // Functions that return matrices will never transpose them (for consistency-sake)
 
@@ -195,7 +196,7 @@ public:
         }
     }
 
-    void DrawDebugUI() override {
+    void DrawDebugUI(GameState& state) override {
         static constexpr std::array<const char*, 4> tonemapOpNames = {"ACES", "Reinhard", "Filmic", "Linear"};
         static bool dropdownValueChanged                           = false;
 
@@ -232,6 +233,17 @@ public:
             _tonemap->SetExposure(_tonemapExposure);
             _tonemap->SetOperator(_tonemapOp);
         }
+
+        ImGui::Begin("Scene");
+        {
+            ImGui::SliderFloat("Sun Height", &_sunHeight, 0.1f, 1.0f);
+        }
+        ImGui::End();
+
+        auto& sun         = state.GetLightState().Sun;
+        sun.direction.y   = _sunHeight;
+        sun.lightViewProj =
+            XMMatrixTranspose(CalculateLightViewProjection(sun, 16.f, state.GetMainCamera().GetAspectRatio()));
     }
 
     void OnResize(u32 width, u32 height) override {}

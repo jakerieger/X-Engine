@@ -60,7 +60,7 @@ namespace x {
         virtual void UnloadContent() = 0;
         virtual void Update(GameState& state, const Clock& clock) = 0;
         virtual void OnResize(u32 width, u32 height) = 0;
-        virtual void DrawDebugUI();
+        virtual void DrawDebugUI(GameState& state) {}
 
     protected:
         std::unique_ptr<DebugUI> _debugUI;

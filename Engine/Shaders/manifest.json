@@ -4,7 +4,8 @@
   },
   "shaderModel": 5,
   "shaders": {
-    "output": "Engine/Shaders/Compiled",
+    "output": "Compiled",
+    "sourceDir": "Source",
     "graphics": [
       {
         "name": "Lit",
