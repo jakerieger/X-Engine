@@ -1,6 +1,7 @@
 #include "RenderSystem.hpp"
 #include "RenderContext.hpp"
 #include "TonemapEffect.hpp"
+#include "Material.hpp"
 
 namespace x {
     #pragma region RenderSystem

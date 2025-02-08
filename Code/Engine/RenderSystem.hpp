@@ -3,13 +3,9 @@
 #include "Common/Types.hpp"
 #include "D3D.hpp"
 #include "Math.hpp"
-#include "Model.hpp"
 #include "Shader.hpp"
-#include "Lights.hpp"
-#include "Material.hpp"
 #include "PostProcessSystem.hpp"
 #include "Volatile.hpp"
-#include "Common/Panic.hpp"
 
 namespace x {
     class RenderContext;

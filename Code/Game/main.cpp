@@ -34,8 +34,8 @@ static vector<GridPosition> GenerateGrid(const int rows = 3,
 
     for (auto row = 0; row < rows; row++) {
         for (auto col = 0; col < cols; col++) {
-            f32 x = xMin + (col * xStep);
-            f32 z = zMin + (row * zStep);
+            f32 x = xMin + (CAST<f32>(col) * xStep);
+            f32 z = zMin + (CAST<f32>(row) * zStep);
 
             GridPosition pos;
             pos.position = {x, 0.0f, z};

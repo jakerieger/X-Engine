@@ -3,6 +3,7 @@
 #include "Clock.hpp"
 #include "DebugUI.hpp"
 #include "DevConsole.hpp"
+#include "EngineCommon.hpp"
 #include "GameState.hpp"
 #include "Common/Types.hpp"
 #include "Platform.hpp"
@@ -31,21 +32,20 @@ namespace x {
         virtual ~IGame();
 
         // Prevent moves or copies
-        IGame(const IGame& other)            = delete;
-        IGame(IGame&& other)                 = delete;
-        IGame& operator=(const IGame& other) = delete;
-        IGame& operator=(IGame&& other)      = delete;
+        CLASS_PREVENT_MOVES_COPIES(IGame)
 
         /// @brief This is the only function that is required to be called on an IGame instance.
         /// Initializes the app, enters into the main loop, and shuts down when the application is closed.
         void Run();
 
-        /// @brief Quits a running IGame instance
+        /// @brief Quits a running IGame instance.
+        /// This is primarily for internal use but can be called at any point without issue.
         void Quit();
 
         /// @brief Enables the console window for Win32 apps. Typically enabled for debug builds to show console output.
         bool EnableConsole();
 
+        /// @brief Enables the debug UI (profiler, developer console, etc)
         void EnableDebugUI();
 
         [[nodiscard]] u32 GetWidth() const;
