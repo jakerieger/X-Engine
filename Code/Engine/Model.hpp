@@ -27,6 +27,7 @@ namespace x {
         friend ModelHandle;
         friend class FBXLoader;
         friend class GenericLoader;
+        friend class ModelLoader;
 
     public:
         explicit ModelData(RenderContext& renderer) : _renderer(renderer) {}
