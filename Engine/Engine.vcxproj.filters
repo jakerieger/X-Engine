@@ -91,6 +91,9 @@
     <ClCompile Include="..\Code\Engine\PoolAllocator.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Code\Engine\ResourceManager.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Code\Engine\Game.hpp">
@@ -499,6 +502,12 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Code\Engine\EngineCommon.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\Memory.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\ResourceManager.hpp">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>

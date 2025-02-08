@@ -249,6 +249,9 @@ public:
     void OnResize(u32 width, u32 height) override {}
 };
 
+#include "Engine/Memory.hpp"
+#include "Engine/ArenaAllocator.hpp"
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow) {
     SpaceGame game(hInstance);
 
@@ -258,6 +261,4 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 
     game.EnableDebugUI();
     game.Run();
-
-    return 0; // I know you don't have to, but I like the explicit nature of this.
 }

@@ -183,6 +183,7 @@
     <ClCompile Include="..\Code\Engine\RasterizerState.cpp" />
     <ClCompile Include="..\Code\Engine\RenderContext.cpp" />
     <ClCompile Include="..\Code\Engine\RenderSystem.cpp" />
+    <ClCompile Include="..\Code\Engine\ResourceManager.cpp" />
     <ClCompile Include="..\Code\Engine\Shader.cpp" />
     <ClCompile Include="..\Code\Engine\Texture.cpp" />
     <ClCompile Include="..\Code\Engine\TonemapEffect.cpp" />
@@ -220,6 +221,7 @@
     <ClInclude Include="..\Code\Engine\Material.hpp" />
     <ClInclude Include="..\Code\Engine\MaterialComponent.hpp" />
     <ClInclude Include="..\Code\Engine\Math.hpp" />
+    <ClInclude Include="..\Code\Engine\Memory.hpp" />
     <ClInclude Include="..\Code\Engine\Mesh.hpp" />
     <ClInclude Include="..\Code\Engine\Model.hpp" />
     <ClInclude Include="..\Code\Engine\ModelComponent.hpp" />
@@ -230,6 +232,7 @@
     <ClInclude Include="..\Code\Engine\RenderContext.hpp" />
     <ClInclude Include="..\Code\Engine\RenderSystem.hpp" />
     <ClInclude Include="..\Code\Engine\Resource.hpp" />
+    <ClInclude Include="..\Code\Engine\ResourceManager.hpp" />
     <ClInclude Include="..\Code\Engine\Shader.hpp" />
     <ClInclude Include="..\Code\Engine\Texture.hpp" />
     <ClInclude Include="..\Code\Engine\TonemapEffect.hpp" />
