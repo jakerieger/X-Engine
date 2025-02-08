@@ -17,6 +17,9 @@ namespace x {
 
             return model;
         }
+
+        void ProcessNode();
+        unique_ptr<Mesh> ProcessMesh();
     };
 
     REGISTER_RESOURCE_LOADER(Model, ModelLoader)
