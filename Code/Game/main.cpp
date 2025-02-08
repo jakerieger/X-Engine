@@ -12,6 +12,8 @@
 
 #include <Vendor/imgui/imgui.h>
 
+#include "Engine/ResourceManager.hpp"
+
 using namespace x; // engine namespace
 using namespace x::Filesystem;
 
@@ -56,6 +58,8 @@ static str ContentPath(const str& filename) {
 }
 
 class SpaceGame final : public IGame {
+    ResourceManager _resourceManager;
+
     shared_ptr<PBRMaterial> _monkeMaterial;
     shared_ptr<PBRMaterial> _floorMaterial;
 
