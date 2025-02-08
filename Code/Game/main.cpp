@@ -12,6 +12,7 @@
 
 #include <Vendor/imgui/imgui.h>
 
+#include "Engine/ModelLoader.hpp"
 #include "Engine/ResourceManager.hpp"
 
 using namespace x; // engine namespace
@@ -90,6 +91,13 @@ public:
                                         _showPostProcessUI = show;
                                     });
         RasterizerStates::SetupRasterizerStates(_renderContext); // Setup our rasterizer states for future use
+
+        _resourceManager.LoadResource<Model>("monke.glb");
+
+        auto model = _resourceManager.FetchResource<Model>("monke.glb");
+        if (!model.has_value()) {
+            PANIC("bruh it broke :(");
+        }
 
         _tonemap = GetPostProcess()->GetEffect<TonemapEffect>();
 

@@ -128,12 +128,5 @@ namespace x {
         // Component managers
         ComponentManager<TransformComponent> _transforms;
         ComponentManager<ModelComponent> _models;
-
-        template<typename T>
-        void ReleaseComponentResources() {
-            if constexpr (detail::release_resources<T>::value) {
-                GetComponents<T>().ReleaseResources();
-            }
-        }
     };
 } // namespace x

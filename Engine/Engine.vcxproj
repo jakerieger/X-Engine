@@ -178,6 +178,7 @@
     <ClCompile Include="..\Code\Engine\Mesh.cpp" />
     <ClCompile Include="..\Code\Engine\Model.cpp" />
     <ClCompile Include="..\Code\Engine\ModelComponent.cpp" />
+    <ClCompile Include="..\Code\Engine\ModelLoader.cpp" />
     <ClCompile Include="..\Code\Engine\PoolAllocator.cpp" />
     <ClCompile Include="..\Code\Engine\PostProcessSystem.cpp" />
     <ClCompile Include="..\Code\Engine\RasterizerState.cpp" />
@@ -225,13 +226,13 @@
     <ClInclude Include="..\Code\Engine\Mesh.hpp" />
     <ClInclude Include="..\Code\Engine\Model.hpp" />
     <ClInclude Include="..\Code\Engine\ModelComponent.hpp" />
+    <ClInclude Include="..\Code\Engine\ModelLoader.hpp" />
     <ClInclude Include="..\Code\Engine\Platform.hpp" />
     <ClInclude Include="..\Code\Engine\PoolAllocator.hpp" />
     <ClInclude Include="..\Code\Engine\PostProcessSystem.hpp" />
     <ClInclude Include="..\Code\Engine\RasterizerState.hpp" />
     <ClInclude Include="..\Code\Engine\RenderContext.hpp" />
     <ClInclude Include="..\Code\Engine\RenderSystem.hpp" />
-    <ClInclude Include="..\Code\Engine\Resource.hpp" />
     <ClInclude Include="..\Code\Engine\ResourceManager.hpp" />
     <ClInclude Include="..\Code\Engine\Shader.hpp" />
     <ClInclude Include="..\Code\Engine\Texture.hpp" />

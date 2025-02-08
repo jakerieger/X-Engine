@@ -15,14 +15,6 @@ namespace x {
         vector<EntityId> _indexToEntity;
 
     public:
-        void ReleaseResources() {
-            if constexpr (detail::release_resources<T>::value) {
-                for (auto& component : _components) {
-                    component.Release();
-                }
-            }
-        }
-
         struct ComponentView {
             EntityId entity;
             T& component;

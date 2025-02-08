@@ -58,13 +58,6 @@ namespace x {
         u64 _value;
         static constexpr u64 kInvalidEntityId = std::numeric_limits<u64>::max();
     };
-
-    namespace detail {
-        template<typename T>
-        struct release_resources {
-            static constexpr bool value = std::is_base_of_v<Resource, T>;
-        };
-    } // namespace detail
 } // namespace x
 
 #ifndef X_ENTITY_ID_HASH_SPECIALIZATION

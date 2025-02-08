@@ -32,6 +32,7 @@ namespace x {
         };
     };
 
+    // Necessary for __LINE__ to expand when used in REGISTER_RESOURCE_LOADER
     #define CONCAT_IMPL(x, y) x##y
     #define CONCAT(x, y) CONCAT_IMPL(x, y)
 
