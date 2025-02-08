@@ -81,7 +81,8 @@ class SpaceGame final : public IGame {
     vector<EntityId> _monkeEntities;
 
 public:
-    explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {}
+    explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720),
+                                                   _resourceManager(_renderContext) {}
 
     void LoadContent(GameState& state) override {
         _devConsole.RegisterCommand("r_ShowPostProcess",

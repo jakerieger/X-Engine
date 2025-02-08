@@ -5,6 +5,7 @@
 #include "Common/Types.hpp"
 #include "Memory.hpp"
 #include "ArenaAllocator.hpp"
+#include "RenderContext.hpp"
 
 namespace x {
     class ResourceLoaderBase;
@@ -58,32 +59,34 @@ namespace x {
     class ResourceLoaderBase {
     public:
         virtual ~ResourceLoaderBase() = default;
-        virtual ResourceBase* Load(ArenaAllocator& allocator, const str& path) = 0;
+        virtual ResourceBase* Load(RenderContext& context, ArenaAllocator& allocator, const str& path) = 0;
     };
 
     template<typename T>
     class ResourceLoader : public ResourceLoaderBase {
     public:
-        ResourceBase* Load(ArenaAllocator& allocator, const str& path) override {
+        ResourceBase* Load(RenderContext& context, ArenaAllocator& allocator, const str& path) override {
             void* memory = allocator.Allocate(sizeof(Resource<T>), alignof(Resource<T>));
             if (!memory)
                 return None;
-            return new(memory) Resource<T>(LoadImpl(path));
+            return new(memory) Resource<T>(LoadImpl(context, path));
         }
 
     private:
-        virtual T LoadImpl(const str& path) = 0;
+        virtual T LoadImpl(RenderContext& context, const str& path) = 0;
     };
 
     class ResourceManager {
         CLASS_PREVENT_MOVES_COPIES(ResourceManager)
 
         ArenaAllocator _allocator;
+        RenderContext& _renderContext;
         std::unordered_map<str, ResourceBase*> _resources;
         std::unordered_map<std::type_index, unique_ptr<ResourceLoaderBase>> _loaders;
 
     public:
-        ResourceManager(const size_t arenaSize = Memory::BYTES_256MB) : _allocator(arenaSize) {
+        ResourceManager(RenderContext& context, const size_t arenaSize = Memory::BYTES_256MB) : _allocator(arenaSize),
+            _renderContext(context) {
             for (const auto& [type, factory] : ResourceRegistry::GetLoaderFactories()) {
                 _loaders[type] = factory();
             }
@@ -109,7 +112,7 @@ namespace x {
                 return false; // no registered loader for type
             }
 
-            ResourceBase* resource = loaderIt->second->Load(_allocator, path);
+            ResourceBase* resource = loaderIt->second->Load(_renderContext, _allocator, path);
             if (!resource) {
                 return false; // loading failed
             }

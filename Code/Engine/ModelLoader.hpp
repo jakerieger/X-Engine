@@ -10,7 +10,7 @@ namespace x {
     };
 
     class ModelLoader : public ResourceLoader<Model> {
-        Model LoadImpl(const str& path) override {
+        Model LoadImpl(RenderContext& context, const str& path) override {
             Model model;
 
             // Rest of loading implementation
