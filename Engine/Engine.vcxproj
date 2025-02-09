@@ -183,6 +183,7 @@
     <ClCompile Include="..\Code\Engine\RenderSystem.cpp" />
     <ClCompile Include="..\Code\Engine\ResourceManager.cpp" />
     <ClCompile Include="..\Code\Engine\Shader.cpp" />
+    <ClCompile Include="..\Code\Engine\ShaderManager.cpp" />
     <ClCompile Include="..\Code\Engine\Texture.cpp" />
     <ClCompile Include="..\Code\Engine\TextureLoader.cpp" />
     <ClCompile Include="..\Code\Engine\TonemapEffect.cpp" />
@@ -230,6 +231,7 @@
     <ClInclude Include="..\Code\Engine\RenderSystem.hpp" />
     <ClInclude Include="..\Code\Engine\ResourceManager.hpp" />
     <ClInclude Include="..\Code\Engine\Shader.hpp" />
+    <ClInclude Include="..\Code\Engine\ShaderManager.hpp" />
     <ClInclude Include="..\Code\Engine\Texture.hpp" />
     <ClInclude Include="..\Code\Engine\TextureLoader.hpp" />
     <ClInclude Include="..\Code\Engine\TonemapEffect.hpp" />

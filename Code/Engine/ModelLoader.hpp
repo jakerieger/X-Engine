@@ -9,7 +9,7 @@
 #include <assimp/postprocess.h>
 
 namespace x {
-    class ModelLoader : public ResourceLoader<Model> {
+    class ModelLoader final : public ResourceLoader<Model> {
         static constexpr u32 kProcessFlags =
             aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_GenNormals | aiProcess_CalcTangentSpace;
 
@@ -29,7 +29,7 @@ namespace x {
 
         void ProcessNode(const RenderContext& context, const aiNode* node, const aiScene* scene, Model& model) {
             for (u32 i = 0; i < node->mNumMeshes; i++) {
-                auto* mesh = scene->mMeshes[node->mMeshes[i]];
+                const auto* mesh = scene->mMeshes[node->mMeshes[i]];
                 model._meshes.push_back(ProcessMesh(context, mesh));
             }
 
