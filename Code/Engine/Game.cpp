@@ -132,7 +132,7 @@ namespace x {
             _renderSystem->UpdateShadowPassParameters(_state.GetLightState().Sun.lightViewProj,
                                                       XMMatrixTranspose(world));
 
-            model.Draw();
+            model.Draw(_renderContext);
         }
     }
 
@@ -145,7 +145,10 @@ namespace x {
 
             const auto transformComponent = _state.GetComponent<TransformComponent>(entity);
             if (transformComponent) { world = transformComponent->GetTransformMatrix(); }
-            model.DrawWithMaterial({world, view, proj}, _state.GetLightState(), _state.GetMainCamera().GetPosition());
+            model.Draw(_renderContext,
+                       {world, view, proj},
+                       _state.GetLightState(),
+                       _state.GetMainCamera().GetPosition());
         }
     }
 

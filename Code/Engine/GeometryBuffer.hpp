@@ -49,7 +49,7 @@ namespace x {
             _vertexCount = vertexCount;
         }
 
-        void Bind(const RenderContext& renderer) {
+        void Bind(const RenderContext& renderer) const {
             auto* context = renderer.GetDeviceContext();
             context->IASetVertexBuffers(0, 1, _vertexBuffer.GetAddressOf(), &_stride, &_offset);
             context->IASetIndexBuffer(_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);

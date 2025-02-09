@@ -76,6 +76,9 @@ namespace x {
         virtual T LoadImpl(RenderContext& context, const str& path) = 0;
     };
 
+    template<typename T>
+    class ResourceHandle;
+
     class ResourceManager {
         CLASS_PREVENT_MOVES_COPIES(ResourceManager)
 
@@ -85,7 +88,8 @@ namespace x {
         std::unordered_map<std::type_index, unique_ptr<ResourceLoaderBase>> _loaders;
 
     public:
-        ResourceManager(RenderContext& context, const size_t arenaSize = Memory::BYTES_256MB) : _allocator(arenaSize),
+        explicit ResourceManager(RenderContext& context, const size_t arenaSize = Memory::BYTES_256MB) :
+            _allocator(arenaSize),
             _renderContext(context) {
             for (const auto& [type, factory] : ResourceRegistry::GetLoaderFactories()) {
                 _loaders[type] = factory();
@@ -122,7 +126,7 @@ namespace x {
         }
 
         template<typename T>
-        std::optional<T*> FetchResource(const str& path) {
+        std::optional<ResourceHandle<T>> FetchResource(const str& path) {
             auto it = _resources.find(path);
             if (it == _resources.end()) {
                 return {}; // nullopt
@@ -133,12 +137,45 @@ namespace x {
                 return {};
             }
 
-            return &typedResource->data;
+            return ResourceHandle<T>(this, path, &typedResource->data);
         }
 
         void Clear() {
             _resources.clear();
             _allocator.Reset();
+        }
+
+        const ArenaAllocator& GetAllocator() {
+            return _allocator;
+        }
+    };
+
+    template<typename T>
+    class ResourceHandle {
+        ResourceManager* _manager;
+        str _path;
+        T* _data;
+
+    public:
+        ResourceHandle() : _manager(None), _data(None) {}
+
+        ResourceHandle(ResourceManager* manager, const str& path, T* data)
+            : _manager(manager), _path(path), _data(data) {}
+
+        T* Get() {
+            return _data;
+        }
+
+        const T* Get() const {
+            return _data;
+        }
+
+        T* operator->() {
+            return _data;
+        }
+
+        const T* operator->() const {
+            return _data;
         }
     };
 }

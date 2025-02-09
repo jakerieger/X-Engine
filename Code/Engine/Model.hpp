@@ -1,42 +1,37 @@
 #pragma once
 
-#include "Common/Types.hpp"
-#include "RenderContext.hpp"
-#include "Mesh.hpp"
+#include "GeometryBuffer.hpp"
+#include "InputLayouts.hpp"
 
 namespace x {
-    class ModelData;
-    class ModelHandle;
-
-    class ModelHandle final {
-        shared_ptr<ModelData> _modelData;
+    class Mesh {
+        GeometryBuffer _geometryBuffer;
 
     public:
-        ModelHandle() = default;
+        Mesh(const RenderContext& context, const vector<VSInputPBR>& vertices, const vector<u32>& indices) {
+            _geometryBuffer
+                .Create(context, vertices.data(), sizeof(VSInputPBR), vertices.size(), indices.data(), indices.size());
+        }
 
-        void Draw() const;
-        bool Valid() const;
-        size_t NumMeshes() const;
-
-        void SetModelData(const shared_ptr<ModelData>& modelData) {
-            _modelData = modelData;
+        void Draw(RenderContext& context) const {
+            _geometryBuffer.Bind(context);
+            context.DrawIndexed(_geometryBuffer.GetIndexCount());
         }
     };
 
-    class ModelData {
-        friend ModelHandle;
-        friend class FBXLoader;
-        friend class GenericLoader;
+    class Model {
         friend class ModelLoader;
+        vector<Mesh> _meshes;
 
     public:
-        explicit ModelData(RenderContext& renderer) : _renderer(renderer) {}
-        bool Valid() const;
+        Model() = default;
 
-    private:
-        RenderContext& _renderer;
-        vector<unique_ptr<Mesh>> _meshes;
-
-        void Draw();
+        void Draw(RenderContext& context) const {
+            for (auto& mesh : _meshes) {
+                mesh.Draw(context);
+            }
+        }
     };
+
+    using ModelHandle = Model*;
 }

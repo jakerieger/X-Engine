@@ -93,6 +93,10 @@ namespace x {
                             const TextureHandle<Texture2D>& roughness,
                             const TextureHandle<Texture2D>& normal);
 
+        const PBRMaterial* GetBaseMaterial() const {
+            return _baseMaterial.get();
+        }
+
         void Bind(const TransformMatrices& transforms, const LightState& lights, Float3 eyePos) const;
         void Unbind() const;
 

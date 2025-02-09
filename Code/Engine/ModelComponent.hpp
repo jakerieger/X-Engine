@@ -4,22 +4,23 @@
 #include "Math.hpp"
 #include "Model.hpp"
 #include "Material.hpp"
+#include "ResourceManager.hpp"
 
 namespace x {
     class ModelComponent {
-        ModelHandle _modelHandle;
+        ResourceHandle<Model> _modelHandle;
         PBRMaterialInstance _materialInstance;
         bool _castsShadows = true;
 
     public:
         ModelComponent() = default;
 
-        ModelComponent& SetModelHandle(const shared_ptr<ModelData>& model) {
-            _modelHandle.SetModelData(model);
+        ModelComponent& SetModelHandle(const ResourceHandle<Model>& model) {
+            _modelHandle = model;
             return *this;
         }
 
-        ModelComponent& SetMaterialHandle(const shared_ptr<PBRMaterial>& material) {
+        ModelComponent& SetMaterial(const shared_ptr<PBRMaterial>& material) {
             _materialInstance.SetBaseMaterial(material);
             return *this;
         }
@@ -33,16 +34,19 @@ namespace x {
             return _materialInstance;
         }
 
-        void DrawWithMaterial(const TransformMatrices& transforms,
-                              const LightState& lights,
-                              const Float3& eyePosition) const {
-            _materialInstance.Bind(transforms, lights, eyePosition);
-            _modelHandle.Draw();
-            _materialInstance.Unbind();
+        void Draw(RenderContext& context,
+                  const TransformMatrices& transforms,
+                  const LightState& lights,
+                  const Float3& eyePosition) const {
+            if (_materialInstance.GetBaseMaterial()) {
+                _materialInstance.Bind(transforms, lights, eyePosition);
+                _modelHandle->Draw(context);
+                _materialInstance.Unbind();
+            }
         }
 
-        void Draw() const {
-            _modelHandle.Draw();
+        void Draw(RenderContext& context) const {
+            _modelHandle->Draw(context);
         }
     };
 }

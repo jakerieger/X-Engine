@@ -170,12 +170,9 @@
     <ClCompile Include="..\Code\Engine\Clock.cpp" />
     <ClCompile Include="..\Code\Engine\ColorGradeEffect.cpp" />
     <ClCompile Include="..\Code\Engine\DevConsole.cpp" />
-    <ClCompile Include="..\Code\Engine\FBXLoader.cpp" />
     <ClCompile Include="..\Code\Engine\Game.cpp" />
-    <ClCompile Include="..\Code\Engine\GenericLoader.cpp" />
     <ClCompile Include="..\Code\Engine\Material.cpp" />
     <ClCompile Include="..\Code\Engine\MaterialComponent.cpp" />
-    <ClCompile Include="..\Code\Engine\Mesh.cpp" />
     <ClCompile Include="..\Code\Engine\Model.cpp" />
     <ClCompile Include="..\Code\Engine\ModelComponent.cpp" />
     <ClCompile Include="..\Code\Engine\ModelLoader.cpp" />
@@ -187,6 +184,7 @@
     <ClCompile Include="..\Code\Engine\ResourceManager.cpp" />
     <ClCompile Include="..\Code\Engine\Shader.cpp" />
     <ClCompile Include="..\Code\Engine\Texture.cpp" />
+    <ClCompile Include="..\Code\Engine\TextureLoader.cpp" />
     <ClCompile Include="..\Code\Engine\TonemapEffect.cpp" />
     <ClCompile Include="..\Code\Engine\TransformComponent.cpp" />
     <ClCompile Include="..\Code\Vendor\imgui\backends\imgui_impl_dx11.cpp" />
@@ -212,10 +210,8 @@
     <ClInclude Include="..\Code\Engine\DevConsole.hpp" />
     <ClInclude Include="..\Code\Engine\EngineCommon.hpp" />
     <ClInclude Include="..\Code\Engine\EntityId.hpp" />
-    <ClInclude Include="..\Code\Engine\FBXLoader.hpp" />
     <ClInclude Include="..\Code\Engine\Game.hpp" />
     <ClInclude Include="..\Code\Engine\GameState.hpp" />
-    <ClInclude Include="..\Code\Engine\GenericLoader.hpp" />
     <ClInclude Include="..\Code\Engine\GeometryBuffer.hpp" />
     <ClInclude Include="..\Code\Engine\InputLayouts.hpp" />
     <ClInclude Include="..\Code\Engine\Lights.hpp" />
@@ -223,7 +219,6 @@
     <ClInclude Include="..\Code\Engine\MaterialComponent.hpp" />
     <ClInclude Include="..\Code\Engine\Math.hpp" />
     <ClInclude Include="..\Code\Engine\Memory.hpp" />
-    <ClInclude Include="..\Code\Engine\Mesh.hpp" />
     <ClInclude Include="..\Code\Engine\Model.hpp" />
     <ClInclude Include="..\Code\Engine\ModelComponent.hpp" />
     <ClInclude Include="..\Code\Engine\ModelLoader.hpp" />
@@ -236,6 +231,7 @@
     <ClInclude Include="..\Code\Engine\ResourceManager.hpp" />
     <ClInclude Include="..\Code\Engine\Shader.hpp" />
     <ClInclude Include="..\Code\Engine\Texture.hpp" />
+    <ClInclude Include="..\Code\Engine\TextureLoader.hpp" />
     <ClInclude Include="..\Code\Engine\TonemapEffect.hpp" />
     <ClInclude Include="..\Code\Engine\TransformComponent.hpp" />
     <ClInclude Include="..\Code\Engine\TransformMatrices.hpp" />

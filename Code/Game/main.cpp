@@ -1,6 +1,5 @@
 #include "Engine/Game.hpp"
 #include "Engine/Model.hpp"
-#include "Engine/GenericLoader.hpp"
 #include "Engine/Material.hpp"
 #include "Engine/RasterizerState.hpp"
 #include "Engine/Texture.hpp"
@@ -59,8 +58,6 @@ static str ContentPath(const str& filename) {
 }
 
 class SpaceGame final : public IGame {
-    ResourceManager _resourceManager;
-
     shared_ptr<PBRMaterial> _monkeMaterial;
     shared_ptr<PBRMaterial> _floorMaterial;
 
@@ -81,8 +78,9 @@ class SpaceGame final : public IGame {
     vector<EntityId> _monkeEntities;
 
 public:
-    explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720),
-                                                   _resourceManager(_renderContext) {}
+    ResourceManager resources;
+
+    explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720), resources(_renderContext) {}
 
     void LoadContent(GameState& state) override {
         _devConsole.RegisterCommand("r_ShowPostProcess",
@@ -93,57 +91,32 @@ public:
                                     });
         RasterizerStates::SetupRasterizerStates(_renderContext); // Setup our rasterizer states for future use
 
-        _resourceManager.LoadResource<Model>("monke.glb");
-
-        auto model = _resourceManager.FetchResource<Model>("monke.glb");
-        if (!model.has_value()) {
-            PANIC("bruh it broke :(");
-        }
-
         _tonemap = GetPostProcess()->GetEffect<TonemapEffect>();
 
-        GenericLoader modelLoader(_renderContext);
-        TextureLoader texLoader(_renderContext);
+        resources.LoadResource<Model>(ContentPath("Monke.glb"));
+        resources.LoadResource<Model>(ContentPath("Floor.glb"));
 
-        const auto floorData = modelLoader.LoadFromFile(ContentPath("Floor.glb"));
+        // resources.LoadResource<Texture2D>(ContentPath("checkerboard.dds"));
+        // resources.LoadResource<Texture2D>(ContentPath("Metal_Albedo.dds"));
+        // resources.LoadResource<Texture2D>(ContentPath("Metal_Metallic.dds"));
+        // resources.LoadResource<Texture2D>(ContentPath("Metal_Roughness.dds"));
+        // resources.LoadResource<Texture2D>(ContentPath("Metal_Normal.dds"));
 
-        const auto floorAlbedo = texLoader.LoadFromFile2D(ContentPath("checkerboard.dds"));
-        const auto floorNormal = texLoader.LoadFromFile2D(ContentPath("Gold_Normal.dds"));
+        auto monkeModelResource = resources.FetchResource<Model>(ContentPath("Monke.glb"));
+        auto floorModelResource = resources.FetchResource<Model>(ContentPath("Floor.glb"));
+        assert(monkeModelResource.has_value() && floorModelResource.has_value() &&
+            "FetchResource returned nullopt for one or more resources.");
 
-        _monkeMaterial = PBRMaterial::Create(_renderContext);
-        _floorMaterial = PBRMaterial::Create(_renderContext);
+        _floorEntity = state.CreateEntity();
+        state.AddComponent<ModelComponent>(_floorEntity)
+             .SetModelHandle(*floorModelResource);
 
-        _floorEntity         = state.CreateEntity();
-        auto& floorTransform = state.AddComponent<TransformComponent>(_floorEntity);
-        auto& floorModel     = state.AddComponent<ModelComponent>(_floorEntity);
+        auto monke = state.CreateEntity();
+        state.AddComponent<ModelComponent>(monke)
+             .SetModelHandle(*monkeModelResource);
 
-        floorTransform.SetPosition({0.0f, -1.f, 0.0f});
-        floorModel.SetModelHandle(floorData)
-                  .SetMaterialHandle(_floorMaterial)
-                  .SetCastsShadows(true)
-                  .GetMaterialInstance()
-                  .SetTextureMaps(floorAlbedo, None, None, floorNormal);
-
-        const auto monkeAlbedo    = texLoader.LoadFromFile2D(ContentPath("Metal_Albedo.dds"));
-        const auto monkeNormal    = texLoader.LoadFromFile2D(ContentPath("Metal_Normal.dds"));
-        const auto monkeMetallic  = texLoader.LoadFromFile2D(ContentPath("Metal_Metallic.dds"));
-        const auto monkeRoughness = texLoader.LoadFromFile2D(ContentPath("Metal_Roughness.dds"));
-
-        const auto monkeData     = modelLoader.LoadFromFile(ContentPath("Monke.glb"));
-        const auto gridPositions = GenerateGrid(3, 3, -3, 3, 0, 5);
-        for (size_t i = 0; i < gridPositions.size(); ++i) {
-            const auto monkeEntity = state.CreateEntity();
-            auto& transform        = state.AddComponent<TransformComponent>(monkeEntity);
-            auto& model            = state.AddComponent<ModelComponent>(monkeEntity);
-
-            model.SetModelHandle(monkeData);
-            model.SetMaterialHandle(_monkeMaterial);
-            model.SetCastsShadows(true);
-            model.GetMaterialInstance().SetTextureMaps(monkeAlbedo, monkeMetallic, monkeRoughness, monkeNormal);
-
-            transform.SetPosition(gridPositions[i].position);
-            _monkeEntities.push_back(monkeEntity);
-        }
+        std::cout << resources.GetAllocator().GetSize() << '\n';
+        std::cout << resources.GetAllocator().GetUsedMemory() << '\n';
 
         auto& camera = state.GetMainCamera();
         camera.SetFOV(70.0f); // TODO: This appears to be completely broken with certain values (80,81,100) ???
