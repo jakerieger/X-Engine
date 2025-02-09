@@ -177,5 +177,9 @@ namespace x {
         const T* operator->() const {
             return _data;
         }
+
+        [[nodiscard]] bool Valid() const {
+            return (_manager != None) && (_data != None) && (!_path.empty());
+        }
     };
 }

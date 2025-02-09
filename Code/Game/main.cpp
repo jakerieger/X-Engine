@@ -106,6 +106,7 @@ public:
         auto floorModelResource = resources.FetchResource<Model>(ContentPath("Floor.glb"));
         assert(monkeModelResource.has_value() && floorModelResource.has_value() &&
             "FetchResource returned nullopt for one or more resources.");
+        assert(monkeModelResource->Valid() && floorModelResource->Valid() && "One or more resources are invalid.");
 
         _floorEntity = state.CreateEntity();
         state.AddComponent<ModelComponent>(_floorEntity)
