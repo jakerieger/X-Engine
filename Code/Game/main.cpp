@@ -9,9 +9,9 @@ using namespace x; // engine namespace
 using namespace x::Filesystem;
 
 // TODO: Make this relative to the executable path, this is simply for testing (and because I'm lazy)
-static str ContentPath(const str& filename) {
+static str GamePath(const str& filename) {
     auto filePath    = Path(__FILE__).Parent();
-    auto contentPath = filePath / ".." / ".." / "Game" / "Content";
+    auto contentPath = filePath / ".." / ".." / "Game";
     return (contentPath / filename).Str();
 }
 
@@ -21,7 +21,7 @@ public:
 
     void LoadContent(Scene* scene) override {
         _renderContext.GetDeviceContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
-        scene->Load(R"(C:\Users\conta\Code\SpaceGame\Game\Scenes\monke.xscn)");
+        scene->Load(GamePath("Scenes/monke.xscn"));
     }
 
     void UnloadContent() override {}
