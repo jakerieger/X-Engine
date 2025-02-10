@@ -16,10 +16,6 @@ namespace x {
     concept IsTexture = std::is_same_v<T, Texture1D> || std::is_same_v<T, Texture2D> || std::is_same_v<T, Texture3D> ||
                         std::is_same_v<T, TextureCubemap>;
 
-    template<typename T>
-        requires IsTexture<T>
-    using TextureHandle = shared_ptr<T>;
-
     class Texture2D {
         friend TextureLoader;
         friend class TextureLoader2D;
@@ -34,27 +30,5 @@ namespace x {
     public:
         void Bind(u32 slot) const;
         void Unbind(u32 slot) const;
-    };
-
-    class TextureLoader {
-        RenderContext& _renderer;
-
-        TextureHandle<Texture2D> CreateTexture2D() {
-            return TextureHandle<Texture2D>(new Texture2D(_renderer));
-        }
-
-    public:
-        explicit TextureLoader(RenderContext& renderer) : _renderer(renderer) {}
-
-        /// @brief Load a 2D texture from a .DDS file
-        /// @param filename Path of .DDS texture file
-        /// @return Handle for Texture2D
-        TextureHandle<Texture2D> LoadFromFile2D(const str& filename);
-
-        /// @brief Load a 2D texture from memory
-        /// @param data Image data bytes
-        /// @param size Image data size in bytes
-        /// @return Handle for Texture2D
-        TextureHandle<Texture2D> LoadFromMemory2D(const u8* data, size_t size);
     };
 }

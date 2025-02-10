@@ -4,11 +4,12 @@
 #include "DebugUI.hpp"
 #include "DevConsole.hpp"
 #include "EngineCommon.hpp"
-#include "GameState.hpp"
+#include "SceneState.hpp"
 #include "Common/Types.hpp"
 #include "Platform.hpp"
 #include "Volatile.hpp"
 #include "RenderSystem.hpp"
+#include "Scene.hpp"
 
 namespace x {
     /// @brief Base interface for implementing a game application.
@@ -23,16 +24,17 @@ namespace x {
         bool _debugUIEnabled{false};
         std::atomic<bool> _isRunning{false};
         std::atomic<bool> _isPaused{false};
-        GameState _state;
         Clock _clock;
         unique_ptr<RenderSystem> _renderSystem;
+        unique_ptr<Scene> _activeScene;
+        unordered_map<str, unique_ptr<PBRMaterial>> _baseMaterials;
 
     public:
         explicit IGame(HINSTANCE instance, str title, u32 width, u32 height);
         virtual ~IGame();
 
         // Prevent moves or copies
-        CLASS_PREVENT_MOVES_COPIES(IGame)
+        X_CLASS_PREVENT_MOVES_COPIES(IGame)
 
         /// @brief This is the only function that is required to be called on an IGame instance.
         /// Initializes the app, enters into the main loop, and shuts down when the application is closed.
@@ -56,11 +58,11 @@ namespace x {
             return _renderSystem->GetPostProcess();
         }
 
-        virtual void LoadContent(GameState& state) = 0;
+        virtual void LoadContent(Scene* scene) = 0;
         virtual void UnloadContent() = 0;
-        virtual void Update(GameState& state, const Clock& clock) = 0;
+        virtual void Update(SceneState& state, const Clock& clock) = 0;
         virtual void OnResize(u32 width, u32 height) = 0;
-        virtual void DrawDebugUI(GameState& state) {}
+        virtual void DrawDebugUI(SceneState& state) {}
 
     protected:
         std::unique_ptr<DebugUI> _debugUI;
@@ -82,8 +84,8 @@ namespace x {
         void InitializeDX();
         void InitializeEngine();
 
-        void RenderDepthOnly();
-        void RenderScene();
+        void RenderDepthOnly(const SceneState& state);
+        void RenderScene(const SceneState& state);
 
         LRESULT ResizeHandler(u32 width, u32 height);
         LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam);

@@ -1,0 +1,15 @@
+{
+  "name": "Floor",
+  "baseMaterial": "PBR",
+  "properties": [],
+  "textures": [
+    {
+      "name": "albedo",
+      "resource": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Content\\checkerboard.dds"
+    },
+    {
+      "name": "normal",
+      "resource": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Content\\Gold_Normal.dds"
+    }
+  ]
+}

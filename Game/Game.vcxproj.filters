@@ -12,8 +12,14 @@
     <None Include="Content\Monke.glb">
       <Filter>Content</Filter>
     </None>
-    <None Include="Scenes\monke.json">
+    <None Include="Scenes\monke.xscn">
       <Filter>Scenes</Filter>
+    </None>
+    <None Include="Materials\Floor.xmat">
+      <Filter>Materials</Filter>
+    </None>
+    <None Include="Materials\Monke.xmat">
+      <Filter>Materials</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -22,6 +28,9 @@
     </Filter>
     <Filter Include="Scenes">
       <UniqueIdentifier>{eaba92f2-e34e-48ab-8fd8-246a4500f4f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Materials">
+      <UniqueIdentifier>{8c426eb4-8a60-4676-9c24-91bf57712f3e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

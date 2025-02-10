@@ -1,55 +1,12 @@
 #include "Engine/Game.hpp"
-#include "Engine/Model.hpp"
-#include "Engine/Material.hpp"
 #include "Engine/RasterizerState.hpp"
-#include "Engine/Texture.hpp"
-#include "Common/Str.hpp"
 #include "Common/Timer.hpp"
-#include "Engine/TonemapEffect.hpp"
-#include "Engine/ColorGradeEffect.hpp"
 #include "Common/Filesystem.hpp"
-
+#include "Engine/Scene.hpp"
 #include <Vendor/imgui/imgui.h>
-
-#include "Engine/TextureLoader.hpp"
-#include "Engine/ModelLoader.hpp"
-#include "Engine/ResourceManager.hpp"
 
 using namespace x; // engine namespace
 using namespace x::Filesystem;
-
-struct GridPosition {
-    Float3 position;
-    int row;
-    int column;
-};
-
-static vector<GridPosition> GenerateGrid(const int rows = 3,
-                                         const int cols = 3,
-                                         const f32 xMin = -5.0f,
-                                         const f32 xMax = 5.0f,
-                                         const f32 zMin = 0.0f,
-                                         const f32 zMax = 5.0f) {
-    f32 xStep = (xMax - xMin) / (CAST<f32>(cols) - 1);
-    f32 zStep = (zMax - zMin) / (CAST<f32>(rows) - 1);
-    vector<GridPosition> positions;
-    positions.reserve(rows * cols);
-
-    for (auto row = 0; row < rows; row++) {
-        for (auto col = 0; col < cols; col++) {
-            f32 x = xMin + (CAST<f32>(col) * xStep);
-            f32 z = zMin + (CAST<f32>(row) * zStep);
-
-            GridPosition pos;
-            pos.position = {x, 0.0f, z};
-            pos.row      = row;
-            pos.column   = col;
-            positions.push_back(pos);
-        }
-    }
-
-    return positions;
-}
 
 // TODO: Make this relative to the executable path, this is simply for testing (and because I'm lazy)
 static str ContentPath(const str& filename) {
@@ -59,185 +16,22 @@ static str ContentPath(const str& filename) {
 }
 
 class SpaceGame final : public IGame {
-    shared_ptr<PBRMaterial> _monkeMaterial;
-    shared_ptr<PBRMaterial> _floorMaterial;
-
-    TonemapEffect* _tonemap       = None;
-    ColorGradeEffect* _colorGrade = None;
-
-    f32 _contrast              = 1.0f;
-    f32 _saturation            = 1.0f;
-    f32 _temperature           = 6500.0f;
-    TonemapOperator _tonemapOp = TonemapOperator::ACES;
-    f32 _tonemapExposure       = 1.0f;
-    bool _showPostProcessUI    = false;
-
-    f32 _rotY      = 0.0f;
-    f32 _sunHeight = 0.6f;
-
-    EntityId _floorEntity;
-    vector<EntityId> _monkeEntities;
-
 public:
-    ResourceManager resources;
+    explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720) {}
 
-    explicit SpaceGame(const HINSTANCE instance) : IGame(instance, "SpaceGame", 1280, 720), resources(_renderContext) {}
-
-    void LoadContent(GameState& state) override {
-        _devConsole.RegisterCommand("r_ShowPostProcess",
-                                    [this](auto args) {
-                                        if (args.size() < 1) { return; }
-                                        const auto show    = CAST<int>(strtol(args[0].c_str(), None, 10));
-                                        _showPostProcessUI = show;
-                                    });
-        RasterizerStates::SetupRasterizerStates(_renderContext); // Setup our rasterizer states for future use
-
-        _tonemap = GetPostProcess()->GetEffect<TonemapEffect>();
-
-        resources.LoadResource<Model>(ContentPath("Monke.glb"));
-        resources.LoadResource<Model>(ContentPath("Floor.glb"));
-        resources.LoadResource<Texture2D>(ContentPath("checkerboard.dds"));
-        resources.LoadResource<Texture2D>(ContentPath("Metal_Albedo.dds"));
-        resources.LoadResource<Texture2D>(ContentPath("Metal_Metallic.dds"));
-        resources.LoadResource<Texture2D>(ContentPath("Metal_Roughness.dds"));
-        resources.LoadResource<Texture2D>(ContentPath("Metal_Normal.dds"));
-
-        auto monkeModelResource = resources.FetchResource<Model>(ContentPath("Monke.glb"));
-        auto floorModelResource = resources.FetchResource<Model>(ContentPath("Floor.glb"));
-        assert(monkeModelResource.has_value() && floorModelResource.has_value() &&
-            "FetchResource returned nullopt for one or more resources.");
-        assert(monkeModelResource->Valid() && floorModelResource->Valid() && "One or more resources are invalid.");
-
-        _floorEntity = state.CreateEntity();
-        state.AddComponent<ModelComponent>(_floorEntity)
-             .SetModelHandle(*floorModelResource);
-
-        auto monke = state.CreateEntity();
-        state.AddComponent<ModelComponent>(monke)
-             .SetModelHandle(*monkeModelResource);
-
-        std::cout << resources.GetAllocator().GetSize() << '\n';
-        std::cout << resources.GetAllocator().GetUsedMemory() << '\n';
-
-        auto& camera = state.GetMainCamera();
-        camera.SetFOV(70.0f); // TODO: This appears to be completely broken with certain values (80,81,100) ???
-        camera.SetPosition(XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f));
-
-        auto& sun       = state.GetLightState().Sun;
-        sun.enabled     = true;
-        sun.intensity   = 2.0f;
-        sun.color       = {1.0f, 1.0f, 1.0f, 1.0f};
-        sun.direction   = {0.6f, _sunHeight, -0.6f, 0.0f};
-        sun.castsShadow = true;
-
-        // Calculate our light view projection for shadow mapping
-        // viewWidth was set by trial and error, 10.0 just looked the best to me
-        const auto lvp    = CalculateLightViewProjection(sun, 16.f, state.GetMainCamera().GetAspectRatio());
-        sun.lightViewProj = XMMatrixTranspose(lvp);
-        // Functions that return matrices will never transpose them (for consistency-sake)
-
-        auto& pointLight0     = state.GetLightState().PointLights[0];
-        pointLight0.enabled   = true;
-        pointLight0.intensity = 20.0f;
-        pointLight0.color     = {1.0f, 0.0f, 0.0f};
-        pointLight0.position  = {5.0f, 3.0f, 0.0f};
-
-        auto& pointLight1     = state.GetLightState().PointLights[1];
-        pointLight1.enabled   = false;
-        pointLight1.intensity = 20.0f;
-        pointLight1.color     = {0.0f, 1.0f, 0.0f};
-        pointLight1.position  = {-5.0f, 3.0f, 0.0f};
-
-        auto& pointLight2     = state.GetLightState().PointLights[2];
-        pointLight2.enabled   = false;
-        pointLight2.intensity = 20.0f;
-        pointLight2.color     = {0.0f, 0.0f, 1.0f};
-        pointLight2.position  = {0.0f, 3.0f, 0.0f};
-
-        auto& areaLight0      = state.GetLightState().AreaLights[0];
-        areaLight0.enabled    = true;
-        areaLight0.intensity  = 1.0f;
-        areaLight0.color      = {1.0f, 0.0f, 1.0f};
-        areaLight0.dimensions = {10.f, 10.f};
-        areaLight0.position   = {0.0f, 0.0f, -5.0f};
-        areaLight0.direction  = {0.0f, 0.0f, 5.0f};
-
+    void LoadContent(Scene* scene) override {
         _renderContext.GetDeviceContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
+        scene->Load(R"(C:\Users\conta\Code\SpaceGame\Game\Scenes\monke.xscn)");
     }
 
     void UnloadContent() override {}
 
-    void Update(GameState& state, const Clock& clock) override {
-        _rotY += (f32)clock.GetDeltaTime() * 45.f;
+    void Update(SceneState& state, const Clock& clock) override {}
 
-        for (const auto& monke : _monkeEntities) {
-            auto transform = state.GetComponentMutable<TransformComponent>(monke);
-            transform->SetRotation({0.0f, _rotY, 0.0f});
-        }
-
-        // Update transform components
-        std::unordered_map<EntityId, TransformComponent*> entitiesWithTransform;
-        for (auto [entity, transform] : state.GetComponents<TransformComponent>().GetMutable()) {
-            transform.Update();
-            entitiesWithTransform[entity] = &transform;
-        }
-    }
-
-    void DrawDebugUI(GameState& state) override {
-        static constexpr std::array<const char*, 4> tonemapOpNames = {"ACES", "Reinhard", "Filmic", "Linear"};
-        static bool dropdownValueChanged                           = false;
-
-        if (_showPostProcessUI) {
-            ImGui::Begin("Post Processing");
-
-            // ImGui::SliderFloat("Contrast", &_contrast, 0.0f, 2.0f);
-            // ImGui::SliderFloat("Saturation", &_saturation, 0.0f, 2.0f);
-            // ImGui::SliderFloat("Temperature", &_temperature, 1000.0f, 10000.0f);
-            // ImGui::Separator();
-            ImGui::SliderFloat("Exposure", &_tonemapExposure, 0.0f, 2.0f);
-
-            if (ImGui::BeginCombo("Tonemap Operator", tonemapOpNames[CAST<u32>(_tonemapOp)])) {
-                for (size_t i = 0; i < tonemapOpNames.size(); i++) {
-                    const auto opName     = tonemapOpNames[i];
-                    const auto currentOp  = CAST<TonemapOperator>(i);
-                    const bool isSelected = (_tonemapOp == currentOp);
-
-                    if (ImGui::Selectable(opName, isSelected)) {
-                        _tonemapOp           = currentOp;
-                        dropdownValueChanged = true;
-                    }
-
-                    if (isSelected) { ImGui::SetItemDefaultFocus(); }
-                }
-                ImGui::EndCombo();
-            }
-
-            ImGui::End();
-
-            // _colorGrade->SetContrast(_contrast);
-            // _colorGrade->SetSaturation(_saturation);
-            // _colorGrade->SetTemperature(_temperature);
-            _tonemap->SetExposure(_tonemapExposure);
-            _tonemap->SetOperator(_tonemapOp);
-        }
-
-        ImGui::Begin("Scene");
-        {
-            ImGui::SliderFloat("Sun Height", &_sunHeight, 0.1f, 1.0f);
-        }
-        ImGui::End();
-
-        auto& sun         = state.GetLightState().Sun;
-        sun.direction.y   = _sunHeight;
-        sun.lightViewProj =
-            XMMatrixTranspose(CalculateLightViewProjection(sun, 16.f, state.GetMainCamera().GetAspectRatio()));
-    }
+    void DrawDebugUI(SceneState& state) override {}
 
     void OnResize(u32 width, u32 height) override {}
 };
-
-#include "Engine/Memory.hpp"
-#include "Engine/ArenaAllocator.hpp"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow) {
     SpaceGame game(hInstance);

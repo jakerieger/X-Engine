@@ -13,7 +13,7 @@ namespace x {
 
         static size_t AlignForward(size_t addr, size_t alignment);
 
-        CLASS_PREVENT_COPIES(ArenaAllocator)
+        X_CLASS_PREVENT_COPIES(ArenaAllocator)
 
     public:
         ArenaAllocator(size_t size);

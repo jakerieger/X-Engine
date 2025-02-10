@@ -14,7 +14,7 @@
         "y": 0.0,
         "z": 0.0
       },
-      "fovY": 70.0,
+      "fovY": 60.0,
       "nearZ": 0.1,
       "farZ":  1000.0
     },
@@ -62,8 +62,8 @@
           }
         },
         "model": {
-          "resource": "Floor.glb",
-          "material": {},
+          "resource": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Content\\Floor.glb",
+          "material": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Materials\\Floor.xmat",
           "castsShadow": true,
           "receiveShadow": true
         }
@@ -91,8 +91,8 @@
           }
         },
         "model": {
-          "resource": "Monke.glb",
-          "material": {},
+          "resource": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Content\\Monke.glb",
+          "material": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Materials\\Monke.xmat",
           "castsShadow": true,
           "receiveShadow": true
         }

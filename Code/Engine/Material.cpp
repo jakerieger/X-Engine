@@ -133,26 +133,26 @@ namespace x {
         _emissiveStrength = strength;
     }
 
-    void PBRMaterialInstance::SetAlbedoMap(const TextureHandle<Texture2D>& albedo) {
+    void PBRMaterialInstance::SetAlbedoMap(const ResourceHandle<Texture2D>& albedo) {
         _albedoMap = albedo;
     }
 
-    void PBRMaterialInstance::SetMetallicMap(const TextureHandle<Texture2D>& metallic) {
+    void PBRMaterialInstance::SetMetallicMap(const ResourceHandle<Texture2D>& metallic) {
         _metallicMap = metallic;
     }
 
-    void PBRMaterialInstance::SetRoughnessMap(const TextureHandle<Texture2D>& roughness) {
+    void PBRMaterialInstance::SetRoughnessMap(const ResourceHandle<Texture2D>& roughness) {
         _roughnessMap = roughness;
     }
 
-    void PBRMaterialInstance::SetNormalMap(const TextureHandle<Texture2D>& normal) {
+    void PBRMaterialInstance::SetNormalMap(const ResourceHandle<Texture2D>& normal) {
         _normalMap = normal;
     }
 
-    void PBRMaterialInstance::SetTextureMaps(const TextureHandle<Texture2D>& albedo,
-                                             const TextureHandle<Texture2D>& metallic,
-                                             const TextureHandle<Texture2D>& roughness,
-                                             const TextureHandle<Texture2D>& normal) {
+    void PBRMaterialInstance::SetTextureMaps(const ResourceHandle<Texture2D>& albedo,
+                                             const ResourceHandle<Texture2D>& metallic,
+                                             const ResourceHandle<Texture2D>& roughness,
+                                             const ResourceHandle<Texture2D>& normal) {
         SetAlbedoMap(albedo);
         SetMetallicMap(metallic);
         SetRoughnessMap(roughness);
@@ -167,10 +167,10 @@ namespace x {
         _baseMaterial->BindShaders();
 
         // ReSharper disable CppCStyleCast
-        if (_albedoMap.get()) { _albedoMap->Bind((u32)TextureMapSlot::Albedo); }
-        if (_metallicMap.get()) { _metallicMap->Bind((u32)TextureMapSlot::Metallic); }
-        if (_roughnessMap.get()) { _roughnessMap->Bind((u32)TextureMapSlot::Roughness); }
-        if (_normalMap.get()) { _normalMap->Bind((u32)TextureMapSlot::Normal); }
+        if (_albedoMap.Get()) { _albedoMap->Bind((u32)TextureMapSlot::Albedo); }
+        if (_metallicMap.Get()) { _metallicMap->Bind((u32)TextureMapSlot::Metallic); }
+        if (_roughnessMap.Get()) { _roughnessMap->Bind((u32)TextureMapSlot::Roughness); }
+        if (_normalMap.Get()) { _normalMap->Bind((u32)TextureMapSlot::Normal); }
         // ReSharper restore CppCStyleCast
 
         _baseMaterial->BindBuffers();
@@ -178,10 +178,10 @@ namespace x {
 
     void PBRMaterialInstance::Unbind() const {
         // ReSharper disable CppCStyleCast
-        if (_albedoMap.get()) { _albedoMap->Unbind((u32)TextureMapSlot::Albedo); }
-        if (_metallicMap.get()) { _metallicMap->Unbind((u32)TextureMapSlot::Metallic); }
-        if (_roughnessMap.get()) { _roughnessMap->Unbind((u32)TextureMapSlot::Roughness); }
-        if (_normalMap.get()) { _normalMap->Unbind((u32)TextureMapSlot::Normal); }
+        if (_albedoMap.Get()) { _albedoMap->Unbind((u32)TextureMapSlot::Albedo); }
+        if (_metallicMap.Get()) { _metallicMap->Unbind((u32)TextureMapSlot::Metallic); }
+        if (_roughnessMap.Get()) { _roughnessMap->Unbind((u32)TextureMapSlot::Roughness); }
+        if (_normalMap.Get()) { _normalMap->Unbind((u32)TextureMapSlot::Normal); }
         // ReSharper restore CppCStyleCast
     }
 

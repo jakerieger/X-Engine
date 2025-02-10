@@ -17,7 +17,7 @@ namespace x {
     }
 
     void Camera::SetFOV(const f32 fovY) {
-        _fovY = fovY;
+        _fovY = XMConvertToRadians(fovY);
         UpdateProjectionMatrix();
     }
 

@@ -34,9 +34,6 @@
     <ClCompile Include="..\Code\Engine\Camera.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\Code\Vendor\ufbx.c">
-      <Filter>Vendor</Filter>
-    </ClCompile>
     <ClCompile Include="..\Code\Engine\RasterizerState.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -91,10 +88,10 @@
     <ClCompile Include="..\Code\Engine\TextureLoader.cpp">
       <Filter>Source\Loaders</Filter>
     </ClCompile>
-    <ClCompile Include="..\Code\Engine\ShaderManager.cpp">
+    <ClCompile Include="..\Code\Engine\Scene.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\Code\Engine\Scene.cpp">
+    <ClCompile Include="..\Code\Engine\StaticResources.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -147,7 +144,7 @@
     <ClInclude Include="..\Code\Engine\EntityId.hpp">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\Engine\GameState.hpp">
+    <ClInclude Include="..\Code\Engine\SceneState.hpp">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Code\Engine\Lights.hpp">
@@ -432,9 +429,6 @@
     <ClInclude Include="..\Code\Vendor\stb_image_write.h">
       <Filter>Vendor</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\Vendor\ufbx.h">
-      <Filter>Vendor</Filter>
-    </ClInclude>
     <ClInclude Include="..\Code\Engine\RasterizerState.hpp">
       <Filter>Source</Filter>
     </ClInclude>
@@ -507,10 +501,10 @@
     <ClInclude Include="..\Code\Engine\TextureLoader.hpp">
       <Filter>Source\Loaders</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\Engine\ShaderManager.hpp">
+    <ClInclude Include="..\Code\Engine\Scene.hpp">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\Engine\Scene.hpp">
+    <ClInclude Include="..\Code\Engine\StaticResources.hpp">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>

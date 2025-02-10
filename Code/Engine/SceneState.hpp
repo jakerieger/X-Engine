@@ -17,9 +17,11 @@ namespace x {
     template<typename T>
     concept IsValidComponent = Same<T, TransformComponent> || Same<T, ModelComponent>;
 
-    class GameState {
+    class SceneState {
+        friend class Scene;
+
     public:
-        GameState() = default;
+        SceneState() = default;
 
         EntityId CreateEntity() {
             const auto newId = ++_nextId;
@@ -30,8 +32,8 @@ namespace x {
             _transforms.RemoveComponent(entity);
         }
 
-        [[nodiscard]] GameState Clone() const {
-            GameState newState;
+        [[nodiscard]] SceneState Clone() const {
+            SceneState newState;
 
             newState._nextId = _nextId;
 
@@ -116,6 +118,14 @@ namespace x {
 
         [[nodiscard]] Camera const& GetMainCamera() const {
             return _mainCamera;
+        }
+
+        void Reset() {
+            _nextId     = 0;
+            _lightState = {};
+            _mainCamera = {};
+            _transforms = {};
+            _models     = {};
         }
 
     private:

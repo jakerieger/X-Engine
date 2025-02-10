@@ -80,7 +80,7 @@ namespace x {
     class ResourceHandle;
 
     class ResourceManager {
-        CLASS_PREVENT_MOVES_COPIES(ResourceManager)
+        X_CLASS_PREVENT_MOVES_COPIES(ResourceManager)
 
         ArenaAllocator _allocator;
         RenderContext& _renderContext;

@@ -6,12 +6,15 @@
 #include <stdexcept>
 #include <thread>
 
+#include "RasterizerState.hpp"
+#include "StaticResources.hpp"
+
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace x {
     IGame::IGame(const HINSTANCE instance, str title, const u32 width, const u32 height)
         : _instance(instance), _hwnd(None), _currentWidth(width), _currentHeight(height), _title(std::move(title)),
-          _state(), _renderContext() {}
+          _renderContext() {}
 
     IGame::~IGame() {
         if (_consoleEnabled) { FreeConsole(); }
@@ -27,7 +30,7 @@ namespace x {
         }
 
         _isRunning = true;
-        LoadContent(_state);
+        LoadContent(_activeScene.get());
 
         MSG msg{};
         while (msg.message != WM_QUIT && _isRunning) {
@@ -35,12 +38,16 @@ namespace x {
                 TranslateMessage(&msg);
                 DispatchMessageA(&msg);
             } else {
+                auto& state = _activeScene->GetState();
+                state.GetMainCamera().OnResize(GetWidth(), GetHeight());
+
                 // Only tick engine forward if we're not currently paused
                 if (!_isPaused) {
                     // ScopedTimer updateTimer("UpdateTime");
 
                     _clock.Tick();
-                    Update(_state, _clock);
+                    _activeScene->Update();
+                    Update(state, _clock);
                 }
 
                 // Continue rendering whether we're paused or not
@@ -53,7 +60,7 @@ namespace x {
                     {
                         // ScopedTimer _("  - ShadowPass");
                         _renderSystem->BeginShadowPass();
-                        RenderDepthOnly();
+                        RenderDepthOnly(state);
                         depthSRV = _renderSystem->EndShadowPass();
                     }
 
@@ -62,7 +69,7 @@ namespace x {
                     {
                         // ScopedTimer _("  - LightPass");
                         _renderSystem->BeginLightPass(depthSRV);
-                        RenderScene();
+                        RenderScene(state);
                         sceneSRV = _renderSystem->EndLightPass();
                     }
 
@@ -77,7 +84,7 @@ namespace x {
                         if (_debugUIEnabled) {
                             _debugUI->BeginFrame(); // begin ImGui frame
                             _debugUI->Draw(_renderContext, _clock); // draw built-in debug ui
-                            DrawDebugUI(_state); // draw user-defined debug ui
+                            DrawDebugUI(state); // draw user-defined debug ui
                             _devConsole.Draw(); // draw developer console last so it overlaps correctly
                             _debugUI->EndFrame(); // end imgui frame
                         }
@@ -122,14 +129,14 @@ namespace x {
 
     f32 IGame::GetAspect() const { return CAST<f32>(_currentWidth) / CAST<f32>(_currentHeight); }
 
-    void IGame::RenderDepthOnly() {
-        for (const auto& [entity, model] : _state.GetComponents<ModelComponent>()) {
+    void IGame::RenderDepthOnly(const SceneState& state) {
+        for (const auto& [entity, model] : state.GetComponents<ModelComponent>()) {
             Matrix world                  = XMMatrixIdentity();
-            const auto transformComponent = _state.GetComponent<TransformComponent>(entity);
+            const auto transformComponent = state.GetComponent<TransformComponent>(entity);
             if (transformComponent) {
                 world = transformComponent->GetTransformMatrix();
             }
-            _renderSystem->UpdateShadowPassParameters(_state.GetLightState().Sun.lightViewProj,
+            _renderSystem->UpdateShadowPassParameters(state.GetLightState().Sun.lightViewProj,
                                                       XMMatrixTranspose(world));
 
             model.Draw(_renderContext);
@@ -137,18 +144,18 @@ namespace x {
     }
 
     // This should never modify game state (always iterate as const)
-    void IGame::RenderScene() {
-        for (const auto& [entity, model] : _state.GetComponents<ModelComponent>()) {
+    void IGame::RenderScene(const SceneState& state) {
+        for (const auto& [entity, model] : state.GetComponents<ModelComponent>()) {
             Matrix world = XMMatrixIdentity();
-            auto view    = _state.GetMainCamera().GetViewMatrix();
-            auto proj    = _state.GetMainCamera().GetProjectionMatrix();
+            auto view    = state.GetMainCamera().GetViewMatrix();
+            auto proj    = state.GetMainCamera().GetProjectionMatrix();
 
-            const auto transformComponent = _state.GetComponent<TransformComponent>(entity);
+            const auto transformComponent = state.GetComponent<TransformComponent>(entity);
             if (transformComponent) { world = transformComponent->GetTransformMatrix(); }
             model.Draw(_renderContext,
                        {world, view, proj},
-                       _state.GetLightState(),
-                       _state.GetMainCamera().GetPosition());
+                       state.GetLightState(),
+                       state.GetMainCamera().GetPosition());
         }
     }
 
@@ -209,7 +216,13 @@ namespace x {
 
         // Tell the engine that these classes need to handle resizing when the window size changes
         RegisterVolatile(_renderSystem.get());
-        RegisterVolatile(&_state.GetMainCamera());
+        _activeScene = make_unique<Scene>(_renderContext);
+
+        RasterizerStates::Init(_renderContext); // Setup our rasterizer states for future use
+
+        if (!StaticResources::Init(_renderContext)) {
+            PANIC("Failed to initialize static resources.");
+        }
     }
 
     void IGame::InitializeEngine() {

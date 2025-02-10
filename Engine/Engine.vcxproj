@@ -184,7 +184,7 @@
     <ClCompile Include="..\Code\Engine\ResourceManager.cpp" />
     <ClCompile Include="..\Code\Engine\Scene.cpp" />
     <ClCompile Include="..\Code\Engine\Shader.cpp" />
-    <ClCompile Include="..\Code\Engine\ShaderManager.cpp" />
+    <ClCompile Include="..\Code\Engine\StaticResources.cpp" />
     <ClCompile Include="..\Code\Engine\Texture.cpp" />
     <ClCompile Include="..\Code\Engine\TextureLoader.cpp" />
     <ClCompile Include="..\Code\Engine\TonemapEffect.cpp" />
@@ -196,7 +196,6 @@
     <ClCompile Include="..\Code\Vendor\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\Code\Vendor\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\Code\Vendor\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="..\Code\Vendor\ufbx.c" />
     <None Include="Shaders\manifest.json" />
     <None Include="Shaders\Source\ColorGrade.hlsl" />
   </ItemGroup>
@@ -213,7 +212,7 @@
     <ClInclude Include="..\Code\Engine\EngineCommon.hpp" />
     <ClInclude Include="..\Code\Engine\EntityId.hpp" />
     <ClInclude Include="..\Code\Engine\Game.hpp" />
-    <ClInclude Include="..\Code\Engine\GameState.hpp" />
+    <ClInclude Include="..\Code\Engine\SceneState.hpp" />
     <ClInclude Include="..\Code\Engine\GeometryBuffer.hpp" />
     <ClInclude Include="..\Code\Engine\InputLayouts.hpp" />
     <ClInclude Include="..\Code\Engine\Lights.hpp" />
@@ -233,7 +232,7 @@
     <ClInclude Include="..\Code\Engine\ResourceManager.hpp" />
     <ClInclude Include="..\Code\Engine\Scene.hpp" />
     <ClInclude Include="..\Code\Engine\Shader.hpp" />
-    <ClInclude Include="..\Code\Engine\ShaderManager.hpp" />
+    <ClInclude Include="..\Code\Engine\StaticResources.hpp" />
     <ClInclude Include="..\Code\Engine\Texture.hpp" />
     <ClInclude Include="..\Code\Engine\TextureLoader.hpp" />
     <ClInclude Include="..\Code\Engine\TonemapEffect.hpp" />
@@ -338,7 +337,6 @@
     <ClInclude Include="..\Code\Vendor\SearchTex.h" />
     <ClInclude Include="..\Code\Vendor\stb_image.h" />
     <ClInclude Include="..\Code\Vendor\stb_image_write.h" />
-    <ClInclude Include="..\Code\Vendor\ufbx.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Code\Vendor\assimp\color4.inl" />
