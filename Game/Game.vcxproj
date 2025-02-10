@@ -153,6 +153,7 @@
     <None Include="Content\Floor.glb" />
     <None Include="Content\Monke.glb" />
     <None Include="packages.config" />
+    <None Include="Scenes\monke.json" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Content\checkerboard.dds" />

@@ -11,6 +11,7 @@
 
 #include <Vendor/imgui/imgui.h>
 
+#include "Engine/TextureLoader.hpp"
 #include "Engine/ModelLoader.hpp"
 #include "Engine/ResourceManager.hpp"
 
@@ -95,12 +96,11 @@ public:
 
         resources.LoadResource<Model>(ContentPath("Monke.glb"));
         resources.LoadResource<Model>(ContentPath("Floor.glb"));
-
-        // resources.LoadResource<Texture2D>(ContentPath("checkerboard.dds"));
-        // resources.LoadResource<Texture2D>(ContentPath("Metal_Albedo.dds"));
-        // resources.LoadResource<Texture2D>(ContentPath("Metal_Metallic.dds"));
-        // resources.LoadResource<Texture2D>(ContentPath("Metal_Roughness.dds"));
-        // resources.LoadResource<Texture2D>(ContentPath("Metal_Normal.dds"));
+        resources.LoadResource<Texture2D>(ContentPath("checkerboard.dds"));
+        resources.LoadResource<Texture2D>(ContentPath("Metal_Albedo.dds"));
+        resources.LoadResource<Texture2D>(ContentPath("Metal_Metallic.dds"));
+        resources.LoadResource<Texture2D>(ContentPath("Metal_Roughness.dds"));
+        resources.LoadResource<Texture2D>(ContentPath("Metal_Normal.dds"));
 
         auto monkeModelResource = resources.FetchResource<Model>(ContentPath("Monke.glb"));
         auto floorModelResource = resources.FetchResource<Model>(ContentPath("Floor.glb"));

@@ -12,10 +12,16 @@
     <None Include="Content\Monke.glb">
       <Filter>Content</Filter>
     </None>
+    <None Include="Scenes\monke.json">
+      <Filter>Scenes</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Content">
       <UniqueIdentifier>{6d48e27d-7dd2-41c5-8efc-c9e00b65b1d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scenes">
+      <UniqueIdentifier>{eaba92f2-e34e-48ab-8fd8-246a4500f4f6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

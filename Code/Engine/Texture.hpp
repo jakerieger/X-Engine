@@ -22,6 +22,7 @@ namespace x {
 
     class Texture2D {
         friend TextureLoader;
+        friend class TextureLoader2D;
 
         ComPtr<ID3D11ShaderResourceView> _textureView;
         ComPtr<ID3D11Resource> _textureResource;

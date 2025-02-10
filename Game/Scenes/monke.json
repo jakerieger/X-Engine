@@ -1,0 +1,102 @@
+{
+  "version": "1.0",
+  "name": "Monke",
+  "description": "A basic demo scene containing a floor and rotating Suzane model.",
+  "world": {
+    "camera": {
+      "position": {
+        "x": 0.0,
+        "y": 1.0,
+        "z": -5.0
+      },
+      "eye": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "fovY": 70.0,
+      "nearZ": 0.1,
+      "farZ":  1000.0
+    },
+    "lights": {
+      "sun": {
+        "enabled": true,
+        "intensity": 2.0,
+        "color": {
+          "r": 1.0,
+          "g": 1.0,
+          "b": 1.0
+        },
+        "direction": {
+          "x": 0.6,
+          "y": 0.6,
+          "z": -0.6
+        },
+        "castsShadows": true
+      },
+      "pointLights": [],
+      "areaLights": [],
+      "spotLights": []
+    }
+  },
+  "entities": [
+    {
+      "id": 0,
+      "name": "floor",
+      "components": {
+        "transform": {
+          "position": {
+            "x": 0,
+            "y": -1,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "scale": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          }
+        },
+        "model": {
+          "resource": "Floor.glb",
+          "material": {},
+          "castsShadow": true,
+          "receiveShadow": true
+        }
+      }
+    },
+    {
+      "id": 1,
+      "name": "monke",
+      "components": {
+        "transform": {
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "scale": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          }
+        },
+        "model": {
+          "resource": "Monke.glb",
+          "material": {},
+          "castsShadow": true,
+          "receiveShadow": true
+        }
+      }
+    }
+  ]
+}

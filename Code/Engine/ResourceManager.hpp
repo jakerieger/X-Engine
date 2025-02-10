@@ -88,7 +88,7 @@ namespace x {
         std::unordered_map<std::type_index, unique_ptr<ResourceLoaderBase>> _loaders;
 
     public:
-        explicit ResourceManager(RenderContext& context, const size_t arenaSize = Memory::BYTES_256MB) :
+        explicit ResourceManager(RenderContext& context, const size_t arenaSize = Memory::BYTES_1GB) :
             _allocator(arenaSize),
             _renderContext(context) {
             for (const auto& [type, factory] : ResourceRegistry::GetLoaderFactories()) {
