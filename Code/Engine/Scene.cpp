@@ -47,6 +47,10 @@ namespace x {
         return _state;
     }
 
+    void Scene::RegisterVolatiles(vector<Volatile*>& volatiles) {
+        volatiles.push_back(&_state.GetMainCamera());
+    }
+
     void Scene::LoadWorld(json& world) {
         auto cameraJson             = world["camera"];
         scene_schema::Camera camera = scene_schema::Camera::FromJson(cameraJson);

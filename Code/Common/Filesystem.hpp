@@ -11,9 +11,9 @@
 #include <stdexcept>
 #include <future>
 #ifdef _WIN32
-    #include <direct.h>
-    #define getcwd _getcwd
-    #define PATH_SEPARATOR '\\'
+#include <direct.h>
+#define getcwd _getcwd
+#define PATH_SEPARATOR '\\'
 #else
     #include <unistd.h>
     #define PATH_SEPARATOR '/'
@@ -52,8 +52,8 @@ namespace x {
             template<typename Func>
             static auto runAsync(Func&& func) -> std::future<decltype(func())> {
                 using ReturnType = decltype(func());
-                auto task =
-                  std::make_shared<std::packaged_task<ReturnType()>>(std::forward<Func>(func));
+                auto task        =
+                    std::make_shared<std::packaged_task<ReturnType()>>(std::forward<Func>(func));
                 std::future<ReturnType> future = task->get_future();
                 std::thread([task]() { (*task)(); }).detach();
                 return future;
@@ -72,8 +72,8 @@ namespace x {
             template<typename Func>
             static auto runAsync(Func&& func) -> std::future<decltype(func())> {
                 using ReturnType = decltype(func());
-                auto task =
-                  std::make_shared<std::packaged_task<ReturnType()>>(std::forward<Func>(func));
+                auto task        =
+                    std::make_shared<std::packaged_task<ReturnType()>>(std::forward<Func>(func));
                 std::future<ReturnType> future = task->get_future();
                 std::thread([task]() { (*task)(); }).detach();
                 return future;
@@ -157,5 +157,5 @@ namespace x {
             static str Join(const str& lhs, const str& rhs);
             static str Normalize(const str& rawPath);
         };
-    };  // namespace Filesystem
-}  // namespace x
+    }; // namespace Filesystem
+} // namespace x

@@ -67,9 +67,6 @@
     <ClCompile Include="..\Code\Engine\TransformComponent.cpp">
       <Filter>Source\Components</Filter>
     </ClCompile>
-    <ClCompile Include="..\Code\Engine\MaterialComponent.cpp">
-      <Filter>Source\Components</Filter>
-    </ClCompile>
     <ClCompile Include="..\Code\Engine\ArenaAllocator.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -472,9 +469,6 @@
       <Filter>Source\Components</Filter>
     </ClInclude>
     <ClInclude Include="..\Code\Engine\TransformComponent.hpp">
-      <Filter>Source\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Code\Engine\MaterialComponent.hpp">
       <Filter>Source\Components</Filter>
     </ClInclude>
     <ClInclude Include="..\Code\Engine\ArenaAllocator.hpp">

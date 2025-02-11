@@ -9,6 +9,8 @@ using namespace x; // engine namespace
 using namespace x::Filesystem;
 
 // TODO: Make this relative to the executable path, this is simply for testing (and because I'm lazy)
+/// @brief Returns the filename relative to the game's directory ($SolutionDir/Game)
+/// @details Example: The filename 'Scenes/monke.xscn' would return $SolutionDir/Game/Scenes/monke.xscn
 static str GamePath(const str& filename) {
     auto filePath    = Path(__FILE__).Parent();
     auto contentPath = filePath / ".." / ".." / "Game";

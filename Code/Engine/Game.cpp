@@ -39,7 +39,6 @@ namespace x {
                 DispatchMessageA(&msg);
             } else {
                 auto& state = _activeScene->GetState();
-                state.GetMainCamera().OnResize(GetWidth(), GetHeight());
 
                 // Only tick engine forward if we're not currently paused
                 if (!_isPaused) {
@@ -214,9 +213,11 @@ namespace x {
         _renderSystem = make_unique<RenderSystem>(_renderContext);
         _renderSystem->Initialize(_currentWidth, _currentHeight);
 
+        _activeScene = make_unique<Scene>(_renderContext);
+
         // Tell the engine that these classes need to handle resizing when the window size changes
         RegisterVolatile(_renderSystem.get());
-        _activeScene = make_unique<Scene>(_renderContext);
+        _activeScene->RegisterVolatiles(_volatiles);
 
         RasterizerStates::Init(_renderContext); // Setup our rasterizer states for future use
 

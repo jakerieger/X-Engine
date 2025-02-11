@@ -33,7 +33,6 @@ namespace x {
         explicit IGame(HINSTANCE instance, str title, u32 width, u32 height);
         virtual ~IGame();
 
-        // Prevent moves or copies
         X_CLASS_PREVENT_MOVES_COPIES(IGame)
 
         /// @brief This is the only function that is required to be called on an IGame instance.

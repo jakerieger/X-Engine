@@ -172,7 +172,6 @@
     <ClCompile Include="..\Code\Engine\DevConsole.cpp" />
     <ClCompile Include="..\Code\Engine\Game.cpp" />
     <ClCompile Include="..\Code\Engine\Material.cpp" />
-    <ClCompile Include="..\Code\Engine\MaterialComponent.cpp" />
     <ClCompile Include="..\Code\Engine\Model.cpp" />
     <ClCompile Include="..\Code\Engine\ModelComponent.cpp" />
     <ClCompile Include="..\Code\Engine\ModelLoader.cpp" />
@@ -217,7 +216,6 @@
     <ClInclude Include="..\Code\Engine\InputLayouts.hpp" />
     <ClInclude Include="..\Code\Engine\Lights.hpp" />
     <ClInclude Include="..\Code\Engine\Material.hpp" />
-    <ClInclude Include="..\Code\Engine\MaterialComponent.hpp" />
     <ClInclude Include="..\Code\Engine\Math.hpp" />
     <ClInclude Include="..\Code\Engine\Memory.hpp" />
     <ClInclude Include="..\Code\Engine\Model.hpp" />

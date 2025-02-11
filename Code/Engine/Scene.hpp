@@ -100,6 +100,8 @@ namespace x {
         SceneState& GetState();
         const SceneState& GetState() const;
 
+        void RegisterVolatiles(vector<Volatile*>& volatiles);
+
     private:
         void LoadWorld(json& world);
         void LoadEntities(json& entities);
