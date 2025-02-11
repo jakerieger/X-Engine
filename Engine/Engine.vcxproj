@@ -142,7 +142,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Code;$(SolutionDir)Engine\Shaders\Header;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\assimp\include;$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Code;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
@@ -387,11 +387,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Libraries\assimp-5.4.3\build\code\assimp.vcxproj">
-      <Project>{cf0fac79-87ce-37d4-b0c3-effb7b945ce6}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Libraries\assimp-5.4.3\build\contrib\zlib\zlibstatic.vcxproj">
-      <Project>{68b53492-6f3a-38bb-abed-5dd5e2b8ebe5}</Project>
+    <ProjectReference Include="..\Vendor\assimp\code\assimp.vcxproj">
+      <Project>{b1c4d101-9afa-3b96-b92e-81e4f0053de9}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
