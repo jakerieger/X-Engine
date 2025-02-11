@@ -4,3 +4,6 @@
 [submodule "Vendor/sol2"]
 	path = Vendor/sol2
 	url = https://github.com/ThePhD/sol2.git
+[submodule "Vendor/luajit"]
+	path = Vendor/luajit
+	url = https://github.com/LuaJIT/LuaJIT.git
