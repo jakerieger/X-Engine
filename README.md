@@ -17,7 +17,16 @@ If you'd like to know how the actual "engine" part of this code-base works, you 
 ### Building requires [Visual Studio 2022](https://visualstudio.microsoft.com/vs/). This is a **Windows-only** project since it uses DirectX 11 and the Win32 API 😔.
 ### ⚠️ **There are no plans currently to port this to other platforms.** ⚠️
 
-See [Quickstart](#quickstart) if you just want to build and run.
+---
+
+### Quickstart
+
+1. Clone repository with submodules
+2. Run [CONFIGURE_VS2022.bat](CONFIGURE_VS2022.bat) from project root (or just double-click it)
+3. Open [SpaceGame.sln](SpaceGame.sln) and set `Game` as the startup project
+4. Select a configuration (*Debug*, *Release*, or *Distribution*) and build
+
+---
 
 This project uses Git Submodules, so make sure to use `--recurse-submodules` when doing `git clone`.
 
@@ -38,13 +47,6 @@ If you prefer to do things manually, follow these steps:
 2. Build [LuaJIT](http://luajit.org/) with the **msvcbuild.bat** script found in `Vendor/luajit/src`, again for x64.
 
 Once the necessary dependencies have been built, open [SpaceGame.sln](SpaceGame.sln) and set `Game` as the startup project. Then just set a configuration (Debug, Release, or Distribution) and build!
-
-### Quickstart
-
-1. Clone repository with submodules
-2. Run [CONFIGURE_VS2022.bat](CONFIGURE_VS2022.bat) from project root (or just double-click it)
-3. Open [SpaceGame.sln](SpaceGame.sln) and set `Game` as the startup project
-4. Select a configuration (*Debug*, *Release*, or *Distribution*) and build
 
 ## Screenshots
 
