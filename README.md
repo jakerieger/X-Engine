@@ -27,7 +27,7 @@ $ git clone https://github.com/jakerieger/SpaceGame.git --recurse-submodules --j
 ### Dependencies
 
 Dependencies that are code-only can be found in [Code/Vendor](Code/Vendor). Dependencies that require building and linking are included as git submodules and can be found in [Vendor](Vendor).
-The fastest way to get up and running is by simply executing `CONFIGURE_VS2022.bat` from the project root directory. This will automatically build and configure any of the vendor libraries.
+The fastest way to get up and running is by simply executing [CONFIGURE_VS2022.bat](CONFIGURE_VS2022.bat) from the project root directory. This will automatically build and configure any of the vendor libraries.
 
 If you prefer to do things manually, follow these steps:
 
