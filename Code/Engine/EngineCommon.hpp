@@ -38,9 +38,18 @@
 #include <comdef.h>
 #include <cstdlib>
 
-[[noreturn]] inline void Panic(const char* file, int line, const char* func, const char* msg) noexcept {
+[[noreturn]] inline void Panic(const char* file,
+                               int line,
+                               const char* func,
+                               const char* msg) noexcept {
     char msgFormatted[2048];
-    snprintf(msgFormatted, 2048, "%s:%d - Panic in `%s()` :\n - %s\n", file, line, func, msg);
+    snprintf(msgFormatted,
+             2048,
+             "%s:%d - Panic in `%s()` :\n - %s\n",
+             file,
+             line,
+             func,
+             msg);
     fprintf(stderr, static_cast<const char*>(msgFormatted));
     #ifndef NDEBUG
     OutputDebugStringA(msgFormatted);
@@ -49,7 +58,11 @@
 }
 
 template<typename... Args>
-[[noreturn]] void Panic(const char* file, int line, const char* func, const char* fmt, Args... args) noexcept {
+[[noreturn]] void Panic(const char* file,
+                        int line,
+                        const char* func,
+                        const char* fmt,
+                        Args... args) noexcept {
     char msg[1024];
     snprintf(msg, sizeof(msg), fmt, args...);
     Panic(file, line, func, msg);
@@ -57,6 +70,6 @@ template<typename... Args>
 
 #define X_PANIC(fmt, ...) Panic(__FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__);
 #define X_PANIC_ASSERT(cond, fmt, ...)                                                                             \
-        if (!(cond)) Panic(__FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__);
+            if (!(cond)) Panic(__FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__);
 
 #endif
