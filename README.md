@@ -13,6 +13,13 @@ The actual game executable code is in [Code/Game/main.cpp](Code/Game/main.cpp).
 If you'd like to know how the actual "engine" part of this code-base works, you can check out the [Engine Architecture](Docs/Engine-Architecture.md) doc.
 
 ## Building
+
+See [Quickstart](#quickstart) if you just want to build and run.
+
+### Building requires [Visual Studio 2022](https://visualstudio.microsoft.com/vs/). This is a **Windows-only** project since it uses DirectX 11 and the Win32 API 😔.
+### ⚠️ **There are no plans currently to port this to other platforms.** ⚠️
+---
+
 This project uses Git Submodules, so make sure to use `--recurse-submodules` when doing `git clone`.
 
 **Example:**
@@ -20,10 +27,7 @@ This project uses Git Submodules, so make sure to use `--recurse-submodules` whe
 $ git clone https://github.com/jakerieger/SpaceGame.git --recurse-submodules --j8
 ```
 > `-j8` lets us use up to 8 threads to download repositories in parallel.
----
-### Building requires [Visual Studio 2022](https://visualstudio.microsoft.com/vs/). This is a **Windows-only** project since it uses DirectX 11 and the Win32 API 😔.
-### ⚠️ **There are no plans currently to port this to other platforms.** ⚠️
----
+
 ### Dependencies
 
 Dependencies that are code-only can be found in [Code/Vendor](Code/Vendor). Dependencies that require building and linking are included as git submodules and can be found in [Vendor](Vendor).
@@ -35,6 +39,13 @@ If you prefer to do things manually, follow these steps:
 2. Build [LuaJIT](http://luajit.org/) with the **msvcbuild.bat** script found in `Vendor/luajit/src`, again for x64.
 
 Once the necessary dependencies have been built, open [SpaceGame.sln](SpaceGame.sln) and set `Game` as the startup project. Then just set a configuration (Debug, Release, or Distribution) and build!
+
+### Quickstart
+
+1. Clone repository with submodules
+2. Run [CONFIGURE_VS2022.bat](CONFIGURE_VS2022.bat) from project root (or just double-click it)
+3. Open [SpaceGame.sln](SpaceGame.sln) and set `Game` as the startup project
+4. Select a configuration (*Debug*, *Release*, or *Distribution*) and build
 
 ## Screenshots
 

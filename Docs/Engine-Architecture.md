@@ -130,14 +130,6 @@ Unload goes like this:
 1. Clear entities from SceneState
 2. Drop all resource memory (reset arena)
 
----
-
-**Relevant classes**:
-- [Scene](../Code/Engine/Scene.hpp)
-    - [SceneState](../Code/Engine/SceneState.hpp)
-    - [ResourceManager](../Code/Engine/ResourceManager.hpp)
-        - [ArenaAllocator](../Code/Engine/ArenaAllocator.hpp)
-
 ## Class Hierarchy
 
 - [IGame](../Code/Engine/Game.hpp)
@@ -151,7 +143,7 @@ Unload goes like this:
             - [ArenaAllocator](../Code/Engine/ArenaAllocator.hpp)
     - [ScriptEngine](../Code/Engine/ScriptEngine.hpp)
 
-## What **isn't** implemented:
+## What *isn't* implemented:
 
 In its current state, this would be better described as a *rendering* engine and not a *game* engine, as rendering has been my focus from the beginning of development, and the part I personally find the most interesting. I haven't even added input handling yet, arguably the most core component of a game.
 
