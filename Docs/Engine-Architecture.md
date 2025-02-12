@@ -16,7 +16,7 @@ The engine uses the following structure:
 
 ![](CoreEngineArchitecture.png)
 
-The red blocks on the left side are the **rendering backend** and the blue blocks are the **current scene**.
+The red blocks on the left side are the **rendering backend** and the blue blocks are the **current scene**. This diagram is simplified for brevity. If you'd like to see the full ownership hierarchy, see [Class Hierarchy](#class-hierarchy).
 
 ## Rendering
 
@@ -138,9 +138,22 @@ Unload goes like this:
     - [ResourceManager](../Code/Engine/ResourceManager.hpp)
         - [ArenaAllocator](../Code/Engine/ArenaAllocator.hpp)
 
+## Class Hierarchy
+
+- [IGame](../Code/Engine/Game.hpp)
+    - [RenderContext](../Code/Engine/RenderContext.hpp)
+    - [RenderSystem](../Code/Engine/RenderSystem.hpp)
+        - [PostProcessSystem](../Code/Engine/PostProcessSystem.hpp)
+    - [Scene](../Code/Engine/Scene.hpp)
+        - [SceneState](../Code/Engine/SceneState.hpp)
+            - [ComponentManager](../Code/Engine/ComponentManager.hpp)
+        - [ResourceManager](../Code/Engine/ResourceManager.hpp)
+            - [ArenaAllocator](../Code/Engine/ArenaAllocator.hpp)
+    - [ScriptEngine](../Code/Engine/ScriptEngine.hpp)
+
 ## What **isn't** implemented:
 
-In its current state, this would be better described as a *rendering* engine and not a *game* engine, as rendering has been my focus from the beginning of development, and the part I personally find the most interesting.
+In its current state, this would be better described as a *rendering* engine and not a *game* engine, as rendering has been my focus from the beginning of development, and the part I personally find the most interesting. I haven't even added input handling yet, arguably the most core component of a game.
 
 That being said, this is a list of things that are planned but not currently implemented:
 
