@@ -33,6 +33,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{5D2C4A82-1118-4766-8627-F90E2618B5BA}"
 	ProjectSection(SolutionItems) = preProject
 		Scripts\compile_shaders.py = Scripts\compile_shaders.py
+		Scripts\configure_sol2.bat = Scripts\configure_sol2.bat
+		Scripts\configure_assimp.bat = Scripts\configure_assimp.bat
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Vendor", "Vendor", "{133BA569-24B9-4452-90B9-D38935FC2D6E}"
