@@ -32,7 +32,7 @@ This project uses Git Submodules, so make sure to use `--recurse-submodules` whe
 
 **Example:**
 ```sh
-$ git clone https://github.com/jakerieger/SpaceGame.git --recurse-submodules --j8
+git clone https://github.com/jakerieger/SpaceGame.git --recurse-submodules -j8
 ```
 > `-j8` lets us use up to 8 threads to download repositories in parallel.
 
