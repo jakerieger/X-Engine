@@ -390,6 +390,10 @@ namespace x::Filesystem {
         return path.c_str();
     }
 
+    str Path::Filename() const {
+        return path.substr(path.find_last_of('/') + 1);
+    }
+
     bool Path::operator==(const Path& other) const {
         return path == other.path;
     }

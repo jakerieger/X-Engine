@@ -245,6 +245,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Code\Engine\ArenaAllocator.cpp" />
+    <ClCompile Include="..\Code\Engine\BehaviorComponent.cpp" />
     <ClCompile Include="..\Code\Engine\Camera.cpp" />
     <ClCompile Include="..\Code\Engine\Clock.cpp" />
     <ClCompile Include="..\Code\Engine\ColorGradeEffect.cpp" />
@@ -261,7 +262,6 @@
     <ClCompile Include="..\Code\Engine\RenderSystem.cpp" />
     <ClCompile Include="..\Code\Engine\ResourceManager.cpp" />
     <ClCompile Include="..\Code\Engine\Scene.cpp" />
-    <ClCompile Include="..\Code\Engine\ScriptEngine.cpp" />
     <ClCompile Include="..\Code\Engine\Shader.cpp" />
     <ClCompile Include="..\Code\Engine\StaticResources.cpp" />
     <ClCompile Include="..\Code\Engine\Texture.cpp" />
@@ -281,6 +281,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Code\Engine\ArenaAllocator.hpp" />
+    <ClInclude Include="..\Code\Engine\BehaviorComponent.hpp" />
     <ClInclude Include="..\Code\Engine\Camera.hpp" />
     <ClInclude Include="..\Code\Engine\Clock.hpp" />
     <ClInclude Include="..\Code\Engine\ColorGradeEffect.hpp" />
@@ -311,6 +312,7 @@
     <ClInclude Include="..\Code\Engine\ResourceManager.hpp" />
     <ClInclude Include="..\Code\Engine\Scene.hpp" />
     <ClInclude Include="..\Code\Engine\ScriptEngine.hpp" />
+    <ClInclude Include="..\Code\Engine\ScriptTypeRegistry.hpp" />
     <ClInclude Include="..\Code\Engine\Shader.hpp" />
     <ClInclude Include="..\Code\Engine\StaticResources.hpp" />
     <ClInclude Include="..\Code\Engine\Texture.hpp" />

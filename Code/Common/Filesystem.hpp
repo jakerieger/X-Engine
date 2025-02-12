@@ -147,6 +147,8 @@ namespace x {
             [[nodiscard]] Path operator/(const str& subPath) const;
             [[nodiscard]] str Str() const;
             [[nodiscard]] const char* CStr() const;
+            [[nodiscard]] str Filename() const;
+
             [[nodiscard]] bool operator==(const Path& other) const;
 
             [[nodiscard]] bool Create() const;

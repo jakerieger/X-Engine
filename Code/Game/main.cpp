@@ -3,6 +3,7 @@
 #include "Common/Timer.hpp"
 #include "Common/Filesystem.hpp"
 #include "Engine/Scene.hpp"
+#include "Engine/ScriptTypeRegistry.hpp"
 
 using namespace x; // engine namespace
 using namespace x::Filesystem;
@@ -23,14 +24,13 @@ public:
     void LoadContent(Scene* scene) override {
         _renderContext.GetDeviceContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
         scene->Load(GamePath("Scenes/monke.xscn"));
-
-        auto& scriptEngine = ScriptEngine::Get();
-        scriptEngine.ExecuteString("print('Hello, Lua!')");
     }
 
     void UnloadContent() override {}
 
-    void Update(SceneState& state, const Clock& clock) override {}
+    void Update(SceneState& state, const Clock& clock) override {
+        IGame::Update(state, clock);
+    }
 
     void DrawDebugUI(SceneState& state) override {}
 

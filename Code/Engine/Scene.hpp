@@ -4,9 +4,6 @@
 #include "SceneState.hpp"
 #include "TextureLoader.hpp"
 #include "ModelLoader.hpp"
-
-#include <fstream>
-#include <iostream>
 #include <Vendor/json.hpp>
 using json = nlohmann::json;
 
@@ -79,6 +76,14 @@ namespace x {
                 return {j["resource"].get<str>(), j["castsShadow"].get<bool>(), j["receiveShadow"].get<bool>()};
             }
         };
+
+        struct Behavior {
+            str script;
+
+            static Behavior FromJson(const json& j) {
+                return {j["script"].get<str>()};
+            }
+        };
     }
 
     class Scene {
@@ -91,11 +96,14 @@ namespace x {
 
     public:
         explicit Scene(RenderContext& context);
+        ~Scene();
 
         void Load(const str& path);
         void Unload();
 
-        void Update();
+        void Awake();
+        void Update(f32 deltaTime);
+        void Destroyed();
 
         SceneState& GetState();
         const SceneState& GetState() const;

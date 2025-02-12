@@ -59,7 +59,7 @@ namespace x {
 
         virtual void LoadContent(Scene* scene) = 0;
         virtual void UnloadContent() = 0;
-        virtual void Update(SceneState& state, const Clock& clock) = 0;
+        virtual void Update(SceneState& state, const Clock& clock);
         virtual void OnResize(u32 width, u32 height) = 0;
         virtual void DrawDebugUI(SceneState& state) {}
 

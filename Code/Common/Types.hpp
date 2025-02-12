@@ -34,10 +34,10 @@ namespace x {
     using f32 = float;
     using f64 = double;
 
-    using cstr = const char*;
-    using str  = std::string;
-    using wstr = std::wstring;
-    using sv   = std::string_view;
+    using cstr    = const char*;
+    using str     = std::string;
+    using wstr    = std::wstring;
+    using strview = std::string_view;
 
     inline constexpr auto None            = nullptr;
     inline constexpr std::nullopt_t Empty = std::nullopt;

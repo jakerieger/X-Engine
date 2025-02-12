@@ -59,9 +59,11 @@ namespace x {
         _i_ = StrCopy(_inputBuffer, kMaxInputLength, "");
     }
 
-    void DevConsole::RegisterCommand(const str& name, const CommandHandler& handler) {
+    DevConsole& DevConsole::RegisterCommand(const str& name, const CommandHandler& handler) {
         _handlers[name] = handler;
         _commands.push_back(name);
+
+        return *this;
     }
 
     void DevConsole::AddLog(const char* fmt, ...) {

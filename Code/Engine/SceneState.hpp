@@ -12,10 +12,11 @@
 
 #include "TransformComponent.hpp"
 #include "ModelComponent.hpp"
+#include "BehaviorComponent.hpp"
 
 namespace x {
     template<typename T>
-    concept IsValidComponent = Same<T, TransformComponent> || Same<T, ModelComponent>;
+    concept IsValidComponent = Same<T, TransformComponent> || Same<T, ModelComponent> || Same<T, BehaviorComponent>;
 
     class SceneState {
         friend class Scene;
@@ -61,6 +62,10 @@ namespace x {
                 return _models.GetComponent(entity);
             }
 
+            if constexpr (Same<T, BehaviorComponent>) {
+                return _behaviors.GetComponent(entity);
+            }
+
             return None;
         }
 
@@ -73,6 +78,10 @@ namespace x {
 
             if constexpr (Same<T, ModelComponent>) {
                 return _models.GetComponentMutable(entity);
+            }
+
+            if constexpr (Same<T, BehaviorComponent>) {
+                return _behaviors.GetComponentMutable(entity);
             }
 
             return None;
@@ -88,6 +97,10 @@ namespace x {
             if constexpr (Same<T, ModelComponent>) {
                 return _models.AddComponent(entity).component;
             }
+
+            if constexpr (Same<T, BehaviorComponent>) {
+                return _behaviors.AddComponent(entity).component;
+            }
         }
 
         template<typename T>
@@ -95,6 +108,7 @@ namespace x {
         const ComponentManager<T>& GetComponents() const {
             if constexpr (Same<T, TransformComponent>) { return _transforms; }
             if constexpr (Same<T, ModelComponent>) { return _models; }
+            if constexpr (Same<T, BehaviorComponent>) { return _behaviors; }
         }
 
         template<typename T>
@@ -102,6 +116,7 @@ namespace x {
         ComponentManager<T>& GetComponents() {
             if constexpr (Same<T, TransformComponent>) { return _transforms; }
             if constexpr (Same<T, ModelComponent>) { return _models; }
+            if constexpr (Same<T, BehaviorComponent>) { return _behaviors; }
         }
 
         LightState& GetLightState() {
@@ -126,6 +141,7 @@ namespace x {
             _mainCamera = {};
             _transforms = {};
             _models     = {};
+            _behaviors  = {};
         }
 
     private:
@@ -138,5 +154,6 @@ namespace x {
         // Component managers
         ComponentManager<TransformComponent> _transforms;
         ComponentManager<ModelComponent> _models;
+        ComponentManager<BehaviorComponent> _behaviors;
     };
 } // namespace x

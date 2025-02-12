@@ -7,7 +7,7 @@
 #include <thread>
 
 #include "RasterizerState.hpp"
-#include "StaticResources.hpp"
+#include "ScriptTypeRegistry.hpp"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -24,7 +24,7 @@ namespace x {
     void IGame::Run() {
         try {
             Initialize();
-        } catch (const std::runtime_error& e) {
+        } catch (const std::runtime_error&) {
             MessageBoxA(_hwnd, "An unknown error occured while initializing the engine.", "SpaceGame", MB_OK);
             return;
         }
@@ -45,7 +45,7 @@ namespace x {
                     // ScopedTimer updateTimer("UpdateTime");
 
                     _clock.Tick();
-                    _activeScene->Update();
+                    _activeScene->Update(CAST<f32>(_clock.GetDeltaTime()));
                     Update(state, _clock);
                 }
 
@@ -127,6 +127,8 @@ namespace x {
     u32 IGame::GetHeight() const { return _currentHeight; }
 
     f32 IGame::GetAspect() const { return CAST<f32>(_currentWidth) / CAST<f32>(_currentHeight); }
+
+    void IGame::Update(SceneState& state, const Clock& clock) {}
 
     void IGame::RenderDepthOnly(const SceneState& state) {
         for (const auto& [entity, model] : state.GetComponents<ModelComponent>()) {
@@ -220,52 +222,53 @@ namespace x {
         _activeScene->RegisterVolatiles(_volatiles);
 
         RasterizerStates::Init(_renderContext); // Setup our rasterizer states for future use
-
-        if (!StaticResources::Init(_renderContext)) {
-            PANIC("Failed to initialize static resources.");
-        }
     }
 
     void IGame::InitializeEngine() {
+        // Initialize the script engine
+        {
+            auto& scriptEngine = ScriptEngine::Get();
+
+            // Register this class
+            auto gameGlobal    = scriptEngine.GetLuaState().new_usertype<IGame>("Game");
+            gameGlobal["Quit"] = [this] { Quit(); };
+
+            // Register other engine types
+            scriptEngine.RegisterTypes<Float3, TransformComponent, BehaviorEntity>();
+        }
+
         if (_debugUIEnabled) { _debugUI = make_unique<DebugUI>(_hwnd, _renderContext); }
 
-        _devConsole.RegisterCommand("quit", [this](auto) { Quit(); });
-
-        _devConsole.RegisterCommand("close", [this](auto) { _devConsole.ToggleVisible(); });
-
-        _devConsole.RegisterCommand("p_ShowFrameGraph",
+        _devConsole.RegisterCommand("quit", [this](auto) { Quit(); })
+                   .RegisterCommand("close", [this](auto) { _devConsole.ToggleVisible(); })
+                   .RegisterCommand("p_ShowFrameGraph",
                                     [this](auto args) {
                                         if (args.size() < 1) { return; }
                                         const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
                                         _debugUI->SetShowFrameGraph(CAST<bool>(show));
-                                    });
-
-        _devConsole.RegisterCommand("p_ShowDeviceInfo",
+                                    })
+                   .RegisterCommand("p_ShowDeviceInfo",
                                     [this](auto args) {
                                         if (args.size() < 1) { return; }
                                         const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
                                         _debugUI->SetShowDeviceInfo(CAST<bool>(show));
-                                    });
-
-        _devConsole.RegisterCommand("p_ShowFrameInfo",
+                                    })
+                   .RegisterCommand("p_ShowFrameInfo",
                                     [this](auto args) {
                                         if (args.size() < 1) { return; }
                                         const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
                                         _debugUI->SetShowFrameInfo(CAST<bool>(show));
-                                    });
-
-        _devConsole.RegisterCommand("p_ShowAll",
+                                    })
+                   .RegisterCommand("p_ShowAll",
                                     [this](auto args) {
                                         if (args.size() < 1) { return; }
                                         const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
                                         _debugUI->SetShowFrameGraph(CAST<bool>(show));
                                         _debugUI->SetShowDeviceInfo(CAST<bool>(show));
                                         _debugUI->SetShowFrameInfo(CAST<bool>(show));
-                                    });
-
-        _devConsole.RegisterCommand("r_Pause", [this](auto) { Pause(); });
-
-        _devConsole.RegisterCommand("r_Resume", [this](auto) { Resume(); });
+                                    })
+                   .RegisterCommand("r_Pause", [this](auto) { Pause(); })
+                   .RegisterCommand("r_Resume", [this](auto) { Resume(); });
     }
 
     LRESULT IGame::ResizeHandler(u32 width, u32 height) {

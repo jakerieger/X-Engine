@@ -91,8 +91,8 @@
     <ClCompile Include="..\Code\Engine\StaticResources.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\Code\Engine\ScriptEngine.cpp">
-      <Filter>Source</Filter>
+    <ClCompile Include="..\Code\Engine\BehaviorComponent.cpp">
+      <Filter>Source\Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -505,6 +505,12 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Code\Engine\ScriptEngine.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\BehaviorComponent.hpp">
+      <Filter>Source\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\ScriptTypeRegistry.hpp">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>

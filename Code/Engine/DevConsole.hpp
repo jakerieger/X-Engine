@@ -24,7 +24,7 @@ namespace x {
 
     public:
         void Execute(const char* cmdLine);
-        void RegisterCommand(const str& name, const CommandHandler& handler);
+        DevConsole& RegisterCommand(const str& name, const CommandHandler& handler);
         void AddLog(const char* fmt, ...);
         void Draw();
         int TextEditCallback(ImGuiInputTextCallbackData* data);

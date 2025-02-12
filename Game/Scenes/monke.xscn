@@ -95,6 +95,9 @@
           "material": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Materials\\Monke.xmat",
           "castsShadow": true,
           "receiveShadow": true
+        },
+        "behavior": {
+          "script": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Scripts\\SpinMonke.lua"
         }
       }
     }

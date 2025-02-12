@@ -1,9 +1,15 @@
 #include "Scene.hpp"
-
+#include "BehaviorComponent.hpp"
 #include "StaticResources.hpp"
+#include "ScriptTypeRegistry.hpp"
+#include <ranges>
 
 namespace x {
     Scene::Scene(RenderContext& context): _resources(context, Memory::BYTES_1GB), _state(), _context(context) {}
+
+    Scene::~Scene() {
+        Unload();
+    }
 
     void Scene::Load(const str& path) {
         _state.Reset();
@@ -23,20 +29,59 @@ namespace x {
 
         auto entitiesJson = sceneJson["entities"];
         LoadEntities(entitiesJson);
+
+        Awake();
     }
 
     void Scene::Unload() {
+        Destroyed();
+
         _state.Reset();
         _entities.clear();
         _resources.Clear();
     }
 
-    void Scene::Update() {
+    void Scene::Awake() {
+        for (const auto& [name, entityId] : _entities) {
+            const auto* behaviorComponent = _state.GetComponent<BehaviorComponent>(entityId);
+            auto* transformComponent      = _state.GetComponentMutable<TransformComponent>(entityId);
+            if (behaviorComponent) {
+                BehaviorEntity entity(name, transformComponent);
+                ScriptEngine::Get().CallAwakeBehavior(behaviorComponent->GetId(), entity);
+            }
+        }
+    }
+
+    void Scene::Update(f32 deltaTime) {
         // Calculate LVP
         // TODO: I only need to update this if either the light direction or the screen size changes, this can be optimized
         const auto lvp =
             CalculateLightViewProjection(_state.GetLightState().Sun, 16.f, _state.GetMainCamera().GetAspectRatio());
         _state.GetLightState().Sun.lightViewProj = XMMatrixTranspose(lvp);
+
+        for (const auto& [name, entityId] : _entities) {
+            const auto* behaviorComponent = _state.GetComponentMutable<BehaviorComponent>(entityId);
+            auto* transformComponent      = _state.GetComponentMutable<TransformComponent>(entityId);
+            if (behaviorComponent) {
+                BehaviorEntity entity(name, transformComponent);
+                ScriptEngine::Get().CallUpdateBehavior(behaviorComponent->GetId(), deltaTime, entity);
+            }
+
+            if (transformComponent) {
+                transformComponent->Update();
+            }
+        }
+    }
+
+    void Scene::Destroyed() {
+        for (const auto& [name, entityId] : _entities) {
+            const auto* behaviorComponent = _state.GetComponent<BehaviorComponent>(entityId);
+            auto* transformComponent      = _state.GetComponentMutable<TransformComponent>(entityId);
+            if (behaviorComponent) {
+                BehaviorEntity entity(name, transformComponent);
+                ScriptEngine::Get().CallDestroyedBehavior(behaviorComponent->GetId(), entity);
+            }
+        }
     }
 
     SceneState& Scene::GetState() {
@@ -115,6 +160,20 @@ namespace x {
                 }
 
                 modelComponent.SetCastsShadows(model.castsShadow);
+            }
+
+            if (components.contains("behavior")) {
+                auto behavior           = scene_schema::Behavior::FromJson(components["behavior"]);
+                auto& behaviorComponent = _state.AddComponent<BehaviorComponent>(entityId);
+                behaviorComponent.LoadFromFile(behavior.script);
+
+                auto loadResult = ScriptEngine::Get().LoadScript(behaviorComponent.GetSource(),
+                                                                 behaviorComponent.GetId());
+                if (!loadResult) {
+                    PANIC("ScriptEngine failed to load script '%s' for entity '%s'",
+                          behavior.script.c_str(),
+                          entities["name"].get<str>().c_str());
+                }
             }
 
             _entities[entity["name"].get<str>()] = entityId;

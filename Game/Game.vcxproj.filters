@@ -21,6 +21,9 @@
     <None Include="Materials\Monke.xmat">
       <Filter>Materials</Filter>
     </None>
+    <None Include="Scripts\SpinMonke.lua">
+      <Filter>Scripts</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Content">
@@ -31,6 +34,9 @@
     </Filter>
     <Filter Include="Materials">
       <UniqueIdentifier>{8c426eb4-8a60-4676-9c24-91bf57712f3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripts">
+      <UniqueIdentifier>{23319f89-c7bd-41ce-91ee-9ddbe8f4fb1f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
