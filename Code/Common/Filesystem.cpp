@@ -3,7 +3,6 @@
 //
 
 #include "Filesystem.hpp"
-#include "Panic.hpp"
 
 #include <sstream>
 
@@ -35,7 +34,9 @@ namespace x::Filesystem {
         const std::streamsize fileSize = file.tellg();
         std::vector<u8> bytes(fileSize);
         file.seekg(0, std::ios::beg);
-        if (!file.read(reinterpret_cast<char*>(bytes.data()), fileSize)) { return {}; }
+        if (!file.read(reinterpret_cast<char*>(bytes.data()), fileSize)) {
+            return {};
+        }
         file.close();
         return bytes;
     }
@@ -59,15 +60,19 @@ namespace x::Filesystem {
         return lines;
     }
 
-    std::vector<u8> FileReader::ReadBlock(const Path& path, size_t size, u64 offset) {
+    std::vector<u8> FileReader::ReadBlock(const Path& path,
+                                          size_t size,
+                                          u64 offset) {
         std::ifstream file(path.Str(), std::ios::binary | std::ios::ate);
         if (!file) { return {}; }
         const std::streamsize fileSize = file.tellg();
-        if (offset >= (u64)fileSize || size == 0 || offset + size > (u64)fileSize) { return {}; }
+        if (offset >= (u64)fileSize || size == 0 || offset + size > (u64)
+            fileSize) { return {}; }
         file.seekg((std::streamsize)offset, std::ios::beg);
         if (!file) { return {}; }
         std::vector<u8> buffer(size);
-        file.read(reinterpret_cast<char*>(buffer.data()), (std::streamsize)size);
+        file.read(reinterpret_cast<char*>(buffer.data()),
+                  (std::streamsize)size);
         if (!file) { return {}; }
         return buffer;
     }
@@ -81,12 +86,15 @@ namespace x::Filesystem {
     #pragma endregion
 
     #pragma region FileWriter
-    bool FileWriter::WriteAllBytes(const Path& path, const std::vector<u8>& data) {
+    bool FileWriter::WriteAllBytes(const Path& path,
+                                   const std::vector<u8>& data) {
         std::ofstream file(path.Str(),
-                           std::ios::binary | std::ios::trunc); // Overwrite existing file
+                           std::ios::binary | std::ios::trunc);
+        // Overwrite existing file
         if (!file)
             return false;
-        file.write(RCAST<const char*>(data.data()), CAST<std::streamsize>(data.size()));
+        file.write(RCAST<const char*>(data.data()),
+                   CAST<std::streamsize>(data.size()));
         return file.good();
     }
 
@@ -98,7 +106,8 @@ namespace x::Filesystem {
         return file.good();
     }
 
-    bool FileWriter::WriteAllLines(const Path& path, const std::vector<str>& lines) {
+    bool FileWriter::WriteAllLines(const Path& path,
+                                   const std::vector<str>& lines) {
         std::ofstream file(path.Str(), std::ios::out | std::ios::trunc);
         if (!file)
             return false;
@@ -109,20 +118,25 @@ namespace x::Filesystem {
         return file.good();
     }
 
-    bool FileWriter::WriteBlock(const Path& path, const std::vector<u8>& data, u64 offset) {
+    bool FileWriter::WriteBlock(const Path& path,
+                                const std::vector<u8>& data,
+                                u64 offset) {
         std::ofstream file(path.Str(),
                            std::ios::binary | std::ios::in |
                            std::ios::out); // Open in binary read/write mode
         if (!file)
             return false;
-        file.seekp(CAST<std::streampos>(offset), std::ios::beg); // seek to offset
+        file.seekp(CAST<std::streampos>(offset), std::ios::beg);
+        // seek to offset
         if (!file)
             return false; // Failed to seek
-        file.write(RCAST<const char*>(data.data()), CAST<std::streamsize>(data.size()));
+        file.write(RCAST<const char*>(data.data()),
+                   CAST<std::streamsize>(data.size()));
         return file.good();
     }
 
-    std::future<std::vector<u8>> AsyncFileReader::ReadAllBytes(const Path& path) {
+    std::future<std::vector<u8>>
+    AsyncFileReader::ReadAllBytes(const Path& path) {
         return runAsync([path]() { return FileReader::ReadAllBytes(path); });
     }
 
@@ -130,34 +144,49 @@ namespace x::Filesystem {
         return runAsync([path]() { return FileReader::ReadAllText(path); });
     }
 
-    std::future<std::vector<str>> AsyncFileReader::ReadAllLines(const Path& path) {
+    std::future<std::vector<str>> AsyncFileReader::ReadAllLines(
+        const Path& path) {
         return runAsync([path]() { return FileReader::ReadAllLines(path); });
     }
 
     std::future<std::vector<u8>>
     AsyncFileReader::ReadBlock(const Path& path, size_t size, u64 offset) {
         return runAsync(
-            [path, size, offset]() { return FileReader::ReadBlock(path, size, offset); });
+            [path, size, offset]() {
+                return FileReader::ReadBlock(path, size, offset);
+            });
     }
 
     std::future<bool> AsyncFileWriter::WriteAllBytes(const Path& path,
-                                                     const std::vector<u8>& data) {
-        return runAsync([path, data]() { return FileWriter::WriteAllBytes(path, data); });
+        const std::vector<u8>& data) {
+        return runAsync([path, data]() {
+            return FileWriter::WriteAllBytes(path, data);
+        });
     }
 
-    std::future<bool> AsyncFileWriter::WriteAllText(const Path& path, const str& text) {
-        return runAsync([path, text]() { return FileWriter::WriteAllText(path, text); });
+    std::future<bool> AsyncFileWriter::WriteAllText(
+        const Path& path,
+        const str& text) {
+        return runAsync([path, text]() {
+            return FileWriter::WriteAllText(path, text);
+        });
     }
 
     std::future<bool> AsyncFileWriter::WriteAllLines(const Path& path,
-                                                     const std::vector<str>& lines) {
-        return runAsync([path, lines]() { return FileWriter::WriteAllLines(path, lines); });
+        const std::vector<str>& lines) {
+        return runAsync([path, lines]() {
+            return FileWriter::WriteAllLines(path, lines);
+        });
     }
 
     std::future<bool>
-    AsyncFileWriter::WriteBlock(const Path& path, const std::vector<u8>& data, u64 offset) {
+    AsyncFileWriter::WriteBlock(const Path& path,
+                                const std::vector<u8>& data,
+                                u64 offset) {
         return runAsync(
-            [path, data, offset]() { return FileWriter::WriteBlock(path, data, offset); });
+            [path, data, offset]() {
+                return FileWriter::WriteBlock(path, data, offset);
+            });
     }
     #pragma endregion
 
@@ -195,7 +224,9 @@ namespace x::Filesystem {
         if (!IsOpen() || size == 0)
             return false;
         const auto currentPos = Position();
-        if (currentPos + size > _size) { size = CAST<size_t>(_size - currentPos); }
+        if (currentPos + size > _size) {
+            size = CAST<size_t>(_size - currentPos);
+        }
         data.resize(size);
         _stream.read(RCAST<char*>(data.data()), size);
         return _stream.good();
@@ -249,13 +280,17 @@ namespace x::Filesystem {
     }
 
     StreamWriter::StreamWriter(const Path& path, bool append)
-        : _stream(path.Str(), std::ios::binary | (append ? std::ios::app : std::ios::trunc)) {}
+        : _stream(path.Str(),
+                  std::ios::binary | (append
+                                          ? std::ios::app
+                                          : std::ios::trunc)) {}
 
     StreamWriter::~StreamWriter() {
         Close();
     }
 
-    StreamWriter::StreamWriter(StreamWriter&& other) noexcept : _stream(std::move(other._stream)) {}
+    StreamWriter::StreamWriter(StreamWriter&& other) noexcept : _stream(
+        std::move(other._stream)) {}
 
     StreamWriter& StreamWriter::operator=(StreamWriter&& other) noexcept {
         if (this != &other) {
