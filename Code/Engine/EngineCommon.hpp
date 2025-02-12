@@ -23,3 +23,13 @@
 
 #define X_PANIC_ASSERT(cond, fmt, ...) \
     if (!(cond)) x::impl::Panic(__FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__)
+
+// I know you can also use _CONSOLE to check if the subsystem is console or not, but I have other things that'll change
+// depending on whether the current configuration is set to Distribution.
+#if defined(X_DISTRIBUTION)
+#define X_MAIN int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
+#define X_MODULE_HANDLE hInstance
+#else
+#define X_MAIN int main(int argc, char* argv[])
+#define X_MODULE_HANDLE GetModuleHandleA(nullptr)
+#endif

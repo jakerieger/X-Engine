@@ -37,30 +37,13 @@ public:
     void OnResize(u32 width, u32 height) override {}
 };
 
-// int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow) {
-//     sol::state lua;
-//     lua.open_libraries();
-//     try {
-//         lua.script("print('Hello from LuaJIT!')");
-//     } catch (const sol::error& e) { std::cout << "Error: " << e.what() << std::endl; }
-//
-//     SpaceGame game(hInstance);
-//
-//     #ifndef NDEBUG
-//     game.EnableConsole();
-//     #endif
-//
-//     game.EnableDebugUI();
-//     game.Run();
-// }
 
-int main() {
-    SpaceGame game(GetModuleHandleA(nullptr));
+X_MAIN {
+    SpaceGame game(X_MODULE_HANDLE);
 
-    // #ifndef NDEBUG
-    // game.EnableConsole();
-    // #endif
-
+    #ifndef X_DISTRIBUTION
     game.EnableDebugUI();
+    #endif
+
     game.Run();
 }
