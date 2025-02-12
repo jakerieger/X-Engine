@@ -6,8 +6,6 @@
 #define SOL_ALL_SAFETIES_ON 1
 #include <sol/sol.hpp>
 
-#include "Common/Panic.hpp"
-
 namespace x {
     struct BehaviorEntity;
 
@@ -64,7 +62,9 @@ namespace x {
             return _lua;
         }
 
-        bool LoadScript(const str& source, const str& scriptId, const ScriptType type = ScriptType::Behavior) {
+        bool LoadScript(const str& source,
+                        const str& scriptId,
+                        const ScriptType type = ScriptType::Behavior) {
             try {
                 auto env = sol::environment(_lua, sol::create, _lua.globals());
                 _lua.script(source, env);
@@ -86,9 +86,12 @@ namespace x {
             }
         }
 
-        void CallAwakeBehavior(const str& scriptId, const BehaviorEntity& entity) {
+        void CallAwakeBehavior(const str& scriptId,
+                               const BehaviorEntity& entity) {
             if (!_behaviorContexts.contains(scriptId)) {
-                X_PANIC("Could not find associated script in behavior contexts for id '%s'", scriptId.c_str());
+                X_PANIC(
+                    "Could not find associated script in behavior contexts for id '%s'",
+                    scriptId.c_str());
             }
 
             const auto& context = _behaviorContexts[scriptId];
@@ -99,9 +102,13 @@ namespace x {
             }
         }
 
-        void CallUpdateBehavior(const str& scriptId, f32 deltaTime, const BehaviorEntity& entity) {
+        void CallUpdateBehavior(const str& scriptId,
+                                f32 deltaTime,
+                                const BehaviorEntity& entity) {
             if (!_behaviorContexts.contains(scriptId)) {
-                X_PANIC("Could not find associated script in behavior contexts for id '%s'", scriptId.c_str());
+                X_PANIC(
+                    "Could not find associated script in behavior contexts for id '%s'",
+                    scriptId.c_str());
             }
 
             const auto& context = _behaviorContexts[scriptId];
@@ -114,9 +121,12 @@ namespace x {
             }
         }
 
-        void CallDestroyedBehavior(const str& scriptId, const BehaviorEntity& entity) {
+        void CallDestroyedBehavior(const str& scriptId,
+                                   const BehaviorEntity& entity) {
             if (!_behaviorContexts.contains(scriptId)) {
-                X_PANIC("Could not find associated script in behavior contexts for id '%s'", scriptId.c_str());
+                X_PANIC(
+                    "Could not find associated script in behavior contexts for id '%s'",
+                    scriptId.c_str());
             }
 
             const auto& context = _behaviorContexts[scriptId];
