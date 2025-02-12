@@ -197,25 +197,28 @@ namespace x {
                 if (!loaded) { PANIC("Failed to load texture '%s' for '%s'.", resource.c_str(), name.c_str()); }
 
                 if (name == "albedo") {
-                    auto albedoMap = _resources.FetchResource<Texture2D>(resource);
+                    std::optional<ResourceHandle<Texture2D>> albedoMap = _resources.FetchResource<Texture2D>(resource);
                     X_PANIC_ASSERT(albedoMap.has_value() && albedoMap->Valid(), "Albedo map null or invalid");
+                    // extracting value from std::optional, not de-referencing ptr!
                     matInstance.SetAlbedoMap(*albedoMap);
                     continue;
                 }
                 if (name == "metallic") {
-                    auto metallicMap = _resources.FetchResource<Texture2D>(resource);
+                    std::optional<ResourceHandle<Texture2D>> metallicMap = _resources.FetchResource<
+                        Texture2D>(resource);
                     X_PANIC_ASSERT(metallicMap.has_value() && metallicMap->Valid(), "Metallic map null or invalid");
                     matInstance.SetMetallicMap(*metallicMap);
                     continue;
                 }
                 if (name == "roughness") {
-                    auto roughnessMap = _resources.FetchResource<Texture2D>(resource);
+                    std::optional<ResourceHandle<Texture2D>> roughnessMap = _resources.FetchResource<Texture2D>(
+                        resource);
                     X_PANIC_ASSERT(roughnessMap.has_value() && roughnessMap->Valid(), "Roughness map null or invalid");
                     matInstance.SetRoughnessMap(*roughnessMap);
                     continue;
                 }
                 if (name == "normal") {
-                    auto normalMap = _resources.FetchResource<Texture2D>(resource);
+                    std::optional<ResourceHandle<Texture2D>> normalMap = _resources.FetchResource<Texture2D>(resource);
                     X_PANIC_ASSERT(normalMap.has_value() && normalMap->Valid(), "Normal map null or invalid");
                     matInstance.SetNormalMap(*normalMap);
                 }
