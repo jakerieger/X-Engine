@@ -18,7 +18,7 @@ namespace x {
         json sceneJson = json::parse(f);
 
         if (sceneJson["version"].get<str>() != "1.0") {
-            PANIC("Scene schema wrong version");
+            X_PANIC("Scene schema wrong version");
         }
 
         _name        = sceneJson["name"].get<str>();
@@ -138,12 +138,12 @@ namespace x {
 
                 // Load resource
                 if (!_resources.LoadResource<Model>(model.resource)) {
-                    PANIC("Failed to load model resource when loading scene: %s", model.resource.c_str());
+                    X_PANIC("Failed to load model resource when loading scene: %s", model.resource.c_str());
                 }
 
                 auto modelHandle = _resources.FetchResource<Model>(model.resource);
                 if (!modelHandle.has_value()) {
-                    PANIC("Failed to fetch model resource: %s", model.resource.c_str());
+                    X_PANIC("Failed to fetch model resource: %s", model.resource.c_str());
                 }
 
                 auto& modelComponent = _state.AddComponent<ModelComponent>(entityId);
@@ -170,9 +170,9 @@ namespace x {
                 auto loadResult = ScriptEngine::Get().LoadScript(behaviorComponent.GetSource(),
                                                                  behaviorComponent.GetId());
                 if (!loadResult) {
-                    PANIC("ScriptEngine failed to load script '%s' for entity '%s'",
-                          behavior.script.c_str(),
-                          entities["name"].get<str>().c_str());
+                    X_PANIC("ScriptEngine failed to load script '%s' for entity '%s'",
+                            behavior.script.c_str(),
+                            entities["name"].get<str>().c_str());
                 }
             }
 
@@ -194,7 +194,7 @@ namespace x {
                 const auto& resource = texJson["resource"].get<str>();
 
                 const bool loaded = _resources.LoadResource<Texture2D>(resource);
-                if (!loaded) { PANIC("Failed to load texture '%s' for '%s'.", resource.c_str(), name.c_str()); }
+                if (!loaded) { X_PANIC("Failed to load texture '%s' for '%s'.", resource.c_str(), name.c_str()); }
 
                 if (name == "albedo") {
                     std::optional<ResourceHandle<Texture2D>> albedoMap = _resources.FetchResource<Texture2D>(resource);

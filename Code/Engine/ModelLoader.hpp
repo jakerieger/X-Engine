@@ -19,7 +19,7 @@ namespace x {
             Assimp::Importer importer;
             const auto* scene = importer.ReadFile(path.c_str(), kProcessFlags);
             if (!scene) {
-                PANIC("Failed to load model.");
+                X_PANIC("Failed to load model.");
             }
 
             ProcessNode(context, scene->mRootNode, scene, model);

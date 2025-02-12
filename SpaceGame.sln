@@ -10,7 +10,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{D9CDE4A0-52F1-4556-9A55-8C571D3A3A6C}"
 	ProjectSection(SolutionItems) = preProject
 		Code\Common\Filesystem.hpp = Code\Common\Filesystem.hpp
-		Code\Common\Panic.hpp = Code\Common\Panic.hpp
 		Code\Common\Str.hpp = Code\Common\Str.hpp
 		Code\Common\Timer.hpp = Code\Common\Timer.hpp
 		Code\Common\Types.hpp = Code\Common\Types.hpp

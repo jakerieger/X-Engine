@@ -45,11 +45,11 @@ namespace x {
                                                    &featureLevel,
                                                    &_context);
 
-        PANIC_IF_FAILED(hr, "Failed to create device and swapchain.")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create device and swapchain.")
 
         // Create render target view
         hr = _swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &_backBuffer);
-        PANIC_IF_FAILED(hr, "Failed to get swapchain back buffer.")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to get swapchain back buffer.")
 
         QueryDeviceInfo(); // Cache device information
     }
@@ -57,9 +57,12 @@ namespace x {
     void RenderContext::ResizeSwapchainBuffers(u32 width, u32 height) {
         _backBuffer.Reset();
 
-        PANIC_IF_FAILED(_swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0),
-                        "Failed to resize swapchain buffers.")
-        PANIC_IF_FAILED(_swapChain->GetBuffer(0, IID_PPV_ARGS(&_backBuffer)), "Failed to get swapchain back buffer.")
+        auto hr = _swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
+        X_PANIC_ASSERT(SUCCEEDED(hr),
+                       "Failed to resize swapchain buffers.")
+
+        hr = _swapChain->GetBuffer(0, IID_PPV_ARGS(&_backBuffer));
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to get swapchain back buffer.")
     }
 
     static str GetVendorNameFromId(const u32 id) {

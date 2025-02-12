@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Common/Types.hpp"
-#include "Common/Panic.hpp"
 #include "D3D.hpp"
-#include "Volatile.hpp"
+#include "EngineCommon.hpp"
 
 namespace x {
     struct DeviceInfo {
@@ -18,9 +17,9 @@ namespace x {
         u32 numTriangles      = 0;
     };
 
-    // class PostProcessSystem;
-
     class RenderContext final {
+        X_CLASS_PREVENT_MOVES_COPIES(RenderContext)
+
         ComPtr<IDXGISwapChain> _swapChain;
         ComPtr<ID3D11Device> _device;
         ComPtr<ID3D11DeviceContext> _context;
@@ -32,21 +31,15 @@ namespace x {
     public:
         RenderContext() = default;
 
-        // Prevent moves or copies
-        RenderContext(const RenderContext& other)            = delete;
-        RenderContext(RenderContext&& other)                 = delete;
-        RenderContext& operator=(const RenderContext& other) = delete;
-        RenderContext& operator=(RenderContext&& other)      = delete;
-
         // clang-format off
         // D3D objects
-        [[nodiscard]] ID3D11Device* GetDevice() const { return _device.Get(); }
-        [[nodiscard]] ID3D11DeviceContext* GetDeviceContext() const { return _context.Get(); }
-        [[nodiscard]] ID3D11Texture2D* GetBackBuffer() const { return _backBuffer.Get(); }
+        X_NODISCARD ID3D11Device* GetDevice() const { return _device.Get(); }
+        X_NODISCARD ID3D11DeviceContext* GetDeviceContext() const { return _context.Get(); }
+        X_NODISCARD ID3D11Texture2D* GetBackBuffer() const { return _backBuffer.Get(); }
 
         // Debug information / profiler
-        [[nodiscard]] DeviceInfo GetDeviceInfo() const { return _deviceInfo; }
-        [[nodiscard]] FrameInfo GetFrameInfo() const { return _frameInfo; }
+        X_NODISCARD DeviceInfo GetDeviceInfo() const { return _deviceInfo; }
+        X_NODISCARD FrameInfo GetFrameInfo() const { return _frameInfo; }
         //
         // clang-format on
 
@@ -56,9 +49,8 @@ namespace x {
         void Draw(u32 vertexCount);
         void DrawIndexed(u32 indexCount);
 
-        friend class Mesh;
-
     private:
+        friend class Mesh;
         friend class RenderSystem;
 
         void ResizeSwapchainBuffers(u32 width, u32 height);

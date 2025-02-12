@@ -180,7 +180,7 @@ namespace x {
     void IGame::InitializeWindow() {
         // Initialize COM (for DirectXTex)
         const auto hr = CoInitializeEx(None, COINIT_MULTITHREADED);
-        PANIC_IF_FAILED(hr, "Failed to initialize COM");
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to initialize COM");
 
         WNDCLASSEXA wc{};
         wc.cbSize        = sizeof(WNDCLASSEXA);

@@ -14,14 +14,14 @@ namespace x {
             ScratchImage scratchImage;
 
             auto hr = LoadFromDDSFile(AnsiToWide(path).c_str(), DDS_FLAGS_NONE, &metadata, scratchImage);
-            PANIC_IF_FAILED(hr, "Failed to load DDS texture file: %s", path.c_str())
+            X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to load DDS texture file: %s", path.c_str())
 
             hr = CreateShaderResourceView(context.GetDevice(),
                                           scratchImage.GetImages(),
                                           scratchImage.GetImageCount(),
                                           metadata,
                                           &texture._textureView);
-            PANIC_IF_FAILED(hr, "Failed to create shader resource view from texture.")
+            X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create shader resource view from texture.")
 
             D3D11_SAMPLER_DESC samplerDesc{};
             samplerDesc.Filter         = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -33,7 +33,7 @@ namespace x {
             samplerDesc.MaxLOD         = D3D11_FLOAT32_MAX;
 
             hr = context.GetDevice()->CreateSamplerState(&samplerDesc, &texture._samplerState);
-            PANIC_IF_FAILED(hr, "Failed to create sampler state for texture.");
+            X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create sampler state for texture.");
 
             return texture;
         }

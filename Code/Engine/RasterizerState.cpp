@@ -21,15 +21,24 @@ namespace x {
         scissorTest.ScissorEnable         = TRUE;
 
         auto* device = renderer.GetDevice();
-        PANIC_IF_FAILED(device->CreateRasterizerState(&defaultSolid, &DefaultSolid),
-                        "Failed to create DefaultSolid rasterizer state.");
-        PANIC_IF_FAILED(device->CreateRasterizerState(&wireframe, &Wireframe),
-                        "Failed to create Wireframe rasterizer state.");
-        PANIC_IF_FAILED(device->CreateRasterizerState(&noCull, &NoCull),
-                        "Failed to create NoCull rasterizer state.");
-        PANIC_IF_FAILED(device->CreateRasterizerState(&cullFront, &CullFront),
-                        "Failed to create CullFront rasterizer state.");
-        PANIC_IF_FAILED(device->CreateRasterizerState(&scissorTest, &ScissorTest),
-                        "Failed to create ScissorTest rasterizer state.");
+        auto hr      = device->CreateRasterizerState(&defaultSolid, &DefaultSolid);
+        X_PANIC_ASSERT(SUCCEEDED(hr),
+                       "Failed to create DefaultSolid rasterizer state.");
+
+        hr = device->CreateRasterizerState(&wireframe, &Wireframe);
+        X_PANIC_ASSERT(SUCCEEDED(hr),
+                       "Failed to create Wireframe rasterizer state.");
+
+        hr = device->CreateRasterizerState(&noCull, &NoCull);
+        X_PANIC_ASSERT(SUCCEEDED(hr),
+                       "Failed to create NoCull rasterizer state.");
+
+        hr = device->CreateRasterizerState(&cullFront, &CullFront);
+        X_PANIC_ASSERT(SUCCEEDED(hr),
+                       "Failed to create CullFront rasterizer state.");
+
+        hr = device->CreateRasterizerState(&scissorTest, &ScissorTest);
+        X_PANIC_ASSERT(SUCCEEDED(hr),
+                       "Failed to create ScissorTest rasterizer state.");
     }
 }

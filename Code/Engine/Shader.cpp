@@ -30,7 +30,7 @@ namespace x {
             if (errorBlob) {
                 const char* msg = CAST<const char*>(errorBlob->GetBufferPointer());
                 size_t msgSize  = errorBlob->GetBufferSize();
-                PANIC("Shader file failed to compile: %s\n - Error: %s", filename.c_str(), msg);
+                X_PANIC("Shader file failed to compile: %s\n - Error: %s", filename.c_str(), msg);
                 errorBlob->Release();
             }
         }
@@ -39,12 +39,12 @@ namespace x {
                         _shaderBlob->GetBufferSize(),
                         IID_ID3D11ShaderReflection,
                         &_reflection);
-        PANIC_IF_FAILED(hr, "Failed to capture shader reflection data.")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to capture shader reflection data.")
     }
 
     void IShader::InitFromMemory(const u8* data, const size_t size) {
         auto hr = D3DCreateBlob(size, &_shaderBlob);
-        PANIC_IF_FAILED(hr, "Failed to create blob.")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create blob.")
 
         memcpy(_shaderBlob->GetBufferPointer(), data, size);
 
@@ -52,12 +52,13 @@ namespace x {
                         _shaderBlob->GetBufferSize(),
                         IID_ID3D11ShaderReflection,
                         &_reflection);
-        PANIC_IF_FAILED(hr, "Failed to capture shader reflection data.")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to capture shader reflection data.")
     }
 
     D3D11_SHADER_DESC IShader::GetShaderDesc() const {
         D3D11_SHADER_DESC desc{};
-        PANIC_IF_FAILED(_reflection->GetDesc(&desc), "Failed to get reflection description from shader.")
+        const auto hr = _reflection->GetDesc(&desc);
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to get reflection description from shader.")
         return desc;
     }
     #pragma endregion
@@ -69,7 +70,7 @@ namespace x {
                                                                   _shaderBlob->GetBufferSize(),
                                                                   None,
                                                                   RCAST<ID3D11VertexShader**>(_shader.GetAddressOf()));
-        PANIC_IF_FAILED(hr, "")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "")
         CreateInputLayout();
     }
 
@@ -79,7 +80,7 @@ namespace x {
                                                                   _shaderBlob->GetBufferSize(),
                                                                   None,
                                                                   RCAST<ID3D11VertexShader**>(_shader.GetAddressOf()));
-        PANIC_IF_FAILED(hr, "")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "")
         CreateInputLayout();
     }
 
@@ -100,7 +101,7 @@ namespace x {
         for (u32 i = 0; i < desc.InputParameters; i++) {
             D3D11_SIGNATURE_PARAMETER_DESC paramDesc;
             const auto hr = _reflection->GetInputParameterDesc(i, &paramDesc);
-            PANIC_IF_FAILED(hr, "")
+            X_PANIC_ASSERT(SUCCEEDED(hr), "")
 
             D3D11_INPUT_ELEMENT_DESC elemDesc;
             elemDesc.SemanticName         = paramDesc.SemanticName;
@@ -119,7 +120,7 @@ namespace x {
                                                                  _shaderBlob->GetBufferPointer(),
                                                                  _shaderBlob->GetBufferSize(),
                                                                  &_inputLayout);
-        PANIC_IF_FAILED(hr, "")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "")
     }
 
     DXGI_FORMAT VertexShader::GetDXGIFormat(const u8 mask, const D3D_REGISTER_COMPONENT_TYPE componentType) {
@@ -177,7 +178,7 @@ namespace x {
                                                                  _shaderBlob->GetBufferSize(),
                                                                  None,
                                                                  RCAST<ID3D11PixelShader**>(_shader.GetAddressOf()));
-        PANIC_IF_FAILED(hr, "")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "")
     }
 
     void PixelShader::LoadFromMemory(const u8* data, const size_t size) {
@@ -186,7 +187,7 @@ namespace x {
                                                                  _shaderBlob->GetBufferSize(),
                                                                  None,
                                                                  RCAST<ID3D11PixelShader**>(_shader.GetAddressOf()));
-        PANIC_IF_FAILED(hr, "")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "")
     }
 
     void PixelShader::Bind() {
@@ -207,7 +208,7 @@ namespace x {
                                                        _shaderBlob->GetBufferSize(),
                                                        None,
                                                        RCAST<ID3D11ComputeShader**>(_shader.GetAddressOf()));
-        PANIC_IF_FAILED(hr, "")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "")
         ExtractThreadGroupSize();
     }
 
@@ -218,7 +219,7 @@ namespace x {
                                                        _shaderBlob->GetBufferSize(),
                                                        None,
                                                        RCAST<ID3D11ComputeShader**>(_shader.GetAddressOf()));
-        PANIC_IF_FAILED(hr, "")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "")
         ExtractThreadGroupSize();
     }
 
@@ -242,10 +243,10 @@ namespace x {
     void ComputeShader::ExtractThreadGroupSize() {
         const u32 result = _reflection->GetThreadGroupSize(&_threadGroupSizeX, &_threadGroupSizeY, &_threadGroupSizeZ);
         if (!result) {
-            PANIC("Failed to get thread group size from reflection data.");
+            X_PANIC("Failed to get thread group size from reflection data.");
         }
         if (_threadGroupSizeX == 0 || _threadGroupSizeY == 0 || _threadGroupSizeZ == 0) {
-            PANIC("Invalid thread group size in compute shader");
+            X_PANIC("Invalid thread group size in compute shader");
         }
     }
     #pragma endregion

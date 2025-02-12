@@ -21,17 +21,42 @@
     template<typename T> \
     T* As() { return dynamic_cast<T*>(this); }
 
-#define X_PANIC_ASSERT(cond, fmt, ...) \
-    if (!(cond)) x::impl::Panic(__FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__)
-
 #define X_NODISCARD [[nodiscard]]
 
-// I know you can also use _CONSOLE to check if the subsystem is console or not, but I have other things that'll change
-// depending on whether the current configuration is set to Distribution.
 #if defined(X_DISTRIBUTION)
+
 #define X_MAIN int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
 #define X_MODULE_HANDLE hInstance
+#define X_PANIC(fmt, ...)
+#define X_PANIC_ASSERT(cond, fmt, ...)
+
 #else
+
 #define X_MAIN int main(int argc, char* argv[])
 #define X_MODULE_HANDLE GetModuleHandleA(nullptr)
+
+#include <comdef.h>
+#include <cstdlib>
+
+[[noreturn]] inline void Panic(const char* file, int line, const char* func, const char* msg) noexcept {
+    char msgFormatted[2048];
+    snprintf(msgFormatted, 2048, "%s:%d - Panic in `%s()` :\n - %s\n", file, line, func, msg);
+    fprintf(stderr, static_cast<const char*>(msgFormatted));
+    #ifndef NDEBUG
+    OutputDebugStringA(msgFormatted);
+    #endif
+    std::abort();
+}
+
+template<typename... Args>
+[[noreturn]] void Panic(const char* file, int line, const char* func, const char* fmt, Args... args) noexcept {
+    char msg[1024];
+    snprintf(msg, sizeof(msg), fmt, args...);
+    Panic(file, line, func, msg);
+}
+
+#define X_PANIC(fmt, ...) Panic(__FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__);
+#define X_PANIC_ASSERT(cond, fmt, ...)                                                                             \
+        if (!(cond)) Panic(__FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__);
+
 #endif

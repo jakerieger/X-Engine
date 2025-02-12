@@ -76,7 +76,7 @@ namespace x {
         auto* device = _renderContext.GetDevice();
         auto hr      = device->CreateRenderTargetView(_renderContext.GetBackBuffer(), None, &_renderTargetView);
 
-        PANIC_IF_FAILED(hr, "Failed to create RenderSystem render target view")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create RenderSystem render target view")
         D3D11_TEXTURE2D_DESC depthStencilDesc = {};
         depthStencilDesc.Width                = width;
         depthStencilDesc.Height               = height;
@@ -90,7 +90,7 @@ namespace x {
 
         ComPtr<ID3D11Texture2D> depthStencilTexture;
         hr = device->CreateTexture2D(&depthStencilDesc, None, &depthStencilTexture);
-        PANIC_IF_FAILED(hr, "Failed to create Depth Stencil Texture")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil Texture")
 
         // Create depth stencil view
         D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
@@ -101,7 +101,7 @@ namespace x {
         hr = device->CreateDepthStencilView(depthStencilTexture.Get(),
                                             &depthStencilViewDesc,
                                             &_depthStencilView);
-        PANIC_IF_FAILED(hr, "Failed to create Depth Stencil View")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil View")
 
         // Create depth stencil state
         D3D11_DEPTH_STENCIL_DESC depthStencilStateDesc = {};
@@ -111,7 +111,7 @@ namespace x {
         depthStencilStateDesc.StencilEnable            = FALSE;
 
         hr = device->CreateDepthStencilState(&depthStencilStateDesc, &_depthStencilState);
-        PANIC_IF_FAILED(hr, "Failed to create Depth Stencil State")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil State")
 
         D3D11_VIEWPORT viewport;
         viewport.Width    = CAST<f32>(width);
@@ -146,7 +146,7 @@ namespace x {
         desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
         auto hr = _renderContext.GetDevice()->CreateBuffer(&desc, None, &_shadowParamsCB);
-        PANIC_IF_FAILED(hr, "Failed to create shadow map constant buffer.")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create shadow map constant buffer.")
 
         Resize(width, height);
     }
@@ -197,7 +197,7 @@ namespace x {
 
         ComPtr<ID3D11Texture2D> depthStencilTexture;
         auto hr = _renderContext.GetDevice()->CreateTexture2D(&depthTexDesc, None, &depthStencilTexture);
-        PANIC_IF_FAILED(hr, "Failed to create Depth Stencil Texture")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil Texture")
 
         D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
         srvDesc.Format                          = DXGI_FORMAT_R32_FLOAT; // Format for reading in shader
@@ -206,7 +206,7 @@ namespace x {
         srvDesc.Texture2D.MostDetailedMip       = 0;
 
         hr = _renderContext.GetDevice()->CreateShaderResourceView(depthStencilTexture.Get(), &srvDesc, &_depthSRV);
-        PANIC_IF_FAILED(hr, "Failed to create Depth SRV")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth SRV")
 
         // Create depth stencil view
         D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
@@ -217,7 +217,7 @@ namespace x {
         hr = _renderContext.GetDevice()->CreateDepthStencilView(depthStencilTexture.Get(),
                                                                 &depthStencilViewDesc,
                                                                 &_depthStencilView);
-        PANIC_IF_FAILED(hr, "Failed to create Depth Stencil View")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil View")
 
         // Create depth stencil state
         D3D11_DEPTH_STENCIL_DESC depthStencilStateDesc = {};
@@ -227,7 +227,7 @@ namespace x {
         depthStencilStateDesc.StencilEnable            = FALSE;
 
         hr = _renderContext.GetDevice()->CreateDepthStencilState(&depthStencilStateDesc, &_depthStencilState);
-        PANIC_IF_FAILED(hr, "Failed to create Depth Stencil State")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil State")
     }
     #pragma endregion
 
@@ -245,7 +245,7 @@ namespace x {
         comparisonSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS; // Key setting!
 
         auto hr = _renderContext.GetDevice()->CreateSamplerState(&comparisonSamplerDesc, &_depthSamplerState);
-        PANIC_IF_FAILED(hr, "Failed to create sampler state for shadow pass");
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create sampler state for shadow pass");
 
         Resize(width, height);
     }
@@ -289,7 +289,7 @@ namespace x {
 
         ComPtr<ID3D11Texture2D> depthStencilTexture;
         auto hr = _renderContext.GetDevice()->CreateTexture2D(&depthStencilDesc, None, &depthStencilTexture);
-        PANIC_IF_FAILED(hr, "Failed to create Depth Stencil Texture")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil Texture")
 
         // Create depth stencil view
         D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
@@ -300,7 +300,7 @@ namespace x {
         hr = _renderContext.GetDevice()->CreateDepthStencilView(depthStencilTexture.Get(),
                                                                 &depthStencilViewDesc,
                                                                 &_depthStencilView);
-        PANIC_IF_FAILED(hr, "Failed to create Depth Stencil View")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil View")
 
         // Create depth stencil state
         D3D11_DEPTH_STENCIL_DESC depthStencilStateDesc = {};
@@ -310,7 +310,7 @@ namespace x {
         depthStencilStateDesc.StencilEnable            = FALSE;
 
         hr = _renderContext.GetDevice()->CreateDepthStencilState(&depthStencilStateDesc, &_depthStencilState);
-        PANIC_IF_FAILED(hr, "Failed to create Depth Stencil State")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil State")
         // ==================================================================================================================//
         // ==================================================================================================================//
         D3D11_TEXTURE2D_DESC sceneDesc{};
@@ -324,13 +324,13 @@ namespace x {
         sceneDesc.BindFlags        = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
         hr = _renderContext.GetDevice()->CreateTexture2D(&sceneDesc, None, &_sceneTexture);
-        PANIC_IF_FAILED(hr, "Failed to create scene texture")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create scene texture")
 
         hr = _renderContext.GetDevice()->CreateRenderTargetView(_sceneTexture.Get(), None, &_renderTargetView);
-        PANIC_IF_FAILED(hr, "Failed to create render target view.");
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create render target view.");
 
         hr = _renderContext.GetDevice()->CreateShaderResourceView(_sceneTexture.Get(), None, &_outputSRV);
-        PANIC_IF_FAILED(hr, "Failed to create shader resource view")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create shader resource view")
     }
     #pragma endregion
 }

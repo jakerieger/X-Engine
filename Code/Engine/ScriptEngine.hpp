@@ -2,10 +2,11 @@
 
 #include "EngineCommon.hpp"
 #include "Common/Types.hpp"
-#include "Common/Panic.hpp"
 
 #define SOL_ALL_SAFETIES_ON 1
 #include <sol/sol.hpp>
+
+#include "Common/Panic.hpp"
 
 namespace x {
     struct BehaviorEntity;
@@ -87,20 +88,20 @@ namespace x {
 
         void CallAwakeBehavior(const str& scriptId, const BehaviorEntity& entity) {
             if (!_behaviorContexts.contains(scriptId)) {
-                PANIC("Could not find associated script in behavior contexts for id '%s'", scriptId.c_str());
+                X_PANIC("Could not find associated script in behavior contexts for id '%s'", scriptId.c_str());
             }
 
             const auto& context = _behaviorContexts[scriptId];
             if (context.onAwake.valid()) {
                 try {
                     _i_ = context.onAwake(entity);
-                } catch (const sol::error& e) { PANIC(e.what()); }
+                } catch (const sol::error& e) { X_PANIC(e.what()); }
             }
         }
 
         void CallUpdateBehavior(const str& scriptId, f32 deltaTime, const BehaviorEntity& entity) {
             if (!_behaviorContexts.contains(scriptId)) {
-                PANIC("Could not find associated script in behavior contexts for id '%s'", scriptId.c_str());
+                X_PANIC("Could not find associated script in behavior contexts for id '%s'", scriptId.c_str());
             }
 
             const auto& context = _behaviorContexts[scriptId];
@@ -108,21 +109,21 @@ namespace x {
                 try {
                     _i_ = context.onUpdate(deltaTime, entity);
                 } catch (const sol::error& e) {
-                    PANIC(e.what());
+                    X_PANIC(e.what());
                 }
             }
         }
 
         void CallDestroyedBehavior(const str& scriptId, const BehaviorEntity& entity) {
             if (!_behaviorContexts.contains(scriptId)) {
-                PANIC("Could not find associated script in behavior contexts for id '%s'", scriptId.c_str());
+                X_PANIC("Could not find associated script in behavior contexts for id '%s'", scriptId.c_str());
             }
 
             const auto& context = _behaviorContexts[scriptId];
             if (context.onDestroyed.valid()) {
                 try {
                     _i_ = context.onDestroyed(entity);
-                } catch (const sol::error& e) { PANIC(e.what()); }
+                } catch (const sol::error& e) { X_PANIC(e.what()); }
             }
         }
 
