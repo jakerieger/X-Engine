@@ -39,5 +39,5 @@ namespace x {
         }
     };
 
-    REGISTER_RESOURCE_LOADER(Texture2D, TextureLoader2D)
+    X_REGISTER_RESOURCE_LOADER(Texture2D, TextureLoader2D)
 }

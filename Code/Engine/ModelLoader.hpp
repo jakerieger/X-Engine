@@ -80,5 +80,5 @@ namespace x {
         }
     };
 
-    REGISTER_RESOURCE_LOADER(Model, ModelLoader)
+    X_REGISTER_RESOURCE_LOADER(Model, ModelLoader)
 }

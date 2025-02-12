@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Math.hpp"
+#include "ScriptEngine.hpp"
 
 namespace x {
     class TransformComponent {
@@ -37,4 +38,13 @@ namespace x {
         static Matrix MatrixTranslation(const Float3& translation);
         static Matrix MatrixScale(const Float3& scale);
     };
+
+    template<>
+    inline void RegisterTypeImpl(sol::usertype<Float3>& usertype) {
+        usertype["x"] = &Float3::x;
+        usertype["y"] = &Float3::y;
+        usertype["z"] = &Float3::z;
+    }
+
+    X_REGISTER_SCRIPT_TYPE(Float3, "Float3")
 } // namespace x

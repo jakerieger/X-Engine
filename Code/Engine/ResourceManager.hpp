@@ -37,7 +37,7 @@ namespace x {
     #define CONCAT_IMPL(x, y) x##y
     #define CONCAT(x, y) CONCAT_IMPL(x, y)
 
-    #define REGISTER_RESOURCE_LOADER(ResourceType, LoaderType) \
+    #define X_REGISTER_RESOURCE_LOADER(ResourceType, LoaderType) \
     namespace { \
         static const x::ResourceRegistry::Registrar<ResourceType, LoaderType> CONCAT(resourceRegistrar, __LINE__); \
     }

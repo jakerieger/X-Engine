@@ -182,6 +182,7 @@
     <ClCompile Include="..\Code\Engine\RenderSystem.cpp" />
     <ClCompile Include="..\Code\Engine\ResourceManager.cpp" />
     <ClCompile Include="..\Code\Engine\Scene.cpp" />
+    <ClCompile Include="..\Code\Engine\ScriptEngine.cpp" />
     <ClCompile Include="..\Code\Engine\Shader.cpp" />
     <ClCompile Include="..\Code\Engine\StaticResources.cpp" />
     <ClCompile Include="..\Code\Engine\Texture.cpp" />
@@ -195,6 +196,7 @@
     <ClCompile Include="..\Code\Vendor\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\Code\Vendor\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\Code\Vendor\imgui\imgui_widgets.cpp" />
+    <None Include="cpp.hint" />
     <None Include="Shaders\manifest.json" />
     <None Include="Shaders\Source\ColorGrade.hlsl" />
   </ItemGroup>
@@ -229,6 +231,7 @@
     <ClInclude Include="..\Code\Engine\RenderSystem.hpp" />
     <ClInclude Include="..\Code\Engine\ResourceManager.hpp" />
     <ClInclude Include="..\Code\Engine\Scene.hpp" />
+    <ClInclude Include="..\Code\Engine\ScriptEngine.hpp" />
     <ClInclude Include="..\Code\Engine\Shader.hpp" />
     <ClInclude Include="..\Code\Engine\StaticResources.hpp" />
     <ClInclude Include="..\Code\Engine\Texture.hpp" />

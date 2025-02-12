@@ -91,6 +91,9 @@
     <ClCompile Include="..\Code\Engine\StaticResources.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Code\Engine\ScriptEngine.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Code\Engine\Game.hpp">
@@ -501,6 +504,9 @@
     <ClInclude Include="..\Code\Engine\StaticResources.hpp">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="..\Code\Engine\ScriptEngine.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Configuration">
@@ -602,5 +608,6 @@
     <None Include="Shaders\manifest.json">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

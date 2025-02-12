@@ -1,0 +1,4 @@
+// Hint files help the Visual Studio IDE interpret Visual C++ identifiers
+// such as names of functions and macros.
+// For more information see https://go.microsoft.com/fwlink/?linkid=865984
+#define X_CLASS_PREVENT_MOVES_COPIES(CLASS_NAME) CLASS_NAME(const CLASS_NAME&) = delete; CLASS_NAME(CLASS_NAME&&) = delete; CLASS_NAME& operator=(const CLASS_NAME&) = delete; CLASS_NAME& operator=(CLASS_NAME&&) = delete;

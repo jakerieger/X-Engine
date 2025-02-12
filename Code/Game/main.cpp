@@ -23,6 +23,9 @@ public:
     void LoadContent(Scene* scene) override {
         _renderContext.GetDeviceContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
         scene->Load(GamePath("Scenes/monke.xscn"));
+
+        auto& scriptEngine = ScriptEngine::Get();
+        scriptEngine.ExecuteString("print('Hello, Lua!')");
     }
 
     void UnloadContent() override {}
@@ -53,8 +56,6 @@ public:
 
 int main() {
     SpaceGame game(GetModuleHandleA(nullptr));
-
-    game.TestLUA();
 
     // #ifndef NDEBUG
     // game.EnableConsole();
