@@ -3,7 +3,6 @@
 #include "Common/Timer.hpp"
 #include "Common/Filesystem.hpp"
 #include "Engine/Scene.hpp"
-#include <Vendor/imgui/imgui.h>
 
 using namespace x; // engine namespace
 using namespace x::Filesystem;
@@ -35,12 +34,31 @@ public:
     void OnResize(u32 width, u32 height) override {}
 };
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow) {
-    SpaceGame game(hInstance);
+// int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow) {
+//     sol::state lua;
+//     lua.open_libraries();
+//     try {
+//         lua.script("print('Hello from LuaJIT!')");
+//     } catch (const sol::error& e) { std::cout << "Error: " << e.what() << std::endl; }
+//
+//     SpaceGame game(hInstance);
+//
+//     #ifndef NDEBUG
+//     game.EnableConsole();
+//     #endif
+//
+//     game.EnableDebugUI();
+//     game.Run();
+// }
 
-    #ifndef NDEBUG
-    game.EnableConsole();
-    #endif
+int main() {
+    SpaceGame game(GetModuleHandleA(nullptr));
+
+    game.TestLUA();
+
+    // #ifndef NDEBUG
+    // game.EnableConsole();
+    // #endif
 
     game.EnableDebugUI();
     game.Run();

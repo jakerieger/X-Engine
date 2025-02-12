@@ -11,6 +11,9 @@
 #include "RenderSystem.hpp"
 #include "Scene.hpp"
 
+#define SOL_ALL_SAFETIES_ON 1
+#include <sol/sol.hpp>
+
 namespace x {
     /// @brief Base interface for implementing a game application.
     /// Hooks up windowing, rendering backend, and input among other things.
@@ -62,6 +65,15 @@ namespace x {
         virtual void Update(SceneState& state, const Clock& clock) = 0;
         virtual void OnResize(u32 width, u32 height) = 0;
         virtual void DrawDebugUI(SceneState& state) {}
+
+        void TestLUA() {
+            sol::state lua;
+            lua.open_libraries();
+
+            lua.script(R"(
+print('Hello from LuaJIT!')
+)");
+        }
 
     protected:
         std::unique_ptr<DebugUI> _debugUI;

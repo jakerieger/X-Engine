@@ -113,7 +113,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\assimp\include;$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Code;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\assimp\include;$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Code;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends;$(SolutionDir)Vendor\luajit\src;$(SolutionDir)Vendor\sol2\include</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
@@ -123,8 +123,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3d11.lib;dxguid.lib;dxgi.lib;</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\conta\Libraries\assimp\build\lib\Debug</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d11.lib;dxguid.lib;dxgi.lib;lua51.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Vendor\luajit\src;</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Command>python "$(SolutionDir)Scripts\compile_shaders.py" "$(ProjectDir)Shaders\manifest.json"</Command>
@@ -142,7 +142,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\assimp\include;$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Code;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\assimp\include;$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Code;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends;$(SolutionDir)Vendor\luajit\src;$(SolutionDir)Vendor\sol2\include</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
@@ -154,8 +154,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3d11.lib;dxguid.lib;dxgi.lib;</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\conta\Libraries\assimp\build\lib\Debug</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d11.lib;dxguid.lib;dxgi.lib;lua51.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Vendor\luajit\src;</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Command>python "$(SolutionDir)Scripts\compile_shaders.py" "$(ProjectDir)Shaders\manifest.json"</Command>

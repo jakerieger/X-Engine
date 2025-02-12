@@ -70,7 +70,7 @@ namespace x {
             }
 
             for (u32 i = 0; i < mesh->mNumFaces; i++) {
-                const auto face = mesh->mFaces[i];
+                const auto& face = mesh->mFaces[i];
                 for (u32 j = 0; j < face.mNumIndices; j++) {
                     indices.push_back(face.mIndices[j]);
                 }
