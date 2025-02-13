@@ -83,6 +83,8 @@ namespace x {
         void InitializeDX();
         void InitializeEngine();
 
+        void TransitionScene(const str& path);
+
         void RenderDepthOnly(const SceneState& state);
         void RenderScene(const SceneState& state);
 

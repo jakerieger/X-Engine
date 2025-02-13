@@ -24,11 +24,12 @@ If you'd like to know how the actual "engine" part of this code-base works, you 
 1. Clone repository with submodules
 2. Run [CONFIGURE_VS2022.bat](CONFIGURE_VS2022.bat) from project root (or just double-click it)
 3. Open [SpaceGame.sln](SpaceGame.sln) and set `Game` as the startup project
-4. Select a configuration (*Debug*, *Release*, or *Distribution*) and build
+4. Right-click the `Engine` project, go to **Manage NuGet Packages...** and install [directxtex_desktop_win10](https://www.nuget.org/packages/directxtex_desktop_win10)
+    - *I'm not sure if it's possible to automate this but if so, I'll add it to the configuration scripts.*
+5. Select a configuration (*Debug*, *Release*, or *Distribution*), **and build**.
 
 ---
 
-This project uses Git Submodules, so make sure to use `--recurse-submodules` when doing `git clone`.
 
 **Example:**
 ```sh
@@ -45,12 +46,15 @@ If you prefer to do things manually, follow these steps:
 
 1. Build [assimp](https://github.com/assimp/assimp) as a **static library** for x64
 2. Build [LuaJIT](http://luajit.org/) with the **msvcbuild.bat** script found in `Vendor/luajit/src`, again for x64.
+3. See **step 3** of the [Quickstart](#quickstart) for installing [DirectXTex](https://github.com/microsoft/DirectXTex)
 
 Once the necessary dependencies have been built, open [SpaceGame.sln](SpaceGame.sln) and set `Game` as the startup project. Then just set a configuration (Debug, Release, or Distribution) and build!
 
-## Screenshots
+## Docs
 
-![](Docs/ShadowMaps.png)
-> **Shadow Maps (hard)**
->
-> *Yes, I know the frame time calculation is wrong. Will fix sometime before I die.*
+- [Engine Architecture](Docs/Engine-Architecture.md)
+    - Basic overview of how the engine is designed and structured. 
+- [Developer Console](Docs/Developer-Console.md)
+    - Documentation for in-game developer console. 
+- [Design Doc](Docs/Design-Doc.md)
+    - Game outline and design goals. 

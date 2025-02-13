@@ -1,0 +1,137 @@
+{
+    "version": "1.0",
+    "name": "Monke2",
+    "description": "A variation of the monke scene to test scene switching.",
+    "world": {
+        "camera": {
+            "position": {
+                "x": 0.0,
+                "y": 1.0,
+                "z": -5.0
+            },
+            "eye": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "fovY": 60.0,
+            "nearZ": 0.1,
+            "farZ": 1000.0
+        },
+        "lights": {
+            "sun": {
+                "enabled": true,
+                "intensity": 2.0,
+                "color": {
+                    "r": 1.0,
+                    "g": 1.0,
+                    "b": 1.0
+                },
+                "direction": {
+                    "x": 0.0,
+                    "y": 0.6,
+                    "z": -0.6
+                },
+                "castsShadows": true
+            },
+            "pointLights": [],
+            "areaLights": [],
+            "spotLights": []
+        }
+    },
+    "entities": [
+        {
+            "id": 0,
+            "name": "floor",
+            "components": {
+                "transform": {
+                    "position": {
+                        "x": 0,
+                        "y": -1,
+                        "z": 0
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
+                    "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                    }
+                },
+                "model": {
+                    "resource": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Content\\Floor.glb",
+                    "material": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Materials\\Floor.xmat",
+                    "castsShadow": true,
+                    "receiveShadow": true
+                }
+            }
+        },
+        {
+            "id": 1,
+            "name": "monke",
+            "components": {
+                "transform": {
+                    "position": {
+                        "x": -3,
+                        "y": 0,
+                        "z": 0
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
+                    "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                    }
+                },
+                "model": {
+                    "resource": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Content\\Monke.glb",
+                    "material": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Materials\\Monke.xmat",
+                    "castsShadow": true,
+                    "receiveShadow": true
+                },
+                "behavior": {
+                    "script": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Scripts\\SpinMonke.lua"
+                }
+            }
+        },
+        {
+            "id": 2,
+            "name": "monke2",
+            "components": {
+                "transform": {
+                    "position": {
+                        "x": 3,
+                        "y": 0,
+                        "z": 0
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
+                    "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                    }
+                },
+                "model": {
+                    "resource": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Content\\Monke.glb",
+                    "material": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Materials\\Monke2.xmat",
+                    "castsShadow": true,
+                    "receiveShadow": true
+                },
+                "behavior": {
+                    "script": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Scripts\\SpinMonke.lua"
+                }
+            }
+        }
+    ]
+}

@@ -139,12 +139,12 @@ namespace x {
 
                 // Load resource
                 if (!_resources.LoadResource<Model>(model.resource)) {
-                    X_PANIC("Failed to load model resource when loading scene: %s", model.resource.c_str());
+                    X_LOG_FATAL("Failed to load model resource when loading scene '%s'", model.resource.c_str())
                 }
 
                 auto modelHandle = _resources.FetchResource<Model>(model.resource);
                 if (!modelHandle.has_value()) {
-                    X_PANIC("Failed to fetch model resource: %s", model.resource.c_str());
+                    X_LOG_FATAL("Failed to fetch model resource: %s", model.resource.c_str());
                 }
 
                 auto& modelComponent = _state.AddComponent<ModelComponent>(entityId);
@@ -171,9 +171,9 @@ namespace x {
                 auto loadResult = ScriptEngine::Get().LoadScript(behaviorComponent.GetSource(),
                                                                  behaviorComponent.GetId());
                 if (!loadResult) {
-                    X_PANIC("ScriptEngine failed to load script '%s' for entity '%s'",
-                            behavior.script.c_str(),
-                            entities["name"].get<str>().c_str());
+                    X_LOG_FATAL("ScriptEngine failed to load script '%s' for entity '%s'",
+                                behavior.script.c_str(),
+                                entities["name"].get<str>().c_str());
                 }
             }
 
@@ -195,33 +195,34 @@ namespace x {
                 const auto& resource = texJson["resource"].get<str>();
 
                 const bool loaded = _resources.LoadResource<Texture2D>(resource);
-                if (!loaded) { X_PANIC("Failed to load texture '%s' for '%s'.", resource.c_str(), name.c_str()); }
+                if (!loaded) { X_LOG_FATAL("Failed to load texture '%s' for '%s'.", resource.c_str(), name.c_str()); }
+
+                // TODO: I feel like I don't need to return an optional since ResourceHandle has an internal method for checking data validity
+                // Might refactor this
+                std::optional<ResourceHandle<Texture2D>> fetchedResource = _resources.FetchResource<
+                    Texture2D>(resource);
+
+                if (!fetchedResource.has_value())
+                    X_LOG_FATAL("Failed to fetch resource '%s'", resource.c_str())
+
+                if (!fetchedResource->Valid())
+                    X_LOG_FATAL("Resource '%s' is not valid", resource.c_str())
 
                 if (name == "albedo") {
-                    std::optional<ResourceHandle<Texture2D>> albedoMap = _resources.FetchResource<Texture2D>(resource);
-                    X_PANIC_ASSERT(albedoMap.has_value() && albedoMap->Valid(), "Albedo map null or invalid");
                     // extracting value from std::optional, not de-referencing ptr!
-                    matInstance.SetAlbedoMap(*albedoMap);
+                    matInstance.SetAlbedoMap(*fetchedResource);
                     continue;
                 }
                 if (name == "metallic") {
-                    std::optional<ResourceHandle<Texture2D>> metallicMap = _resources.FetchResource<
-                        Texture2D>(resource);
-                    X_PANIC_ASSERT(metallicMap.has_value() && metallicMap->Valid(), "Metallic map null or invalid");
-                    matInstance.SetMetallicMap(*metallicMap);
+                    matInstance.SetMetallicMap(*fetchedResource);
                     continue;
                 }
                 if (name == "roughness") {
-                    std::optional<ResourceHandle<Texture2D>> roughnessMap = _resources.FetchResource<Texture2D>(
-                        resource);
-                    X_PANIC_ASSERT(roughnessMap.has_value() && roughnessMap->Valid(), "Roughness map null or invalid");
-                    matInstance.SetRoughnessMap(*roughnessMap);
+                    matInstance.SetRoughnessMap(*fetchedResource);
                     continue;
                 }
                 if (name == "normal") {
-                    std::optional<ResourceHandle<Texture2D>> normalMap = _resources.FetchResource<Texture2D>(resource);
-                    X_PANIC_ASSERT(normalMap.has_value() && normalMap->Valid(), "Normal map null or invalid");
-                    matInstance.SetNormalMap(*normalMap);
+                    matInstance.SetNormalMap(*fetchedResource);
                 }
             }
         }
