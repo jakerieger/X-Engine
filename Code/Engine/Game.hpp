@@ -10,6 +10,7 @@
 #include "Volatile.hpp"
 #include "RenderSystem.hpp"
 #include "Scene.hpp"
+#include "ScriptEngine.hpp"
 
 namespace x {
     /// @brief Base interface for implementing a game application.
@@ -30,6 +31,11 @@ namespace x {
         unique_ptr<RenderSystem> _renderSystem;
         unique_ptr<Scene> _activeScene;
         unordered_map<str, unique_ptr<PBRMaterial>> _baseMaterials;
+        std::unique_ptr<DebugUI> _debugUI;
+        vector<Volatile*> _volatiles;
+        DevConsole _devConsole;
+        RenderContext _renderContext;
+        ScriptEngine _scriptEngine;
 
     public:
         explicit Game(HINSTANCE instance, str title, u32 width, u32 height);
@@ -49,16 +55,6 @@ namespace x {
 
         PostProcessSystem* GetPostProcess() {
             return _renderSystem->GetPostProcess();
-        }
-
-    protected:
-        std::unique_ptr<DebugUI> _debugUI;
-        vector<Volatile*> _volatiles;
-        DevConsole _devConsole;
-        RenderContext _renderContext;
-
-        void RegisterVolatile(Volatile* vol) {
-            _volatiles.push_back(vol);
         }
 
     private:
@@ -81,5 +77,9 @@ namespace x {
         LRESULT ResizeHandler(u32 width, u32 height);
         LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam);
         static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+        void RegisterVolatile(Volatile* vol) {
+            _volatiles.push_back(vol);
+        }
     };
 }

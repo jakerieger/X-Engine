@@ -1,11 +1,12 @@
 #include "Scene.hpp"
 #include "BehaviorComponent.hpp"
 #include "StaticResources.hpp"
-#include "ScriptTypeRegistry.hpp"
 #include <ranges>
 
 namespace x {
-    Scene::Scene(RenderContext& context): _resources(context, Memory::BYTES_1GB), _state(), _context(context) {}
+    Scene::Scene(RenderContext& context, ScriptEngine& scriptEngine): _resources(context, Memory::BYTES_1GB), _state(),
+                                                                      _context(context),
+                                                                      _scriptEngine(scriptEngine) {}
 
     Scene::~Scene() {
         Unload();
@@ -48,7 +49,7 @@ namespace x {
             auto* transformComponent      = _state.GetComponentMutable<TransformComponent>(entityId);
             if (behaviorComponent) {
                 BehaviorEntity entity(name, transformComponent);
-                ScriptEngine::Get().CallAwakeBehavior(behaviorComponent->GetId(), entity);
+                _scriptEngine.CallAwakeBehavior(behaviorComponent->GetId(), entity);
             }
         }
     }
@@ -65,7 +66,7 @@ namespace x {
             auto* transformComponent      = _state.GetComponentMutable<TransformComponent>(entityId);
             if (behaviorComponent) {
                 BehaviorEntity entity(name, transformComponent);
-                ScriptEngine::Get().CallUpdateBehavior(behaviorComponent->GetId(), deltaTime, entity);
+                _scriptEngine.CallUpdateBehavior(behaviorComponent->GetId(), deltaTime, entity);
             }
 
             if (transformComponent) {
@@ -80,7 +81,7 @@ namespace x {
             auto* transformComponent      = _state.GetComponentMutable<TransformComponent>(entityId);
             if (behaviorComponent) {
                 BehaviorEntity entity(name, transformComponent);
-                ScriptEngine::Get().CallDestroyedBehavior(behaviorComponent->GetId(), entity);
+                _scriptEngine.CallDestroyedBehavior(behaviorComponent->GetId(), entity);
             }
         }
     }
@@ -168,8 +169,8 @@ namespace x {
                 auto& behaviorComponent = _state.AddComponent<BehaviorComponent>(entityId);
                 behaviorComponent.LoadFromFile(behavior.script);
 
-                auto loadResult = ScriptEngine::Get().LoadScript(behaviorComponent.GetSource(),
-                                                                 behaviorComponent.GetId());
+                auto loadResult = _scriptEngine.LoadScript(behaviorComponent.GetSource(),
+                                                           behaviorComponent.GetId());
                 if (!loadResult) {
                     X_LOG_FATAL("ScriptEngine failed to load script '%s' for entity '%s'",
                                 behavior.script.c_str(),

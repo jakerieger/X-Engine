@@ -4,6 +4,8 @@
 #include "SceneState.hpp"
 #include "TextureLoader.hpp"
 #include "ModelLoader.hpp"
+#include "ScriptTypeRegistry.hpp"
+
 #include <Vendor/json.hpp>
 using json = nlohmann::json;
 
@@ -90,12 +92,13 @@ namespace x {
         ResourceManager _resources;
         SceneState _state;
         RenderContext& _context;
+        ScriptEngine& _scriptEngine;
         str _name;
         str _description;
         unordered_map<str, EntityId> _entities;
 
     public:
-        explicit Scene(RenderContext& context);
+        explicit Scene(RenderContext& context, ScriptEngine& scriptEngine);
         ~Scene();
 
         void Load(const str& path);

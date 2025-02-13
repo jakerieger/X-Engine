@@ -224,15 +224,13 @@ namespace x {
     void Game::InitializeEngine() {
         // Initialize the script engine
         {
-            auto& scriptEngine = ScriptEngine::Get();
-
             // Register this class
-            auto gameGlobal = scriptEngine.GetLuaState().new_usertype<Game>(
+            auto gameGlobal = _scriptEngine.GetLuaState().new_usertype<Game>(
                 "Game");
             gameGlobal["Quit"] = [this] { Quit(); };
 
             // Register other engine types
-            scriptEngine.RegisterTypes<
+            _scriptEngine.RegisterTypes<
                 Float3, TransformComponent, BehaviorEntity>();
         }
 
@@ -288,7 +286,7 @@ namespace x {
         }
 
         _activeScene.reset();
-        _activeScene = make_unique<Scene>(_renderContext);
+        _activeScene = make_unique<Scene>(_renderContext, _scriptEngine);
         _activeScene->Load(path);
         _activeScene->RegisterVolatiles(_volatiles);
     }

@@ -53,9 +53,8 @@ namespace x {
         X_CLASS_PREVENT_MOVES_COPIES(ScriptEngine)
 
     public:
-        static ScriptEngine& Get() {
-            static ScriptEngine instance;
-            return instance;
+        ScriptEngine() {
+            InitializeLua();
         }
 
         sol::state& GetLuaState() {
@@ -162,10 +161,6 @@ namespace x {
         }
 
     private:
-        ScriptEngine() {
-            InitializeLua();
-        }
-
         void InitializeLua() {
             _lua.open_libraries(sol::lib::base,
                                 sol::lib::math,
