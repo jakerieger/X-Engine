@@ -2,11 +2,8 @@
 setlocal EnableDelayedExpansion
 
 set "ORIGINAL_DIR=%CD%"
-
-REM The Visual Studio installation path - you may need to adjust this
 set "VS_PATH=C:\Program Files\Microsoft Visual Studio\2022\Community"
 
-REM First, we'll verify that Visual Studio exists in the expected location
 if not exist "%VS_PATH%" (
     echo Visual Studio 2022 not found at %VS_PATH%
     echo Please adjust the VS_PATH variable to match your installation
@@ -27,7 +24,6 @@ if not "%VSCMD_ARG_TGT_ARCH%"=="x64" (
     exit /b 1
 )
 
-REM Change to the LuaJIT source directory
 cd /d "Vendor\luajit\src"
 if errorlevel 1 (
     echo Failed to change to LuaJIT directory
@@ -44,7 +40,6 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM Return to the original directory
 cd /d "%ORIGINAL_DIR%"
 
 echo.

@@ -1,10 +1,7 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-REM Store the current directory for later use
 set "ORIGINAL_DIR=%CD%"
-
-REM Define the path to the Assimp directory relative to the project root
 set "ASSIMP_PATH=%CD%\Vendor\assimp"
 
 REM Verify that the Assimp directory exists
@@ -27,7 +24,6 @@ echo Build directory: %CD%
 echo Assimp source: %ASSIMP_PATH%
 
 REM Execute CMake configuration with all required arguments
-REM We use a single cmake call to maintain consistency with your Python script
 cmake ^
     "%ASSIMP_PATH%" ^
     -A x64 ^

@@ -232,6 +232,8 @@ namespace x {
 
         ShowWindow(_hwnd, SW_SHOWDEFAULT);
         UpdateWindow(_hwnd);
+
+        X_LOG_INFO("Initialized window")
     }
 
     void IGame::InitializeDX() {

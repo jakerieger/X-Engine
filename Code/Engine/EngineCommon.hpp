@@ -1,4 +1,8 @@
 #pragma once
+#pragma warning(disable: 4996)
+
+#include <chrono>
+#include <cstdlib>
 
 /// @brief Deletes both the move/copy assignment operator and constructor
 #define X_CLASS_PREVENT_MOVES_COPIES(CLASS_NAME) \
@@ -36,7 +40,6 @@
 #define X_MODULE_HANDLE GetModuleHandleA(nullptr)
 
 #include <comdef.h>
-#include <cstdlib>
 
 [[noreturn]] inline void Panic(const char* file,
                                int line,
@@ -73,3 +76,95 @@ template<typename... Args>
             if (!(cond)) Panic(__FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__);
 
 #endif
+
+#include <fstream>
+#include <iostream>
+
+class Logger;
+Logger& GetLogger();
+
+#define X_LOG_SEVERITY_INFO 0
+#define X_LOG_SEVERITY_WARN 1
+#define X_LOG_SEVERITY_ERROR 2
+#define X_LOG_SEVERITY_FATAL 3
+
+// Log format:
+// 2025-02-12 19:56:32 [INFO] - Log entry message goes here
+
+class Logger {
+    friend Logger& GetLogger();
+    X_CLASS_PREVENT_MOVES_COPIES(Logger)
+
+public:
+    ~Logger() {
+        if (_logFile.is_open()) {
+            _logFile.close();
+        }
+    }
+
+    void Log(const uint32_t severity, const char* msg) {
+        const auto severityStr = GetSeverityString(severity);
+        const auto timestamp   = GetTimestamp();
+        const auto logEntry    = std::format("{} [{}] - {}\n", timestamp, severityStr, msg);
+        _logFile << logEntry;
+
+        #ifndef X_DISTRIBUTION
+        std::cout << logEntry;
+        #endif
+    }
+
+    template<typename... Args>
+    void Log(const uint32_t severity, const char* fmt, Args... args) {
+        char msg[1024];
+        snprintf(msg, sizeof(msg), fmt, args...);
+        Log(severity, msg);
+    }
+
+private:
+    std::ofstream _logFile;
+    Logger() : _logFile(GetLogFileName(), std::ios::app) {}
+
+    X_NODISCARD std::string GetTimestamp() const {
+        using namespace std::chrono;
+        const auto now  = system_clock::now();
+        const auto time = system_clock::to_time_t(now);
+        char timeBuffer[512];
+        ctime_s(timeBuffer, sizeof(timeBuffer), &time);
+        std::string timestamp = timeBuffer;
+        timestamp.pop_back(); // remove newline
+        return timestamp;
+    }
+
+    X_NODISCARD std::string GetSeverityString(const uint32_t severity) const {
+        if (severity == X_LOG_SEVERITY_INFO)
+            return "INFO";
+        if (severity == X_LOG_SEVERITY_WARN)
+            return "WARNING";
+        if (severity == X_LOG_SEVERITY_ERROR)
+            return "ERROR";
+        if (severity == X_LOG_SEVERITY_FATAL)
+            return "FATAL";
+        return "";
+    }
+
+    X_NODISCARD std::string GetLogFileName() const {
+        using namespace std::chrono;
+        const auto now        = system_clock::now();
+        const auto duration   = now.time_since_epoch();
+        const auto unixMillis = duration_cast<milliseconds>(duration).count();
+        std::string name      = "Engine_" + std::to_string(unixMillis) + ".log";
+        return name;
+    }
+};
+
+inline Logger& GetLogger() {
+    static Logger instance;
+    return instance;
+}
+
+#define X_LOG(severity, fmt, ...) GetLogger().Log(severity, fmt, ##__VA_ARGS__);
+
+#define X_LOG_INFO(fmt, ...) GetLogger().Log(X_LOG_SEVERITY_INFO, fmt, ##__VA_ARGS__);
+#define X_LOG_WARN(fmt, ...) GetLogger().Log(X_LOG_SEVERITY_WARN, fmt, ##__VA_ARGS__);
+#define X_LOG_ERROR(fmt, ...) GetLogger().Log(X_LOG_SEVERITY_ERROR, fmt, ##__VA_ARGS__);
+#define X_LOG_FATAL(fmt, ...) GetLogger().Log(X_LOG_SEVERITY_FATAL, fmt, ##__VA_ARGS__);

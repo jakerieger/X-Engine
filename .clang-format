@@ -65,5 +65,3 @@ SpacesInSquareBrackets: false
 SortIncludes: Never
 TabWidth: 4
 UseTab: Never
-IndentPPDirectives: BeforeHash
-IndentWidth: 4
