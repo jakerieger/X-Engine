@@ -231,6 +231,7 @@
     <None Include="Materials\Monke.xmat" />
     <None Include="packages.config" />
     <None Include="Scenes\monke.xscn" />
+    <None Include="Scripts\CameraController.lua" />
     <None Include="Scripts\SpinMonke.lua" />
   </ItemGroup>
   <ItemGroup>

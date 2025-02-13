@@ -293,6 +293,8 @@
     <ClInclude Include="..\Code\Engine\EngineCommon.hpp" />
     <ClInclude Include="..\Code\Engine\EntityId.hpp" />
     <ClInclude Include="..\Code\Engine\Game.hpp" />
+    <ClInclude Include="..\Code\Engine\Input.hpp" />
+    <ClInclude Include="..\Code\Engine\InputCodes.hpp" />
     <ClInclude Include="..\Code\Engine\SceneState.hpp" />
     <ClInclude Include="..\Code\Engine\GeometryBuffer.hpp" />
     <ClInclude Include="..\Code\Engine\InputLayouts.hpp" />

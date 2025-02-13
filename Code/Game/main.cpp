@@ -2,5 +2,5 @@
 
 X_MAIN {
     x::Game game(X_MODULE_HANDLE, "SpaceGame", 1600, 900);
-    game.Run(R"(Scenes\monke2.xscn)");
+    game.Run(R"(Scenes\monke.xscn)");
 }

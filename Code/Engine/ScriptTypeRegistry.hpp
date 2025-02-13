@@ -63,4 +63,13 @@ namespace x {
             usertype["transform"] = &BehaviorEntity::transform;
         }
     };
+
+    template<>
+    struct LuaTypeTraits<Camera> {
+        static constexpr std::string_view typeName = "Camera";
+
+        static void RegisterMembers(sol::usertype<Camera>& usertype) {
+            // TODO: Register camera members
+        }
+    };
 }

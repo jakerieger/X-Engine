@@ -4,6 +4,7 @@
 #include "DebugUI.hpp"
 #include "DevConsole.hpp"
 #include "EngineCommon.hpp"
+#include "Input.hpp"
 #include "SceneState.hpp"
 #include "Common/Types.hpp"
 #include "Platform.hpp"
@@ -36,6 +37,7 @@ namespace x {
         DevConsole _devConsole;
         RenderContext _renderContext;
         ScriptEngine _scriptEngine;
+        Input _input;
 
     public:
         explicit Game(HINSTANCE instance, str title, u32 width, u32 height);

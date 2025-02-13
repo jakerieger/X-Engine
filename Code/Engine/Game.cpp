@@ -224,14 +224,19 @@ namespace x {
     void Game::InitializeEngine() {
         // Initialize the script engine
         {
-            // Register this class
-            auto gameGlobal = _scriptEngine.GetLuaState().new_usertype<Game>(
+            auto& lua = _scriptEngine.GetLuaState();
+
+            // register game globals
+            auto gameGlobal = lua.new_usertype<Game>(
                 "Game");
             gameGlobal["Quit"] = [this] { Quit(); };
+            _input.RegisterLuaGlobals(lua);
+
+            // TODO: register scene globals
 
             // Register other engine types
             _scriptEngine.RegisterTypes<
-                Float3, TransformComponent, BehaviorEntity>();
+                Float3, TransformComponent, BehaviorEntity, Camera>();
         }
 
         if (_debugUIEnabled) {
@@ -322,6 +327,20 @@ namespace x {
                 // Backtick/tilde key
                 if (wParam == VK_OEM_3) { _devConsole.ToggleVisible(); }
                 if (wParam == VK_ESCAPE) { Quit(); }
+
+                _input.UpdateKeyState(wParam, true);
+            }
+                return 0;
+            case WM_KEYUP: {
+                _input.UpdateKeyState(wParam, false);
+            }
+                return 0;
+            case WM_LBUTTONDOWN: {
+                _input.UpdateMouseButtonState(MouseButton::Left, true);
+            }
+                return 0;
+            case WM_LBUTTONUP: {
+                _input.UpdateMouseButtonState(MouseButton::Left, false);
             }
                 return 0;
         }

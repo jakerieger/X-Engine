@@ -24,6 +24,9 @@
     <None Include="Scripts\SpinMonke.lua">
       <Filter>Scripts</Filter>
     </None>
+    <None Include="Scripts\CameraController.lua">
+      <Filter>Scripts</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Content">
