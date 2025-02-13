@@ -20,8 +20,11 @@ if errorlevel 1 (
 )
 
 echo Configuring Assimp with CMake...
-echo Build directory: %CD%
+echo Build directory: %ASSIMP_PATH%
 echo Assimp source: %ASSIMP_PATH%
+
+REM Change to the build directory before running CMake
+cd /d %ASSIMP_PATH%
 
 REM Execute CMake configuration with all required arguments
 cmake ^
