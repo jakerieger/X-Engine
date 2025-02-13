@@ -108,8 +108,8 @@ namespace x {
         _state._mainCamera.SetFOV(camera.fovY);
         _state._mainCamera.SetClipPlanes(camera.nearZ, camera.farZ);
 
-        auto sunJson = world["lights"]["sun"];
-        auto sun     = scene_schema::DirectionalLight::FromJson(sunJson);
+        auto sunJson                       = world["lights"]["sun"];
+        scene_schema::DirectionalLight sun = scene_schema::DirectionalLight::FromJson(sunJson);
 
         // Update sun
         auto& sunState       = _state._lightState.Sun;
@@ -126,8 +126,8 @@ namespace x {
             const auto& components = entity["components"];
 
             if (components.contains("transform")) {
-                auto transform           = scene_schema::Transform::FromJson(components["transform"]);
-                auto& transformComponent = _state.AddComponent<TransformComponent>(entityId);
+                scene_schema::Transform transform = scene_schema::Transform::FromJson(components["transform"]);
+                auto& transformComponent          = _state.AddComponent<TransformComponent>(entityId);
 
                 transformComponent.SetPosition({transform.position.x, transform.position.y, transform.position.z});
                 transformComponent.SetRotation({transform.rotation.x, transform.rotation.y, transform.rotation.z});
@@ -136,7 +136,7 @@ namespace x {
             }
 
             if (components.contains("model")) {
-                auto model = scene_schema::Model::FromJson(components["model"]);
+                scene_schema::Model model = scene_schema::Model::FromJson(components["model"]);
 
                 // Load resource
                 if (!_resources.LoadResource<Model>(model.resource)) {
@@ -165,8 +165,8 @@ namespace x {
             }
 
             if (components.contains("behavior")) {
-                auto behavior           = scene_schema::Behavior::FromJson(components["behavior"]);
-                auto& behaviorComponent = _state.AddComponent<BehaviorComponent>(entityId);
+                scene_schema::Behavior behavior = scene_schema::Behavior::FromJson(components["behavior"]);
+                auto& behaviorComponent         = _state.AddComponent<BehaviorComponent>(entityId);
                 behaviorComponent.LoadFromFile(behavior.script);
 
                 auto loadResult = _scriptEngine.LoadScript(behaviorComponent.GetSource(),
@@ -185,6 +185,8 @@ namespace x {
     void Scene::LoadMaterial(json& material, ModelComponent& modelComponent) {
         const auto& baseMaterial = material["baseMaterial"].get<str>();
         if (baseMaterial == "PBR") {
+            // TODO: Move the PBR Material handle to somewhere in static memory so we aren't creating a new one for every material
+            // At the moment, this kind of defeats the purpose of having base materials and material instances.
             const auto baseMatHandle = PBRMaterial::Create(_context);
             modelComponent.SetMaterial(baseMatHandle);
             auto& matInstance = modelComponent.GetMaterialInstance();
