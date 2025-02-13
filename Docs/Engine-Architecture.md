@@ -8,7 +8,7 @@ The root class of the engine is the [IGame](../Code/Engine/Game.hpp) class. This
 
 1. Initializing and creating the window
 2. Initializing the rendering backend ([RenderContext](../Code/Engine/RenderContext.hpp), [RenderSystem](../Code/Engine/RenderSystem.hpp)).
-3. Managing the game state ([GameState](../Code/Engine/GameState.hpp))
+3. Managing the game state ([Scene](../Code/Engine/Scene.hpp), [SceneState](../Code/Engine/SceneState.hpp))
 4. Running the core game loop
 5. Shutting down and cleaning up
 
