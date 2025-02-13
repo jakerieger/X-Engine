@@ -1,13 +1,9 @@
 #include "Game.hpp"
 #include "RenderContext.hpp"
 #include "Common/Timer.hpp"
-
-#include <Vendor/imgui/imgui.h>
-#include <stdexcept>
-#include <thread>
-
 #include "RasterizerState.hpp"
 #include "ScriptTypeRegistry.hpp"
+#include <imgui.h>
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
     HWND hWnd,
@@ -16,33 +12,28 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
     LPARAM lParam);
 
 namespace x {
-    IGame::IGame(const HINSTANCE instance,
-                 str title,
-                 const u32 width,
-                 const u32 height)
+    Game::Game(const HINSTANCE instance,
+               str title,
+               const u32 width,
+               const u32 height)
         : _instance(instance), _hwnd(None), _currentWidth(width),
           _currentHeight(height), _title(std::move(title)),
-          _renderContext() {}
+          _renderContext() {
+        #ifndef X_DISTRIBUTION
+        _debugUIEnabled = true;
+        #endif
+    }
 
-    IGame::~IGame() {
-        if (_consoleEnabled) { FreeConsole(); }
+    Game::~Game() {
         if (_isRunning) { Shutdown(); }
         X_LOG_INFO("Game shutdown")
     }
 
-    void IGame::Run() {
-        try {
-            Initialize();
-        } catch (const std::runtime_error&) {
-            MessageBoxA(_hwnd,
-                        "An unknown error occured while initializing the engine.",
-                        "SpaceGame",
-                        MB_OK);
-            return;
-        }
+    void Game::Run(const str& initialScene) {
+        Initialize();
+        TransitionScene(initialScene);
 
         _isRunning = true;
-        LoadContent(_activeScene.get());
 
         MSG msg{};
         while (msg.message != WM_QUIT && _isRunning) {
@@ -50,103 +41,36 @@ namespace x {
                 TranslateMessage(&msg);
                 DispatchMessageA(&msg);
             } else {
-                auto& state = _activeScene->GetState();
-
-                // Only tick engine forward if we're not currently paused
-                if (!_isPaused) {
-                    // ScopedTimer updateTimer("UpdateTime");
-
-                    _clock.Tick();
-                    _activeScene->Update(CAST<f32>(_clock.GetDeltaTime()));
-                    Update(state, _clock);
-                }
-
-                // Continue rendering whether we're paused or not
-                _renderSystem->BeginFrame();
-                {
-                    // ScopedTimer frameTimer("FrameTime");
-
-                    // Do our depth-only shadow pass first
-                    ID3D11ShaderResourceView* depthSRV;
-                    {
-                        // ScopedTimer _("  - ShadowPass");
-                        _renderSystem->BeginShadowPass();
-                        RenderDepthOnly(state);
-                        depthSRV = _renderSystem->EndShadowPass();
-                    }
-
-                    // Do our fully lit pass using our previous depth-only pass as input for our shadow mapping shader
-                    ID3D11ShaderResourceView* sceneSRV;
-                    {
-                        // ScopedTimer _("  - LightPass");
-                        _renderSystem->BeginLightPass(depthSRV);
-                        RenderScene(state);
-                        sceneSRV = _renderSystem->EndLightPass();
-                    }
-
-                    // We can now pass our fully lit scene texture to the post processing pipeline to be processed and displayed on screen
-                    {
-                        // ScopedTimer _("  - PostProcessPass");
-                        _renderSystem->PostProcessPass(sceneSRV);
-                    }
-
-                    // Draw debug UI last (on top of everything else)
-                    {
-                        if (_debugUIEnabled) {
-                            _debugUI->BeginFrame(); // begin ImGui frame
-                            _debugUI->Draw(_renderContext, _clock);
-                            // draw built-in debug ui
-                            DrawDebugUI(state); // draw user-defined debug ui
-                            _devConsole.Draw();
-                            // draw developer console last so it overlaps correctly
-                            _debugUI->EndFrame(); // end imgui frame
-                        }
-                    }
-                }
-                _renderSystem->EndFrame();
+                Update();
+                RenderFrame();
             }
         }
 
         Shutdown();
     }
 
-    void IGame::Quit() {
+    void Game::Quit() {
         _isRunning = false;
         PostQuitMessage(0);
     }
 
-    bool IGame::EnableConsole() {
-        AllocConsole();
+    u32 Game::GetWidth() const { return _currentWidth; }
 
-        FILE* pStdin  = stdin;
-        FILE* pStdout = stdout;
-        FILE* pStderr = stderr;
+    u32 Game::GetHeight() const { return _currentHeight; }
 
-        errno_t res = freopen_s(&pStdin, "CONIN$", "r", stdin);
-        if (res) { return false; }
-        res = freopen_s(&pStdout, "CONOUT$", "w", stdout);
-        if (res) { return false; }
-        res = freopen_s(&pStderr, "CONOUT$", "w", stderr);
-        if (res) { return false; }
-
-        _consoleEnabled = true;
-
-        return true;
-    }
-
-    void IGame::EnableDebugUI() { _debugUIEnabled = true; }
-
-    u32 IGame::GetWidth() const { return _currentWidth; }
-
-    u32 IGame::GetHeight() const { return _currentHeight; }
-
-    f32 IGame::GetAspect() const {
+    f32 Game::GetAspect() const {
         return CAST<f32>(_currentWidth) / CAST<f32>(_currentHeight);
     }
 
-    void IGame::Update(SceneState& state, const Clock& clock) {}
+    void Game::Update() {
+        // Only tick engine forward if we're not currently paused
+        if (!_isPaused) {
+            _clock.Tick();
+            _activeScene->Update(CAST<f32>(_clock.GetDeltaTime()));
+        }
+    }
 
-    void IGame::RenderDepthOnly(const SceneState& state) {
+    void Game::RenderDepthOnly(const SceneState& state) {
         for (const auto& [entity, model] : state.GetComponents<
                  ModelComponent>()) {
             Matrix world                  = XMMatrixIdentity();
@@ -164,7 +88,7 @@ namespace x {
     }
 
     // This should never modify game state (always iterate as const)
-    void IGame::RenderScene(const SceneState& state) {
+    void Game::RenderScene(const SceneState& state) {
         for (const auto& [entity, model] : state.GetComponents<
                  ModelComponent>()) {
             Matrix world = XMMatrixIdentity();
@@ -183,25 +107,70 @@ namespace x {
         }
     }
 
-    void IGame::Initialize() {
+    void Game::RenderFrame() {
+        const auto& state = _activeScene->GetState();
+
+        // Although this entire process could probably be encapsulated in another function or class,
+        // I like the ability to just directly output the depth pass and skip the light pass if need-be.
+        _renderSystem->BeginFrame();
+        {
+            // ScopedTimer frameTimer("FrameTime");
+
+            // Do our depth-only shadow pass first
+            ID3D11ShaderResourceView* depthSRV;
+            {
+                // ScopedTimer _("  - ShadowPass");
+                _renderSystem->BeginShadowPass();
+                RenderDepthOnly(state);
+                depthSRV = _renderSystem->EndShadowPass();
+            }
+
+            // Do our fully lit pass using our previous depth-only pass as input for our shadow mapping shader
+            ID3D11ShaderResourceView* sceneSRV;
+            {
+                // ScopedTimer _("  - LightPass");
+                _renderSystem->BeginLightPass(depthSRV);
+                RenderScene(state);
+                sceneSRV = _renderSystem->EndLightPass();
+            }
+
+            // We can now pass our fully lit scene texture to the post processing pipeline to be processed and displayed
+            // on screen
+            {
+                // ScopedTimer _("  - PostProcessPass");
+                _renderSystem->PostProcessPass(sceneSRV);
+            }
+
+            // Draw debug UI last (on top of everything else)
+            {
+                if (_debugUIEnabled) {
+                    _debugUI->BeginFrame(); // begin ImGui frame
+                    _debugUI->Draw(_renderContext, _clock);
+                    _devConsole.Draw();
+                    _debugUI->EndFrame(); // end imgui frame
+                }
+            }
+        }
+        _renderSystem->EndFrame();
+    }
+
+    void Game::Initialize() {
         InitializeWindow();
         InitializeDX();
         InitializeEngine();
         X_LOG_INFO("Initialization complete")
     }
 
-    void IGame::Shutdown() {
-        UnloadContent();
-        _debugUI.reset();
-
+    void Game::Shutdown() {
+        _activeScene.reset(); // probably isn't even necessary
         CoUninitialize();
     }
 
-    void IGame::Pause() { _isPaused = true; }
+    void Game::Pause() { _isPaused = true; }
 
-    void IGame::Resume() { _isPaused = false; }
+    void Game::Resume() { _isPaused = false; }
 
-    void IGame::InitializeWindow() {
+    void Game::InitializeWindow() {
         // Initialize COM (for DirectXTex)
         const auto hr = CoInitializeEx(None, COINIT_MULTITHREADED);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to initialize COM");
@@ -214,7 +183,7 @@ namespace x {
         wc.lpszClassName = "SpaceGameWindowClass";
 
         if (!RegisterClassExA(&wc)) {
-            throw std::runtime_error("Failed to register window class.");
+            X_LOG_FATAL("Failed to register window class")
         }
 
         _hwnd = CreateWindowExA(WS_EX_APPWINDOW,
@@ -230,38 +199,35 @@ namespace x {
                                 _instance,
                                 this);
 
-        if (!_hwnd) { throw std::runtime_error("Failed to create window."); }
+        if (!_hwnd) { X_LOG_FATAL("Failed to create window."); }
 
         ShowWindow(_hwnd, SW_SHOWDEFAULT);
         UpdateWindow(_hwnd);
 
-        X_LOG_INFO("Initialized window")
+        X_LOG_DEBUG("Initialized window")
     }
 
-    void IGame::InitializeDX() {
+    void Game::InitializeDX() {
         _renderContext.Initialize(_hwnd, _currentWidth, _currentHeight);
         _renderSystem = make_unique<RenderSystem>(_renderContext);
         _renderSystem->Initialize(_currentWidth, _currentHeight);
 
-        _activeScene = make_unique<Scene>(_renderContext);
-
         // Tell the engine that these classes need to handle resizing when the window size changes
         RegisterVolatile(_renderSystem.get());
-        _activeScene->RegisterVolatiles(_volatiles);
 
         RasterizerStates::Init(_renderContext);
         // Setup our rasterizer states for future use
 
-        X_LOG_INFO("Initialized DirectX")
+        X_LOG_DEBUG("Initialized DirectX")
     }
 
-    void IGame::InitializeEngine() {
+    void Game::InitializeEngine() {
         // Initialize the script engine
         {
             auto& scriptEngine = ScriptEngine::Get();
 
             // Register this class
-            auto gameGlobal = scriptEngine.GetLuaState().new_usertype<IGame>(
+            auto gameGlobal = scriptEngine.GetLuaState().new_usertype<Game>(
                 "Game");
             gameGlobal["Quit"] = [this] { Quit(); };
 
@@ -312,16 +278,22 @@ namespace x {
                                         TransitionScene(scenePath);
                                     });
 
-        X_LOG_INFO("Initialized engine")
+        X_LOG_DEBUG("Initialized engine")
     }
 
-    void IGame::TransitionScene(const str& path) {
+    void Game::TransitionScene(const str& path) {
+        if (path.empty()) {
+            X_LOG_WARN("Attempted to load blank scene")
+            return;
+        }
+
         _activeScene.reset();
         _activeScene = make_unique<Scene>(_renderContext);
         _activeScene->Load(path);
+        _activeScene->RegisterVolatiles(_volatiles);
     }
 
-    LRESULT IGame::ResizeHandler(u32 width, u32 height) {
+    LRESULT Game::ResizeHandler(u32 width, u32 height) {
         _currentWidth  = width;
         _currentHeight = height;
 
@@ -329,11 +301,10 @@ namespace x {
             vol->OnResize(width, height);
         }
 
-        OnResize(width, height);
         return S_OK;
     }
 
-    LRESULT IGame::MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) {
+    LRESULT Game::MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) {
         if (_debugUIEnabled && ImGui_ImplWin32_WndProcHandler(
                 _hwnd,
                 msg,
@@ -360,15 +331,15 @@ namespace x {
         return DefWindowProcA(_hwnd, msg, wParam, lParam);
     }
 
-    LRESULT IGame::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-        IGame* game = None;
+    LRESULT Game::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+        Game* game = None;
 
         if (msg == WM_CREATE) {
             const auto* pCreate = RCAST<CREATESTRUCTA*>(lParam);
-            game                = CAST<IGame*>(pCreate->lpCreateParams);
+            game                = CAST<Game*>(pCreate->lpCreateParams);
             SetWindowLongPtrA(hwnd, GWLP_USERDATA, RCAST<LONG_PTR>(game));
         } else {
-            game = RCAST<IGame*>(GetWindowLongPtrA(hwnd, GWLP_USERDATA));
+            game = RCAST<Game*>(GetWindowLongPtrA(hwnd, GWLP_USERDATA));
         }
 
         if (game) { return game->MessageHandler(msg, wParam, lParam); }

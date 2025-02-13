@@ -14,14 +14,16 @@
 namespace x {
     /// @brief Base interface for implementing a game application.
     /// Hooks up windowing, rendering backend, and input among other things.
-    class IGame {
+    class Game {
+        X_CLASS_PREVENT_MOVES_COPIES(Game)
+
         HINSTANCE _instance;
         HWND _hwnd;
         u32 _currentWidth;
         u32 _currentHeight;
         str _title;
-        bool _consoleEnabled{false};
         bool _debugUIEnabled{false};
+        // These don't actually need to be atomic but I want multi-threading for future plans
         std::atomic<bool> _isRunning{false};
         std::atomic<bool> _isPaused{false};
         Clock _clock;
@@ -30,24 +32,16 @@ namespace x {
         unordered_map<str, unique_ptr<PBRMaterial>> _baseMaterials;
 
     public:
-        explicit IGame(HINSTANCE instance, str title, u32 width, u32 height);
-        virtual ~IGame();
-
-        X_CLASS_PREVENT_MOVES_COPIES(IGame)
+        explicit Game(HINSTANCE instance, str title, u32 width, u32 height);
+        virtual ~Game();
 
         /// @brief This is the only function that is required to be called on an IGame instance.
         /// Initializes the app, enters into the main loop, and shuts down when the application is closed.
-        void Run();
+        void Run(const str& initialScene);
 
         /// @brief Quits a running IGame instance.
         /// This is primarily for internal use but can be called at any point without issue.
         void Quit();
-
-        /// @brief Enables the console window for Win32 apps. Typically enabled for debug builds to show console output.
-        bool EnableConsole();
-
-        /// @brief Enables the debug UI (profiler, developer console, etc)
-        void EnableDebugUI();
 
         [[nodiscard]] u32 GetWidth() const;
         [[nodiscard]] u32 GetHeight() const;
@@ -56,12 +50,6 @@ namespace x {
         PostProcessSystem* GetPostProcess() {
             return _renderSystem->GetPostProcess();
         }
-
-        virtual void LoadContent(Scene* scene) = 0;
-        virtual void UnloadContent() = 0;
-        virtual void Update(SceneState& state, const Clock& clock);
-        virtual void OnResize(u32 width, u32 height) = 0;
-        virtual void DrawDebugUI(SceneState& state) {}
 
     protected:
         std::unique_ptr<DebugUI> _debugUI;
@@ -85,8 +73,10 @@ namespace x {
 
         void TransitionScene(const str& path);
 
+        void Update();
         void RenderDepthOnly(const SceneState& state);
         void RenderScene(const SceneState& state);
+        void RenderFrame();
 
         LRESULT ResizeHandler(u32 width, u32 height);
         LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam);

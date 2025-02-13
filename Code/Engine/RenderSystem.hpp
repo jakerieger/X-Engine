@@ -75,7 +75,7 @@ namespace x {
         void OnResize(u32 width, u32 height) override;
 
     private:
-        friend class IGame;
+        friend class Game;
 
         RenderContext& _renderContext;
         ShadowPass _shadowPass;
