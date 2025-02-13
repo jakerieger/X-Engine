@@ -87,9 +87,7 @@ Logger& GetLogger();
 #define X_LOG_SEVERITY_WARN 1
 #define X_LOG_SEVERITY_ERROR 2
 #define X_LOG_SEVERITY_FATAL 3
-
-// Log format:
-// 2025-02-12 19:56:32 [INFO] - Log entry message goes here
+#define X_LOG_SEVERITY_DEBUG 4
 
 class Logger {
     friend Logger& GetLogger();
@@ -144,6 +142,8 @@ private:
             return "ERROR";
         if (severity == X_LOG_SEVERITY_FATAL)
             return "FATAL";
+        if (severity == X_LOG_SEVERITY_DEBUG)
+            return "DEBUG";
         return "";
     }
 
@@ -163,8 +163,8 @@ inline Logger& GetLogger() {
 }
 
 #define X_LOG(severity, fmt, ...) GetLogger().Log(severity, fmt, ##__VA_ARGS__);
-
 #define X_LOG_INFO(fmt, ...) GetLogger().Log(X_LOG_SEVERITY_INFO, fmt, ##__VA_ARGS__);
 #define X_LOG_WARN(fmt, ...) GetLogger().Log(X_LOG_SEVERITY_WARN, fmt, ##__VA_ARGS__);
 #define X_LOG_ERROR(fmt, ...) GetLogger().Log(X_LOG_SEVERITY_ERROR, fmt, ##__VA_ARGS__);
 #define X_LOG_FATAL(fmt, ...) GetLogger().Log(X_LOG_SEVERITY_FATAL, fmt, ##__VA_ARGS__);
+#define X_LOG_DEBUG(fmt, ...) GetLogger().Log(X_LOG_SEVERITY_DEBUG, fmt, ##__VA_ARGS__);

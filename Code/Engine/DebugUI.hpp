@@ -145,15 +145,15 @@ namespace x {
             ImGui::Text("Frame Info");
             ImGui::Text("==========");
 
-            auto frameTime = std::format("Frame time : {:.8f}ms", clock.GetDeltaTime() / 1000.0);
+            auto frameTime = std::format("Frame time : {:.4f}ms", clock.GetDeltaTime());
             auto frameRate = std::format("Frame rate : {:.0f} FPS", clock.GetFramesPerSecond());
-            auto drawCalls = std::format("Draw Calls : {}", frameInfo.drawCallsPerFrame);
-            auto triangles = std::format("Triangles  : {}", frameInfo.numTriangles);
+            // auto drawCalls = std::format("Draw Calls : {}", frameInfo.drawCallsPerFrame);
+            // auto triangles = std::format("Triangles  : {}", frameInfo.numTriangles);
 
             ImGui::Text(frameTime.c_str());
             ImGui::Text(frameRate.c_str());
-            ImGui::Text(drawCalls.c_str());
-            ImGui::Text(triangles.c_str());
+            // ImGui::Text(drawCalls.c_str());
+            // ImGui::Text(triangles.c_str());
 
             ImGui::End();
         }

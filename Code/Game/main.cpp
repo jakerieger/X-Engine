@@ -23,7 +23,7 @@ public:
 
     void LoadContent(Scene* scene) override {
         _renderContext.GetDeviceContext()->RSSetState(RasterizerStates::DefaultSolid.Get());
-        scene->Load(GamePath("Scenes/monke.xscn"));
+        scene->Load(GamePath("Scenes\\monke.xscn"));
     }
 
     void UnloadContent() override {}

@@ -27,6 +27,7 @@ namespace x {
     IGame::~IGame() {
         if (_consoleEnabled) { FreeConsole(); }
         if (_isRunning) { Shutdown(); }
+        X_LOG_INFO("Game shutdown")
     }
 
     void IGame::Run() {
@@ -186,6 +187,7 @@ namespace x {
         InitializeWindow();
         InitializeDX();
         InitializeEngine();
+        X_LOG_INFO("Initialization complete")
     }
 
     void IGame::Shutdown() {
@@ -249,6 +251,8 @@ namespace x {
 
         RasterizerStates::Init(_renderContext);
         // Setup our rasterizer states for future use
+
+        X_LOG_INFO("Initialized DirectX")
     }
 
     void IGame::InitializeEngine() {
@@ -321,6 +325,8 @@ namespace x {
                                     })
                    .RegisterCommand("r_Pause", [this](auto) { Pause(); })
                    .RegisterCommand("r_Resume", [this](auto) { Resume(); });
+
+        X_LOG_INFO("Initialized engine")
     }
 
     LRESULT IGame::ResizeHandler(u32 width, u32 height) {

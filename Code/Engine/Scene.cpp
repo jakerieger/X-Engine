@@ -30,6 +30,7 @@ namespace x {
         auto entitiesJson = sceneJson["entities"];
         LoadEntities(entitiesJson);
 
+        X_LOG_INFO("Loaded scene: '%s'", path.c_str())
         Awake();
     }
 
