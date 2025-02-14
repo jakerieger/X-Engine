@@ -33,6 +33,10 @@ namespace x {
             return _aspectRatio;
         }
 
+        std::pair<f32, f32> GetClipPlanes() const {
+            return std::make_pair(_zNear, _zFar);
+        }
+
         [[nodiscard]] Matrix GetViewMatrix() const;
         [[nodiscard]] Matrix GetProjectionMatrix() const;
         [[nodiscard]] Matrix GetViewProjectionMatrix() const;

@@ -55,12 +55,20 @@ namespace x {
     }
 
     void Scene::Update(f32 deltaTime) {
+        const auto& camera    = _state.GetMainCamera();
+        const auto clipPlanes = camera.GetClipPlanes();
+
         // Calculate LVP
-        // TODO: I only need to update this if either the light direction or the screen size changes, this can be optimized
+        // TODO: I only need to update this if either the light direction or the screen size changes; this can be optimized!
         const auto lvp =
-            CalculateLightViewProjection(_state.GetLightState().Sun, 16.f, _state.GetMainCamera().GetAspectRatio());
+            CalculateLightViewProjection(_state.GetLightState().Sun,
+                                         10.0f,
+                                         camera.GetAspectRatio(),
+                                         clipPlanes.first,
+                                         clipPlanes.second);
         _state.GetLightState().Sun.lightViewProj = XMMatrixTranspose(lvp);
 
+        // Update scene entities
         for (const auto& [name, entityId] : _entities) {
             const auto* behaviorComponent = _state.GetComponentMutable<BehaviorComponent>(entityId);
             auto* transformComponent      = _state.GetComponentMutable<TransformComponent>(entityId);
@@ -70,6 +78,8 @@ namespace x {
             }
 
             if (transformComponent) {
+                // Instead of re-calculating matrices every frame, the Transform component uses lazy updating.
+                // This does nothing if no transform values have changed between frames.
                 transformComponent->Update();
             }
         }

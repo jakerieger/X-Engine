@@ -23,7 +23,7 @@ namespace x {
 
     void RenderSystem::BeginFrame() {
         auto* ctx = _renderContext.GetDeviceContext();
-        ctx->ClearRenderTargetView(_renderTargetView.Get(), Colors::Black);
+        ctx->ClearRenderTargetView(_renderTargetView.Get(), Colors::CornflowerBlue);
         ctx->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
     }
 
@@ -256,7 +256,7 @@ namespace x {
                                                               _depthStencilView.Get());
         _renderContext.GetDeviceContext()->OMSetDepthStencilState(_depthStencilState.Get(), 0);
 
-        _renderContext.GetDeviceContext()->ClearRenderTargetView(_renderTargetView.Get(), Colors::Black);
+        _renderContext.GetDeviceContext()->ClearRenderTargetView(_renderTargetView.Get(), Colors::CornflowerBlue);
         _renderContext.GetDeviceContext()->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
         _renderContext.GetDeviceContext()->PSSetShaderResources((u32)TextureMapSlot::ShadowZBuffer, 1, &depthSRV);

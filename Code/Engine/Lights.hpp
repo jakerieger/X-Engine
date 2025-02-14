@@ -78,6 +78,8 @@ namespace x {
     CalculateLightViewProjection(const DirectionalLight& light,
                                  f32 viewWidth,
                                  f32 aspectRatio,
+                                 f32 nearZ,
+                                 f32 farZ,
                                  const Float3& sceneCenter = {0.f, 0.f, 0.f}) {
         Vector direction = XMLoadFloat4(&light.direction);
         direction        = XMVector3Normalize(direction);
@@ -92,7 +94,7 @@ namespace x {
         }
 
         Matrix lightView = XMMatrixLookAtLH(lightPosition, center, worldUp);
-        Matrix lightProj = XMMatrixOrthographicLH(viewWidth, viewHeight, 0.01f, 100.0f);
+        Matrix lightProj = XMMatrixOrthographicLH(viewWidth, viewHeight, nearZ, farZ);
 
         return lightView * lightProj;
     }

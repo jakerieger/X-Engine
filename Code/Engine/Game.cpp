@@ -110,8 +110,6 @@ namespace x {
     void Game::RenderFrame() {
         const auto& state = _activeScene->GetState();
 
-        // Although this entire process could probably be encapsulated in another function or class,
-        // I like the ability to just directly output the depth pass and skip the light pass if need-be.
         _renderSystem->BeginFrame();
         {
             // ScopedTimer frameTimer("FrameTime");
