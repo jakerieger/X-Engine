@@ -114,7 +114,7 @@ namespace x {
         scene_schema::Camera camera = scene_schema::Camera::FromJson(cameraJson);
 
         // Update camera
-        _state._mainCamera.SetPosition(Vector{camera.position.x, camera.position.y, camera.position.z});
+        _state._mainCamera.SetPosition(VectorSet{camera.position.x, camera.position.y, camera.position.z});
         // TODO: Add setter for eye
         _state._mainCamera.SetFOV(camera.fovY);
         _state._mainCamera.SetClipPlanes(camera.nearZ, camera.farZ);

@@ -40,10 +40,13 @@ namespace x {
             if (PeekMessageA(&msg, None, 0, 0, PM_REMOVE)) {
                 TranslateMessage(&msg);
                 DispatchMessageA(&msg);
-            } else {
-                Update();
-                RenderFrame();
+                continue;
             }
+
+            _clock.Tick();
+
+            Update();
+            RenderFrame();
         }
 
         Shutdown();
@@ -63,9 +66,16 @@ namespace x {
     }
 
     void Game::Update() {
-        // Only tick engine forward if we're not currently paused
         if (!_isPaused) {
-            _clock.Tick();
+            auto& camera      = _activeScene->GetState().GetMainCamera();
+            const auto deltaX = _input.GetMouseDeltaX();
+            const auto deltaY = _input.GetMouseDeltaY();
+            // printf("(%f, %f)\n", deltaX, deltaY);
+            // constexpr f32 mouseSensitivity = 0.001f;
+            // const auto deltaYaw            = deltaX * mouseSensitivity;
+            // const auto deltaPitch          = deltaY * mouseSensitivity;
+            // camera.Rotate(deltaPitch, deltaYaw);
+
             _activeScene->Update(CAST<f32>(_clock.GetDeltaTime()));
         }
     }

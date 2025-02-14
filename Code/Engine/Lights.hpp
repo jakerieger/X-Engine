@@ -81,13 +81,13 @@ namespace x {
                                  f32 nearZ,
                                  f32 farZ,
                                  const Float3& sceneCenter = {0.f, 0.f, 0.f}) {
-        Vector direction = XMLoadFloat4(&light.direction);
-        direction        = XMVector3Normalize(direction);
+        VectorSet direction = XMLoadFloat4(&light.direction);
+        direction           = XMVector3Normalize(direction);
 
-        const auto viewHeight = viewWidth / aspectRatio;
-        Vector center         = XMLoadFloat3(&sceneCenter);
-        Vector lightPosition  = center + (direction * viewHeight);
-        Vector worldUp        = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+        const auto viewHeight   = viewWidth / aspectRatio;
+        VectorSet center        = XMLoadFloat3(&sceneCenter);
+        VectorSet lightPosition = center + (direction * viewHeight);
+        VectorSet worldUp       = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
         if (Abs(XMVectorGetY(direction)) > 0.99f) {
             worldUp = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);

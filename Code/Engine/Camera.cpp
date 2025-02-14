@@ -11,7 +11,37 @@ namespace x {
         UpdateProjectionMatrix();
     }
 
-    void Camera::SetPosition(const Vector& position) {
+    void Camera::Rotate(f32 deltaPitch, f32 deltaYaw) {
+        _rotation.x += deltaPitch;
+        _rotation.y += deltaYaw;
+
+        constexpr f32 maxPitch = XM_PIDIV2 - 0.01f; // clamp pitch to prevent flipping
+        _rotation.x            = std::max(-maxPitch, std::min(maxPitch, _rotation.x));
+
+        // Keep yaw in [0, 2PI] range
+        if (_rotation.y > XM_2PI) {
+            _rotation.y -= XM_2PI;
+        } else if (_rotation.y < 0.0f) {
+            _rotation.y += XM_2PI;
+        }
+
+        Matrix rotationMatrix = XMMatrixRotationRollPitchYaw(_rotation.x, _rotation.y, 0.0f);
+
+        VectorSet defaultForward = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+        VectorSet defaultRight   = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+        VectorSet defaultUp      = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+        _forward = XMVector3TransformCoord(defaultForward, rotationMatrix);
+        _right   = XMVector3TransformCoord(defaultRight, rotationMatrix);
+        _up      = XMVector3TransformCoord(defaultUp, rotationMatrix);
+
+        // Update look-at point
+        _at = XMVectorAdd(_position, _forward);
+
+        UpdateViewMatrix();
+    }
+
+    void Camera::SetPosition(const VectorSet& position) {
         _position = position;
         UpdateViewMatrix();
     }
@@ -27,8 +57,8 @@ namespace x {
     }
 
     void Camera::SetClipPlanes(const f32 near, const f32 far) {
-        _zNear = near;
-        _zFar  = far;
+        _nearZ = near;
+        _farZ  = far;
         UpdateProjectionMatrix();
     }
 
@@ -50,26 +80,11 @@ namespace x {
         return pos;
     }
 
-    void Camera::GetFrustumDimensions(f32& width, f32& height) const {
-        height = 2.0f * _zFar * tanf(_fovY * 0.5f);
-        width  = height * _aspectRatio;
-    }
-
-    f32 Camera::GetSceneRadius() const {
-        f32 width, height;
-        GetFrustumDimensions(width, height);
-
-        if (width <= 0 || height <= 0)
-            return std::numeric_limits<f32>::infinity();
-
-        return sqrtf((width * width) + (height * height) + (_zFar * _zFar)) * 0.5f;
-    }
-
     void Camera::UpdateViewMatrix() {
         _viewMatrix = XMMatrixLookAtLH(_position, _at, _up);
     }
 
     void Camera::UpdateProjectionMatrix() {
-        _projectionMatrix = XMMatrixPerspectiveFovLH(_fovY, _aspectRatio, _zNear, _zFar);
+        _projectionMatrix = XMMatrixPerspectiveFovLH(_fovY, _aspectRatio, _nearZ, _farZ);
     }
 }

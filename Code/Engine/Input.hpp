@@ -37,6 +37,14 @@ namespace x {
             return _mouseY;
         }
 
+        f32 GetMouseDeltaX() const {
+            return _mouseDeltaX;
+        }
+
+        f32 GetMouseDeltaY() const {
+            return _mouseDeltaY;
+        }
+
     private:
         friend class Game;
 
@@ -119,7 +127,11 @@ namespace x {
                                       "GetMouseX",
                                       &Input::GetMouseX,
                                       "GetMouseY",
-                                      &Input::GetMouseY);
+                                      &Input::GetMouseY,
+                                      "GetMouseDeltaX",
+                                      &Input::GetMouseDeltaX,
+                                      "GetMouseDeltaY",
+                                      &Input::GetMouseDeltaY);
             state["Input"] = this;
         }
 
@@ -134,6 +146,15 @@ namespace x {
         }
 
         void UpdateMousePosition(const int x, const int y) {
+            _mouseDeltaX = CAST<f32>(x - _mouseX);
+            _mouseDeltaY = CAST<f32>(y - _mouseY);
+
+            constexpr f32 deadZone = 2.0f;
+            if (std::abs(_mouseDeltaX) < deadZone)
+                _mouseDeltaX = 0.0f;
+            if (std::abs(_mouseDeltaY) < deadZone)
+                _mouseDeltaY = 0.0f;
+
             _mouseX = x;
             _mouseY = y;
         }
@@ -145,6 +166,7 @@ namespace x {
 
         unordered_map<int, KeyState> _keyStates;
         unordered_map<int, KeyState> _mouseStates;
-        int _mouseX = 0, _mouseY = 0;
+        int _mouseX      = 0, _mouseY        = 0;
+        f32 _mouseDeltaX = 0.f, _mouseDeltaY = 0.f;
     };
 }

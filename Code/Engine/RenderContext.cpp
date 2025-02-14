@@ -107,7 +107,7 @@ namespace x {
     }
 
     void RenderContext::Present() {
-        const auto hr = _swapChain->Present(0, 0);
+        const auto hr = _swapChain->Present(1, 0);
         if (FAILED(hr)) { _i_ = fprintf(stderr, "Failed to present.\n"); }
     }
 
