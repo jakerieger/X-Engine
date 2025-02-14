@@ -1,16 +1,17 @@
 #include "PostProcessSystem.hpp"
 #include "RenderContext.hpp"
-
 #include <algorithm>
+
+#include "ScreenTexture_VS.h"
+#include "ScreenTexture_PS.h"
 
 namespace x {
     bool PostProcessSystem::Initialize(u32 width, u32 height) {
         _width  = width;
         _height = height;
 
-        const auto screenTextureShader = R"(C:\Users\conta\Code\SpaceGame\Engine\Shaders\Source\ScreenTexture.hlsl)";
-        _fullscreenVS.LoadFromFile(screenTextureShader);
-        _fullscreenPS.LoadFromFile(screenTextureShader);
+        _fullscreenVS.LoadFromMemory(X_ARRAY_W_SIZE(kScreenTexture_VSBytes));
+        _fullscreenPS.LoadFromMemory(X_ARRAY_W_SIZE(kScreenTexture_PSBytes));
 
         return CreateIntermediateTargets();
     }

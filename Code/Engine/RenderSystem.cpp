@@ -3,6 +3,9 @@
 #include "TonemapEffect.hpp"
 #include "Material.hpp"
 
+#include "ShadowPass_VS.h"
+#include "ShadowPass_PS.h"
+
 namespace x {
     #pragma region RenderSystem
     RenderSystem::RenderSystem(RenderContext& context) : _renderContext(context), _shadowPass(context),
@@ -135,9 +138,8 @@ namespace x {
                                                     _pixelShader(context) {}
 
     void ShadowPass::Initialize(u32 width, u32 height) {
-        const str shadowMapShader = R"(C:\Users\conta\Code\SpaceGame\Engine\Shaders\Source\ShadowPass.hlsl)";
-        _vertexShader.LoadFromFile(shadowMapShader);
-        _pixelShader.LoadFromFile(shadowMapShader);
+        _vertexShader.LoadFromMemory(X_ARRAY_W_SIZE(kShadowPass_VSBytes));
+        _pixelShader.LoadFromMemory(X_ARRAY_W_SIZE(kShadowPass_PSBytes));
 
         D3D11_BUFFER_DESC desc{};
         desc.ByteWidth      = sizeof(ShadowMapParams);

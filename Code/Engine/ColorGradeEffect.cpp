@@ -1,8 +1,10 @@
 #include "ColorGradeEffect.hpp"
 
+#include "ColorGrade_CS.h"
+
 namespace x {
     bool ColorGradeEffect::Initialize() {
-        _computeShader.LoadFromFile(R"(C:\Users\conta\Code\SpaceGame\Engine\Shaders\Source\ColorGrade.hlsl)");
+        _computeShader.LoadFromMemory(X_ARRAY_W_SIZE(kColorGrade_CSBytes));
         return CreateResources();
     }
 

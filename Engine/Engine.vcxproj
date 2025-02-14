@@ -161,7 +161,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\assimp\include;$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Code;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends;$(SolutionDir)Vendor\luajit\src;$(SolutionDir)Vendor\sol2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\assimp\include;$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Code;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends;$(SolutionDir)Vendor\luajit\src;$(SolutionDir)Vendor\sol2\include;$(ProjectDir)Shaders\Header</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
@@ -190,7 +190,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\assimp\include;$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Code;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends;$(SolutionDir)Vendor\luajit\src;$(SolutionDir)Vendor\sol2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\assimp\include;$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Code;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends;$(SolutionDir)Vendor\luajit\src;$(SolutionDir)Vendor\sol2\include;$(ProjectDir)Shaders\Header</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
@@ -221,7 +221,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\assimp\include;$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Code;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends;$(SolutionDir)Vendor\luajit\src;$(SolutionDir)Vendor\sol2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\assimp\include;$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Code;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends;$(SolutionDir)Vendor\luajit\src;$(SolutionDir)Vendor\sol2\include;$(ProjectDir)Shaders\Header</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
@@ -421,6 +421,14 @@
     <ClInclude Include="..\Code\Vendor\SearchTex.h" />
     <ClInclude Include="..\Code\Vendor\stb_image.h" />
     <ClInclude Include="..\Code\Vendor\stb_image_write.h" />
+    <ClInclude Include="Shaders\Header\ColorGrade_CS.h" />
+    <ClInclude Include="Shaders\Header\Lit_PS.h" />
+    <ClInclude Include="Shaders\Header\Lit_VS.h" />
+    <ClInclude Include="Shaders\Header\ScreenTexture_PS.h" />
+    <ClInclude Include="Shaders\Header\ScreenTexture_VS.h" />
+    <ClInclude Include="Shaders\Header\ShadowPass_PS.h" />
+    <ClInclude Include="Shaders\Header\ShadowPass_VS.h" />
+    <ClInclude Include="Shaders\Header\Tonemap_CS.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Code\Vendor\assimp\color4.inl" />

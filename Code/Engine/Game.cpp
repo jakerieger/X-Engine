@@ -341,6 +341,20 @@ namespace x {
                 _input.UpdateMouseButtonState(MouseButton::Left, false);
             }
                 return 0;
+            case WM_RBUTTONDOWN: {
+                _input.UpdateMouseButtonState(MouseButton::Right, true);
+            }
+                return 0;
+            case WM_RBUTTONUP: {
+                _input.UpdateMouseButtonState(MouseButton::Right, false);
+            }
+                return 0;
+            case WM_MOUSEMOVE: {
+                const int xPos = GET_X_LPARAM(lParam);
+                const int yPos = GET_Y_LPARAM(lParam);
+                _input.UpdateMousePosition(xPos, yPos);
+            }
+                return 0;
         }
 
         return DefWindowProcA(_hwnd, msg, wParam, lParam);

@@ -1,14 +1,17 @@
 #include "Material.hpp"
 #include "RenderContext.hpp"
 
+#include "Lit_VS.h"
+#include "Lit_PS.h"
+
 namespace x {
     PBRMaterial::PBRMaterial(RenderContext& renderer) : _renderer(renderer) {
         _vertexShader = make_unique<VertexShader>(renderer);
         _pixelShader  = make_unique<PixelShader>(renderer);
 
-        const auto pbrShader = R"(C:\Users\conta\Code\SpaceGame\Engine\Shaders\Source\PBR_TexMaps.hlsl)";
-        _vertexShader->LoadFromFile(pbrShader);
-        _pixelShader->LoadFromFile(pbrShader);
+        _vertexShader->LoadFromMemory(X_ARRAY_W_SIZE(kLit_VSBytes));
+        _pixelShader->LoadFromMemory(X_ARRAY_W_SIZE(kLit_PSBytes));
+
         CreateBuffers();
     }
 

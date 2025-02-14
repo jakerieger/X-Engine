@@ -16,7 +16,8 @@ class ShaderManifest:
     """Represents the complete shader compilation manifest"""
     compiler_path: str
     shader_model: int
-    output_dir: str
+    compiled_output: str
+    header_output: str
     source_dir: str  # Added source directory field
     graphics_shaders: List[ShaderInfo]
     compute_shaders: List[ShaderInfo]
@@ -27,7 +28,8 @@ class ShaderManifest:
         return cls(
             compiler_path=json_data["compiler"]["fxcPath"],
             shader_model=json_data["shaderModel"],
-            output_dir=json_data["shaders"]["output"],
+            compiled_output=json_data["shaders"]["binOutput"],
+            header_output=json_data["shaders"]["headerOutput"],
             source_dir=json_data["shaders"]["sourceDir"],  # Parse the source directory
             graphics_shaders=[ShaderInfo(**shader) for shader in json_data["shaders"]["graphics"]],
             compute_shaders=[ShaderInfo(**shader) for shader in json_data["shaders"]["compute"]]
@@ -42,7 +44,8 @@ class ShaderCompiler:
     def compile_all(self) -> bool:
         """Compiles all shaders specified in the manifest"""
         # Ensure output directory exists
-        os.makedirs(self.manifest.output_dir, exist_ok=True)
+        os.makedirs(self.manifest.compiled_output, exist_ok=True)
+        os.makedirs(self.manifest.header_output, exist_ok=True)
         
         # Convert paths to Path objects for easier manipulation
         source_dir = Path(self.manifest.source_dir)
@@ -79,17 +82,23 @@ class ShaderCompiler:
             return False
         
         # Prepare output paths
-        vs_output = Path(self.manifest.output_dir) / f"{shader.name}_VS.xs"
-        ps_output = Path(self.manifest.output_dir) / f"{shader.name}_PS.xs"
+        vs_output = Path(self.manifest.compiled_output) / f"{shader.name}_VS.xs"
+        ps_output = Path(self.manifest.compiled_output) / f"{shader.name}_PS.xs"
+        vs_output_header = Path(self.manifest.header_output) / f"{shader.name}_VS.h"
+        ps_output_header = Path(self.manifest.header_output) / f"{shader.name}_PS.h"
         
         # Create output subdirectories if needed
         vs_output.parent.mkdir(parents=True, exist_ok=True)
         ps_output.parent.mkdir(parents=True, exist_ok=True)
+        vs_output_header.parent.mkdir(parents=True, exist_ok=True)
+        ps_output_header.parent.mkdir(parents=True, exist_ok=True)
         
         # Compile vertex shader
         vs_success = self._run_compiler(
             source=str(source_path),
-            output=vs_output,
+            name=f"{shader.name}_VS",
+            compiled_output=vs_output,
+            header_output=vs_output_header,
             profile=f"vs_{self.manifest.shader_model}_0",
             entry_point="VS_Main"
         )
@@ -97,7 +106,9 @@ class ShaderCompiler:
         # Compile pixel shader
         ps_success = self._run_compiler(
             source=str(source_path),
-            output=ps_output,
+            name=f"{shader.name}_PS",
+            compiled_output=ps_output,
+            header_output=ps_output_header,
             profile=f"ps_{self.manifest.shader_model}_0",
             entry_point="PS_Main"
         )
@@ -117,27 +128,34 @@ class ShaderCompiler:
             return False
         
         # Prepare output path
-        cs_output = Path(self.manifest.output_dir) / f"{shader.name}_CS.xs"
+        cs_output = Path(self.manifest.compiled_output) / f"{shader.name}_CS.xs"
+        cs_output_header = Path(self.manifest.header_output) / f"{shader.name}_CS.h"
         
         # Create output subdirectories if needed
         cs_output.parent.mkdir(parents=True, exist_ok=True)
+        cs_output_header.parent.mkdir(parents=True, exist_ok=True)
         
         # Compile compute shader
         return self._run_compiler(
             source=str(source_path),
-            output=cs_output,
+            name=f"{shader.name}_CS",
+            compiled_output=cs_output,
+            header_output=cs_output_header,
             profile=f"cs_{self.manifest.shader_model}_0",
             entry_point="CS_Main"
         )
     
-    def _run_compiler(self, source: str, output: Path, profile: str, entry_point: str) -> bool:
+    def _run_compiler(self, source: str, name: str, compiled_output: Path, header_output: Path, profile: str, entry_point: str) -> bool:
         """Runs the FXC compiler with specified parameters"""
         try:
+            # TODO: Add the options for debug symbol stripping and optimizations based on build configuration
             cmd = [
                 self.manifest.compiler_path,
                 "/T", profile,
                 "/E", entry_point,
-                "/Fo", str(output),
+                "/Fo", str(compiled_output),
+                "/Fh", str(header_output),
+                "/Vn", f"k{name}Bytes",
                 source
             ]
             
@@ -174,7 +192,8 @@ def resolve_paths(manifest_path: Path, manifest_data: dict) -> dict:
     
     # Resolve shader directories relative to manifest location
     shaders = resolved_data["shaders"]
-    shaders["output"] = str(manifest_dir / shaders["output"])
+    shaders["binOutput"] = str(manifest_dir / shaders["binOutput"])
+    shaders["headerOutput"] = str(manifest_dir / shaders["headerOutput"])
     shaders["sourceDir"] = str(manifest_dir / shaders["sourceDir"])
     
     return resolved_data
@@ -184,6 +203,13 @@ def main():
 
     parser = argparse.ArgumentParser(description="Compile HLSL shaders based on a manifest file")
     parser.add_argument("manifest", help="Path to the shader manifest JSON file")
+    parser.add_argument(
+        "--config",
+        choices=['debug', 'release', 'dist'],
+        default='debug',
+        help="Set configuration mode (default: %(default)s)"
+    )
+
     args = parser.parse_args()
     
     try:
@@ -199,7 +225,7 @@ def main():
             
         # Create manifest object with resolved paths
         manifest = ShaderManifest.from_json(resolved_data)
-        
+
         # Create compiler and run compilation
         compiler = ShaderCompiler(manifest)
         success = compiler.compile_all()

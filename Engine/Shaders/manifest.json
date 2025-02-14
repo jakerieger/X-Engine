@@ -4,7 +4,8 @@
   },
   "shaderModel": 5,
   "shaders": {
-    "output": "Compiled",
+    "binOutput": "Compiled",
+    "headerOutput": "Header",
     "sourceDir": "Source",
     "graphics": [
       {

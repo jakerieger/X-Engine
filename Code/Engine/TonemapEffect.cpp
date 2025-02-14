@@ -1,8 +1,10 @@
 #include "TonemapEffect.hpp"
 
+#include "Tonemap_CS.h"
+
 namespace x {
     bool TonemapEffect::Initialize() {
-        _computeShader.LoadFromFile(R"(C:\Users\conta\Code\SpaceGame\Engine\Shaders\Source\Tonemap.hlsl)");
+        _computeShader.LoadFromMemory(X_ARRAY_W_SIZE(kTonemap_CSBytes));
         return CreateResources();
     }
 

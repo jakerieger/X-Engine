@@ -27,6 +27,8 @@
 
 #define X_NODISCARD [[nodiscard]]
 
+#define X_ARRAY_W_SIZE(arr) (arr), sizeof((arr))
+
 #if defined(X_DISTRIBUTION)
 
 #define X_MAIN int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)

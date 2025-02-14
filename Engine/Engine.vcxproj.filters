@@ -519,6 +519,30 @@
     <ClInclude Include="..\Code\Engine\Input.hpp">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="Shaders\Header\ColorGrade_CS.h">
+      <Filter>Shaders\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Header\Lit_PS.h">
+      <Filter>Shaders\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Header\Lit_VS.h">
+      <Filter>Shaders\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Header\ScreenTexture_PS.h">
+      <Filter>Shaders\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Header\ScreenTexture_VS.h">
+      <Filter>Shaders\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Header\ShadowPass_PS.h">
+      <Filter>Shaders\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Header\ShadowPass_VS.h">
+      <Filter>Shaders\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Header\Tonemap_CS.h">
+      <Filter>Shaders\Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Configuration">
