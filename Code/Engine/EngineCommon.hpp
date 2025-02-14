@@ -158,7 +158,8 @@ private:
         const auto now        = system_clock::now();
         const auto duration   = now.time_since_epoch();
         const auto unixMillis = duration_cast<milliseconds>(duration).count();
-        std::string name      = "Engine_" + std::to_string(unixMillis) + ".log";
+        // TODO: Put these is a subdirectory so I can just delete the folder to clear the logs
+        std::string name = "Logs\\Engine_" + std::to_string(unixMillis) + ".log";
         return name;
     }
 };
