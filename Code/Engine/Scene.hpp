@@ -109,7 +109,7 @@ namespace x {
         void Destroyed();
 
         SceneState& GetState();
-        const SceneState& GetState() const;
+        X_NODISCARD const SceneState& GetState() const;
 
         void RegisterVolatiles(vector<Volatile*>& volatiles);
 
