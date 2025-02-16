@@ -28,6 +28,8 @@ namespace x {
         void OnResize(u32 width, u32 height) override;
 
         void Rotate(f32 deltaPitch, f32 deltaYaw);
+        void MoveForward(f32 distance);
+        void MoveRight(f32 distance);
 
         void SetPosition(const VectorSet& position);
         void SetFOV(f32 fovY);

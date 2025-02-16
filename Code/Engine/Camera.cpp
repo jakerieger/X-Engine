@@ -41,6 +41,18 @@ namespace x {
         UpdateViewMatrix();
     }
 
+    void Camera::MoveForward(f32 distance) {
+        _position = XMVectorAdd(_position, XMVectorScale(_forward, distance));
+        _at       = XMVectorAdd(_position, _forward);
+        UpdateViewMatrix();
+    }
+
+    void Camera::MoveRight(f32 distance) {
+        _position = XMVectorAdd(_position, XMVectorScale(_right, distance));
+        _at       = XMVectorAdd(_position, _forward);
+        UpdateViewMatrix();
+    }
+
     void Camera::SetPosition(const VectorSet& position) {
         _position = position;
         UpdateViewMatrix();

@@ -78,6 +78,11 @@ namespace x {
                 camera.Rotate(deltaPitch, deltaYaw);
             }
 
+            if (_input.GetKeyDown(KeyCode::D)) { camera.MoveRight(0.1f); }
+            if (_input.GetKeyDown(KeyCode::A)) { camera.MoveRight(-0.1f); }
+            if (_input.GetKeyDown(KeyCode::W)) { camera.MoveForward(0.1f); }
+            if (_input.GetKeyDown(KeyCode::S)) { camera.MoveForward(-0.1f); }
+
             _activeScene->Update(CAST<f32>(_clock.GetDeltaTime()));
         }
     }
