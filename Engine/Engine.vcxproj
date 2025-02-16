@@ -255,6 +255,7 @@
     <ClCompile Include="..\Code\Engine\Model.cpp" />
     <ClCompile Include="..\Code\Engine\ModelComponent.cpp" />
     <ClCompile Include="..\Code\Engine\ModelLoader.cpp" />
+    <ClCompile Include="..\Code\Engine\Mouse.cpp" />
     <ClCompile Include="..\Code\Engine\PoolAllocator.cpp" />
     <ClCompile Include="..\Code\Engine\PostProcessSystem.cpp" />
     <ClCompile Include="..\Code\Engine\RasterizerState.cpp" />
@@ -295,6 +296,7 @@
     <ClInclude Include="..\Code\Engine\Game.hpp" />
     <ClInclude Include="..\Code\Engine\Input.hpp" />
     <ClInclude Include="..\Code\Engine\InputCodes.hpp" />
+    <ClInclude Include="..\Code\Engine\Mouse.hpp" />
     <ClInclude Include="..\Code\Engine\SceneState.hpp" />
     <ClInclude Include="..\Code\Engine\GeometryBuffer.hpp" />
     <ClInclude Include="..\Code\Engine\InputLayouts.hpp" />

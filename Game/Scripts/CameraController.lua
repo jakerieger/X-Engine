@@ -1,3 +1,5 @@
-function onUpdate(deltaTime, entity)
-
+function onUpdate(deltaTime, camera)
+    local yaw = Input:GetMouseDeltaX()
+    local pitch = Input:GetMouseDeltaY()
+    camera:Rotate(pitch, yaw)
 end

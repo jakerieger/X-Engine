@@ -16,7 +16,8 @@
       },
       "fovY": 60.0,
       "nearZ": 0.1,
-      "farZ":  1000.0
+      "farZ": 1000.0,
+      "controller": "Scripts\\CameraController.lua"
     },
     "lights": {
       "sun": {
@@ -62,8 +63,8 @@
           }
         },
         "model": {
-          "resource": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Content\\Floor.glb",
-          "material": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Materials\\Floor.xmat",
+          "resource": "Content\\Floor.glb",
+          "material": "Materials\\Floor.xmat",
           "castsShadow": true,
           "receiveShadow": true
         }
@@ -91,39 +92,13 @@
           }
         },
         "model": {
-          "resource": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Content\\Monke.glb",
-          "material": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Materials\\Monke.xmat",
+          "resource": "Content\\Monke.glb",
+          "material": "Materials\\Monke.xmat",
           "castsShadow": true,
           "receiveShadow": true
         },
         "behavior": {
-          "script": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Scripts\\SpinMonke.lua"
-        }
-      }
-    },
-    {
-      "id": 2,
-      "name": "CameraController",
-      "components": {
-        "transform": {
-          "position": {
-            "x": 0,
-            "y": 0,
-            "z": 0
-          },
-          "rotation": {
-            "x": 0,
-            "y": 0,
-            "z": 0
-          },
-          "scale": {
-            "x": 1,
-            "y": 1,
-            "z": 1
-          }
-        },
-        "behavior": {
-          "script": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Scripts\\CameraController.lua"
+          "script": "Scripts\\SpinMonke.lua"
         }
       }
     }

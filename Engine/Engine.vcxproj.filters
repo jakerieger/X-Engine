@@ -94,6 +94,9 @@
     <ClCompile Include="..\Code\Engine\BehaviorComponent.cpp">
       <Filter>Source\Components</Filter>
     </ClCompile>
+    <ClCompile Include="..\Code\Engine\Mouse.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Code\Engine\Game.hpp">
@@ -542,6 +545,9 @@
     </ClInclude>
     <ClInclude Include="Shaders\Header\Tonemap_CS.h">
       <Filter>Shaders\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\Mouse.hpp">
+      <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

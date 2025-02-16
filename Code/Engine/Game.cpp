@@ -67,14 +67,16 @@ namespace x {
 
     void Game::Update() {
         if (!_isPaused) {
-            auto& camera      = _activeScene->GetState().GetMainCamera();
-            const auto deltaX = _input.GetMouseDeltaX();
-            const auto deltaY = _input.GetMouseDeltaY();
-            // printf("(%f, %f)\n", deltaX, deltaY);
-            // constexpr f32 mouseSensitivity = 0.001f;
-            // const auto deltaYaw            = deltaX * mouseSensitivity;
-            // const auto deltaPitch          = deltaY * mouseSensitivity;
-            // camera.Rotate(deltaPitch, deltaYaw);
+            auto& camera = _activeScene->GetState().GetMainCamera();
+
+            if (_mouse.IsCaptured()) {
+                const auto deltaX              = _input.GetMouseDeltaX();
+                const auto deltaY              = _input.GetMouseDeltaY();
+                constexpr f32 mouseSensitivity = 0.001f;
+                const auto deltaYaw            = deltaX * mouseSensitivity;
+                const auto deltaPitch          = deltaY * mouseSensitivity;
+                camera.Rotate(deltaPitch, deltaYaw);
+            }
 
             _activeScene->Update(CAST<f32>(_clock.GetDeltaTime()));
         }
@@ -353,16 +355,20 @@ namespace x {
                 return 0;
             case WM_RBUTTONDOWN: {
                 _input.UpdateMouseButtonState(MouseButton::Right, true);
+                _mouse.CaptureMouse(_hwnd);
             }
                 return 0;
             case WM_RBUTTONUP: {
                 _input.UpdateMouseButtonState(MouseButton::Right, false);
+                _mouse.ReleaseMouse(_hwnd);
             }
                 return 0;
             case WM_MOUSEMOVE: {
-                const int xPos = GET_X_LPARAM(lParam);
-                const int yPos = GET_Y_LPARAM(lParam);
-                _input.UpdateMousePosition(xPos, yPos);
+                _mouse.OnMouseMove(_hwnd, _input, lParam);
+            }
+                return 0;
+            case WM_KILLFOCUS: {
+                _mouse.ReleaseMouse(_hwnd);
             }
                 return 0;
         }

@@ -5,6 +5,7 @@
 #include "DevConsole.hpp"
 #include "EngineCommon.hpp"
 #include "Input.hpp"
+#include "Mouse.hpp"
 #include "SceneState.hpp"
 #include "Common/Types.hpp"
 #include "Platform.hpp"
@@ -18,26 +19,6 @@ namespace x {
     /// Hooks up windowing, rendering backend, and input among other things.
     class Game {
         X_CLASS_PREVENT_MOVES_COPIES(Game)
-
-        HINSTANCE _instance;
-        HWND _hwnd;
-        u32 _currentWidth;
-        u32 _currentHeight;
-        str _title;
-        bool _debugUIEnabled{false};
-        // These don't actually need to be atomic but I want multi-threading for future plans
-        std::atomic<bool> _isRunning{false};
-        std::atomic<bool> _isPaused{false};
-        Clock _clock;
-        unique_ptr<RenderSystem> _renderSystem;
-        unique_ptr<Scene> _activeScene;
-        unordered_map<str, unique_ptr<PBRMaterial>> _baseMaterials;
-        std::unique_ptr<DebugUI> _debugUI;
-        vector<Volatile*> _volatiles;
-        DevConsole _devConsole;
-        RenderContext _renderContext;
-        ScriptEngine _scriptEngine;
-        Input _input;
 
     public:
         explicit Game(HINSTANCE instance, str title, u32 width, u32 height);
@@ -60,6 +41,26 @@ namespace x {
         }
 
     private:
+        HINSTANCE _instance;
+        HWND _hwnd;
+        u32 _currentWidth;
+        u32 _currentHeight;
+        str _title;
+        bool _debugUIEnabled{false};
+        bool _isRunning{false};
+        bool _isPaused{false};
+        Clock _clock;
+        unique_ptr<RenderSystem> _renderSystem;
+        unique_ptr<Scene> _activeScene;
+        unordered_map<str, unique_ptr<PBRMaterial>> _baseMaterials;
+        std::unique_ptr<DebugUI> _debugUI;
+        vector<Volatile*> _volatiles;
+        DevConsole _devConsole;
+        RenderContext _renderContext;
+        ScriptEngine _scriptEngine;
+        Input _input;
+        Mouse _mouse;
+
         void Initialize();
         void Shutdown();
         void Pause();

@@ -9,7 +9,7 @@ namespace x {
         _totalTime              = 0.0;
         _frameCount             = 0;
         _framesPerSecond        = 0.0;
-        _fpsUpdateInterval      = 1.0; // In seconds
+        _fpsUpdateInterval      = 0.5; // In seconds
         _timeSinceLastFpsUpdate = 0.0;
     }
 

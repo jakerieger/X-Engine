@@ -8,6 +8,7 @@
 
 namespace x {
     class Input {
+        friend class Mouse;
         X_CLASS_PREVENT_MOVES_COPIES(Input)
 
     public:
@@ -146,8 +147,8 @@ namespace x {
         }
 
         void UpdateMousePosition(const int x, const int y) {
-            _mouseDeltaX = CAST<f32>(x - _mouseX);
-            _mouseDeltaY = CAST<f32>(y - _mouseY);
+            _mouseDeltaX = CAST<f32>(x);
+            _mouseDeltaY = CAST<f32>(y);
 
             constexpr f32 deadZone = 2.0f;
             if (std::abs(_mouseDeltaX) < deadZone)
@@ -155,8 +156,8 @@ namespace x {
             if (std::abs(_mouseDeltaY) < deadZone)
                 _mouseDeltaY = 0.0f;
 
-            _mouseX = x;
-            _mouseY = y;
+            _mouseX += x;
+            _mouseY += y;
         }
 
         struct KeyState {
