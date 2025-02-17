@@ -97,6 +97,9 @@
     <ClCompile Include="..\Code\Engine\Mouse.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Code\Engine\BloomEffect.cpp">
+      <Filter>Source\PostProcessing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Code\Engine\Game.hpp">
@@ -548,6 +551,9 @@
     </ClInclude>
     <ClInclude Include="..\Code\Engine\Mouse.hpp">
       <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Code\Engine\BloomEffect.hpp">
+      <Filter>Source\PostProcessing</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

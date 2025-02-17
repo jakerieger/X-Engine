@@ -7,6 +7,8 @@
 
 namespace x {
     class IComputeEffect {
+        friend class PostProcessSystem;
+
     public:
         explicit IComputeEffect(RenderContext& renderer) : _renderer(renderer), _computeShader(renderer) {}
         virtual ~IComputeEffect() = default;
@@ -50,9 +52,10 @@ namespace x {
         RenderContext& _renderer;
         ComputeShader _computeShader;
         ComPtr<ID3D11Buffer> _constantBuffer;
-        bool _enabled = true;
-        u32 _width    = 0;
-        u32 _height   = 0;
+        bool _enabled       = true;
+        u32 _width          = 0;
+        u32 _height         = 0;
+        DXGI_FORMAT _format = DXGI_FORMAT_R8G8B8A8_UNORM;
 
         virtual bool CreateResources() { return true; }
         virtual void UpdateConstants() {}

@@ -134,41 +134,26 @@ namespace x {
 
         _renderSystem->BeginFrame();
         {
-            // ScopedTimer frameTimer("FrameTime");
-
             // Do our depth-only shadow pass first
-            ID3D11ShaderResourceView* depthSRV;
-            {
-                // ScopedTimer _("  - ShadowPass");
-                _renderSystem->BeginShadowPass();
-                RenderDepthOnly(state);
-                depthSRV = _renderSystem->EndShadowPass();
-            }
+            _renderSystem->BeginShadowPass();
+            RenderDepthOnly(state);
+            ID3D11ShaderResourceView* depthSRV = _renderSystem->EndShadowPass();
 
             // Do our fully lit pass using our previous depth-only pass as input for our shadow mapping shader
-            ID3D11ShaderResourceView* sceneSRV;
-            {
-                // ScopedTimer _("  - LightPass");
-                _renderSystem->BeginLightPass(depthSRV);
-                RenderScene(state);
-                sceneSRV = _renderSystem->EndLightPass();
-            }
+            _renderSystem->BeginLightPass(depthSRV);
+            RenderScene(state);
+            ID3D11ShaderResourceView* sceneSRV = _renderSystem->EndLightPass();
 
             // We can now pass our fully lit scene texture to the post processing pipeline to be processed and displayed
             // on screen
-            {
-                // ScopedTimer _("  - PostProcessPass");
-                _renderSystem->PostProcessPass(sceneSRV);
-            }
+            _renderSystem->PostProcessPass(sceneSRV);
 
             // Draw debug UI last (on top of everything else)
-            {
-                if (_debugUIEnabled) {
-                    _debugUI->BeginFrame(); // begin ImGui frame
-                    _debugUI->Draw(_renderContext, _clock);
-                    _devConsole.Draw();
-                    _debugUI->EndFrame(); // end imgui frame
-                }
+            if (_debugUIEnabled) {
+                _debugUI->BeginFrame(); // begin ImGui frame
+                _debugUI->Draw(_renderContext, _clock);
+                _devConsole.Draw();
+                _debugUI->EndFrame(); // end imgui frame
             }
         }
         _renderSystem->EndFrame();

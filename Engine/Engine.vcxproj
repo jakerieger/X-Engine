@@ -246,6 +246,7 @@
   <ItemGroup>
     <ClCompile Include="..\Code\Engine\ArenaAllocator.cpp" />
     <ClCompile Include="..\Code\Engine\BehaviorComponent.cpp" />
+    <ClCompile Include="..\Code\Engine\BloomEffect.cpp" />
     <ClCompile Include="..\Code\Engine\Camera.cpp" />
     <ClCompile Include="..\Code\Engine\Clock.cpp" />
     <ClCompile Include="..\Code\Engine\ColorGradeEffect.cpp" />
@@ -283,6 +284,7 @@
   <ItemGroup>
     <ClInclude Include="..\Code\Engine\ArenaAllocator.hpp" />
     <ClInclude Include="..\Code\Engine\BehaviorComponent.hpp" />
+    <ClInclude Include="..\Code\Engine\BloomEffect.hpp" />
     <ClInclude Include="..\Code\Engine\Camera.hpp" />
     <ClInclude Include="..\Code\Engine\Clock.hpp" />
     <ClInclude Include="..\Code\Engine\ColorGradeEffect.hpp" />

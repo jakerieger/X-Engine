@@ -80,13 +80,16 @@ namespace x {
 
         _intermediateTargets.resize(_effects.size());
 
-        for (auto& target : _intermediateTargets) {
+        for (size_t i = 0; i < _intermediateTargets.size(); i++) {
+            auto& target          = _intermediateTargets[i];
+            const auto dxgiFormat = _effects[i]->_format;
+
             D3D11_TEXTURE2D_DESC desc{};
             desc.Width            = _width;
             desc.Height           = _height;
             desc.MipLevels        = 1;
             desc.ArraySize        = 1;
-            desc.Format           = DXGI_FORMAT_R8G8B8A8_UNORM;
+            desc.Format           = dxgiFormat;
             desc.SampleDesc.Count = 1;
             desc.Usage            = D3D11_USAGE_DEFAULT;
             desc.BindFlags        = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
