@@ -1,12 +1,20 @@
-﻿# Space Game
+# Space Game
 
-A protoype space exploration game/engine built using DirectX 11.
+A prototype space exploration and survival game/engine built with DirectX 11.
 
 ## Project Structure
 
-All of the C++ code is in the aptly named directory [Code](Code). Shader sources can be found in [Engine/Shaders/Source](Engine/Shaders/Source).
-
+All of the C++ code is in the aptly named [Code](Code) directory. 
+Shader sources can be found in [Engine/Shaders/Source](Engine/Shaders/Source).
 The actual game executable code is in [Code/Game/main.cpp](Code/Game/main.cpp).
+### Directories
+
+- **Code** - C++ sources and headers
+- **Docs** - Engine documentation
+- **Engine** - Visual Studio project files, shader sources
+- **Game** - Visual Studio project files, game content (scenes, materials, scripts, etc.)
+- **Scripts** - Project configuration scripts
+- **Vendor** - Third party dependencies (Git Submodules)
 
 ## Engine Architecture
 
@@ -47,6 +55,8 @@ If you prefer to do things manually, follow these steps:
 1. Build [assimp](https://github.com/assimp/assimp) as a **static library** for x64
 2. Build [LuaJIT](http://luajit.org/) with the **msvcbuild.bat** script found in `Vendor/luajit/src`, again for x64.
 3. See **step 3** of the [Quickstart](#quickstart) for installing [DirectXTex](https://github.com/microsoft/DirectXTex)
+
+> Although not necessary to compile the project, [FXC](https://learn.microsoft.com/en-us/windows/win32/direct3dtools/fxc) is required to be in your path in order for the [compile_shaders.py](Scripts/compile_shaders.py) script to run successfully.
 
 Once the necessary dependencies have been built, open [SpaceGame.sln](SpaceGame.sln) and set `Game` as the startup project. Then just set a configuration (Debug, Release, or Distribution) and build!
 

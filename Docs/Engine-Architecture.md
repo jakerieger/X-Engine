@@ -4,7 +4,7 @@ The engine doesn't have a name, so I'll simply be referring to it as `x` since t
 
 As it currently stands, x is a rather simple forward rendered 3D engine with an Entity Component System (ECS).
 
-The root class of the engine is the [IGame](../Code/Engine/Game.hpp) class. This class is responsible for the following:
+The root class of the engine is the [Game](../Code/Engine/Game.hpp) class. This class is responsible for the following:
 
 1. Initializing and creating the window
 2. Initializing the rendering backend ([RenderContext](../Code/Engine/RenderContext.hpp), [RenderSystem](../Code/Engine/RenderSystem.hpp)).
@@ -20,7 +20,7 @@ The red blocks on the left side are the **rendering backend** and the blue block
 
 ## Rendering
 
-Most things that need to create resources used for rendering store references to the [RenderContext](../Code/Engine/RenderContext.hpp) owned by IGame, which is a class that holds the Direct3D device and swapchain. The [RenderSystem](../Code/Engine/RenderSystem.hpp) is what's actually responsible for orchestrating the process of rendering a frame, and something only the [IGame](../Code/Engine/Game.hpp) instance interacts with.
+Most things that need to create resources used for rendering store references to the [RenderContext](../Code/Engine/RenderContext.hpp) owned by [Game](../Code/Engine/Game.hpp), which is a class that holds the Direct3D device and swapchain. The [RenderSystem](../Code/Engine/RenderSystem.hpp) is what's actually responsible for orchestrating the process of rendering a frame, and something only the [Game](../Code/Engine/Game.hpp) instance interacts with.
 
 > As mentioned above, x uses a forward renderer. This simply means all the lighting calculations are done **per fragment**, and although simple to implement can lead to performance deficits with scenes containing a large number of lights, since each fragment needs to calculate lighting for every light despite the fact that it might not even be visible or within range of said light. The plan for the future is to move to a hybrid forward+/deferred system.
 
@@ -109,7 +109,7 @@ A scene is initially defined in an `.xscn` file ([example](../Game/Scenes/monke.
 }
 ```
 
-The IGame instance holds an `activeScene` member which can load and unload these scene descriptors.
+The Game instance holds an `activeScene` member which can load and unload these scene descriptors.
 
 ### Resources
 
@@ -145,15 +145,14 @@ Unload goes like this:
 
 ## What *isn't* implemented:
 
-In its current state, this would be better described as a *rendering* engine and not a *game* engine, as rendering has been my focus from the beginning of development, and the part I personally find the most interesting. I haven't even added input handling yet, arguably the most core component of a game.
+In its current state, this would be better described as a *rendering* engine and not a *game* engine, as rendering has been my focus from the beginning of development, and the part I personally find the most interesting.
 
 That being said, this is a list of things that are planned but not currently implemented:
 
 1. Opaque/transparent mesh sorting
 2. Soft shadows (PCF)
 3. Anti-aliasing of any kind
-4. Input handling
-5. Lock-free multi-threading
-6. Some kind of 3D physics engine (likely Bullet, honestly)
+4. Lock-free multi-threading
+5. Some kind of 3D physics engine (likely Bullet, honestly)
 
 ...and a whole hell of a lot more :D
