@@ -7,9 +7,6 @@ namespace x {
             ::ShowCursor(FALSE);
             ::SetCapture(hwnd);
 
-            ::GetCursorPos(&_lastPos);
-            ::ScreenToClient(hwnd, &_lastPos);
-
             RECT windowRect;
             ::GetClientRect(hwnd, &windowRect);
 
@@ -17,6 +14,8 @@ namespace x {
                 (windowRect.right - windowRect.left) / 2,
                 (windowRect.bottom - windowRect.top) / 2,
             };
+
+            _lastPos = center;
 
             ::ClientToScreen(hwnd, &center);
             ::SetCursorPos(center.x, center.y);
@@ -38,21 +37,27 @@ namespace x {
         if (_captured) {
             RECT windowRect;
             ::GetClientRect(hwnd, &windowRect);
-            POINT centerPoint = {(windowRect.right - windowRect.left) / 2,
-                                 (windowRect.bottom - windowRect.top) / 2};
+            POINT centerPoint = {(windowRect.right - windowRect.left) / 2, (windowRect.bottom - windowRect.top) / 2};
 
             POINT currentPos = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
 
-            // Calculate delta from center
-            const int deltaX = currentPos.x - centerPoint.x;
-            const int deltaY = currentPos.y - centerPoint.y;
+            // Only update if the position has actually changed
+            if (currentPos.x != centerPoint.x || currentPos.y != centerPoint.y) {
+                // Calculate delta from center
+                const int deltaX = currentPos.x - centerPoint.x;
+                const int deltaY = currentPos.y - centerPoint.y;
 
-            if (deltaX != 0 || deltaY != 0) {
-                input.UpdateMousePosition(deltaX, deltaY);
+                // Only update input if we have actual movement
+                if (deltaX != 0 || deltaY != 0) {
+                    input.UpdateMousePosition(deltaX, deltaY);
 
-                // Reset cursor to center
-                ::ClientToScreen(hwnd, &centerPoint);
-                ::SetCursorPos(centerPoint.x, centerPoint.y);
+                    // Reset cursor to center
+                    ::ClientToScreen(hwnd, &centerPoint);
+                    ::SetCursorPos(centerPoint.x, centerPoint.y);
+                }
+            } else {
+                // If no movement, ensure deltas are zero
+                input.UpdateMousePosition(0, 0);
             }
         } else {
             const int xPos = GET_X_LPARAM(lParam);

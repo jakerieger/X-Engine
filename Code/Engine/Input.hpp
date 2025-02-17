@@ -46,6 +46,11 @@ namespace x {
             return _mouseDeltaY;
         }
 
+        void ResetMouseDeltas() {
+            _mouseDeltaX = 0.0f;
+            _mouseDeltaY = 0.0f;
+        }
+
     private:
         friend class Game;
 
@@ -150,7 +155,7 @@ namespace x {
             _mouseDeltaX = CAST<f32>(x);
             _mouseDeltaY = CAST<f32>(y);
 
-            constexpr f32 deadZone = 2.0f;
+            constexpr f32 deadZone = 2.5f; // Might need to tweak this, also frame-rate dependent :(
             if (std::abs(_mouseDeltaX) < deadZone)
                 _mouseDeltaX = 0.0f;
             if (std::abs(_mouseDeltaY) < deadZone)

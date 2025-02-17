@@ -70,12 +70,17 @@ namespace x {
             auto& camera = _activeScene->GetState().GetMainCamera();
 
             if (_mouse.IsCaptured()) {
-                const auto deltaX              = _input.GetMouseDeltaX();
-                const auto deltaY              = _input.GetMouseDeltaY();
-                constexpr f32 mouseSensitivity = 0.001f;
-                const auto deltaYaw            = deltaX * mouseSensitivity;
-                const auto deltaPitch          = deltaY * mouseSensitivity;
-                camera.Rotate(deltaPitch, deltaYaw);
+                const auto deltaX = _input.GetMouseDeltaX();
+                const auto deltaY = _input.GetMouseDeltaY();
+
+                if (deltaX != 0.0f || deltaY != 0.0f) {
+                    constexpr f32 mouseSensitivity = 0.001f;
+                    const auto deltaYaw            = deltaX * mouseSensitivity;
+                    const auto deltaPitch          = deltaY * mouseSensitivity;
+                    camera.Rotate(deltaPitch, deltaYaw);
+                }
+
+                _input.ResetMouseDeltas();
             }
 
             if (_input.GetKeyDown(KeyCode::D)) { camera.MoveRight(0.1f); }
@@ -341,7 +346,11 @@ namespace x {
             case WM_KEYDOWN: {
                 // Backtick/tilde key
                 if (wParam == VK_OEM_3) { _devConsole.ToggleVisible(); }
-                if (wParam == VK_ESCAPE) { Quit(); }
+
+                if (wParam == VK_ESCAPE && _mouse.IsCaptured()) {
+                    _mouse.ReleaseMouse(_hwnd);
+                    return 0;
+                }
 
                 _input.UpdateKeyState(wParam, true);
             }
@@ -352,6 +361,10 @@ namespace x {
                 return 0;
             case WM_LBUTTONDOWN: {
                 _input.UpdateMouseButtonState(MouseButton::Left, true);
+
+                if (!_mouse.IsCaptured()) {
+                    _mouse.CaptureMouse(_hwnd);
+                }
             }
                 return 0;
             case WM_LBUTTONUP: {
@@ -360,12 +373,10 @@ namespace x {
                 return 0;
             case WM_RBUTTONDOWN: {
                 _input.UpdateMouseButtonState(MouseButton::Right, true);
-                _mouse.CaptureMouse(_hwnd);
             }
                 return 0;
             case WM_RBUTTONUP: {
                 _input.UpdateMouseButtonState(MouseButton::Right, false);
-                _mouse.ReleaseMouse(_hwnd);
             }
                 return 0;
             case WM_MOUSEMOVE: {
