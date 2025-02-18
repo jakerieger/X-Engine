@@ -2,7 +2,7 @@
 
 #include "Common/Types.hpp"
 #include <functional>
-#include <imgui/imgui.h>
+#include <imgui.h>
 
 namespace x {
     static constexpr size_t kMaxInputLength = 256;

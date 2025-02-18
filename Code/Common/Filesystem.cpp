@@ -12,8 +12,6 @@
 // in order for Microsoft's stat.h to define names like S_IFMT, S_IFREG, and S_IFDIR,
 // rather than just defining  _S_IFMT, _S_IFREG, and _S_IFDIR as it normally does.
 #define _CRT_INTERNAL_NONSTDC_NAMES 1
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
 #include <Windows.h>
 #include <sys/stat.h>
 #if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)

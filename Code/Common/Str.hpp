@@ -2,6 +2,7 @@
 // Created: 1/16/2025.
 //
 #pragma once
+#pragma warning(disable:4996)
 
 #include "Types.hpp"
 
