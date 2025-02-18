@@ -17,5 +17,6 @@ target_link_libraries(TestProgram PRIVATE
     sol2
     assimp
     yaml-cpp
+    DirectXTex
 )
 target_compile_definitions(TestProgram PRIVATE LUA_JIT)

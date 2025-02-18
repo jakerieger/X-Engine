@@ -40,9 +40,11 @@ endif()
 FetchContent_Declare(
     directxtex
     GIT_REPOSITORY https://github.com/microsoft/DirectXTex.git
-    GIT_TAG oct2024
+    GIT_TAG feb2024
 )
 
+set(DIRECTXTEX_BUILD_STATIC_LIB ON CACHE BOOL "Build static library" FORCE)
+set(DIRECTXTEX_SHARED_LIBS OFF CACHE BOOL "Build shared library" FORCE)
 set(BUILD_DX12 OFF CACHE BOOL "Build with DirectX12 support" FORCE)
 set(BUILD_TOOLS OFF CACHE BOOL "Build DirectXTex command-line tools" FORCE)
 set(ENABLE_OPENEXR OFF CACHE BOOL "Enable OpenEXR support" FORCE)

@@ -1,4 +1,5 @@
 #include <sol/sol.hpp>
+#include <DirectXTex.h>
 
 int main() {
     sol::state lua;
