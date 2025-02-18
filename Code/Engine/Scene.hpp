@@ -114,8 +114,8 @@ namespace x {
         void RegisterVolatiles(vector<Volatile*>& volatiles);
 
     private:
-        void LoadWorld(json& world);
-        void LoadEntities(json& entities);
-        void LoadMaterial(json& material, ModelComponent& modelComponent);
+        // void LoadWorld(json& world);
+        // void LoadEntities(json& entities);
+        // void LoadMaterial(json& material, ModelComponent& modelComponent);
     };
 }

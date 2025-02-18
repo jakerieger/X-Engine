@@ -219,6 +219,9 @@
     <ProjectReference Include="..\Engine\Engine.vcxproj">
       <Project>{de6e5659-9b7a-4a4b-b1a1-2eace121c2cb}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\Vendor\yaml-cpp\yaml-cpp.vcxproj">
+      <Project>{27060a32-edee-3f1a-b9d6-5324536486e9}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Code\Common\Filesystem.cpp" />
@@ -230,7 +233,7 @@
     <None Include="Materials\Floor.xmat" />
     <None Include="Materials\Monke.xmat" />
     <None Include="packages.config" />
-    <None Include="Scenes\monke.xscn" />
+    <None Include="Scenes\Monke.xscn" />
     <None Include="Scripts\CameraController.lua" />
     <None Include="Scripts\SpinMonke.lua" />
   </ItemGroup>

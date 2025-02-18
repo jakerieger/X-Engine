@@ -12,9 +12,6 @@
     <None Include="Content\Monke.glb">
       <Filter>Content</Filter>
     </None>
-    <None Include="Scenes\monke.xscn">
-      <Filter>Scenes</Filter>
-    </None>
     <None Include="Materials\Floor.xmat">
       <Filter>Materials</Filter>
     </None>
@@ -26,6 +23,9 @@
     </None>
     <None Include="Scripts\CameraController.lua">
       <Filter>Scripts</Filter>
+    </None>
+    <None Include="Scenes\Monke.xscn">
+      <Filter>Scenes</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

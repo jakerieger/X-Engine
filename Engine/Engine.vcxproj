@@ -161,7 +161,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\assimp\include;$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Code;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends;$(SolutionDir)Vendor\luajit\src;$(SolutionDir)Vendor\sol2\include;$(ProjectDir)Shaders\Header</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\assimp\include;$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Code;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends;$(SolutionDir)Vendor\luajit\src;$(SolutionDir)Vendor\sol2\include;$(ProjectDir)Shaders\Header;$(SolutionDir)Vendor\yaml-cpp\include</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
@@ -190,7 +190,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\assimp\include;$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Code;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends;$(SolutionDir)Vendor\luajit\src;$(SolutionDir)Vendor\sol2\include;$(ProjectDir)Shaders\Header</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\assimp\include;$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Code;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends;$(SolutionDir)Vendor\luajit\src;$(SolutionDir)Vendor\sol2\include;$(ProjectDir)Shaders\Header;$(SolutionDir)Vendor\yaml-cpp\include</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
@@ -221,7 +221,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\assimp\include;$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Code;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends;$(SolutionDir)Vendor\luajit\src;$(SolutionDir)Vendor\sol2\include;$(ProjectDir)Shaders\Header</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\assimp\include;$(SolutionDir)Code\Engine;$(SolutionDir)Code\Vendor;$(SolutionDir)Code;$(SolutionDir)Code\Vendor\imgui;$(SolutionDir)Code\Vendor\imgui\backends;$(SolutionDir)Vendor\luajit\src;$(SolutionDir)Vendor\sol2\include;$(ProjectDir)Shaders\Header;$(SolutionDir)Vendor\yaml-cpp\include</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
@@ -264,6 +264,7 @@
     <ClCompile Include="..\Code\Engine\RenderSystem.cpp" />
     <ClCompile Include="..\Code\Engine\ResourceManager.cpp" />
     <ClCompile Include="..\Code\Engine\Scene.cpp" />
+    <ClCompile Include="..\Code\Engine\SceneParser.cpp" />
     <ClCompile Include="..\Code\Engine\Shader.cpp" />
     <ClCompile Include="..\Code\Engine\StaticResources.cpp" />
     <ClCompile Include="..\Code\Engine\Texture.cpp" />
@@ -299,6 +300,7 @@
     <ClInclude Include="..\Code\Engine\Input.hpp" />
     <ClInclude Include="..\Code\Engine\InputCodes.hpp" />
     <ClInclude Include="..\Code\Engine\Mouse.hpp" />
+    <ClInclude Include="..\Code\Engine\SceneParser.hpp" />
     <ClInclude Include="..\Code\Engine\SceneState.hpp" />
     <ClInclude Include="..\Code\Engine\GeometryBuffer.hpp" />
     <ClInclude Include="..\Code\Engine\InputLayouts.hpp" />
@@ -490,6 +492,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Vendor\assimp\code\assimp.vcxproj">
       <Project>{b1c4d101-9afa-3b96-b92e-81e4f0053de9}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Vendor\yaml-cpp\yaml-cpp.vcxproj">
+      <Project>{27060a32-edee-3f1a-b9d6-5324536486e9}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

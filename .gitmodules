@@ -7,3 +7,6 @@
 [submodule "Vendor/luajit"]
 	path = Vendor/luajit
 	url = https://github.com/LuaJIT/LuaJIT.git
+[submodule "Vendor/yaml-cpp"]
+	path = Vendor/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp
