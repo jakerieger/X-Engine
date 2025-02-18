@@ -1,3 +1,5 @@
+cmake_policy(PUSH)
+cmake_policy(SET CMP0169 OLD)
 function(build_luajit)
     FetchContent_GetProperties(luajit)
 
@@ -26,3 +28,4 @@ function(build_luajit)
         INTERFACE_INCLUDE_DIRECTORIES "${luajit_SOURCE_DIR}/src"
     )
 endfunction()
+cmake_policy(POP)

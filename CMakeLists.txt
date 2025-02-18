@@ -11,6 +11,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
+set(WINDOWS_COMPILE_DEFS
+    UNICODE
+    _UNICODE
+    WIN32_LEAN_AND_MEAN
+    NOMINMAX
+)
+
 add_executable(TestProgram TestProgram.cpp)
 target_link_libraries(TestProgram PRIVATE
     luajit
@@ -19,4 +26,9 @@ target_link_libraries(TestProgram PRIVATE
     yaml-cpp
     DirectXTex
 )
-target_compile_definitions(TestProgram PRIVATE LUA_JIT)
+
+if(WIN32)
+    target_compile_definitions(TestProgram PRIVATE ${WINDOWS_COMPILE_DEFS} LUA_JIT)
+else()
+    message(FATAL_ERROR "Project only supports Windows. Please use Windows.")
+endif()
