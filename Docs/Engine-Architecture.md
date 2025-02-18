@@ -14,7 +14,7 @@ The root class of the engine is the [Game](../Code/Engine/Game.hpp) class. This 
 
 The engine uses the following structure:
 
-![](CoreEngineArchitecture.png)
+![](image/CoreEngineArchitecture.png)
 
 The red blocks on the left side are the **rendering backend** and the blue blocks are the **current scene**. This diagram is simplified for brevity. If you'd like to see the full ownership hierarchy, see [Class Hierarchy](#class-hierarchy).
 

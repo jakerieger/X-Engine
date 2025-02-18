@@ -68,3 +68,5 @@ Once the necessary dependencies have been built, open [SpaceGame.sln](SpaceGame.
     - Documentation for in-game developer console. 
 - [Design Doc](Docs/Design-Doc.md)
     - Game outline and design goals. 
+- [Development Log](Docs/Development-Log.md)
+	- Timestamped dev log, mostly for me and my poor memory.
