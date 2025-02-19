@@ -22,7 +22,9 @@ namespace x {
         virtual void OnInitialize() {};
         virtual void OnShutdown() {};
         virtual void OnResize(u32 width, u32 height) {};
-        virtual void MainLoop() {};
+
+        virtual void Update() {}
+        virtual void Render() {}
 
         X_NODISCARD u32 GetWidth() const {
             return _currentWidth;

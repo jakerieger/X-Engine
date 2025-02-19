@@ -24,8 +24,12 @@ public:
         _game.TransitionScene(_initialScene);
     }
 
-    void MainLoop() override {
-        _game.MainLoop();
+    void Update() override {
+        _game.Update();
+    }
+
+    void Render() override {
+        _game.RenderFrame();
     }
 
 private:

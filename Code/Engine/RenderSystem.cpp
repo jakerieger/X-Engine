@@ -33,15 +33,6 @@ namespace x {
         _postProcess.Resize(width, height);
     }
 
-    void RenderSystem::BeginFrame() {
-        _viewport->ClearRenderTargetView();
-        _viewport->ClearDepthStencilView();
-    }
-
-    void RenderSystem::EndFrame() {
-        _renderContext.Present();  // swapchain present
-    }
-
     void RenderSystem::BeginShadowPass() {
         _shadowPass.BeginPass();
     }

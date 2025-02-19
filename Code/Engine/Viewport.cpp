@@ -133,6 +133,11 @@ namespace x {
         ctx->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, stencil);
     }
 
+    void Viewport::ClearAll(const f32 clearColor[4], f32 depth, u8 stencil) const {
+        ClearRenderTargetView(clearColor);
+        ClearDepthStencilView(depth, stencil);
+    }
+
     void Viewport::BindRenderTarget() const {
         auto* ctx = _context.GetDeviceContext();
         ctx->OMSetRenderTargets(1, _renderTargetView.GetAddressOf(), _depthStencilView.Get());

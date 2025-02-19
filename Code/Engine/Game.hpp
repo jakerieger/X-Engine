@@ -32,7 +32,8 @@ namespace x {
 
         void Initialize(Window* window, Viewport* viewport);
         void Shutdown();
-        void MainLoop();
+        void Update();
+        void RenderFrame();
         void TransitionScene(const str& path);
 
     private:
@@ -57,10 +58,8 @@ namespace x {
 
         void InitializeEngine();
 
-        void Update();
         void RenderDepthOnly(const SceneState& state) const;
         void RenderScene(const SceneState& state) const;
-        void RenderFrame();
 
         void OnResize(u32 width, u32 height) const;
 

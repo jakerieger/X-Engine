@@ -20,6 +20,7 @@ namespace x {
 
         void ClearRenderTargetView(const f32 clearColor[4] = Colors::CornflowerBlue) const;
         void ClearDepthStencilView(f32 depth = 1.0f, u8 stencil = 0) const;
+        void ClearAll(const f32 clearColor[4] = Colors::CornflowerBlue, f32 depth = 1.0f, u8 stencil = 0) const;
         void BindRenderTarget() const;
 
         X_NODISCARD ComPtr<ID3D11RenderTargetView> const& GetRenderTargetView();

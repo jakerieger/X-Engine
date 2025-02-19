@@ -61,9 +61,6 @@ namespace x {
 
         void Initialize();
 
-        void BeginFrame();
-        void EndFrame();
-
         void BeginShadowPass();
         ID3D11ShaderResourceView* EndShadowPass();
         void BeginLightPass(ID3D11ShaderResourceView* depthSRV);

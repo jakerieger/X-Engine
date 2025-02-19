@@ -10,6 +10,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 namespace x {
     void Game::Update() {
+        _clock.Tick();
+        
         if (!_isPaused || !_isFocused) {
             auto& camera = _activeScene->GetState().GetMainCamera();
 
@@ -66,7 +68,6 @@ namespace x {
 
         const auto& state = _activeScene->GetState();
 
-        _renderSystem->BeginFrame();
         {
             // Do our depth-only shadow pass first
             _renderSystem->BeginShadowPass();
@@ -90,7 +91,6 @@ namespace x {
                 _debugUI->EndFrame();  // end imgui frame
             }
         }
-        _renderSystem->EndFrame();
     }
 
     void Game::OnResize(u32 width, u32 height) const {
@@ -171,12 +171,6 @@ namespace x {
         _renderSystem.reset();
         _activeScene.reset();  // probably isn't even necessary
         _window = None;
-    }
-
-    void Game::MainLoop() {
-        _clock.Tick();
-        Update();
-        RenderFrame();
     }
 
     void Game::Pause() {

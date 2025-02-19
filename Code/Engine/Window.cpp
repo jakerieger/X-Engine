@@ -38,8 +38,12 @@ namespace x {
                 continue;
             }
 
+            Update();
+
             _windowViewport->AttachViewport();
-            MainLoop();
+            _windowViewport->ClearAll();
+            Render();
+            _context.Present();
         }
 
         Shutdown();
