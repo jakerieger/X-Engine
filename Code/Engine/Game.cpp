@@ -5,23 +5,15 @@
 #include "ScriptTypeRegistry.hpp"
 #include <imgui.h>
 
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
-    HWND hWnd,
-    UINT msg,
-    WPARAM wParam,
-    LPARAM lParam);
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace x {
-    Game::Game(const HINSTANCE instance,
-               str title,
-               const u32 width,
-               const u32 height)
-        : _instance(instance), _hwnd(None), _currentWidth(width),
-          _currentHeight(height), _title(std::move(title)),
+    Game::Game(const HINSTANCE instance, str title, const u32 width, const u32 height)
+        : _instance(instance), _hwnd(None), _currentWidth(width), _currentHeight(height), _title(std::move(title)),
           _renderContext() {
-        #ifndef X_DISTRIBUTION
+#ifndef X_DISTRIBUTION
         _debugUIEnabled = true;
-        #endif
+#endif
     }
 
     Game::~Game() {
@@ -35,7 +27,7 @@ namespace x {
 
         _isRunning = true;
 
-        MSG msg{};
+        MSG msg {};
         while (msg.message != WM_QUIT && _isRunning) {
             if (PeekMessageA(&msg, None, 0, 0, PM_REMOVE)) {
                 TranslateMessage(&msg);
@@ -57,9 +49,13 @@ namespace x {
         PostQuitMessage(0);
     }
 
-    u32 Game::GetWidth() const { return _currentWidth; }
+    u32 Game::GetWidth() const {
+        return _currentWidth;
+    }
 
-    u32 Game::GetHeight() const { return _currentHeight; }
+    u32 Game::GetHeight() const {
+        return _currentHeight;
+    }
 
     f32 Game::GetAspect() const {
         return CAST<f32>(_currentWidth) / CAST<f32>(_currentHeight);
@@ -93,17 +89,12 @@ namespace x {
     }
 
     void Game::RenderDepthOnly(const SceneState& state) {
-        for (const auto& [entity, model] : state.GetComponents<
-                 ModelComponent>()) {
+        for (const auto& [entity, model] : state.GetComponents<ModelComponent>()) {
             Matrix world                  = XMMatrixIdentity();
-            const auto transformComponent = state.GetComponent<
-                TransformComponent>(entity);
-            if (transformComponent) {
-                world = transformComponent->GetTransformMatrix();
-            }
-            _renderSystem->UpdateShadowPassParameters(
-                state.GetLightState().Sun.lightViewProj,
-                XMMatrixTranspose(world));
+            const auto transformComponent = state.GetComponent<TransformComponent>(entity);
+            if (transformComponent) { world = transformComponent->GetTransformMatrix(); }
+            _renderSystem->UpdateShadowPassParameters(state.GetLightState().Sun.lightViewProj,
+                                                      XMMatrixTranspose(world));
 
             model.Draw(_renderContext);
         }
@@ -111,21 +102,14 @@ namespace x {
 
     // This should never modify game state (always iterate as const)
     void Game::RenderScene(const SceneState& state) {
-        for (const auto& [entity, model] : state.GetComponents<
-                 ModelComponent>()) {
+        for (const auto& [entity, model] : state.GetComponents<ModelComponent>()) {
             Matrix world = XMMatrixIdentity();
             auto view    = state.GetMainCamera().GetViewMatrix();
             auto proj    = state.GetMainCamera().GetProjectionMatrix();
 
-            const auto transformComponent = state.GetComponent<
-                TransformComponent>(entity);
-            if (transformComponent) {
-                world = transformComponent->GetTransformMatrix();
-            }
-            model.Draw(_renderContext,
-                       {world, view, proj},
-                       state.GetLightState(),
-                       state.GetMainCamera().GetPosition());
+            const auto transformComponent = state.GetComponent<TransformComponent>(entity);
+            if (transformComponent) { world = transformComponent->GetTransformMatrix(); }
+            model.Draw(_renderContext, {world, view, proj}, state.GetLightState(), state.GetMainCamera().GetPosition());
         }
     }
 
@@ -150,10 +134,10 @@ namespace x {
 
             // Draw debug UI last (on top of everything else)
             if (_debugUIEnabled) {
-                _debugUI->BeginFrame(); // begin ImGui frame
+                _debugUI->BeginFrame();  // begin ImGui frame
                 _debugUI->Draw(_renderContext, _clock);
                 _devConsole.Draw();
-                _debugUI->EndFrame(); // end imgui frame
+                _debugUI->EndFrame();  // end imgui frame
             }
         }
         _renderSystem->EndFrame();
@@ -167,29 +151,31 @@ namespace x {
     }
 
     void Game::Shutdown() {
-        _activeScene.reset(); // probably isn't even necessary
+        _activeScene.reset();  // probably isn't even necessary
         CoUninitialize();
     }
 
-    void Game::Pause() { _isPaused = true; }
+    void Game::Pause() {
+        _isPaused = true;
+    }
 
-    void Game::Resume() { _isPaused = false; }
+    void Game::Resume() {
+        _isPaused = false;
+    }
 
     void Game::InitializeWindow() {
         // Initialize COM (for DirectXTex)
         const auto hr = CoInitializeEx(None, COINIT_MULTITHREADED);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to initialize COM");
 
-        WNDCLASSEXA wc{};
+        WNDCLASSEXA wc {};
         wc.cbSize        = sizeof(WNDCLASSEXA);
         wc.style         = CS_HREDRAW | CS_VREDRAW;
         wc.lpfnWndProc   = WndProc;
         wc.hInstance     = _instance;
         wc.lpszClassName = "SpaceGameWindowClass";
 
-        if (!RegisterClassExA(&wc)) {
-            X_LOG_FATAL("Failed to register window class")
-        }
+        if (!RegisterClassExA(&wc)) { X_LOG_FATAL("Failed to register window class") }
 
         _hwnd = CreateWindowExA(WS_EX_APPWINDOW,
                                 wc.lpszClassName,
@@ -213,7 +199,7 @@ namespace x {
     }
 
     void Game::InitializeDX() {
-        _renderContext.Initialize(_hwnd, _currentWidth, _currentHeight);
+        _renderContext.Initialize(_hwnd, (int)_currentWidth, (int)_currentHeight);
         _renderSystem = make_unique<RenderSystem>(_renderContext);
         _renderSystem->Initialize(_currentWidth, _currentHeight);
 
@@ -232,59 +218,54 @@ namespace x {
             auto& lua = _scriptEngine.GetLuaState();
 
             // register game globals
-            auto gameGlobal = lua.new_usertype<Game>(
-                "Game");
+            auto gameGlobal    = lua.new_usertype<Game>("Game");
             gameGlobal["Quit"] = [this] { Quit(); };
             _input.RegisterLuaGlobals(lua);
 
             // TODO: register scene globals
 
             // Register other engine types
-            _scriptEngine.RegisterTypes<
-                Float3, TransformComponent, BehaviorEntity, Camera>();
+            _scriptEngine.RegisterTypes<Float3, TransformComponent, BehaviorEntity, Camera>();
         }
 
-        if (_debugUIEnabled) {
-            _debugUI = make_unique<DebugUI>(_hwnd, _renderContext);
-        }
+        if (_debugUIEnabled) { _debugUI = make_unique<DebugUI>(_hwnd, _renderContext); }
 
         _devConsole.RegisterCommand("quit", [this](auto) { Quit(); })
-                   .RegisterCommand("close", [this](auto) { _devConsole.ToggleVisible(); })
-                   .RegisterCommand("p_ShowFrameGraph",
-                                    [this](auto args) {
-                                        if (args.size() < 1) { return; }
-                                        const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
-                                        _debugUI->SetShowFrameGraph(CAST<bool>(show));
-                                    })
-                   .RegisterCommand("p_ShowDeviceInfo",
-                                    [this](auto args) {
-                                        if (args.size() < 1) { return; }
-                                        const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
-                                        _debugUI->SetShowDeviceInfo(CAST<bool>(show));
-                                    })
-                   .RegisterCommand("p_ShowFrameInfo",
-                                    [this](auto args) {
-                                        if (args.size() < 1) { return; }
-                                        const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
-                                        _debugUI->SetShowFrameInfo(CAST<bool>(show));
-                                    })
-                   .RegisterCommand("p_ShowAll",
-                                    [this](auto args) {
-                                        if (args.size() < 1) { return; }
-                                        const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
-                                        _debugUI->SetShowFrameGraph(CAST<bool>(show));
-                                        _debugUI->SetShowDeviceInfo(CAST<bool>(show));
-                                        _debugUI->SetShowFrameInfo(CAST<bool>(show));
-                                    })
-                   .RegisterCommand("g_Pause", [this](auto) { Pause(); })
-                   .RegisterCommand("g_Resume", [this](auto) { Resume(); })
-                   .RegisterCommand("g_Load",
-                                    [this](auto args) {
-                                        if (args.size() < 1) { return; }
-                                        const auto& sceneName = args[0];
-                                        const auto scenePath  = "Scenes\\" + sceneName + ".xscn";
-                                        TransitionScene(scenePath);
-                                    });
+          .RegisterCommand("close", [this](auto) { _devConsole.ToggleVisible(); })
+          .RegisterCommand("p_ShowFrameGraph",
+                           [this](auto args) {
+                               if (args.size() < 1) { return; }
+                               const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                               _debugUI->SetShowFrameGraph(CAST<bool>(show));
+                           })
+          .RegisterCommand("p_ShowDeviceInfo",
+                           [this](auto args) {
+                               if (args.size() < 1) { return; }
+                               const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                               _debugUI->SetShowDeviceInfo(CAST<bool>(show));
+                           })
+          .RegisterCommand("p_ShowFrameInfo",
+                           [this](auto args) {
+                               if (args.size() < 1) { return; }
+                               const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                               _debugUI->SetShowFrameInfo(CAST<bool>(show));
+                           })
+          .RegisterCommand("p_ShowAll",
+                           [this](auto args) {
+                               if (args.size() < 1) { return; }
+                               const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                               _debugUI->SetShowFrameGraph(CAST<bool>(show));
+                               _debugUI->SetShowDeviceInfo(CAST<bool>(show));
+                               _debugUI->SetShowFrameInfo(CAST<bool>(show));
+                           })
+          .RegisterCommand("g_Pause", [this](auto) { Pause(); })
+          .RegisterCommand("g_Resume", [this](auto) { Resume(); })
+          .RegisterCommand("g_Load", [this](auto args) {
+              if (args.size() < 1) { return; }
+              const auto& sceneName = args[0];
+              const auto scenePath  = "Scenes\\" + sceneName + ".xscn";
+              TransitionScene(scenePath);
+          });
 
         X_LOG_DEBUG("Initialized engine")
     }
@@ -313,12 +294,7 @@ namespace x {
     }
 
     LRESULT Game::MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) {
-        if (_debugUIEnabled && ImGui_ImplWin32_WndProcHandler(
-                _hwnd,
-                msg,
-                wParam,
-                lParam))
-            return true;
+        if (_debugUIEnabled && ImGui_ImplWin32_WndProcHandler(_hwnd, msg, wParam, lParam)) return true;
 
         switch (msg) {
             case WM_DESTROY:
@@ -330,26 +306,31 @@ namespace x {
 
             case WM_KEYDOWN: {
                 // Backtick/tilde key
-                if (wParam == VK_OEM_3) { _devConsole.ToggleVisible(); }
+                if (wParam == VK_OEM_3) {
+                    _devConsole.ToggleVisible();
+                    if (_devConsole.IsVisible()) {
+                        _input.SetEnabled(false);
+                    } else {
+                        _input.SetEnabled(true);
+                    }
+                }
 
                 if (wParam == VK_ESCAPE && _mouse.IsCaptured()) {
                     _mouse.ReleaseMouse(_hwnd);
                     return 0;
                 }
 
-                _input.UpdateKeyState(wParam, true);
+                _input.UpdateKeyState((int)wParam, true);
             }
                 return 0;
             case WM_KEYUP: {
-                _input.UpdateKeyState(wParam, false);
+                _input.UpdateKeyState((int)wParam, false);
             }
                 return 0;
             case WM_LBUTTONDOWN: {
                 _input.UpdateMouseButtonState(MouseButton::Left, true);
 
-                if (!_mouse.IsCaptured()) {
-                    _mouse.CaptureMouse(_hwnd);
-                }
+                if (!_mouse.IsCaptured()) { _mouse.CaptureMouse(_hwnd); }
             }
                 return 0;
             case WM_LBUTTONUP: {
@@ -392,4 +373,4 @@ namespace x {
 
         return DefWindowProcA(hwnd, msg, wParam, lParam);
     }
-} // namespace x
+}  // namespace x

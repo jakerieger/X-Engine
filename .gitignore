@@ -8,6 +8,7 @@ vcpkg/
 vcpkg_installed/
 packages/
 Engine/Shaders/Compiled
+imgui.ini
 
 # Engine-specific log files
 *.log

@@ -30,19 +30,19 @@ namespace x {
             return _mouseStates[button].released;
         }
 
-        int GetMouseX() const {
+        X_NODISCARD int GetMouseX() const {
             return _mouseX;
         }
 
-        int GetMouseY() const {
+        X_NODISCARD int GetMouseY() const {
             return _mouseY;
         }
 
-        f32 GetMouseDeltaX() const {
+        X_NODISCARD f32 GetMouseDeltaX() const {
             return _mouseDeltaX;
         }
 
-        f32 GetMouseDeltaY() const {
+        X_NODISCARD f32 GetMouseDeltaY() const {
             return _mouseDeltaY;
         }
 
@@ -142,27 +142,35 @@ namespace x {
         }
 
         void UpdateKeyState(int key, bool pressed) {
+            if (!_enabled) return;
+
             _keyStates[key].pressed  = pressed;
             _keyStates[key].released = !pressed;
         }
 
         void UpdateMouseButtonState(int button, bool pressed) {
+            if (!_enabled) return;
+
             _mouseStates[button].pressed  = pressed;
             _mouseStates[button].released = !pressed;
         }
 
         void UpdateMousePosition(const int x, const int y) {
+            if (!_enabled) return;
+
             _mouseDeltaX = CAST<f32>(x);
             _mouseDeltaY = CAST<f32>(y);
 
-            constexpr f32 deadZone = 2.5f; // Might need to tweak this, also frame-rate dependent :(
-            if (std::abs(_mouseDeltaX) < deadZone)
-                _mouseDeltaX = 0.0f;
-            if (std::abs(_mouseDeltaY) < deadZone)
-                _mouseDeltaY = 0.0f;
+            constexpr f32 deadZone = 2.5f;  // Might need to tweak this, also frame-rate dependent :(
+            if (std::abs(_mouseDeltaX) < deadZone) _mouseDeltaX = 0.0f;
+            if (std::abs(_mouseDeltaY) < deadZone) _mouseDeltaY = 0.0f;
 
             _mouseX += x;
             _mouseY += y;
+        }
+
+        void SetEnabled(bool enabled) {
+            _enabled = enabled;
         }
 
         struct KeyState {
@@ -172,7 +180,8 @@ namespace x {
 
         unordered_map<int, KeyState> _keyStates;
         unordered_map<int, KeyState> _mouseStates;
-        int _mouseX      = 0, _mouseY        = 0;
+        int _mouseX = 0, _mouseY = 0;
         f32 _mouseDeltaX = 0.f, _mouseDeltaY = 0.f;
+        bool _enabled = true;
     };
-}
+}  // namespace x
