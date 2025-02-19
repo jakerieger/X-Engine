@@ -1,7 +1,16 @@
 # Development Log
 
 ## Contents
+- [Feb 18, 2025](#feb-18-2025)
 - [Feb 17, 2025](#feb-17-2025)
+
+## Feb 18, 2025
+
+Transition to CMake build system has been completed and merged into `master`. Descriptor files for scenes and materials have been converted from JSON to YAML for simpler editing and parsing. Scene loading and descriptor parsing has obviously been reworked due to the change in format, but also for a better designed system overall.
+
+All third party dependencies are now fetched automatically by the build system; no need for git submodules. Hence, they have been removed. Everything else remains consistent with previous versions of the project.
+
+Continuing work on seperating the engine core from the windowing system so work on a level editor can begin. This will likely be the following week(s) focus.
 
 ## Feb 17, 2025
 
