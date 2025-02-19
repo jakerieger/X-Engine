@@ -20,7 +20,6 @@ public:
 
     void OnInitialize() override {
         // Simply render to the window viewport
-        _windowViewport->AttachViewport();
         _game.Initialize(this, _windowViewport.get());
         _game.TransitionScene(_initialScene);
     }

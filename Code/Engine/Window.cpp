@@ -38,6 +38,7 @@ namespace x {
                 continue;
             }
 
+            _windowViewport->AttachViewport();
             MainLoop();
         }
 
