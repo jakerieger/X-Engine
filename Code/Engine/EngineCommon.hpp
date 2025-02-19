@@ -141,7 +141,7 @@ private:
         const auto now         = system_clock::now();
         const auto duration    = now.time_since_epoch();
         const auto unixMillis  = duration_cast<milliseconds>(duration).count();
-        const auto filename    = std::format("x_{}.log", "DEBUG", unixMillis);
+        const auto filename    = std::format("x_{}.log", unixMillis);
         const std::string name = (logDirectory / filename).Str();
         return name;
     }
