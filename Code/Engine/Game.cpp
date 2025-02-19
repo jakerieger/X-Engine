@@ -154,6 +154,10 @@ namespace x {
         RegisterHandler<MouseMoveEvent>([this](const MouseMoveEvent& e) { OnMouseMove(e.GetX(), e.GetY()); });
     }
 
+    Game::~Game() {
+        Shutdown();
+    }
+
     void Game::Initialize(Window* window, Viewport* viewport) {
         _window       = window;
         _renderSystem = make_unique<RenderSystem>(_renderContext, viewport);

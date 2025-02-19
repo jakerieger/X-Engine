@@ -24,6 +24,7 @@ namespace x {
 
     public:
         explicit Game(RenderContext& context);
+        ~Game();
 
         PostProcessSystem* GetPostProcess() {
             return _renderSystem->GetPostProcess();
