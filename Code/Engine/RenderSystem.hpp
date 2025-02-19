@@ -5,6 +5,7 @@
 #include "Math.hpp"
 #include "Shader.hpp"
 #include "PostProcessSystem.hpp"
+#include "Viewport.hpp"
 #include "Volatile.hpp"
 
 namespace x {
@@ -54,10 +55,11 @@ namespace x {
         void Resize(u32 width, u32 height);
     };
 
-    class RenderSystem final : public Volatile {
+    class RenderSystem : public Volatile {
     public:
-        explicit RenderSystem(RenderContext& context);
-        void Initialize(u32 width, u32 height);
+        RenderSystem(RenderContext& context, Viewport* viewport);
+
+        void Initialize();
 
         void BeginFrame();
         void EndFrame();
@@ -72,23 +74,17 @@ namespace x {
             return &_postProcess;
         }
 
-        void OnResize(u32 width, u32 height) override;
+        void OnResize(u32 width, u32 height);
 
     private:
         friend class Game;
 
         RenderContext& _renderContext;
+        Viewport* _viewport;
         ShadowPass _shadowPass;
         LightPass _lightPass;
         PostProcessSystem _postProcess;
 
-        u32 _width  = 0;
-        u32 _height = 0;
-
-        ComPtr<ID3D11RenderTargetView> _renderTargetView;
-        ComPtr<ID3D11DepthStencilView> _depthStencilView;
-        ComPtr<ID3D11DepthStencilState> _depthStencilState;
-
         void UpdateShadowPassParameters(const Matrix& lightViewProj, const Matrix& world);
     };
-}
+}  // namespace x

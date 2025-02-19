@@ -1,4 +1,5 @@
 #include "Camera.hpp"
+#include "EngineCommon.hpp"
 
 namespace x {
     Camera::Camera() {
@@ -7,6 +8,7 @@ namespace x {
     }
 
     void Camera::OnResize(const u32 width, const u32 height) {
+        X_DEBUG_LOG_RESIZE("Camera", width, height)
         _aspectRatio = CAST<f32>(width) / CAST<f32>(height);
         UpdateProjectionMatrix();
     }
@@ -15,7 +17,7 @@ namespace x {
         _rotation.x += deltaPitch;
         _rotation.y += deltaYaw;
 
-        constexpr f32 maxPitch = XM_PIDIV2 - 0.01f; // clamp pitch to prevent flipping
+        constexpr f32 maxPitch = XM_PIDIV2 - 0.01f;  // clamp pitch to prevent flipping
         _rotation.x            = std::max(-maxPitch, std::min(maxPitch, _rotation.x));
 
         // Keep yaw in [0, 2PI] range
@@ -68,9 +70,9 @@ namespace x {
         UpdateProjectionMatrix();
     }
 
-    void Camera::SetClipPlanes(const f32 near, const f32 far) {
-        _nearZ = near;
-        _farZ  = far;
+    void Camera::SetClipPlanes(const f32 nearZ, const f32 farZ) {
+        _nearZ = nearZ;
+        _farZ  = farZ;
         UpdateProjectionMatrix();
     }
 
@@ -99,4 +101,4 @@ namespace x {
     void Camera::UpdateProjectionMatrix() {
         _projectionMatrix = XMMatrixPerspectiveFovLH(_fovY, _aspectRatio, _nearZ, _farZ);
     }
-}
+}  // namespace x

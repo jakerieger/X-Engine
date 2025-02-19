@@ -11,8 +11,8 @@ namespace x {
             ::GetClientRect(hwnd, &windowRect);
 
             POINT center = {
-                (windowRect.right - windowRect.left) / 2,
-                (windowRect.bottom - windowRect.top) / 2,
+              (windowRect.right - windowRect.left) / 2,
+              (windowRect.bottom - windowRect.top) / 2,
             };
 
             _lastPos = center;
@@ -33,13 +33,13 @@ namespace x {
         }
     }
 
-    void Mouse::OnMouseMove(HWND hwnd, Input& input, LPARAM lParam) {
+    void Mouse::OnMouseMove(HWND hwnd, Input& input, i32 xPos, i32 yPos) const {
         if (_captured) {
             RECT windowRect;
             ::GetClientRect(hwnd, &windowRect);
             POINT centerPoint = {(windowRect.right - windowRect.left) / 2, (windowRect.bottom - windowRect.top) / 2};
 
-            POINT currentPos = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
+            POINT currentPos = {xPos, yPos};
 
             // Only update if the position has actually changed
             if (currentPos.x != centerPoint.x || currentPos.y != centerPoint.y) {
@@ -60,9 +60,7 @@ namespace x {
                 input.UpdateMousePosition(0, 0);
             }
         } else {
-            const int xPos = GET_X_LPARAM(lParam);
-            const int yPos = GET_Y_LPARAM(lParam);
             input.UpdateMousePosition(xPos, yPos);
         }
     }
-}
+}  // namespace x

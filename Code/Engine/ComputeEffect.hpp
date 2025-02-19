@@ -38,10 +38,15 @@ namespace x {
         virtual void OnResize(const u32 width, const u32 height) {
             _width  = width;
             _height = height;
+            X_DEBUG_LOG_RESIZE("IComputeEffect", width, height)
         }
 
-        bool IsEnabled() const { return _enabled; }
-        void SetEnabled(const bool enabled) { _enabled = enabled; }
+        bool IsEnabled() const {
+            return _enabled;
+        }
+        void SetEnabled(const bool enabled) {
+            _enabled = enabled;
+        }
 
         template<typename T>
         T* As() {
@@ -57,12 +62,14 @@ namespace x {
         u32 _height         = 0;
         DXGI_FORMAT _format = DXGI_FORMAT_R8G8B8A8_UNORM;
 
-        virtual bool CreateResources() { return true; }
+        virtual bool CreateResources() {
+            return true;
+        }
         virtual void UpdateConstants() {}
 
         template<typename T>
         bool CreateConstantBuffer() {
-            D3D11_BUFFER_DESC desc{};
+            D3D11_BUFFER_DESC desc {};
             desc.ByteWidth      = sizeof(T);
             desc.Usage          = D3D11_USAGE_DYNAMIC;
             desc.BindFlags      = D3D11_BIND_CONSTANT_BUFFER;
@@ -71,4 +78,4 @@ namespace x {
             return SUCCEEDED(_renderer.GetDevice()->CreateBuffer(&desc, None, &_constantBuffer));
         }
     };
-}
+}  // namespace x

@@ -6,6 +6,7 @@
 
 #include "Common/Types.hpp"
 #include "Engine/Game.hpp"
+#include "Engine/Viewport.hpp"
 #include "Engine/Window.hpp"
 
 using namespace x;
@@ -13,14 +14,19 @@ using namespace x;
 class GameWindow final : public Window {
 public:
     GameWindow(const str& title, const str& initialScene)
-        : Window(title, 1600, 900), _game(x::None, title, 1600, 900), _initialScene(initialScene) {}
+        : Window(title, 1600, 900), _game(_context), _initialScene(initialScene) {
+        AddListener(&_game);  // Let our game instance listen to window events (resize, lose focus, etc.)
+    }
 
-    bool Initialize() override {
-        // Initialize the base Window first!
-        if (!Window::Initialize()) { return false; }
+    void OnInitialize() override {
+        // Simply render to the window viewport
+        _windowViewport->AttachViewport();
+        _game.Initialize(this, _windowViewport.get());
+        _game.TransitionScene(_initialScene);
+    }
 
-        // Game specific initialization goes here
-        // _game.Initialize(this);
+    void MainLoop() override {
+        _game.MainLoop();
     }
 
 private:

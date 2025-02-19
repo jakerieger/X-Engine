@@ -18,7 +18,7 @@ namespace x {
 
         void CaptureMouse(HWND hwnd);
         void ReleaseMouse(HWND hwnd);
-        void OnMouseMove(HWND hwnd, Input& input, LPARAM lParam);
+        void OnMouseMove(HWND hwnd, Input& input, i32 xPos, i32 yPos) const;
 
         X_NODISCARD bool IsCaptured() const {
             return _captured;

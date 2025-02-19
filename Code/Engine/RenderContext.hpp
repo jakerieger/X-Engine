@@ -51,10 +51,11 @@ namespace x {
 
     private:
         friend class Mesh;
-        friend class RenderSystem;
+        friend class Window;
+        friend class Viewport;
 
         void ResizeSwapchainBuffers(u32 width, u32 height);
         void QueryDeviceInfo();
         void AddTriangleCountToFrame(u32 count);
     };
-} // namespace x
+}  // namespace x

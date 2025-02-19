@@ -5,12 +5,13 @@
 #pragma once
 
 #include "EventEmitter.hpp"
+#include "Viewport.hpp"
 #include "Common/Types.hpp"
 #include "Engine/EngineCommon.hpp"
 #include "Engine/RenderContext.hpp"
 
 namespace x {
-    class Window : EventEmitter {
+    class Window : public EventEmitter {
     public:
         Window(const str& title, int width, int height);
         virtual ~Window();
@@ -18,22 +19,37 @@ namespace x {
         int Run();
         LRESULT Quit();
 
+        virtual void OnInitialize() {};
+        virtual void OnShutdown() {};
+        virtual void OnResize(u32 width, u32 height) {};
+        virtual void MainLoop() {};
+
+        X_NODISCARD u32 GetWidth() const {
+            return _currentWidth;
+        }
+
+        X_NODISCARD u32 GetHeight() const {
+            return _currentHeight;
+        }
+
+        X_NODISCARD HWND GetHandle() const {
+            return _hwnd;
+        }
+
     protected:
         HINSTANCE _instance;
         HWND _hwnd;
         u32 _currentWidth, _currentHeight;
         str _title;
         RenderContext _context;
-
-        // Final output views for this window
-        ComPtr<ID3D11RenderTargetView> _renderTargetView;
-        ComPtr<ID3D11DepthStencilView> _depthStencilView;
-        ComPtr<ID3D11DepthStencilState> _depthStencilState;
-
-        virtual bool Initialize();
-        virtual void Shutdown();
+        unique_ptr<Viewport> _windowViewport;
 
     private:
+        bool _focused = false;
+
+        bool Initialize();
+        void Shutdown();
+
         LRESULT ResizeHandler(u32 width, u32 height);
         LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam);
         static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);

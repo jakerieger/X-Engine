@@ -13,7 +13,7 @@ namespace x {
         VectorSet _forward = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
         VectorSet _right   = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
 
-        Float2 _rotation = {0.0f, 0.0f}; // pitch, yaw
+        Float2 _rotation = {0.0f, 0.0f};  // pitch, yaw
 
         f32 _fovY        = XM_PIDIV4;
         f32 _aspectRatio = 16.f / 9.0f;
@@ -34,7 +34,7 @@ namespace x {
         void SetPosition(const VectorSet& position);
         void SetFOV(f32 fovY);
         void SetAspectRatio(f32 ratio);
-        void SetClipPlanes(f32 near, f32 far);
+        void SetClipPlanes(f32 nearZ, f32 farZ);
 
         f32 GetFovY() const {
             return _fovY;
@@ -57,4 +57,4 @@ namespace x {
         void UpdateViewMatrix();
         void UpdateProjectionMatrix();
     };
-}
+}  // namespace x

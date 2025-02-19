@@ -17,6 +17,8 @@ namespace x {
     }
 
     void PostProcessSystem::Resize(const u32 width, const u32 height) {
+        X_DEBUG_LOG_RESIZE("PostProcess", width, height)
+
         _width  = width;
         _height = height;
 
@@ -39,7 +41,7 @@ namespace x {
 
         // Count enabled effects
         const size_t enabledEffects =
-            std::ranges::count_if(_effects, [](const auto& effect) { return effect->IsEnabled(); });
+          std::ranges::count_if(_effects, [](const auto& effect) { return effect->IsEnabled(); });
 
         if (enabledEffects == 0) {
             RenderToScreen(sceneInput, finalOutput);
@@ -56,9 +58,9 @@ namespace x {
 
             // Select the appropriate output target
             bool isLastEffect =
-                (i == _effects.size() - 1) || std::none_of(std::next(_effects.begin(), i + 1),
-                                                           _effects.end(),
-                                                           [](const auto& effect) { return effect->IsEnabled(); });
+              (i == _effects.size() - 1) || std::none_of(std::next(_effects.begin(), i + 1),
+                                                         _effects.end(),
+                                                         [](const auto& effect) { return effect->IsEnabled(); });
 
             // For the last effect, we'll write to our final intermediate target
             ID3D11UnorderedAccessView* currentOutput = _intermediateTargets[targetIndex].uav.Get();
@@ -84,7 +86,7 @@ namespace x {
             auto& target          = _intermediateTargets[i];
             const auto dxgiFormat = _effects[i]->_format;
 
-            D3D11_TEXTURE2D_DESC desc{};
+            D3D11_TEXTURE2D_DESC desc {};
             desc.Width            = _width;
             desc.Height           = _height;
             desc.MipLevels        = 1;
@@ -123,4 +125,4 @@ namespace x {
         ID3D11ShaderResourceView* nullSRV = nullptr;
         context->PSSetShaderResources(0, 1, &nullSRV);
     }
-}
+}  // namespace x

@@ -54,7 +54,7 @@ namespace x {
         static constexpr u32 GraveAccent  = 96;
         static constexpr u32 World1       = 161;
         static constexpr u32 World2       = 162;
-        static constexpr u32 Escape       = 256;
+        static constexpr u32 Escape       = VK_ESCAPE;
         static constexpr u32 Enter        = 257;
         static constexpr u32 Tab          = 258;
         static constexpr u32 Backspace    = 259;
@@ -124,7 +124,7 @@ namespace x {
         static constexpr u32 RightAlt     = 346;
         static constexpr u32 RightSuper   = 347;
         static constexpr u32 RightMenu    = 348;
-    } // namespace KeyCode
+    }  // namespace KeyCode
 
     namespace MouseButton {
         static constexpr u32 Left   = 0;
@@ -135,5 +135,5 @@ namespace x {
         static constexpr u32 Macro3 = 5;
         static constexpr u32 Macro4 = 6;
         static constexpr u32 Macro5 = 7;
-    } // namespace MouseButton
-}
+    }  // namespace MouseButton
+}  // namespace x

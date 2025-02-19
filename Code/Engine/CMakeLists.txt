@@ -85,6 +85,8 @@ add_library(x STATIC
     ${ENGINE_DIR}/TransformComponent.cpp
     ${ENGINE_DIR}/TransformComponent.hpp
     ${ENGINE_DIR}/TransformMatrices.hpp
+    ${ENGINE_DIR}/Viewport.cpp
+    ${ENGINE_DIR}/Viewport.hpp
     ${ENGINE_DIR}/Volatile.hpp
     ${ENGINE_DIR}/Window.cpp
     ${ENGINE_DIR}/Window.hpp

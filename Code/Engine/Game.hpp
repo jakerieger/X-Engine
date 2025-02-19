@@ -4,6 +4,7 @@
 #include "DebugUI.hpp"
 #include "DevConsole.hpp"
 #include "EngineCommon.hpp"
+#include "EventListener.hpp"
 #include "Input.hpp"
 #include "Mouse.hpp"
 #include "SceneState.hpp"
@@ -13,76 +14,63 @@
 #include "RenderSystem.hpp"
 #include "Scene.hpp"
 #include "ScriptEngine.hpp"
+#include "Viewport.hpp"
 
 namespace x {
     /// @brief Base interface for implementing a game application.
     /// Hooks up windowing, rendering backend, and input among other things.
-    class Game {
+    class Game : public EventListener {
         X_CLASS_PREVENT_MOVES_COPIES(Game)
 
     public:
-        explicit Game(HINSTANCE instance, str title, u32 width, u32 height);
-        virtual ~Game();
-
-        /// @brief This is the only function that is required to be called on an IGame instance.
-        /// Initializes the app, enters into the main loop, and shuts down when the application is closed.
-        void Run(const str& initialScene);
-
-        /// @brief Quits a running IGame instance.
-        /// This is primarily for internal use but can be called at any point without issue.
-        void Quit();
-
-        [[nodiscard]] u32 GetWidth() const;
-        [[nodiscard]] u32 GetHeight() const;
-        [[nodiscard]] f32 GetAspect() const;
+        explicit Game(RenderContext& context);
 
         PostProcessSystem* GetPostProcess() {
             return _renderSystem->GetPostProcess();
         }
 
+        void Initialize(Window* window, Viewport* viewport);
+        void Shutdown();
+        void MainLoop();
+        void TransitionScene(const str& path);
+
     private:
-        HINSTANCE _instance;
-        HWND _hwnd;
-        u32 _currentWidth;
-        u32 _currentHeight;
-        str _title;
-        bool _debugUIEnabled{false};
-        bool _isRunning{false};
-        bool _isPaused{false};
+        bool _debugUIEnabled {false};
+        bool _isRunning {false};
+        bool _isPaused {false};
+        bool _isFocused {true};
         Clock _clock;
         unique_ptr<RenderSystem> _renderSystem;
         unique_ptr<Scene> _activeScene;
-        unordered_map<str, unique_ptr<PBRMaterial>> _baseMaterials;
         std::unique_ptr<DebugUI> _debugUI;
         vector<Volatile*> _volatiles;
         DevConsole _devConsole;
-        RenderContext _renderContext;
+        RenderContext& _renderContext;
         ScriptEngine _scriptEngine;
         Input _input;
         Mouse _mouse;
+        Window* _window;
 
-        void Initialize();
-        void Shutdown();
         void Pause();
         void Resume();
 
-        void InitializeWindow();
-        void InitializeDX();
         void InitializeEngine();
 
-        void TransitionScene(const str& path);
-
         void Update();
-        void RenderDepthOnly(const SceneState& state);
-        void RenderScene(const SceneState& state);
+        void RenderDepthOnly(const SceneState& state) const;
+        void RenderScene(const SceneState& state) const;
         void RenderFrame();
 
-        LRESULT ResizeHandler(u32 width, u32 height);
-        LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam);
-        static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+        void OnResize(u32 width, u32 height) const;
 
-        void RegisterVolatile(Volatile* vol) {
-            _volatiles.push_back(vol);
-        }
+        void OnKeyDown(u32 key);
+        void OnKeyUp(u32 key);
+        void OnMouseButtonDown(u32 button);
+        void OnMouseButtonUp(u32 button);
+        void OnMouseMove(u32 x, u32 y);
+        void OnLostFocus();
+        void OnGainedFocus();
+
+        void RegisterVolatile(Volatile* vol);
     };
-}
+}  // namespace x

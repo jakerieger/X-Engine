@@ -23,9 +23,9 @@ namespace x {
         D3D_FEATURE_LEVEL featureLevel;
 
         UINT createDeviceFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-        #ifdef _DEBUG
+#ifdef _DEBUG
         createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-        #endif
+#endif
 
         // Create device and swap chain
         HRESULT hr = D3D11CreateDeviceAndSwapChain(nullptr,
@@ -51,15 +51,16 @@ namespace x {
         hr = _swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &_backBuffer);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to get swapchain back buffer.")
 
-        QueryDeviceInfo(); // Cache device information
+        QueryDeviceInfo();  // Cache device information
     }
 
     void RenderContext::ResizeSwapchainBuffers(u32 width, u32 height) {
+        X_DEBUG_LOG_RESIZE("Swapchain", width, height)
+        
         _backBuffer.Reset();
 
         auto hr = _swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
-        X_PANIC_ASSERT(SUCCEEDED(hr),
-                       "Failed to resize swapchain buffers.")
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to resize swapchain buffers.")
 
         hr = _swapChain->GetBuffer(0, IID_PPV_ARGS(&_backBuffer));
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to get swapchain back buffer.")
@@ -107,6 +108,7 @@ namespace x {
     }
 
     void RenderContext::Present() {
+        _context->Flush();
         const auto hr = _swapChain->Present(1, 0);
         if (FAILED(hr)) { _i_ = fprintf(stderr, "Failed to present.\n"); }
     }
@@ -120,4 +122,4 @@ namespace x {
     }
 
     void RenderContext::AddTriangleCountToFrame(u32 count) {}
-} // namespace x
+}  // namespace x
