@@ -17,8 +17,6 @@ namespace x {
     }
 
     void PostProcessSystem::Resize(const u32 width, const u32 height) {
-        X_DEBUG_LOG_RESIZE("PostProcess", width, height)
-
         _width  = width;
         _height = height;
 

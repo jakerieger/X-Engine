@@ -6,8 +6,6 @@
 
 namespace x {
     bool Viewport::Resize(u32 width, u32 height, bool attachToBackBuffer) {
-        X_DEBUG_LOG_RESIZE("Viewport", width, height)
-
         _width  = width;
         _height = height;
 

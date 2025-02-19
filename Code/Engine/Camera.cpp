@@ -8,7 +8,6 @@ namespace x {
     }
 
     void Camera::OnResize(const u32 width, const u32 height) {
-        X_DEBUG_LOG_RESIZE("Camera", width, height)
         _aspectRatio = CAST<f32>(width) / CAST<f32>(height);
         UpdateProjectionMatrix();
     }

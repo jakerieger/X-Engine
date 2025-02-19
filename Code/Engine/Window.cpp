@@ -124,8 +124,6 @@ namespace x {
     LRESULT Window::ResizeHandler(u32 width, u32 height) {
         if (!_focused) return S_OK;
 
-        X_DEBUG_LOG_RESIZE("Window", width, height)
-
         _currentWidth  = width;
         _currentHeight = height;
 

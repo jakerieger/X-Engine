@@ -28,8 +28,6 @@ namespace x {
         const auto width  = _viewport->GetWidth();
         const auto height = _viewport->GetHeight();
 
-        X_DEBUG_LOG_RESIZE("RenderSystem", width, height)
-
         _shadowPass.Resize(width, height);
         _lightPass.Resize(width, height);
         _postProcess.Resize(width, height);
@@ -120,8 +118,6 @@ namespace x {
     }
 
     void ShadowPass::Resize(u32 width, u32 height) {
-        X_DEBUG_LOG_RESIZE("ShadowPass", width, height)
-
         _depthSRV.Reset();
         _depthStencilState.Reset();
         _depthStencilView.Reset();
@@ -212,8 +208,6 @@ namespace x {
     }
 
     void LightPass::Resize(u32 width, u32 height) {
-        X_DEBUG_LOG_RESIZE("LightPass", width, height)
-
         _renderTargetView.Reset();
         _depthStencilView.Reset();
         _depthStencilState.Reset();

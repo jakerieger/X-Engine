@@ -38,7 +38,6 @@ namespace x {
         virtual void OnResize(const u32 width, const u32 height) {
             _width  = width;
             _height = height;
-            X_DEBUG_LOG_RESIZE("IComputeEffect", width, height)
         }
 
         bool IsEnabled() const {

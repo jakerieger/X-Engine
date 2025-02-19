@@ -33,7 +33,7 @@
 
 #define X_ARRAY_W_SIZE(arr) (arr), sizeof((arr))
 
-#if defined(X_DISTRIBUTION)
+#if defined(X_DIST)
 
     #define X_MAIN int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
     #define X_MODULE_HANDLE hInstance
@@ -44,8 +44,6 @@
 
     #define X_MAIN int main(int argc, char* argv[])
     #define X_MODULE_HANDLE GetModuleHandleA(nullptr)
-
-    #include <comdef.h>
 
 [[noreturn]] inline void Panic(const char* file, int line, const char* func, const char* msg) noexcept {
     char msgFormatted[2048];
@@ -94,7 +92,7 @@ public:
         const auto logEntry    = std::format("[{}] {} | Engine |: {}\n", timestamp, severityStr, msg);
         _logFile << logEntry;
 
-#ifndef X_DISTRIBUTION
+#ifndef X_DIST
         std::cout << logEntry;
 #endif
 
@@ -162,6 +160,3 @@ inline Logger& GetLogger() {
 
 /// @brief Fatal log level will also abort program after logging entry (with `std::abort`)!
 #define X_LOG_FATAL(fmt, ...) GetLogger().Log(X_LOG_SEVERITY_FATAL, fmt, ##__VA_ARGS__);
-
-// #define X_DEBUG_LOG_RESIZE(name, w, h) X_LOG_DEBUG("Resizing %s: (%u, %u)", name, w, h)
-#define X_DEBUG_LOG_RESIZE(name, w, h)

@@ -110,6 +110,14 @@ target_link_libraries(x PUBLIC
     DirectXTex
 )
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_definitions(-DX_DEBUG)
+elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_definitions(-DX_RELEASE)
+elseif (CMAKE_BUILD_TYPE STREQUAL "Dist")
+    add_definitions(-DX_DIST)
+endif ()
+
 target_compile_definitions(x PRIVATE ${WINDOWS_COMPILE_DEFS} LUA_JIT)
 
 target_include_directories(x PUBLIC

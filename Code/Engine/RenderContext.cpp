@@ -55,8 +55,6 @@ namespace x {
     }
 
     void RenderContext::ResizeSwapchainBuffers(u32 width, u32 height) {
-        X_DEBUG_LOG_RESIZE("Swapchain", width, height)
-        
         _backBuffer.Reset();
 
         auto hr = _swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
