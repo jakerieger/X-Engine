@@ -1,7 +1,7 @@
 #include "RasterizerState.hpp"
 
 namespace x {
-    void RasterizerStates::Init(const RenderContext& renderer) noexcept {
+    void RasterizerStates::Initialize(const RenderContext& renderer) noexcept {
         D3D11_RASTERIZER_DESC defaultSolid{};
         defaultSolid.FillMode              = D3D11_FILL_SOLID;
         defaultSolid.CullMode              = D3D11_CULL_BACK;

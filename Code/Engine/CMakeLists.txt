@@ -27,6 +27,9 @@ add_library(x STATIC
     ${ENGINE_DIR}/DevConsole.hpp
     ${ENGINE_DIR}/EngineCommon.hpp
     ${ENGINE_DIR}/EntityId.hpp
+    ${ENGINE_DIR}/Event.hpp
+    ${ENGINE_DIR}/EventEmitter.hpp
+    ${ENGINE_DIR}/EventListener.hpp
     ${ENGINE_DIR}/Game.cpp
     ${ENGINE_DIR}/Game.hpp
     ${ENGINE_DIR}/GeometryBuffer.hpp
@@ -83,6 +86,8 @@ add_library(x STATIC
     ${ENGINE_DIR}/TransformComponent.hpp
     ${ENGINE_DIR}/TransformMatrices.hpp
     ${ENGINE_DIR}/Volatile.hpp
+    ${ENGINE_DIR}/Window.cpp
+    ${ENGINE_DIR}/Window.hpp
 )
 
 message("${CMAKE_SOURCE_DIR}")

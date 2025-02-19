@@ -7,6 +7,8 @@ add_executable(SpaceGame
     ${IMGUI_SOURCES}
     ${STB_SOURCES}
     ${COMMON_SOURCES}
+    ${GAME_DIR}/GameWindow.cpp
+    ${GAME_DIR}/GameWindow.hpp
     ${GAME_DIR}/main.cpp
 )
 include(${CMAKE_DIR}/CopyGameContent.cmake)

@@ -206,7 +206,7 @@ namespace x {
         // Tell the engine that these classes need to handle resizing when the window size changes
         RegisterVolatile(_renderSystem.get());
 
-        RasterizerStates::Init(_renderContext);
+        RasterizerStates::Initialize(_renderContext);
         // Setup our rasterizer states for future use
 
         X_LOG_DEBUG("Initialized DirectX")

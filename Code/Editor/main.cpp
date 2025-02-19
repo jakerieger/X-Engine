@@ -8,5 +8,5 @@ using namespace x::Editor;
 
 int main() {
     Editor editor;
-    editor.Run();
+    return editor.Run();
 }

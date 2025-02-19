@@ -13,7 +13,7 @@ namespace x {
         static inline ComPtr<ID3D11RasterizerState> CullFront;
         static inline ComPtr<ID3D11RasterizerState> ScissorTest;
 
-        static void Init(const RenderContext& renderer) noexcept;
+        static void Initialize(const RenderContext& renderer) noexcept;
 
     private:
         RasterizerStates() = default;
