@@ -1,15 +1,12 @@
 #include "Scene.hpp"
 #include "BehaviorComponent.hpp"
 #include "StaticResources.hpp"
-#include <ranges>
-
 #include "SceneParser.hpp"
+#include <optional>
 
 namespace x {
-    Scene::Scene(RenderContext& context, ScriptEngine& scriptEngine): _resources(context, Memory::BYTES_128MB),
-                                                                      _state(),
-                                                                      _context(context),
-                                                                      _scriptEngine(scriptEngine) {}
+    Scene::Scene(RenderContext& context, ScriptEngine& scriptEngine)
+        : _resources(context, Memory::BYTES_128MB), _state(), _context(context), _scriptEngine(scriptEngine) {}
 
     Scene::~Scene() {
         Unload();
@@ -18,8 +15,63 @@ namespace x {
     void Scene::Load(const str& path) {
         _state.Reset();
 
-        SceneDescriptor descriptor{};
+        SceneDescriptor descriptor {};
         SceneParser::Parse(path, descriptor);
+
+        auto& mainCamera = _state._mainCamera;
+        auto& sun        = _state._lightState.Sun;
+
+        const auto& cameraDescriptor = descriptor.world.camera;
+        mainCamera.SetPosition(Float3ToVectorSet(cameraDescriptor.position));
+        mainCamera.SetFOV(cameraDescriptor.fovY);
+        mainCamera.SetClipPlanes(cameraDescriptor.nearZ, cameraDescriptor.farZ);
+
+        const auto& sunDescriptor = descriptor.world.lights.sun;
+        sun.enabled               = sunDescriptor.enabled;
+        sun.intensity             = sunDescriptor.intensity;
+        sun.color                 = {sunDescriptor.color.x, sunDescriptor.color.y, sunDescriptor.color.z, 1.0f};
+        sun.direction    = {sunDescriptor.direction.x, sunDescriptor.direction.y, sunDescriptor.direction.z, 0.0f};
+        sun.castsShadows = sunDescriptor.castsShadows;
+
+        for (auto& entity : descriptor.entities) {
+            const EntityId newEntity = _state.CreateEntity();
+
+            // Create and attach components
+            auto transformDescriptor = entity.transform;
+            auto& transformComponent = _state.AddComponent<TransformComponent>(newEntity);
+            transformComponent.SetPosition(transformDescriptor.position);
+            transformComponent.SetRotation(transformDescriptor.rotation);
+            transformComponent.SetScale(transformDescriptor.scale);
+            transformComponent.Update();
+
+            if (entity.model.has_value()) {
+                auto& model          = entity.model.value();
+                auto& modelComponent = _state.AddComponent<ModelComponent>(newEntity);
+                modelComponent.SetCastsShadows(model.castsShadows);
+
+                // Load model resource
+                if (!_resources.LoadResource<Model>(model.resource)) { X_LOG_FATAL("Failed to load model"); }
+                auto modelHandle = _resources.FetchResource<Model>(model.resource);
+                if (!modelHandle.has_value()) { X_LOG_FATAL("Failed to fetch model resource"); }
+                modelComponent.SetModelHandle(*modelHandle);
+
+                // Load material
+                MaterialDescriptor matDesc = MaterialParser::Parse(model.material);
+                LoadMaterial(matDesc, modelComponent);
+            }
+
+            if (entity.behavior.has_value()) {
+                auto& behavior          = entity.behavior.value();
+                auto& behaviorComponent = _state.AddComponent<BehaviorComponent>(newEntity);
+                behaviorComponent.LoadFromFile(behavior.script);
+
+                const auto loadResult =
+                  _scriptEngine.LoadScript(behaviorComponent.GetSource(), behaviorComponent.GetId());
+                if (!loadResult) { X_LOG_FATAL("Failed to load behavior script"); }
+            }
+
+            _entities[entity.name] = newEntity;
+        }
 
         Awake();
         X_LOG_INFO("Loaded scene: '%s'", path.c_str())
@@ -49,13 +101,13 @@ namespace x {
         const auto clipPlanes = camera.GetClipPlanes();
 
         // Calculate LVP
-        // TODO: I only need to update this if either the light direction or the screen size changes; this can be optimized!
-        const auto lvp =
-            CalculateLightViewProjection(_state.GetLightState().Sun,
-                                         10.0f,
-                                         camera.GetAspectRatio(),
-                                         clipPlanes.first,
-                                         clipPlanes.second);
+        // TODO: I only need to update this if either the light direction or the screen size changes; this can be
+        // optimized!
+        const auto lvp                           = CalculateLightViewProjection(_state.GetLightState().Sun,
+                                                      10.0f,
+                                                      camera.GetAspectRatio(),
+                                                      clipPlanes.first,
+                                                      clipPlanes.second);
         _state.GetLightState().Sun.lightViewProj = XMMatrixTranspose(lvp);
 
         // Update scene entities
@@ -98,136 +150,31 @@ namespace x {
         volatiles.push_back(&_state.GetMainCamera());
     }
 
-    // void Scene::LoadWorld(json& world) {
-    //     auto cameraJson             = world["camera"];
-    //     scene_schema::Camera camera = scene_schema::Camera::FromJson(cameraJson);
-    //
-    //     // Update camera
-    //     _state._mainCamera.SetPosition(VectorSet{camera.position.x, camera.position.y, camera.position.z});
-    //     // TODO: Add setter for eye
-    //     _state._mainCamera.SetFOV(camera.fovY);
-    //     _state._mainCamera.SetClipPlanes(camera.nearZ, camera.farZ);
-    //
-    //     auto sunJson                       = world["lights"]["sun"];
-    //     scene_schema::DirectionalLight sun = scene_schema::DirectionalLight::FromJson(sunJson);
-    //
-    //     // Update sun
-    //     auto& sunState       = _state._lightState.Sun;
-    //     sunState.enabled     = sun.enabled;
-    //     sunState.intensity   = sun.intensity;
-    //     sunState.color       = Float4{sun.color.r, sun.color.g, sun.color.b, 1.0f};
-    //     sunState.direction   = Float4{sun.direction.x, sun.direction.y, sun.direction.z, 0.0f};
-    //     sunState.castsShadow = sun.castsShadows;
-    // }
-    //
-    // void Scene::LoadEntities(json& entities) {
-    //     for (auto& entity : entities) {
-    //         const auto entityId    = _state.CreateEntity();
-    //         const auto& components = entity["components"];
-    //
-    //         if (components.contains("transform")) {
-    //             scene_schema::Transform transform = scene_schema::Transform::FromJson(components["transform"]);
-    //             auto& transformComponent          = _state.AddComponent<TransformComponent>(entityId);
-    //
-    //             transformComponent.SetPosition({transform.position.x, transform.position.y, transform.position.z});
-    //             transformComponent.SetRotation({transform.rotation.x, transform.rotation.y, transform.rotation.z});
-    //             transformComponent.SetScale({transform.scale.x, transform.scale.y, transform.scale.z});
-    //             transformComponent.Update();
-    //         }
-    //
-    //         if (components.contains("model")) {
-    //             scene_schema::Model model = scene_schema::Model::FromJson(components["model"]);
-    //
-    //             // Load resource
-    //             if (!_resources.LoadResource<Model>(model.resource)) {
-    //                 X_LOG_FATAL("Failed to load model resource when loading scene '%s'", model.resource.c_str())
-    //             }
-    //
-    //             auto modelHandle = _resources.FetchResource<Model>(model.resource);
-    //             if (!modelHandle.has_value()) {
-    //                 X_LOG_FATAL("Failed to fetch model resource: %s", model.resource.c_str());
-    //             }
-    //
-    //             auto& modelComponent = _state.AddComponent<ModelComponent>(entityId);
-    //             modelComponent.SetModelHandle(*modelHandle);
-    //
-    //             if (components["model"].contains("material")) {
-    //                 const auto& mat     = components["model"]["material"];
-    //                 const auto& matPath = mat.get<str>();
-    //                 if (!matPath.empty()) {
-    //                     std::ifstream f(matPath);
-    //                     json matJson = json::parse(f);
-    //                     LoadMaterial(matJson, modelComponent);
-    //                 }
-    //             }
-    //
-    //             modelComponent.SetCastsShadows(model.castsShadow);
-    //         }
-    //
-    //         if (components.contains("behavior")) {
-    //             scene_schema::Behavior behavior = scene_schema::Behavior::FromJson(components["behavior"]);
-    //             auto& behaviorComponent         = _state.AddComponent<BehaviorComponent>(entityId);
-    //             behaviorComponent.LoadFromFile(behavior.script);
-    //
-    //             auto loadResult = _scriptEngine.LoadScript(behaviorComponent.GetSource(),
-    //                                                        behaviorComponent.GetId());
-    //             if (!loadResult) {
-    //                 X_LOG_FATAL("ScriptEngine failed to load script '%s' for entity '%s'",
-    //                             behavior.script.c_str(),
-    //                             entities["name"].get<str>().c_str());
-    //             }
-    //         }
-    //
-    //         _entities[entity["name"].get<str>()] = entityId;
-    //     }
-    // }
-    //
-    // void Scene::LoadMaterial(json& material, ModelComponent& modelComponent) {
-    //     const auto& baseMaterial = material["baseMaterial"].get<str>();
-    //     if (baseMaterial == "PBR") {
-    //         // TODO: Move the PBR Material handle to somewhere in static memory so we aren't creating a new one for every material
-    //         // At the moment, this kind of defeats the purpose of having base materials and material instances.
-    //         const auto baseMatHandle = PBRMaterial::Create(_context);
-    //         modelComponent.SetMaterial(baseMatHandle);
-    //         auto& matInstance = modelComponent.GetMaterialInstance();
-    //
-    //         // Read material properties and load textures
-    //         const auto& texturesJson = material["textures"];
-    //         for (auto& texJson : texturesJson) {
-    //             const auto& name     = texJson["name"].get<str>();
-    //             const auto& resource = texJson["resource"].get<str>();
-    //
-    //             const bool loaded = _resources.LoadResource<Texture2D>(resource);
-    //             if (!loaded) { X_LOG_FATAL("Failed to load texture '%s' for '%s'.", resource.c_str(), name.c_str()); }
-    //
-    //             // TODO: I feel like I don't need to return an optional since ResourceHandle has an internal method for checking data validity
-    //             // Might refactor this
-    //             std::optional<ResourceHandle<Texture2D>> fetchedResource = _resources.FetchResource<
-    //                 Texture2D>(resource);
-    //
-    //             if (!fetchedResource.has_value())
-    //                 X_LOG_FATAL("Failed to fetch resource '%s'", resource.c_str())
-    //
-    //             if (!fetchedResource->Valid())
-    //                 X_LOG_FATAL("Resource '%s' is not valid", resource.c_str())
-    //
-    //             if (name == "albedo") {
-    //                 // extracting value from std::optional, not de-referencing ptr!
-    //                 matInstance.SetAlbedoMap(*fetchedResource);
-    //                 continue;
-    //             }
-    //             if (name == "metallic") {
-    //                 matInstance.SetMetallicMap(*fetchedResource);
-    //                 continue;
-    //             }
-    //             if (name == "roughness") {
-    //                 matInstance.SetRoughnessMap(*fetchedResource);
-    //                 continue;
-    //             }
-    //             if (name == "normal") {
-    //                 matInstance.SetNormalMap(*fetchedResource);
-    //             }
-    //         }
-    //     }
-    // }
-}
+    void Scene::LoadMaterial(const MaterialDescriptor& material, ModelComponent& modelComponent) {
+        if (material.baseMaterial == "PBR") {
+            // TODO: Move the base materials to somewhere in static memory so they aren't being created for every single
+            // material instance.
+            const auto baseMatHandle = PBRMaterial::Create(_context);
+            modelComponent.SetMaterial(baseMatHandle);
+            PBRMaterialInstance& instance = modelComponent.GetMaterialInstance();
+
+            for (const auto& texture : material.textures) {
+                // Load texture resource
+                if (!_resources.LoadResource<Texture2D>(texture.resource)) {
+                    X_LOG_FATAL("Failed to to load texture resource: '%s'", texture.resource)
+                }
+
+                std::optional<ResourceHandle<Texture2D>> resource =
+                  _resources.FetchResource<Texture2D>(texture.resource);
+
+                if (!resource.has_value()) { X_LOG_FATAL("Failed to fetch texture resource: '%s'", texture.resource) }
+                if (!resource->Valid()) { X_LOG_FATAL("Resource invalid: '%s'", texture.resource) }
+
+                if (texture.name == "albedo") { instance.SetAlbedoMap(*resource); }
+                if (texture.name == "metallic") { instance.SetMetallicMap(*resource); }
+                if (texture.name == "roughness") { instance.SetRoughnessMap(*resource); }
+                if (texture.name == "normal") { instance.SetNormalMap(*resource); }
+            }
+        }
+    }
+}  // namespace x

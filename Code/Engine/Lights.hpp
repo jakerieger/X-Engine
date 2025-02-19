@@ -18,7 +18,7 @@ namespace x {
         Float4 color         = {1.0f, 1.0f, 1.0f, 1.0f}; // 16 bytes
         f32 intensity        = 1.0f; // 4 bytes
         f32 _pad1[3]         = {0.0f, 0.0f, 0.0f};
-        u32 castsShadow      = HLSL_TRUE; // 4 bytes
+        u32 castsShadows      = HLSL_TRUE; // 4 bytes
         u32 enabled          = HLSL_TRUE; // 4 bytes
         f32 _pad2[2]         = {0.0f, 0.0f};
         Matrix lightViewProj = XMMatrixIdentity();

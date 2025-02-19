@@ -9,7 +9,6 @@
 #include "ComponentManager.hpp"
 #include "Lights.hpp"
 #include "Camera.hpp"
-
 #include "TransformComponent.hpp"
 #include "ModelComponent.hpp"
 #include "BehaviorComponent.hpp"
@@ -43,28 +42,19 @@ namespace x {
 
             newState._transforms = _transforms;
             newState._models     = _models;
+            newState._behaviors  = _behaviors;
 
             return newState;
-        }
-
-        void ReleaseAllResources() {
-            // TODO: Release component resources
         }
 
         template<typename T>
             requires IsValidComponent<T>
         const T* GetComponent(EntityId entity) const {
-            if constexpr (Same<T, TransformComponent>) {
-                return _transforms.GetComponent(entity);
-            }
+            if constexpr (Same<T, TransformComponent>) { return _transforms.GetComponent(entity); }
 
-            if constexpr (Same<T, ModelComponent>) {
-                return _models.GetComponent(entity);
-            }
+            if constexpr (Same<T, ModelComponent>) { return _models.GetComponent(entity); }
 
-            if constexpr (Same<T, BehaviorComponent>) {
-                return _behaviors.GetComponent(entity);
-            }
+            if constexpr (Same<T, BehaviorComponent>) { return _behaviors.GetComponent(entity); }
 
             return None;
         }
@@ -72,17 +62,11 @@ namespace x {
         template<typename T>
             requires IsValidComponent<T>
         T* GetComponentMutable(EntityId entity) {
-            if constexpr (Same<T, TransformComponent>) {
-                return _transforms.GetComponentMutable(entity);
-            }
+            if constexpr (Same<T, TransformComponent>) { return _transforms.GetComponentMutable(entity); }
 
-            if constexpr (Same<T, ModelComponent>) {
-                return _models.GetComponentMutable(entity);
-            }
+            if constexpr (Same<T, ModelComponent>) { return _models.GetComponentMutable(entity); }
 
-            if constexpr (Same<T, BehaviorComponent>) {
-                return _behaviors.GetComponentMutable(entity);
-            }
+            if constexpr (Same<T, BehaviorComponent>) { return _behaviors.GetComponentMutable(entity); }
 
             return None;
         }
@@ -90,17 +74,11 @@ namespace x {
         template<typename T>
             requires IsValidComponent<T>
         T& AddComponent(EntityId entity) {
-            if constexpr (Same<T, TransformComponent>) {
-                return _transforms.AddComponent(entity).component;
-            }
+            if constexpr (Same<T, TransformComponent>) { return _transforms.AddComponent(entity).component; }
 
-            if constexpr (Same<T, ModelComponent>) {
-                return _models.AddComponent(entity).component;
-            }
+            if constexpr (Same<T, ModelComponent>) { return _models.AddComponent(entity).component; }
 
-            if constexpr (Same<T, BehaviorComponent>) {
-                return _behaviors.AddComponent(entity).component;
-            }
+            if constexpr (Same<T, BehaviorComponent>) { return _behaviors.AddComponent(entity).component; }
         }
 
         template<typename T>
@@ -156,4 +134,4 @@ namespace x {
         ComponentManager<ModelComponent> _models;
         ComponentManager<BehaviorComponent> _behaviors;
     };
-} // namespace x
+}  // namespace x

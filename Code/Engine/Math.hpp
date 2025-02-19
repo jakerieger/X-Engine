@@ -20,6 +20,16 @@ namespace x {
     using Uint3     = XMUINT3;
     using Uint2     = XMUINT2;
 
+    inline VectorSet Float3ToVectorSet(const Float3& v) {
+        return XMLoadFloat3(&v);
+    }
+
+    inline Float3 VectorSetToFloat3(const VectorSet& v) {
+        Float3 dest;
+        XMStoreFloat3(&dest, v);
+        return dest;
+    }
+
     inline float Fractional(const float x) {
         return x - static_cast<float>(static_cast<int>(x));
     }

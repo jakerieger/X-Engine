@@ -16,7 +16,10 @@ namespace x {
         descriptor.description = desc;
 
         ParseWorld(scene["world"], descriptor);
-        ParseEntities(scene["entities"], descriptor);
+
+        if (const auto entities = scene["entities"]; entities.IsDefined() && entities.size() > 0) {
+            ParseEntities(entities, descriptor);
+        }
     }
 
     void ParseWorld(const YAML::Node& world, SceneDescriptor& descriptor) {
@@ -38,7 +41,46 @@ namespace x {
         descriptor.world.lights.sun.castsShadows = sunNode["castsShadows"].as<bool>();
     }
 
-    void ParseEntities(const YAML::Node& entities, SceneDescriptor& descriptor) {}
+    void ParseEntities(const YAML::Node& entities, SceneDescriptor& descriptor) {
+        auto& entitiesArray = descriptor.entities;
+
+        for (const auto& entity : entities) {
+            EntityDescriptor entityDescriptor {};
+            const auto name       = entity["name"].as<str>();
+            entityDescriptor.name = name;
+
+            YAML::Node componentsNode = entity["components"];
+
+            YAML::Node transformNode = componentsNode["transform"];
+            TransformDescriptor transformDescriptor {};
+            transformDescriptor.position = ParseFloat3(transformNode["position"]);
+            transformDescriptor.rotation = ParseFloat3(transformNode["rotation"]);
+            transformDescriptor.scale    = ParseFloat3(transformNode["scale"]);
+
+            entityDescriptor.transform = transformDescriptor;
+
+            YAML::Node modelNode = componentsNode["model"];
+            if (modelNode.IsDefined()) {
+                ModelDescriptor modelDescriptor {};
+                modelDescriptor.resource       = modelNode["resource"].as<str>();
+                modelDescriptor.material       = modelNode["material"].as<str>();
+                modelDescriptor.castsShadows   = modelNode["castsShadows"].as<bool>();
+                modelDescriptor.receiveShadows = modelNode["receiveShadows"].as<bool>();
+
+                entityDescriptor.model = modelDescriptor;
+            }
+
+            YAML::Node behaviorNode = componentsNode["behavior"];
+            if (behaviorNode.IsDefined()) {
+                BehaviorDescriptor behaviorDescriptor {};
+                behaviorDescriptor.script = behaviorNode["script"].as<str>();
+
+                entityDescriptor.behavior = behaviorDescriptor;
+            }
+
+            entitiesArray.push_back(entityDescriptor);
+        }
+    }
 
     Float3 ParseFloat3(const YAML::Node& node, const bool rgb) {
         const auto x = node[rgb ? "r" : "x"].as<f32>();
@@ -47,4 +89,4 @@ namespace x {
 
         return {x, y, z};
     }
-}
+}  // namespace x

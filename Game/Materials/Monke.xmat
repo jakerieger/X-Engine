@@ -1,23 +1,12 @@
-{
-  "name": "Monke",
-  "baseMaterial": "PBR",
-  "properties": [],
-  "textures": [
-    {
-      "name": "albedo",
-      "resource": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Content\\Metal_Albedo.dds"
-    },
-    {
-      "name": "metallic",
-      "resource": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Content\\Metal_Metallic.dds"
-    },
-    {
-      "name": "roughness",
-      "resource": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Content\\Metal_Roughness.dds"
-    },
-    {
-      "name": "normal",
-      "resource": "C:\\Users\\conta\\Code\\SpaceGame\\Game\\Content\\Metal_Normal.dds"
-    }
-  ]
-}
+name: Monke
+baseMaterial: PBR
+properties: []
+textures:
+  - name: albedo
+    resource: Content\Metal_Albedo.dds
+  - name: metallic
+    resource: Content\Metal_Metallic.dds
+  - name: roughness
+    resource: Content\Metal_Roughness.dds
+  - name: normal
+    resource: Content\Metal_Normal.dds

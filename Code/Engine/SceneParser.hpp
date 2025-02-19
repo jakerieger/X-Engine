@@ -51,6 +51,7 @@ namespace x {
     };
 
     struct EntityDescriptor {
+        str name;
         TransformDescriptor transform;
         std::optional<ModelDescriptor> model       = {};
         std::optional<BehaviorDescriptor> behavior = {};
@@ -72,4 +73,4 @@ namespace x {
     public:
         static void Parse(const str& filename, SceneDescriptor& descriptor);
     };
-}
+}  // namespace x

@@ -50,8 +50,8 @@ entities:
       model:
         resource: Content\Floor.glb
         material: Materials\Floor.xmat
-        castsShadow: true
-        receiveShadow: true
+        castsShadows: true
+        receiveShadows: true
   - id: 1
     name: monke
     components:
@@ -71,7 +71,7 @@ entities:
       model:
         resource: Content\Monke.glb
         material: Materials\Monke.xmat
-        castsShadow: true
-        receiveShadow: true
+        castsShadows: true
+        receiveShadows: true
       behavior:
         script: Scripts\SpinMonke.lua

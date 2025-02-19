@@ -28,6 +28,8 @@ set(ENGINE_SOURCES
     ${CODE_DIR}/Engine/Lights.hpp
     ${CODE_DIR}/Engine/Material.cpp
     ${CODE_DIR}/Engine/Material.hpp
+    ${CODE_DIR}/Engine/MaterialParser.cpp
+    ${CODE_DIR}/Engine/MaterialParser.hpp
     ${CODE_DIR}/Engine/Math.hpp
     ${CODE_DIR}/Engine/Memory.hpp
     ${CODE_DIR}/Engine/Model.cpp
