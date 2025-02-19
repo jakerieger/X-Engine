@@ -141,7 +141,7 @@ private:
         const auto now         = system_clock::now();
         const auto duration    = now.time_since_epoch();
         const auto unixMillis  = duration_cast<milliseconds>(duration).count();
-        const auto filename    = "X_" + std::to_string(unixMillis) + ".log";
+        const auto filename    = std::format("x_{}.log", "DEBUG", unixMillis);
         const std::string name = (logDirectory / filename).Str();
         return name;
     }
@@ -156,7 +156,12 @@ inline Logger& GetLogger() {
 #define X_LOG_INFO(fmt, ...) GetLogger().Log(X_LOG_SEVERITY_INFO, fmt, ##__VA_ARGS__);
 #define X_LOG_WARN(fmt, ...) GetLogger().Log(X_LOG_SEVERITY_WARN, fmt, ##__VA_ARGS__);
 #define X_LOG_ERROR(fmt, ...) GetLogger().Log(X_LOG_SEVERITY_ERROR, fmt, ##__VA_ARGS__);
-#define X_LOG_DEBUG(fmt, ...) GetLogger().Log(X_LOG_SEVERITY_DEBUG, fmt, ##__VA_ARGS__);
+
+#ifdef X_DEBUG
+    #define X_LOG_DEBUG(fmt, ...) GetLogger().Log(X_LOG_SEVERITY_DEBUG, fmt, ##__VA_ARGS__);
+#else
+    #define X_LOG_DEBUG(fmt, ...)
+#endif
 
 /// @brief Fatal log level will also abort program after logging entry (with `std::abort`)!
 #define X_LOG_FATAL(fmt, ...) GetLogger().Log(X_LOG_SEVERITY_FATAL, fmt, ##__VA_ARGS__);
