@@ -29,6 +29,8 @@ public:
     }
 
     void Render() override {
+        _windowViewport->AttachViewport();
+        _windowViewport->ClearAll();
         _game.RenderFrame();
     }
 

@@ -30,7 +30,7 @@ namespace x {
         }
 
         MSG msg;
-        ZeroMemory(&msg, sizeof(MSG));
+        ::ZeroMemory(&msg, sizeof(MSG));
         while (msg.message != WM_QUIT) {
             if (::PeekMessage(&msg, None, 0, 0, PM_REMOVE)) {
                 ::TranslateMessage(&msg);
@@ -39,9 +39,6 @@ namespace x {
             }
 
             Update();
-
-            _windowViewport->AttachViewport();
-            _windowViewport->ClearAll();
             Render();
             _context.Present();
         }

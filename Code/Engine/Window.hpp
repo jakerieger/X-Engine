@@ -46,6 +46,8 @@ namespace x {
         RenderContext _context;
         unique_ptr<Viewport> _windowViewport;
 
+        virtual LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam);
+
     private:
         bool _focused = false;
 
@@ -53,7 +55,6 @@ namespace x {
         void Shutdown();
 
         LRESULT ResizeHandler(u32 width, u32 height);
-        LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam);
         static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
     };
 }  // namespace x

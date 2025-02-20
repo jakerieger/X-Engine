@@ -33,7 +33,7 @@
 // - For correct results you need to be using sRGB and convert to linear space in the pixel shader output.
 // - The default dear imgui styles will be impacted by this change (alpha values will need tweaking).
 
-// FIXME: cfg.OversampleH, OversampleV are not supported (but perhaps not so necessary with this rasterizer).
+// FIXME: cfg.OversampleH, OversampleV are not supported, but generally not necessary with this rasterizer because Hinting makes everything look better.
 
 #include "imgui.h"
 #ifndef IMGUI_DISABLE
@@ -269,11 +269,11 @@ namespace
         if (glyph_index == 0)
             return nullptr;
 
-		// If this crash for you: FreeType 2.11.0 has a crash bug on some bitmap/colored fonts.
-		// - https://gitlab.freedesktop.org/freetype/freetype/-/issues/1076
-		// - https://github.com/ocornut/imgui/issues/4567
-		// - https://github.com/ocornut/imgui/issues/4566
-		// You can use FreeType 2.10, or the patched version of 2.11.0 in VcPkg, or probably any upcoming FreeType version.
+        // If this crash for you: FreeType 2.11.0 has a crash bug on some bitmap/colored fonts.
+        // - https://gitlab.freedesktop.org/freetype/freetype/-/issues/1076
+        // - https://github.com/ocornut/imgui/issues/4567
+        // - https://github.com/ocornut/imgui/issues/4566
+        // You can use FreeType 2.10, or the patched version of 2.11.0 in VcPkg, or probably any upcoming FreeType version.
         FT_Error error = FT_Load_Glyph(Face, glyph_index, LoadFlags);
         if (error)
             return nullptr;

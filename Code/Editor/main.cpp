@@ -2,11 +2,11 @@
 // Created: 2/18/2025.
 //
 
-#include "Editor.hpp"
+#include "EditorWindow.hpp"
 
 using namespace x::Editor;
 
 int main() {
-    Editor editor;
+    EditorWindow editor;
     return editor.Run();
 }
