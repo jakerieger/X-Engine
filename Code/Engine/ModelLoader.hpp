@@ -11,16 +11,14 @@
 namespace x {
     class ModelLoader final : public ResourceLoader<Model> {
         static constexpr u32 kProcessFlags =
-            aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_GenNormals | aiProcess_CalcTangentSpace;
+          aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_GenNormals | aiProcess_CalcTangentSpace;
 
         Model LoadImpl(RenderContext& context, const str& path) override {
             Model model;
 
             Assimp::Importer importer;
             const auto* scene = importer.ReadFile(path.c_str(), kProcessFlags);
-            if (!scene) {
-                X_PANIC("Failed to load model.");
-            }
+            if (!scene) { X_PANIC("Failed to load model: '%s'", path.c_str()); }
 
             ProcessNode(context, scene->mRootNode, scene, model);
 
@@ -81,4 +79,4 @@ namespace x {
     };
 
     X_REGISTER_RESOURCE_LOADER(Model, ModelLoader)
-}
+}  // namespace x

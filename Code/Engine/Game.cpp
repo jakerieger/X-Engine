@@ -11,7 +11,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 namespace x {
     void Game::Update() {
         _clock.Tick();
-        
+
         if (!_isPaused || !_isFocused) {
             auto& camera = _activeScene->GetState().GetMainCamera();
 
@@ -39,6 +39,8 @@ namespace x {
     }
 
     void Game::RenderDepthOnly(const SceneState& state) const {
+        if (_activeScene->GetNumEntities() == 0) return;
+
         for (const auto& [entity, model] : state.GetComponents<ModelComponent>()) {
             Matrix world                  = XMMatrixIdentity();
             const auto transformComponent = state.GetComponent<TransformComponent>(entity);
@@ -52,6 +54,8 @@ namespace x {
 
     // This should never modify game state (always iterate as const)
     void Game::RenderScene(const SceneState& state) const {
+        if (_activeScene->GetNumEntities() == 0) return;
+
         for (const auto& [entity, model] : state.GetComponents<ModelComponent>()) {
             Matrix world = XMMatrixIdentity();
             auto view    = state.GetMainCamera().GetViewMatrix();
@@ -159,11 +163,15 @@ namespace x {
     }
 
     void Game::Initialize(Window* window, Viewport* viewport) {
-        _window       = window;
+        _window = window;
+
         _renderSystem = make_unique<RenderSystem>(_renderContext, viewport);
         _renderSystem->Initialize();
+
         RegisterVolatile(_renderSystem.get());
         InitializeEngine();
+
+        _activeScene = make_unique<Scene>(_renderContext, _scriptEngine);
         X_LOG_INFO("Initialization complete")
     }
 
@@ -249,5 +257,9 @@ namespace x {
         _activeScene = make_unique<Scene>(_renderContext, _scriptEngine);
         _activeScene->Load(path);
         _activeScene->RegisterVolatiles(_volatiles);
+    }
+
+    void Game::Resize(u32 width, u32 height) const {
+        OnResize(width, height);
     }
 }  // namespace x

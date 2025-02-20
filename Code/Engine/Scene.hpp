@@ -30,6 +30,7 @@ namespace x {
 
         SceneState& GetState();
         X_NODISCARD const SceneState& GetState() const;
+        X_NODISCARD u32 GetNumEntities() const;
 
         void RegisterVolatiles(vector<Volatile*>& volatiles);
 

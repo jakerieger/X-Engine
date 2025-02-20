@@ -25,10 +25,11 @@ include_directories(
 
 if (WIN32)
     set(WINDOWS_COMPILE_DEFS
-        UNICODE
-        _UNICODE
+        #        UNICODE
+        #        _UNICODE
         WIN32_LEAN_AND_MEAN
         NOMINMAX
+        _CRT_SECURE_NO_WARNINGS
     )
 
     add_subdirectory(${CODE_DIR}/Engine)

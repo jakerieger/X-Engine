@@ -3,6 +3,7 @@
 //
 
 #include "EditorWindow.hpp"
+#include "FileDialogs.hpp"
 
 #include <imgui.h>
 #include <imgui_impl_win32.h>
@@ -25,6 +26,10 @@ namespace x::Editor {
         ImGui_ImplDX11_Init(_context.GetDevice(), _context.GetDeviceContext());
 
         ImGui::StyleColorsDark();
+
+        // Initialize the engine core
+        _sceneViewport.Resize(100, 100);
+        _game.Initialize(this, &_sceneViewport);
     }
 
     void EditorWindow::OnResize(u32 width, u32 height) {}
@@ -50,7 +55,13 @@ namespace x::Editor {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("New Scene", "Ctrl+N")) {}
-                if (ImGui::MenuItem("Open Scene", "Ctrl+O")) {}
+                if (ImGui::MenuItem("Open Scene", "Ctrl+O")) {
+                    const char* filter = "Scene (*.xscn)|*.xscn|";
+                    char filename[MAX_PATH];
+                    if (OpenFileDialog(_hwnd, None, filter, "Open Scene File", filename, MAX_PATH)) {
+                        HandleOpenScene(filename);
+                    }
+                }
                 if (ImGui::MenuItem("Save Scene", "Ctrl+S")) {}
                 ImGui::Separator();
                 if (ImGui::MenuItem("Exit", "Alt+F4")) { Quit(); }
@@ -98,9 +109,14 @@ namespace x::Editor {
         ImGui::Begin("Scene");
         {
             ImVec2 contentSize = ImGui::GetContentRegionAvail();
+
             _sceneViewport.Resize((u32)contentSize.x, (u32)contentSize.y);
             _sceneViewport.BindRenderTarget();
             _sceneViewport.ClearRenderTargetView(Colors::CornflowerBlue);
+
+            _game.Resize(contentSize.x, contentSize.y);
+            _game.RenderFrame();
+
             auto* srv = _sceneViewport.GetShaderResourceView().Get();
             ImGui::Image(ImTextureID((void*)srv), contentSize);
         }
@@ -127,5 +143,9 @@ namespace x::Editor {
     LRESULT EditorWindow::MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) {
         if (ImGui_ImplWin32_WndProcHandler(_hwnd, msg, wParam, lParam)) return true;
         return Window::MessageHandler(msg, wParam, lParam);
+    }
+
+    void EditorWindow::HandleOpenScene(const char* filename) {
+        _game.TransitionScene(filename);
     }
 }  // namespace x::Editor

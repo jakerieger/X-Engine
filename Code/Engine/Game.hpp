@@ -35,6 +35,7 @@ namespace x {
         void Update();
         void RenderFrame();
         void TransitionScene(const str& path);
+        void Resize(u32 width, u32 height) const;
 
     private:
         bool _debugUIEnabled {false};

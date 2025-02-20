@@ -1,37 +1,28 @@
-﻿#define _CRT_SECURE_NO_WARNINGS
-
-#include "DevConsole.hpp"
-
+﻿#include "DevConsole.hpp"
+#include "Common/Str.hpp"
 #include <cstdarg>
 #include <sstream>
-
-#include "Common/Str.hpp"
 
 namespace x {
     DevConsole::DevConsole() {
         _i_ = StrCopy(_inputBuffer, kMaxInputLength, "");
 
-        RegisterCommand("clear",
-                        [this](const vector<str>&) {
-                            _items.clear();
-                        });
+        RegisterCommand("clear", [this](const vector<str>&) { _items.clear(); });
 
-        RegisterCommand("help",
-                        [this](const vector<str>&) {
-                            _items.emplace_back("Commands:");
-                            for (const auto& cmd : _commands) {
-                                _items.push_back("- " + cmd);
-                            }
-                        });
+        RegisterCommand("help", [this](const vector<str>&) {
+            _items.emplace_back("Commands:");
+            for (const auto& cmd : _commands) {
+                _items.push_back("- " + cmd);
+            }
+        });
 
-        RegisterCommand("echo",
-                        [this](const vector<str>& args) {
-                            str msg;
-                            for (const auto& arg : args) {
-                                msg += arg + " ";
-                                AddLog("%s", msg.c_str());
-                            }
-                        });
+        RegisterCommand("echo", [this](const vector<str>& args) {
+            str msg;
+            for (const auto& arg : args) {
+                msg += arg + " ";
+                AddLog("%s", msg.c_str());
+            }
+        });
     }
 
     void DevConsole::Execute(const char* cmdLine) {
@@ -84,9 +75,7 @@ namespace x {
     }
 
     void DevConsole::Draw() {
-        if (!IsVisible()) {
-            return;
-        }
+        if (!IsVisible()) { return; }
 
         const ImGuiViewport* viewport = ImGui::GetMainViewport();
         ImGui::SetNextWindowPos(viewport->Pos);
@@ -96,7 +85,7 @@ namespace x {
         if (!ImGui::Begin("##console",
                           &_visible,
                           ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse |
-                          ImGuiWindowFlags_NoTitleBar)) {
+                            ImGuiWindowFlags_NoTitleBar)) {
             ImGui::End();
             return;
         }
@@ -109,8 +98,7 @@ namespace x {
         for (const auto& item : _items) {
             ImGui::TextUnformatted(item.c_str());
         }
-        if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
-            ImGui::SetScrollHereY(1.0f);
+        if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) ImGui::SetScrollHereY(1.0f);
         ImGui::EndChild();
 
         // Command line
@@ -129,30 +117,28 @@ namespace x {
         ImGui::PushItemWidth(-1);
         ImGui::PushStyleColor(ImGuiCol_FrameBg, {0.0f, 0.0f, 0.0f, 0.0f});
         if (ImGui::InputText(
-            "##Input",
-            _inputBuffer,
-            IM_ARRAYSIZE(_inputBuffer),
-            inputTextFlags,
-            [](ImGuiInputTextCallbackData* data) -> int {
-                const auto console = CAST<DevConsole*>(data->UserData);
-                return console->TextEditCallback(data);
-            },
-            this)) {
+              "##Input",
+              _inputBuffer,
+              IM_ARRAYSIZE(_inputBuffer),
+              inputTextFlags,
+              [](ImGuiInputTextCallbackData* data) -> int {
+                  const auto console = CAST<DevConsole*>(data->UserData);
+                  return console->TextEditCallback(data);
+              },
+              this)) {
             char* input_end = _inputBuffer + StrLen(_inputBuffer, kMaxInputLength);
             while (input_end > _inputBuffer && input_end[-1] == ' ')
                 input_end--;
             *input_end = 0;
 
-            if (_inputBuffer[0])
-                Execute(_inputBuffer);
+            if (_inputBuffer[0]) Execute(_inputBuffer);
             reclaimFocus = true;
         }
         ImGui::PopStyleColor();
         ImGui::PopItemWidth();
 
         ImGui::SetItemDefaultFocus();
-        if (reclaimFocus)
-            ImGui::SetKeyboardFocusHere(-1);
+        if (reclaimFocus) ImGui::SetKeyboardFocusHere(-1);
 
         ImGui::End();
     }
@@ -162,25 +148,20 @@ namespace x {
             case ImGuiInputTextFlags_CallbackHistory: {
                 const int prevHistoryPos = _historyPos;
                 if (data->EventKey == ImGuiKey_UpArrow) {
-                    if (_historyPos == -1)
-                        _historyPos = CAST<i32>(_history.size()) - 1;
-                    else if (_historyPos > 0)
-                        _historyPos--;
+                    if (_historyPos == -1) _historyPos = CAST<i32>(_history.size()) - 1;
+                    else if (_historyPos > 0) _historyPos--;
                 } else if (data->EventKey == ImGuiKey_DownArrow) {
                     if (_historyPos != -1) {
-                        if (++_historyPos >= _history.size())
-                            _historyPos = -1;
+                        if (++_historyPos >= _history.size()) _historyPos = -1;
                     }
                 }
 
                 if (prevHistoryPos != _historyPos) {
                     data->CursorPos = data->SelectionStart = data->SelectionEnd = data->BufTextLen =
-                                                                 snprintf(data->Buf,
-                                                                          CAST<size_t>(data->BufSize),
-                                                                          "%s",
-                                                                          (_historyPos >= 0)
-                                                                              ? _history[_historyPos].c_str()
-                                                                              : "");
+                      snprintf(data->Buf,
+                               CAST<size_t>(data->BufSize),
+                               "%s",
+                               (_historyPos >= 0) ? _history[_historyPos].c_str() : "");
                     data->BufDirty = true;
                 }
                 break;
@@ -197,4 +178,4 @@ namespace x {
     bool DevConsole::IsVisible() const {
         return _visible;
     }
-}
+}  // namespace x

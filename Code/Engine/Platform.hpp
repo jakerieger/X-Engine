@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <wrl/client.h>
+#include <commdlg.h>
 
 using Microsoft::WRL::ComPtr;
 

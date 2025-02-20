@@ -48,8 +48,8 @@ entities:
           y: 1
           z: 1
       model:
-        resource: Content\Floor.glb
-        material: Materials\Floor.xmat
+        resource: C:\Users\conta\Code\SpaceGame\Game\Content\Floor.glb
+        material: C:\Users\conta\Code\SpaceGame\Game\Materials\Floor.xmat
         castsShadows: true
         receiveShadows: true
   - id: 1
@@ -69,9 +69,9 @@ entities:
           y: 1
           z: 1
       model:
-        resource: Content\Monke.glb
-        material: Materials\Monke.xmat
+        resource: C:\Users\conta\Code\SpaceGame\Game\Content\Monke.glb
+        material: C:\Users\conta\Code\SpaceGame\Game\Materials\Monke.xmat
         castsShadows: true
         receiveShadows: true
       behavior:
-        script: Scripts\SpinMonke.lua
+        script: C:\Users\conta\Code\SpaceGame\Game\Scripts\SpinMonke.lua

@@ -146,6 +146,10 @@ namespace x {
         return _state;
     }
 
+    u32 Scene::GetNumEntities() const {
+        return _entities.size();
+    }
+
     void Scene::RegisterVolatiles(vector<Volatile*>& volatiles) {
         volatiles.push_back(&_state.GetMainCamera());
     }
