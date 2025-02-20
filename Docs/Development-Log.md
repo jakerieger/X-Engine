@@ -2,9 +2,40 @@
 
 ## Contents
 
+**February 2025:**
+
+- [Feb 20, 2025](#feb-20-2025)
 - [Feb 19, 2025](#feb-19-2025)
 - [Feb 18, 2025](#feb-18-2025)
 - [Feb 17, 2025](#feb-17-2025)
+
+---
+
+## Feb 20, 2025
+
+I've successfully decoupled the game engine core from the windowing system. I started working on the
+scene editor which at the moment draws some empty panels and the scene view in the middle. Scene
+files can be opened and are displayed in the scene view; pause and resume works for game updates.
+
+The biggest problem at the moment is resizing for the game viewport isn't working or responding
+correctly. This is likely due to the resizing methods used within the engine core and will likely
+need to be re-worked. The [Viewport](../Code/Engine/Viewport.hpp) class proved successful in its
+design goals during testing.
+
+The main focus now is to fix all the bugs with the embedded core inside an independently sized
+viewport not directly associated with the window size or resize events. Input is another problem to
+tackle, as editor input should be separate from game input.
+
+Some other considerations are handling scene viewport focus events, also related to input
+management. Game input should only be registered when the viewport is focused, otherwise input is
+registered for the editor itself.
+
+> Commit: [318f5bc](https://github.com/jakerieger/SpaceGame/commit/318f5bc483d2a633cddade8259c3de66299b3012)
+
+### New classes:
+
+- [EditorWindow](../Code/Editor/EditorWindow.hpp)
+- [FileDialogs](../Code/Editor/FileDialogs.hpp)
 
 ## Feb 19, 2025
 
