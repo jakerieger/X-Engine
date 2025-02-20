@@ -40,7 +40,9 @@ namespace x::Editor {
         ImGui::DestroyContext();
     }
 
-    void EditorWindow::Update() {}
+    void EditorWindow::Update() {
+        _game.Update(!_gameRunning);
+    }
 
     void EditorWindow::Render() {
         _windowViewport->AttachViewport();
@@ -124,7 +126,10 @@ namespace x::Editor {
         ImGui::PopStyleVar();
 
         ImGui::Begin("Entities");
-        {}
+        {
+            if (ImGui::Button("Play")) { _gameRunning = true; }
+            if (ImGui::Button("Pause")) { _gameRunning = false; }
+        }
         ImGui::End();
 
         ImGui::Begin("Properties");

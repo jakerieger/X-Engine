@@ -26,6 +26,7 @@ namespace x::Editor {
     private:
         Viewport _sceneViewport;
         Game _game;
+        bool _gameRunning = false;
 
         void HandleOpenScene(const char* filename);
     };

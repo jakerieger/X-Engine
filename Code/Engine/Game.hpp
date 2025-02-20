@@ -32,7 +32,7 @@ namespace x {
 
         void Initialize(Window* window, Viewport* viewport);
         void Shutdown();
-        void Update();
+        void Update(bool paused = false);
         void RenderFrame();
         void TransitionScene(const str& path);
         void Resize(u32 width, u32 height) const;

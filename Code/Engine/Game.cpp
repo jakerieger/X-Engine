@@ -9,10 +9,10 @@
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace x {
-    void Game::Update() {
+    void Game::Update(bool paused) {
         _clock.Tick();
 
-        if (!_isPaused || !_isFocused) {
+        if ((!_isPaused || !_isFocused) && !paused) {
             auto& camera = _activeScene->GetState().GetMainCamera();
 
             if (_mouse.IsCaptured()) {
