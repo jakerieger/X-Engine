@@ -10,6 +10,8 @@
 #include <imgui_impl_dx11.h>
 #include <imgui_internal.h>
 #include <Inter.h>
+#include <yaml-cpp/yaml.h>
+#include <fstream>
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -25,9 +27,11 @@ namespace x::Editor {
         ImGui_ImplWin32_Init(_hwnd);
         ImGui_ImplDX11_Init(_context.GetDevice(), _context.GetDeviceContext());
 
-        ImGui::StyleColorsDark();
+        ApplyTheme();
 
         // Initialize the engine core
+        _windowViewport->SetClearColor(Colors::Black);
+        _sceneViewport.SetClearColor(Colors::CornflowerBlue);
         _sceneViewport.Resize(100, 100);
         _game.Initialize(this, &_sceneViewport);
     }
@@ -52,8 +56,12 @@ namespace x::Editor {
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
+        //============================================================================================================//
+        //============================================================================================================//
+
         static bool firstTime = true;
 
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("New Scene", "Ctrl+N")) {}
@@ -83,29 +91,82 @@ namespace x::Editor {
             }
             ImGui::EndMainMenuBar();
         }
+        ImGui::PopStyleVar();
+
+        //============================================================================================================//
+        //============================================================================================================//
+
+        float menuBarHeight           = ImGui::GetFrameHeight();
+        ImGuiWindowFlags toolbarFlags = ImGuiWindowFlags_NoTitleBar |            // No title bar needed
+                                        ImGuiWindowFlags_NoScrollbar |           // Disable scrolling
+                                        ImGuiWindowFlags_NoMove |                // Prevent moving
+                                        ImGuiWindowFlags_NoResize |              // Prevent resizing
+                                        ImGuiWindowFlags_NoCollapse |            // Prevent collapsing
+                                        ImGuiWindowFlags_NoSavedSettings |       // Don't save position/size
+                                        ImGuiWindowFlags_NoBringToFrontOnFocus;  // Don't change z-order
+
+        ImGui::SetNextWindowPos(ImVec2(0, menuBarHeight));
+        ImGui::SetNextWindowSize(ImVec2(ImGui::GetMainViewport()->Size.x, 36));
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2, 2));
+        if (ImGui::Begin("##Toolbar", nullptr, toolbarFlags)) {
+            // Add your toolbar buttons/tools here
+            if (ImGui::Button("##transform", ImVec2(28, 28))) {}
+            ImGui::SameLine();
+            if (ImGui::Button("##rotate", ImVec2(28, 28))) {}
+            ImGui::SameLine();
+            if (ImGui::Button("##scale", ImVec2(28, 28))) {}
+            // ... add more toolbar items
+
+            ImGui::End();
+        }
+        ImGui::PopStyleVar(2);
 
         auto* imguiViewport      = ImGui::GetWindowViewport();
         ImGuiDockNodeFlags flags = ImGuiDockNodeFlags_PassthruCentralNode;
-        ImGui::DockSpaceOverViewport(imguiViewport->ID, imguiViewport, flags);
 
-        if (firstTime) {
-            firstTime = false;
-            ImGui::DockBuilderRemoveNode(imguiViewport->ID);
-            ImGui::DockBuilderAddNode(imguiViewport->ID, flags | ImGuiDockNodeFlags_DockSpace);
-            ImGui::DockBuilderSetNodeSize(imguiViewport->ID, imguiViewport->Size);
+        ImGui::SetNextWindowPos(ImVec2(0, menuBarHeight + 36));
+        ImGui::SetNextWindowSize(ImVec2(imguiViewport->Size.x, imguiViewport->Size.y - menuBarHeight - 36));
+        ImGui::SetNextWindowViewport(imguiViewport->ID);
 
-            ImGuiID dockMainId   = imguiViewport->ID;
-            ImGuiID dockRightId  = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Right, 0.2f, None, &dockMainId);
-            ImGuiID dockLeftId   = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Left, 0.2f, None, &dockMainId);
-            ImGuiID dockBottomId = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Down, 0.2f, None, &dockMainId);
+        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
+                                       ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+                                       ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
+                                       ImGuiWindowFlags_NoNavFocus;
 
-            ImGui::DockBuilderDockWindow("Entities", dockLeftId);
-            ImGui::DockBuilderDockWindow("Properties", dockRightId);
-            ImGui::DockBuilderDockWindow("Scene", dockMainId);
-            ImGui::DockBuilderDockWindow("Editor Log", dockBottomId);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+        if (ImGui::Begin("DockSpace", nullptr, windowFlags)) {
+            ImGuiID dockspaceId = ImGui::GetID("Editor::DockSpace");
+            ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), flags);
 
-            ImGui::DockBuilderFinish(imguiViewport->ID);
+            if (firstTime) {
+                firstTime = false;
+                ImGui::DockBuilderRemoveNode(dockspaceId);
+                ImGui::DockBuilderAddNode(dockspaceId, flags | ImGuiDockNodeFlags_DockSpace);
+                ImGui::DockBuilderSetNodeSize(dockspaceId, ImGui::GetWindowSize());
+
+                ImGuiID dockMainId   = dockspaceId;
+                ImGuiID dockRightId  = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Right, 0.2f, None, &dockMainId);
+                ImGuiID dockLeftId   = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Left, 0.2f, None, &dockMainId);
+                ImGuiID dockBottomId = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Down, 0.2f, None, &dockMainId);
+
+                ImGui::DockBuilderDockWindow("Entities", dockLeftId);
+                ImGui::DockBuilderDockWindow("Properties", dockRightId);
+                ImGui::DockBuilderDockWindow("Scene", dockMainId);
+                ImGui::DockBuilderDockWindow("Editor Log", dockBottomId);
+
+                ImGui::DockBuilderFinish(imguiViewport->ID);
+            }
+
+            ImGui::End();
         }
+        ImGui::PopStyleVar(3);
+
+        //============================================================================================================//
+        //============================================================================================================//
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
         ImGui::Begin("Scene");
@@ -114,7 +175,7 @@ namespace x::Editor {
 
             _sceneViewport.Resize((u32)contentSize.x, (u32)contentSize.y);
             _sceneViewport.BindRenderTarget();
-            _sceneViewport.ClearRenderTargetView(Colors::CornflowerBlue);
+            _sceneViewport.ClearRenderTargetView();
 
             _game.Resize(contentSize.x, contentSize.y);
             _game.RenderFrame();
@@ -126,10 +187,7 @@ namespace x::Editor {
         ImGui::PopStyleVar();
 
         ImGui::Begin("Entities");
-        {
-            if (ImGui::Button("Play")) { _gameRunning = true; }
-            if (ImGui::Button("Pause")) { _gameRunning = false; }
-        }
+        {}
         ImGui::End();
 
         ImGui::Begin("Properties");
@@ -152,5 +210,141 @@ namespace x::Editor {
 
     void EditorWindow::HandleOpenScene(const char* filename) {
         _game.TransitionScene(filename);
+    }
+
+    static ImVec4 HexToVec4(const str& hex,
+                            const f32 alpha = 1.0f) {  // Ensure the string starts with '#' and is the correct length
+        if (hex.length() != 6) { throw std::invalid_argument("Hex color should be in the format 'RRGGBB'"); }
+
+        ImVec4 color;
+        const char red[3]   = {hex[0], hex[1], '\0'};
+        const char green[3] = {hex[2], hex[3], '\0'};
+        const char blue[3]  = {hex[4], hex[5], '\0'};
+
+        const int r = strtol(red, nullptr, 16);
+        const int g = strtol(green, nullptr, 16);
+        const int b = strtol(blue, nullptr, 16);
+
+        color.x = (float)r / 255.0f;
+        color.y = (float)g / 255.0f;
+        color.z = (float)b / 255.0f;
+        color.w = alpha;
+
+        return color;
+    }
+
+    void EditorWindow::ApplyTheme() {
+        auto theme = R""(
+  Name: Dark
+  WindowBackground: 181818
+  ChildBackground: 212121
+  FrameBackground: 2D2D2D
+  SecondaryBackground: 363636
+  HeaderBackground: 040404
+  TextHighlight: FFFFFF
+  TextPrimary: DADADA
+  TextSecondary: B3B3B3
+  TextDisabled: 666666
+  Border: 363636
+  Error: FF0000
+  Warning: FFFF00
+  Success: 00FF00
+  Link: 0000FF
+  Scrollbar: 353535
+  Primary: 6190e6
+  Secondary: 585858
+  BorderRadius: 0.0
+  BorderWidth: 1.0
+  Font: Inter-Regular.ttf
+)"";
+
+        auto themeYaml = YAML::Load(theme);
+
+        const auto borderRadius = themeYaml["BorderRadius"].as<f32>();
+        const auto borderWidth  = themeYaml["BorderWidth"].as<f32>();
+
+        ImGuiStyle& style   = ImGui::GetStyle();
+        ImVec4* styleColors = style.Colors;
+
+        style.WindowRounding   = borderRadius;
+        style.FrameRounding    = borderRadius;
+        style.WindowBorderSize = borderWidth;
+        style.FrameBorderSize  = 0.f;
+        style.TabRounding      = borderRadius;
+
+        // Load colors
+        const auto windowBackground    = HexToVec4(themeYaml["WindowBackground"].as<str>());
+        const auto childBackground     = HexToVec4(themeYaml["ChildBackground"].as<str>());
+        const auto frameBackground     = HexToVec4(themeYaml["FrameBackground"].as<str>());
+        const auto secondaryBackground = HexToVec4(themeYaml["SecondaryBackground"].as<str>());
+        const auto headerBackground    = HexToVec4(themeYaml["HeaderBackground"].as<str>());
+        const auto textHighlight       = HexToVec4(themeYaml["TextHighlight"].as<str>());
+        const auto textPrimary         = HexToVec4(themeYaml["TextPrimary"].as<str>());
+        const auto textSecondary       = HexToVec4(themeYaml["TextSecondary"].as<str>());
+        const auto textDisabled        = HexToVec4(themeYaml["TextDisabled"].as<str>());
+        const auto border              = HexToVec4(themeYaml["Border"].as<str>());
+        const auto error               = HexToVec4(themeYaml["Error"].as<str>());
+        const auto warning             = HexToVec4(themeYaml["Warning"].as<str>());
+        const auto success             = HexToVec4(themeYaml["Success"].as<str>());
+        const auto link                = HexToVec4(themeYaml["Link"].as<str>());
+        const auto scrollbar           = HexToVec4(themeYaml["Scrollbar"].as<str>());
+        const auto primary             = HexToVec4(themeYaml["Primary"].as<str>());
+        const auto secondary           = HexToVec4(themeYaml["Secondary"].as<str>());
+
+        styleColors[ImGuiCol_Text]                 = textPrimary;
+        styleColors[ImGuiCol_TextDisabled]         = textDisabled;
+        styleColors[ImGuiCol_WindowBg]             = windowBackground;
+        styleColors[ImGuiCol_ChildBg]              = childBackground;
+        styleColors[ImGuiCol_PopupBg]              = windowBackground;
+        styleColors[ImGuiCol_Border]               = border;
+        styleColors[ImGuiCol_BorderShadow]         = ImVec4(0.f, 0.f, 0.f, 0.f);
+        styleColors[ImGuiCol_FrameBg]              = frameBackground;
+        styleColors[ImGuiCol_FrameBgHovered]       = secondaryBackground;
+        styleColors[ImGuiCol_FrameBgActive]        = secondaryBackground;
+        styleColors[ImGuiCol_TitleBg]              = frameBackground;
+        styleColors[ImGuiCol_TitleBgActive]        = frameBackground;
+        styleColors[ImGuiCol_TitleBgCollapsed]     = frameBackground;
+        styleColors[ImGuiCol_MenuBarBg]            = windowBackground;
+        styleColors[ImGuiCol_ScrollbarBg]          = windowBackground;
+        styleColors[ImGuiCol_ScrollbarGrab]        = scrollbar;
+        styleColors[ImGuiCol_ScrollbarGrabHovered] = scrollbar;
+        styleColors[ImGuiCol_ScrollbarGrabActive]  = scrollbar;
+        styleColors[ImGuiCol_CheckMark]            = textPrimary;
+        styleColors[ImGuiCol_SliderGrab]           = scrollbar;
+        styleColors[ImGuiCol_SliderGrabActive]     = scrollbar;
+        styleColors[ImGuiCol_Button]               = secondary;
+        styleColors[ImGuiCol_ButtonHovered]        = ImVec4(secondary.x, secondary.y, secondary.z, 0.75f);
+        styleColors[ImGuiCol_ButtonActive]         = ImVec4(secondary.x, secondary.y, secondary.z, 0.60f);
+        styleColors[ImGuiCol_Header]               = secondaryBackground;
+        styleColors[ImGuiCol_HeaderHovered]        = headerBackground;
+        styleColors[ImGuiCol_HeaderActive]         = headerBackground;
+        styleColors[ImGuiCol_Separator]            = border;
+        styleColors[ImGuiCol_SeparatorHovered]     = link;
+        styleColors[ImGuiCol_SeparatorActive]      = link;
+        styleColors[ImGuiCol_ResizeGrip]           = ImVec4(0.26f, 0.59f, 0.98f, 0.20f);
+        styleColors[ImGuiCol_ResizeGripHovered]    = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
+        styleColors[ImGuiCol_ResizeGripActive]     = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
+        styleColors[ImGuiCol_Tab]                  = headerBackground;
+        styleColors[ImGuiCol_TabHovered]           = headerBackground;
+        styleColors[ImGuiCol_TabActive]            = headerBackground;
+        styleColors[ImGuiCol_TabUnfocused]         = styleColors[ImGuiCol_Tab];
+        styleColors[ImGuiCol_TabUnfocusedActive]   = styleColors[ImGuiCol_TabActive];
+        styleColors[ImGuiCol_TableBorderLight]     = ImVec4(0.f, 0.f, 0.f, 0.f);
+        styleColors[ImGuiCol_TableBorderStrong]    = ImVec4(0.f, 0.f, 0.f, 0.f);
+        styleColors[ImGuiCol_PlotLines]            = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
+        styleColors[ImGuiCol_PlotLinesHovered]     = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
+        styleColors[ImGuiCol_PlotHistogram]        = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+        styleColors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+        styleColors[ImGuiCol_TableHeaderBg]        = ImVec4(0.19f, 0.19f, 0.20f, 1.00f);
+        styleColors[ImGuiCol_TableBorderStrong]    = ImVec4(0.31f, 0.31f, 0.35f, 1.00f);  // Prefer using Alpha=1.0 here
+        styleColors[ImGuiCol_TableBorderLight]     = ImVec4(0.23f, 0.23f, 0.25f, 1.00f);  // Prefer using Alpha=1.0 here
+        styleColors[ImGuiCol_TableRowBg]           = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+        styleColors[ImGuiCol_TableRowBgAlt]        = ImVec4(1.00f, 1.00f, 1.00f, 0.06f);
+        styleColors[ImGuiCol_TextSelectedBg]       = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
+        styleColors[ImGuiCol_DragDropTarget]       = link;
+        styleColors[ImGuiCol_NavHighlight]         = ImVec4(30.f / 255.f, 30.f / 255.f, 30.f / 255.f, 1.00f);
+        styleColors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
+        styleColors[ImGuiCol_NavWindowingDimBg]     = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
+        styleColors[ImGuiCol_ModalWindowDimBg]      = ImVec4(0.00f, 0.00f, 0.00f, 0.0f);
     }
 }  // namespace x::Editor

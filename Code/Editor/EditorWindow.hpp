@@ -29,5 +29,6 @@ namespace x::Editor {
         bool _gameRunning = false;
 
         void HandleOpenScene(const char* filename);
+        static void ApplyTheme();
     };
 }  // namespace x::Editor

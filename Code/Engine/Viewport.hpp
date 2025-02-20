@@ -18,10 +18,13 @@ namespace x {
         void AttachViewport() const;
         void DetachViewport() const;
 
-        void ClearRenderTargetView(const f32 clearColor[4] = Colors::CornflowerBlue) const;
+        void ClearRenderTargetView() const;
         void ClearDepthStencilView(f32 depth = 1.0f, u8 stencil = 0) const;
-        void ClearAll(const f32 clearColor[4] = Colors::CornflowerBlue, f32 depth = 1.0f, u8 stencil = 0) const;
+        void ClearAll(f32 depth = 1.0f, u8 stencil = 0) const;
         void BindRenderTarget() const;
+
+        void SetClearColor(f32 r, f32 g, f32 b, f32 a);
+        void SetClearColor(XMVECTORF32 color);
 
         X_NODISCARD ComPtr<ID3D11RenderTargetView> const& GetRenderTargetView();
         X_NODISCARD ComPtr<ID3D11DepthStencilView> const& GetDepthStencilView();
@@ -36,6 +39,7 @@ namespace x {
         D3D11_VIEWPORT _viewport {};
         RenderContext& _context;
         u32 _width, _height;
+        f32 _clearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
         ComPtr<ID3D11Texture2D> _renderTarget;
         ComPtr<ID3D11RenderTargetView> _renderTargetView;
         ComPtr<ID3D11DepthStencilView> _depthStencilView;

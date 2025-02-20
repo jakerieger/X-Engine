@@ -33,9 +33,9 @@ FetchContent_Declare(
 set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
 
-if(NOT WIN32)
+if (NOT WIN32)
     message(FATAL_ERROR "DirectXTex requires Windows")
-endif()
+endif ()
 
 FetchContent_Declare(
     directxtex
@@ -48,6 +48,7 @@ set(DIRECTXTEX_SHARED_LIBS OFF CACHE BOOL "Build shared library" FORCE)
 set(BUILD_DX12 OFF CACHE BOOL "Build with DirectX12 support" FORCE)
 set(BUILD_TOOLS OFF CACHE BOOL "Build DirectXTex command-line tools" FORCE)
 set(ENABLE_OPENEXR OFF CACHE BOOL "Enable OpenEXR support" FORCE)
+
 
 FetchContent_MakeAvailable(
     assimp

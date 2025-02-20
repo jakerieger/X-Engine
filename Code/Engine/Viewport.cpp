@@ -123,9 +123,9 @@ namespace x {
         _context.GetDeviceContext()->RSSetViewports(1, None);
     }
 
-    void Viewport::ClearRenderTargetView(const f32 clearColor[4]) const {
+    void Viewport::ClearRenderTargetView() const {
         auto* ctx = _context.GetDeviceContext();
-        ctx->ClearRenderTargetView(_renderTargetView.Get(), clearColor);
+        ctx->ClearRenderTargetView(_renderTargetView.Get(), _clearColor);
     }
 
     void Viewport::ClearDepthStencilView(f32 depth, u8 stencil) const {
@@ -133,8 +133,8 @@ namespace x {
         ctx->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, stencil);
     }
 
-    void Viewport::ClearAll(const f32 clearColor[4], f32 depth, u8 stencil) const {
-        ClearRenderTargetView(clearColor);
+    void Viewport::ClearAll(f32 depth, u8 stencil) const {
+        ClearRenderTargetView();
         ClearDepthStencilView(depth, stencil);
     }
 
@@ -142,6 +142,20 @@ namespace x {
         auto* ctx = _context.GetDeviceContext();
         ctx->OMSetRenderTargets(1, _renderTargetView.GetAddressOf(), _depthStencilView.Get());
         ctx->OMSetDepthStencilState(_depthStencilState.Get(), 0);
+    }
+
+    void Viewport::SetClearColor(f32 r, f32 g, f32 b, f32 a) {
+        _clearColor[0] = r;
+        _clearColor[1] = g;
+        _clearColor[2] = b;
+        _clearColor[3] = a;
+    }
+
+    void Viewport::SetClearColor(XMVECTORF32 color) {
+        _clearColor[0] = color[0];
+        _clearColor[1] = color[1];
+        _clearColor[2] = color[2];
+        _clearColor[3] = color[3];
     }
 
     ComPtr<ID3D11RenderTargetView> const& Viewport::GetRenderTargetView() {

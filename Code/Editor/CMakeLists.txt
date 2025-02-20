@@ -14,5 +14,5 @@ add_executable(xeditor
     ${EDITOR_DIR}/main.cpp
 )
 
-target_link_libraries(xeditor PRIVATE x)
+target_link_libraries(xeditor x)
 target_compile_definitions(xeditor PRIVATE ${WINDOWS_COMPILE_DEFS} LUA_JIT)

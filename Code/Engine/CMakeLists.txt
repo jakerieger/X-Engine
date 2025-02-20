@@ -101,11 +101,12 @@ set(DX_LIBS
     dxguid.lib
 )
 
-target_link_libraries(x PUBLIC
+target_link_libraries(x
+    PUBLIC
     ${DX_LIBS}
+    assimp
     luajit
     sol2
-    assimp
     yaml-cpp
     DirectXTex
 )
