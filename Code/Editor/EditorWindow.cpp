@@ -22,6 +22,7 @@ namespace x::Editor {
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
+        io.IniFilename = None;  // Disable ini for now
         io.Fonts->AddFontFromMemoryCompressedTTF(Inter_compressed_data, Inter_compressed_size, 16.0f);
 
         ImGui_ImplWin32_Init(_hwnd);
@@ -212,8 +213,8 @@ namespace x::Editor {
         _game.TransitionScene(filename);
     }
 
-    static ImVec4 HexToVec4(const str& hex,
-                            const f32 alpha = 1.0f) {  // Ensure the string starts with '#' and is the correct length
+    static ImVec4 HexToImVec4(const str& hex,
+                              const f32 alpha = 1.0f) {  // Ensure the string starts with '#' and is the correct length
         if (hex.length() != 6) { throw std::invalid_argument("Hex color should be in the format 'RRGGBB'"); }
 
         ImVec4 color;
@@ -273,23 +274,23 @@ namespace x::Editor {
         style.TabRounding      = borderRadius;
 
         // Load colors
-        const auto windowBackground    = HexToVec4(themeYaml["WindowBackground"].as<str>());
-        const auto childBackground     = HexToVec4(themeYaml["ChildBackground"].as<str>());
-        const auto frameBackground     = HexToVec4(themeYaml["FrameBackground"].as<str>());
-        const auto secondaryBackground = HexToVec4(themeYaml["SecondaryBackground"].as<str>());
-        const auto headerBackground    = HexToVec4(themeYaml["HeaderBackground"].as<str>());
-        const auto textHighlight       = HexToVec4(themeYaml["TextHighlight"].as<str>());
-        const auto textPrimary         = HexToVec4(themeYaml["TextPrimary"].as<str>());
-        const auto textSecondary       = HexToVec4(themeYaml["TextSecondary"].as<str>());
-        const auto textDisabled        = HexToVec4(themeYaml["TextDisabled"].as<str>());
-        const auto border              = HexToVec4(themeYaml["Border"].as<str>());
-        const auto error               = HexToVec4(themeYaml["Error"].as<str>());
-        const auto warning             = HexToVec4(themeYaml["Warning"].as<str>());
-        const auto success             = HexToVec4(themeYaml["Success"].as<str>());
-        const auto link                = HexToVec4(themeYaml["Link"].as<str>());
-        const auto scrollbar           = HexToVec4(themeYaml["Scrollbar"].as<str>());
-        const auto primary             = HexToVec4(themeYaml["Primary"].as<str>());
-        const auto secondary           = HexToVec4(themeYaml["Secondary"].as<str>());
+        const auto windowBackground    = HexToImVec4(themeYaml["WindowBackground"].as<str>());
+        const auto childBackground     = HexToImVec4(themeYaml["ChildBackground"].as<str>());
+        const auto frameBackground     = HexToImVec4(themeYaml["FrameBackground"].as<str>());
+        const auto secondaryBackground = HexToImVec4(themeYaml["SecondaryBackground"].as<str>());
+        const auto headerBackground    = HexToImVec4(themeYaml["HeaderBackground"].as<str>());
+        const auto textHighlight       = HexToImVec4(themeYaml["TextHighlight"].as<str>());
+        const auto textPrimary         = HexToImVec4(themeYaml["TextPrimary"].as<str>());
+        const auto textSecondary       = HexToImVec4(themeYaml["TextSecondary"].as<str>());
+        const auto textDisabled        = HexToImVec4(themeYaml["TextDisabled"].as<str>());
+        const auto border              = HexToImVec4(themeYaml["Border"].as<str>());
+        const auto error               = HexToImVec4(themeYaml["Error"].as<str>());
+        const auto warning             = HexToImVec4(themeYaml["Warning"].as<str>());
+        const auto success             = HexToImVec4(themeYaml["Success"].as<str>());
+        const auto link                = HexToImVec4(themeYaml["Link"].as<str>());
+        const auto scrollbar           = HexToImVec4(themeYaml["Scrollbar"].as<str>());
+        const auto primary             = HexToImVec4(themeYaml["Primary"].as<str>());
+        const auto secondary           = HexToImVec4(themeYaml["Secondary"].as<str>());
 
         styleColors[ImGuiCol_Text]                 = textPrimary;
         styleColors[ImGuiCol_TextDisabled]         = textDisabled;
