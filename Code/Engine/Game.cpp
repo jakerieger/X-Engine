@@ -257,6 +257,7 @@ namespace x {
         _activeScene = make_unique<Scene>(_renderContext, _scriptEngine);
         _activeScene->Load(path);
         _activeScene->RegisterVolatiles(_volatiles);
+        _activeScene->Update(0.0f);
     }
 
     void Game::Resize(u32 width, u32 height) const {

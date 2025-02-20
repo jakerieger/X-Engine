@@ -50,7 +50,6 @@ namespace x::Editor {
     }
 
     void EditorWindow::Render() {
-        _windowViewport->AttachViewport();
         _windowViewport->ClearAll();
 
         ImGui_ImplDX11_NewFrame();
@@ -177,8 +176,9 @@ namespace x::Editor {
             _sceneViewport.Resize((u32)contentSize.x, (u32)contentSize.y);
             _sceneViewport.BindRenderTarget();
             _sceneViewport.ClearRenderTargetView();
+            _sceneViewport.AttachViewport();
 
-            _game.Resize(contentSize.x, contentSize.y);
+            _game.Resize((u32)contentSize.x, (u32)contentSize.y);
             _game.RenderFrame();
 
             auto* srv = _sceneViewport.GetShaderResourceView().Get();
@@ -199,6 +199,7 @@ namespace x::Editor {
         {}
         ImGui::End();
 
+        _windowViewport->AttachViewport();
         _windowViewport->BindRenderTarget();
         ImGui::Render();
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
