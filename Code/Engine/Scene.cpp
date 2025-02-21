@@ -18,8 +18,8 @@ namespace x {
         SceneDescriptor descriptor {};
         SceneParser::Parse(path, descriptor);
 
-        auto& mainCamera = _state._mainCamera;
-        auto& sun        = _state._lightState.Sun;
+        auto& mainCamera = _state.MainCamera;
+        auto& sun        = _state.Lights.Sun;
 
         const auto& cameraDescriptor = descriptor.world.camera;
         mainCamera.SetPosition(Float3ToVectorSet(cameraDescriptor.position));
@@ -140,6 +140,10 @@ namespace x {
 
     SceneState& Scene::GetState() {
         return _state;
+    }
+    
+    unordered_map<str, EntityId>& Scene::GetEntities() {
+        return _entities;
     }
 
     const SceneState& Scene::GetState() const {

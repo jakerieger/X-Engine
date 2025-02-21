@@ -37,8 +37,8 @@ namespace x {
 
             newState._nextId = _nextId;
 
-            newState._lightState = _lightState;
-            newState._mainCamera = _mainCamera;
+            newState.Lights     = Lights;
+            newState.MainCamera = MainCamera;
 
             newState._transforms = _transforms;
             newState._models     = _models;
@@ -98,36 +98,36 @@ namespace x {
         }
 
         LightState& GetLightState() {
-            return _lightState;
+            return Lights;
         }
 
         [[nodiscard]] LightState const& GetLightState() const {
-            return _lightState;
+            return Lights;
         }
 
         Camera& GetMainCamera() {
-            return _mainCamera;
+            return MainCamera;
         }
 
         [[nodiscard]] Camera const& GetMainCamera() const {
-            return _mainCamera;
+            return MainCamera;
         }
 
         void Reset() {
             _nextId     = 0;
-            _lightState = {};
-            _mainCamera = {};
+            Lights      = {};
+            MainCamera  = {};
             _transforms = {};
             _models     = {};
             _behaviors  = {};
         }
 
+        // Global state
+        LightState Lights;
+        Camera MainCamera;
+
     private:
         u64 _nextId = 0;
-
-        // Global state
-        LightState _lightState;
-        Camera _mainCamera;
 
         // Component managers
         ComponentManager<TransformComponent> _transforms;

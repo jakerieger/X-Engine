@@ -27,6 +27,11 @@ namespace x::Editor {
         Viewport _sceneViewport;
         Game _game;
         bool _gameRunning = false;
+        Camera _editorCamera;
+        Camera _sceneCamera;
+        unordered_map<str, EntityId> _entities;
+
+        EntityId _selectedEntity;
 
         void HandleOpenScene(const char* filename);
         static void ApplyTheme();

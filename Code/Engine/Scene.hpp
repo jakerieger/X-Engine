@@ -29,6 +29,7 @@ namespace x {
         void Destroyed();
 
         SceneState& GetState();
+        unordered_map<str, EntityId>& GetEntities();
         X_NODISCARD const SceneState& GetState() const;
         X_NODISCARD u32 GetNumEntities() const;
 

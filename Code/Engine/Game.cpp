@@ -263,4 +263,8 @@ namespace x {
     void Game::Resize(u32 width, u32 height) const {
         OnResize(width, height);
     }
+
+    Scene* Game::GetActiveScene() {
+        return _activeScene.get();
+    }
 }  // namespace x

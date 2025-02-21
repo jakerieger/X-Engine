@@ -47,6 +47,7 @@ namespace x::Editor {
 
     void EditorWindow::Update() {
         _game.Update(!_gameRunning);
+        _entities = _game.GetActiveScene()->GetEntities();
     }
 
     void EditorWindow::Render() {
@@ -171,14 +172,16 @@ namespace x::Editor {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
         ImGui::Begin("Scene");
         {
-            ImVec2 contentSize = ImGui::GetContentRegionAvail();
+            ImVec2 contentSize       = ImGui::GetContentRegionAvail();
+            const auto contentWidth  = CAST<u32>(contentSize.x);
+            const auto contentHeight = CAST<u32>(contentSize.y);
 
-            _sceneViewport.Resize((u32)contentSize.x, (u32)contentSize.y);
+            _sceneViewport.Resize(contentWidth, contentHeight);
             _sceneViewport.BindRenderTarget();
             _sceneViewport.ClearRenderTargetView();
             _sceneViewport.AttachViewport();
 
-            _game.Resize((u32)contentSize.x, (u32)contentSize.y);
+            _game.Resize(contentWidth, contentHeight);
             _game.RenderFrame();
 
             auto* srv = _sceneViewport.GetShaderResourceView().Get();
@@ -188,7 +191,11 @@ namespace x::Editor {
         ImGui::PopStyleVar();
 
         ImGui::Begin("Entities");
-        {}
+        {
+            for (auto [name, id] : _entities) {
+                if (ImGui::Selectable(name.c_str(), id == _selectedEntity)) { _selectedEntity = id; }
+            }
+        }
         ImGui::End();
 
         ImGui::Begin("Properties");
@@ -212,10 +219,14 @@ namespace x::Editor {
 
     void EditorWindow::HandleOpenScene(const char* filename) {
         _game.TransitionScene(filename);
+
+        auto& sceneState      = _game.GetActiveScene()->GetState();
+        _sceneCamera          = sceneState.MainCamera;  // Cache scene camera
+        sceneState.MainCamera = _editorCamera;  // Override scene camera with editor camera while not in play mode
     }
 
     static ImVec4 HexToImVec4(const str& hex,
-                              const f32 alpha = 1.0f) {  // Ensure the string starts with '#' and is the correct length
+                              const f32 alpha = 1.0f) {  // Ensure the string is the correct length
         if (hex.length() != 6) { throw std::invalid_argument("Hex color should be in the format 'RRGGBB'"); }
 
         ImVec4 color;
@@ -238,16 +249,16 @@ namespace x::Editor {
     void EditorWindow::ApplyTheme() {
         auto theme = R""(
   Name: Dark
-  WindowBackground: 181818
-  ChildBackground: 212121
-  FrameBackground: 2D2D2D
+  WindowBackground: 242324
+  ChildBackground: 242324
+  FrameBackground: 434243
   SecondaryBackground: 363636
   HeaderBackground: 040404
   TextHighlight: FFFFFF
   TextPrimary: DADADA
   TextSecondary: B3B3B3
   TextDisabled: 666666
-  Border: 363636
+  Border: 181818
   Error: FF0000
   Warning: FFFF00
   Success: 00FF00
