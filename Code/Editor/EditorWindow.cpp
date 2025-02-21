@@ -43,7 +43,7 @@ namespace x::Editor {
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-        io.IniFilename = None;  // Disable ini for now
+        io.IniFilename = "XEditorConfig.ini";
         io.Fonts->AddFontFromMemoryCompressedTTF(Inter_compressed_data, Inter_compressed_size, 16.0f);
 
         ImGui_ImplWin32_Init(_hwnd);
