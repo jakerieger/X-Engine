@@ -17,12 +17,8 @@ namespace x {
         ImFont* _font        = None;
 
     public:
-        explicit DebugUI(const HWND hwnd, RenderContext& renderer) : _renderer(renderer) {
-            Initialize(hwnd);
-        }
-
-        ~DebugUI() {
-            Shutdown();
+        explicit DebugUI(RenderContext& renderer) : _renderer(renderer) {
+            Initialize();
         }
 
         void BeginFrame() {
@@ -56,9 +52,7 @@ namespace x {
         }
 
     private:
-        void Initialize(const HWND hwnd) {
-            IMGUI_CHECKVERSION();
-            ImGui::CreateContext();
+        void Initialize() {
             ImGuiIO& io = ImGui::GetIO();
             (void)io;
             io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
@@ -66,16 +60,6 @@ namespace x {
             _font = io.Fonts->AddFontFromMemoryCompressedTTF(JetBrainsMono_TTF_compressed_data,
                                                              JetBrainsMono_TTF_compressed_size,
                                                              16.0f);
-
-            ImGui::StyleColorsDark();
-            ImGui_ImplWin32_Init(hwnd);
-            ImGui_ImplDX11_Init(_renderer.GetDevice(), _renderer.GetDeviceContext());
-        }
-
-        void Shutdown() {
-            ImGui_ImplDX11_Shutdown();
-            ImGui_ImplWin32_Shutdown();
-            ImGui::DestroyContext();
         }
 
         void DrawFrameGraph(const Clock& clock) {
@@ -87,7 +71,7 @@ namespace x {
             if (!ImGui::Begin("##framegraph",
                               None,
                               ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse |
-                              ImGuiWindowFlags_NoTitleBar)) {
+                                ImGuiWindowFlags_NoTitleBar)) {
                 ImGui::End();
                 return;
             }
@@ -107,7 +91,7 @@ namespace x {
             if (!ImGui::Begin("##deviceinfo",
                               None,
                               ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse |
-                              ImGuiWindowFlags_NoTitleBar)) {
+                                ImGuiWindowFlags_NoTitleBar)) {
                 ImGui::End();
                 return;
             }
@@ -117,10 +101,10 @@ namespace x {
             ImGui::Text(info.model.c_str());
 
             constexpr f64 kBytesPerGB = 1024.0 * 1024.0 * 1024.0;
-            const auto gpuMemory      = std::format("GPU Memory: {:.2f} GB",
-                                               CAST<f32>((CAST<f64>(info.videoMemoryInBytes) / kBytesPerGB)));
-            const auto sharedMemory = std::format("Shared Memory: {:.2f} GB",
-                                                  CAST<f32>((CAST<f64>(info.sharedMemoryInBytes) / kBytesPerGB)));
+            const auto gpuMemory =
+              std::format("GPU Memory: {:.2f} GB", CAST<f32>((CAST<f64>(info.videoMemoryInBytes) / kBytesPerGB)));
+            const auto sharedMemory =
+              std::format("Shared Memory: {:.2f} GB", CAST<f32>((CAST<f64>(info.sharedMemoryInBytes) / kBytesPerGB)));
 
             ImGui::Text(gpuMemory.c_str());
             ImGui::Text(sharedMemory.c_str());
@@ -136,7 +120,7 @@ namespace x {
             if (!ImGui::Begin("##frameinfo",
                               None,
                               ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse |
-                              ImGuiWindowFlags_NoTitleBar)) {
+                                ImGuiWindowFlags_NoTitleBar)) {
                 ImGui::End();
                 return;
             }
@@ -172,4 +156,4 @@ namespace x {
             ImGui::PopStyleColor(2);
         }
     };
-}
+}  // namespace x

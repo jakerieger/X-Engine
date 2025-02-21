@@ -14,6 +14,7 @@ namespace x {
 
     void Scene::Load(const str& path) {
         _state.Reset();
+        _initialState.Reset();
 
         SceneDescriptor descriptor {};
         SceneParser::Parse(path, descriptor);
@@ -73,6 +74,8 @@ namespace x {
             _entities[entity.name] = newEntity;
         }
 
+        _initialState = _state;  // Cache init state so scene can be reset
+
         Awake();
         X_LOG_INFO("Loaded scene: '%s'", path.c_str())
     }
@@ -83,6 +86,17 @@ namespace x {
         _state.Reset();
         _entities.clear();
         _resources.Clear();
+    }
+
+    void Scene::Reset() {
+        _state.Reset();
+        _entities.clear();
+        _resources.Clear();
+    }
+
+    void Scene::ResetToInitialState() {
+        _state.Reset();
+        _state = _initialState;
     }
 
     void Scene::Awake() {
@@ -141,7 +155,7 @@ namespace x {
     SceneState& Scene::GetState() {
         return _state;
     }
-    
+
     unordered_map<str, EntityId>& Scene::GetEntities() {
         return _entities;
     }

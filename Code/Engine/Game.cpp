@@ -205,44 +205,44 @@ namespace x {
             _scriptEngine.RegisterTypes<Float3, TransformComponent, BehaviorEntity, Camera>();
         }
 
-        // if (_debugUIEnabled) { _debugUI = make_unique<DebugUI>(_hwnd, _renderContext); }
+        if (_debugUIEnabled) { _debugUI = make_unique<DebugUI>(_renderContext); }
 
-        // _devConsole.RegisterCommand("quit", [this](auto) { Quit(); })
-        //   .RegisterCommand("close", [this](auto) { _devConsole.ToggleVisible(); })
-        //   .RegisterCommand("p_ShowFrameGraph",
-        //                    [this](auto args) {
-        //                        if (args.size() < 1) { return; }
-        //                        const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
-        //                        _debugUI->SetShowFrameGraph(CAST<bool>(show));
-        //                    })
-        //   .RegisterCommand("p_ShowDeviceInfo",
-        //                    [this](auto args) {
-        //                        if (args.size() < 1) { return; }
-        //                        const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
-        //                        _debugUI->SetShowDeviceInfo(CAST<bool>(show));
-        //                    })
-        //   .RegisterCommand("p_ShowFrameInfo",
-        //                    [this](auto args) {
-        //                        if (args.size() < 1) { return; }
-        //                        const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
-        //                        _debugUI->SetShowFrameInfo(CAST<bool>(show));
-        //                    })
-        //   .RegisterCommand("p_ShowAll",
-        //                    [this](auto args) {
-        //                        if (args.size() < 1) { return; }
-        //                        const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
-        //                        _debugUI->SetShowFrameGraph(CAST<bool>(show));
-        //                        _debugUI->SetShowDeviceInfo(CAST<bool>(show));
-        //                        _debugUI->SetShowFrameInfo(CAST<bool>(show));
-        //                    })
-        //   .RegisterCommand("g_Pause", [this](auto) { Pause(); })
-        //   .RegisterCommand("g_Resume", [this](auto) { Resume(); })
-        //   .RegisterCommand("g_Load", [this](auto args) {
-        //       if (args.size() < 1) { return; }
-        //       const auto& sceneName = args[0];
-        //       const auto scenePath  = "Scenes\\" + sceneName + ".xscn";
-        //       TransitionScene(scenePath);
-        //   });
+        _devConsole.RegisterCommand("quit", [this](auto) { _window->Quit(); })
+          .RegisterCommand("close", [this](auto) { _devConsole.ToggleVisible(); })
+          .RegisterCommand("p_ShowFrameGraph",
+                           [this](auto args) {
+                               if (args.size() < 1) { return; }
+                               const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                               _debugUI->SetShowFrameGraph(CAST<bool>(show));
+                           })
+          .RegisterCommand("p_ShowDeviceInfo",
+                           [this](auto args) {
+                               if (args.size() < 1) { return; }
+                               const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                               _debugUI->SetShowDeviceInfo(CAST<bool>(show));
+                           })
+          .RegisterCommand("p_ShowFrameInfo",
+                           [this](auto args) {
+                               if (args.size() < 1) { return; }
+                               const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                               _debugUI->SetShowFrameInfo(CAST<bool>(show));
+                           })
+          .RegisterCommand("p_ShowAll",
+                           [this](auto args) {
+                               if (args.size() < 1) { return; }
+                               const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                               _debugUI->SetShowFrameGraph(CAST<bool>(show));
+                               _debugUI->SetShowDeviceInfo(CAST<bool>(show));
+                               _debugUI->SetShowFrameInfo(CAST<bool>(show));
+                           })
+          .RegisterCommand("g_Pause", [this](auto) { Pause(); })
+          .RegisterCommand("g_Resume", [this](auto) { Resume(); })
+          .RegisterCommand("g_Load", [this](auto args) {
+              if (args.size() < 1) { return; }
+              const auto& sceneName = args[0];
+              const auto scenePath  = "Scenes\\" + sceneName + ".xscn";
+              TransitionScene(scenePath);
+          });
 
         X_LOG_DEBUG("Initialized engine")
     }
@@ -264,7 +264,13 @@ namespace x {
         OnResize(width, height);
     }
 
-    Scene* Game::GetActiveScene() {
+    Scene* Game::GetActiveScene() const {
         return _activeScene.get();
+    }
+
+    bool Game::SceneValid() const {
+        if (_activeScene.get() == nullptr) { return false; }
+        // additional checks here...
+        return true;
     }
 }  // namespace x

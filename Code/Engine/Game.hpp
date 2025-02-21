@@ -37,7 +37,8 @@ namespace x {
         void TransitionScene(const str& path);
         void Resize(u32 width, u32 height) const;
 
-        Scene* GetActiveScene();
+        Scene* GetActiveScene() const;
+        bool SceneValid() const;
 
     private:
         bool _debugUIEnabled {false};

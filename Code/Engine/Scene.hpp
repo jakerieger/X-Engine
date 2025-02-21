@@ -11,6 +11,7 @@ namespace x {
     class Scene {
         ResourceManager _resources;
         SceneState _state;
+        SceneState _initialState;
         RenderContext& _context;
         ScriptEngine& _scriptEngine;
         str _name;
@@ -23,6 +24,9 @@ namespace x {
 
         void Load(const str& path);
         void Unload();
+
+        void Reset();
+        void ResetToInitialState();
 
         void Awake();
         void Update(f32 deltaTime);

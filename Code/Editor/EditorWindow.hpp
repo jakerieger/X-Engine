@@ -4,15 +4,16 @@
 
 #pragma once
 
+#include "TextureManager.hpp"
 #include "Common/Types.hpp"
-#include "Engine/EngineCommon.hpp"
 #include "Engine/Game.hpp"
 #include "Engine/Window.hpp"
 
 namespace x::Editor {
     class EditorWindow final : public Window {
     public:
-        EditorWindow() : Window("XEditor", 1600, 900), _sceneViewport(_context), _game(_context) {}
+        EditorWindow()
+            : Window("XEditor", 1600, 900), _sceneViewport(_context), _textureManager(_context), _game(_context) {}
 
         void OnInitialize() override;
         void OnResize(u32 width, u32 height) override;
@@ -25,15 +26,21 @@ namespace x::Editor {
 
     private:
         Viewport _sceneViewport;
+        TextureManager _textureManager;
+
         Game _game;
         bool _gameRunning = false;
+
         Camera _editorCamera;
         Camera _sceneCamera;
-        unordered_map<str, EntityId> _entities;
 
+        unordered_map<str, EntityId> _entities;
         EntityId _selectedEntity;
 
         void HandleOpenScene(const char* filename);
+        void TogglePlayMode();
+        void NewScene();
+
         static void ApplyTheme();
     };
 }  // namespace x::Editor

@@ -11,11 +11,32 @@
 #include <imgui_internal.h>
 #include <Inter.h>
 #include <yaml-cpp/yaml.h>
-#include <fstream>
+#include "EditorIcons.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace x::Editor {
+    static ImVec4 HexToImVec4(const str& hex,
+                              const f32 alpha = 1.0f) {  // Ensure the string is the correct length
+        if (hex.length() != 6) { throw std::invalid_argument("Hex color should be in the format 'RRGGBB'"); }
+
+        ImVec4 color;
+        const char red[3]   = {hex[0], hex[1], '\0'};
+        const char green[3] = {hex[2], hex[3], '\0'};
+        const char blue[3]  = {hex[4], hex[5], '\0'};
+
+        const int r = strtol(red, None, 16);
+        const int g = strtol(green, None, 16);
+        const int b = strtol(blue, None, 16);
+
+        color.x = (f32)r / 255.0f;
+        color.y = (f32)g / 255.0f;
+        color.z = (f32)b / 255.0f;
+        color.w = alpha;
+
+        return color;
+    }
+
     void EditorWindow::OnInitialize() {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -30,10 +51,18 @@ namespace x::Editor {
 
         ApplyTheme();
 
+        // Load icons
+        if (!_textureManager.LoadFromMemory(MOVE_BYTES, 24, 24, 4, "MoveIcon")) { X_PANIC("Failed to load icon"); }
+        if (!_textureManager.LoadFromMemory(SELECT_BYTES, 24, 24, 4, "SelectIcon")) { X_PANIC("Failed to load icon"); }
+        if (!_textureManager.LoadFromMemory(ROTATE_BYTES, 24, 24, 4, "RotateIcon")) { X_PANIC("Failed to load icon"); }
+        if (!_textureManager.LoadFromMemory(SCALE_BYTES, 24, 24, 4, "ScaleIcon")) { X_PANIC("Failed to load icon"); }
+        if (!_textureManager.LoadFromMemory(PLAY_BYTES, 24, 24, 4, "PlayIcon")) { X_PANIC("Failed to load icon"); }
+
         // Initialize the engine core
         _windowViewport->SetClearColor(Colors::Black);
         _sceneViewport.SetClearColor(Colors::CornflowerBlue);
-        _sceneViewport.Resize(100, 100);
+        _sceneViewport.Resize(100,
+                              100);  // Give the viewport a default size to prevent DX11 resource creation from failing.
         _game.Initialize(this, &_sceneViewport);
     }
 
@@ -58,14 +87,18 @@ namespace x::Editor {
         ImGui::NewFrame();
 
         //============================================================================================================//
+        // MENU BAR
         //============================================================================================================//
 
         static bool firstTime = true;
 
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, HexToImVec4("202020"));
+        ImGui::PushStyleColor(ImGuiCol_MenuBarBg, HexToImVec4("202020"));
+
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
-                if (ImGui::MenuItem("New Scene", "Ctrl+N")) {}
+                if (ImGui::MenuItem("New Scene", "Ctrl+N")) { NewScene(); }
                 if (ImGui::MenuItem("Open Scene", "Ctrl+O")) {
                     const char* filter = "Scene (*.xscn)|*.xscn|";
                     char filename[MAX_PATH];
@@ -95,52 +128,85 @@ namespace x::Editor {
         ImGui::PopStyleVar();
 
         //============================================================================================================//
+        // TOOL BAR
         //============================================================================================================//
 
-        float menuBarHeight           = ImGui::GetFrameHeight();
-        ImGuiWindowFlags toolbarFlags = ImGuiWindowFlags_NoTitleBar |            // No title bar needed
-                                        ImGuiWindowFlags_NoScrollbar |           // Disable scrolling
-                                        ImGuiWindowFlags_NoMove |                // Prevent moving
-                                        ImGuiWindowFlags_NoResize |              // Prevent resizing
-                                        ImGuiWindowFlags_NoCollapse |            // Prevent collapsing
-                                        ImGuiWindowFlags_NoSavedSettings |       // Don't save position/size
-                                        ImGuiWindowFlags_NoBringToFrontOnFocus;  // Don't change z-order
+        const f32 menuBarHeight                 = ImGui::GetFrameHeight();
+        constexpr ImGuiWindowFlags toolbarFlags = ImGuiWindowFlags_NoTitleBar |            // No title bar needed
+                                                  ImGuiWindowFlags_NoScrollbar |           // Disable scrolling
+                                                  ImGuiWindowFlags_NoMove |                // Prevent moving
+                                                  ImGuiWindowFlags_NoResize |              // Prevent resizing
+                                                  ImGuiWindowFlags_NoCollapse |            // Prevent collapsing
+                                                  ImGuiWindowFlags_NoSavedSettings |       // Don't save position/size
+                                                  ImGuiWindowFlags_NoBringToFrontOnFocus;  // Don't change z-order
 
         ImGui::SetNextWindowPos(ImVec2(0, menuBarHeight));
         ImGui::SetNextWindowSize(ImVec2(ImGui::GetMainViewport()->Size.x, 36));
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2, 2));
-        if (ImGui::Begin("##Toolbar", nullptr, toolbarFlags)) {
-            // Add your toolbar buttons/tools here
-            if (ImGui::Button("##transform", ImVec2(28, 28))) {}
-            ImGui::SameLine();
-            if (ImGui::Button("##rotate", ImVec2(28, 28))) {}
-            ImGui::SameLine();
-            if (ImGui::Button("##scale", ImVec2(28, 28))) {}
-            // ... add more toolbar items
+        if (ImGui::Begin("##Toolbar", None, toolbarFlags)) {
+            const auto selectIcon = _textureManager.GetTexture("SelectIcon");
+            const auto moveIcon   = _textureManager.GetTexture("MoveIcon");
+            const auto rotateIcon = _textureManager.GetTexture("RotateIcon");
+            const auto scaleIcon  = _textureManager.GetTexture("ScaleIcon");
+            const auto playIcon   = _textureManager.GetTexture("PlayIcon");
+
+#define TOOLBAR_BUTTON(name, icon)                                                                                     \
+    ImGui::ImageButton(name,                                                                                           \
+                       ImTextureID((icon)->srv.Get()),                                                                 \
+                       ImVec2(24, 24),                                                                                 \
+                       ImVec2(0, 0),                                                                                   \
+                       ImVec2(1, 1),                                                                                   \
+                       ImVec4(0, 0, 0, 0),                                                                             \
+                       ImVec4(1, 1, 1, 0.5))
+
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+            {
+                if (TOOLBAR_BUTTON("##select", selectIcon)) {}
+                ImGui::SameLine();
+
+                if (TOOLBAR_BUTTON("##move", moveIcon)) {}
+                ImGui::SameLine();
+
+                if (TOOLBAR_BUTTON("##rotate", rotateIcon)) {}
+                ImGui::SameLine();
+
+                if (TOOLBAR_BUTTON("##scale", scaleIcon)) {}
+
+                auto toolbarWidth = ImGui::GetWindowSize().x - ImGui::GetStyle().WindowPadding.x;
+                ImGui::SameLine(toolbarWidth / 2 - 12);
+
+                if (TOOLBAR_BUTTON("##play", playIcon)) { TogglePlayMode(); }
+                ImGui::SameLine();
+            }
+            ImGui::PopStyleColor();
+            ImGui::PopStyleVar();
 
             ImGui::End();
         }
         ImGui::PopStyleVar(2);
 
-        auto* imguiViewport      = ImGui::GetWindowViewport();
-        ImGuiDockNodeFlags flags = ImGuiDockNodeFlags_PassthruCentralNode;
+#undef TOOLBAR_BUTTON
+
+        const auto* imguiViewport          = ImGui::GetWindowViewport();
+        constexpr ImGuiDockNodeFlags flags = ImGuiDockNodeFlags_PassthruCentralNode;
 
         ImGui::SetNextWindowPos(ImVec2(0, menuBarHeight + 36));
         ImGui::SetNextWindowSize(ImVec2(imguiViewport->Size.x, imguiViewport->Size.y - menuBarHeight - 36));
         ImGui::SetNextWindowViewport(imguiViewport->ID);
 
-        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
-                                       ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
-                                       ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
-                                       ImGuiWindowFlags_NoNavFocus;
+        constexpr ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
+                                                 ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+                                                 ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
+                                                 ImGuiWindowFlags_NoNavFocus;
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-        if (ImGui::Begin("DockSpace", nullptr, windowFlags)) {
-            ImGuiID dockspaceId = ImGui::GetID("Editor::DockSpace");
+        if (ImGui::Begin("DockSpace", None, windowFlags)) {
+            const ImGuiID dockspaceId = ImGui::GetID("Editor::DockSpace");
             ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), flags);
 
             if (firstTime) {
@@ -149,10 +215,13 @@ namespace x::Editor {
                 ImGui::DockBuilderAddNode(dockspaceId, flags | ImGuiDockNodeFlags_DockSpace);
                 ImGui::DockBuilderSetNodeSize(dockspaceId, ImGui::GetWindowSize());
 
-                ImGuiID dockMainId   = dockspaceId;
-                ImGuiID dockRightId  = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Right, 0.2f, None, &dockMainId);
-                ImGuiID dockLeftId   = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Left, 0.2f, None, &dockMainId);
-                ImGuiID dockBottomId = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Down, 0.2f, None, &dockMainId);
+                ImGuiID dockMainId = dockspaceId;
+                const ImGuiID dockRightId =
+                  ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Right, 0.2f, None, &dockMainId);
+                const ImGuiID dockLeftId =
+                  ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Left, 0.2f, None, &dockMainId);
+                const ImGuiID dockBottomId =
+                  ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Down, 0.2f, None, &dockMainId);
 
                 ImGui::DockBuilderDockWindow("Entities", dockLeftId);
                 ImGui::DockBuilderDockWindow("Properties", dockRightId);
@@ -165,14 +234,16 @@ namespace x::Editor {
             ImGui::End();
         }
         ImGui::PopStyleVar(3);
+        ImGui::PopStyleColor(2);
 
         //============================================================================================================//
+        // EDITOR PANELS
         //============================================================================================================//
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
         ImGui::Begin("Scene");
         {
-            ImVec2 contentSize       = ImGui::GetContentRegionAvail();
+            const ImVec2 contentSize = ImGui::GetContentRegionAvail();
             const auto contentWidth  = CAST<u32>(contentSize.x);
             const auto contentHeight = CAST<u32>(contentSize.y);
 
@@ -225,25 +296,31 @@ namespace x::Editor {
         sceneState.MainCamera = _editorCamera;  // Override scene camera with editor camera while not in play mode
     }
 
-    static ImVec4 HexToImVec4(const str& hex,
-                              const f32 alpha = 1.0f) {  // Ensure the string is the correct length
-        if (hex.length() != 6) { throw std::invalid_argument("Hex color should be in the format 'RRGGBB'"); }
+    void EditorWindow::TogglePlayMode() {
+        if (!_game.SceneValid()) return;
 
-        ImVec4 color;
-        const char red[3]   = {hex[0], hex[1], '\0'};
-        const char green[3] = {hex[2], hex[3], '\0'};
-        const char blue[3]  = {hex[4], hex[5], '\0'};
+        if (_gameRunning) {
+            // Reset camera back to editor camera
+            _game.GetActiveScene()->ResetToInitialState();
+            _game.GetActiveScene()->Update(0.0f);
+            auto& sceneState      = _game.GetActiveScene()->GetState();
+            sceneState.MainCamera = _editorCamera;
 
-        const int r = strtol(red, nullptr, 16);
-        const int g = strtol(green, nullptr, 16);
-        const int b = strtol(blue, nullptr, 16);
+            _gameRunning = false;
+        } else {
+            // Reset camera back to scene camera
+            _game.GetActiveScene()->ResetToInitialState();
+            _game.GetActiveScene()->Update(0.0f);
+            auto& sceneState      = _game.GetActiveScene()->GetState();
+            sceneState.MainCamera = _sceneCamera;
 
-        color.x = (float)r / 255.0f;
-        color.y = (float)g / 255.0f;
-        color.z = (float)b / 255.0f;
-        color.w = alpha;
+            _gameRunning = true;
+        }
+    }
 
-        return color;
+    void EditorWindow::NewScene() {
+        _game.GetActiveScene()->Reset();
+        _entities.clear();
     }
 
     void EditorWindow::ApplyTheme() {
