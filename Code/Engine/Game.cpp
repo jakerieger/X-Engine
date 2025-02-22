@@ -273,4 +273,8 @@ namespace x {
         // additional checks here...
         return true;
     }
+    
+    PostProcessSystem* Game::GetPostProcess() const {
+        return _renderSystem->GetPostProcess();
+    }
 }  // namespace x

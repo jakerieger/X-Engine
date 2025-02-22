@@ -17,18 +17,12 @@
 #include "Viewport.hpp"
 
 namespace x {
-    /// @brief Base interface for implementing a game application.
-    /// Hooks up windowing, rendering backend, and input among other things.
     class Game : public EventListener {
         X_CLASS_PREVENT_MOVES_COPIES(Game)
 
     public:
         explicit Game(RenderContext& context);
         ~Game();
-
-        PostProcessSystem* GetPostProcess() {
-            return _renderSystem->GetPostProcess();
-        }
 
         void Initialize(Window* window, Viewport* viewport);
         void Shutdown();
@@ -37,8 +31,9 @@ namespace x {
         void TransitionScene(const str& path);
         void Resize(u32 width, u32 height) const;
 
-        Scene* GetActiveScene() const;
-        bool SceneValid() const;
+        X_NODISCARD Scene* GetActiveScene() const;
+        X_NODISCARD bool SceneValid() const;
+        X_NODISCARD PostProcessSystem* GetPostProcess() const;
 
     private:
         bool _debugUIEnabled {false};

@@ -3,5 +3,5 @@
 
 X_MAIN {
     GameWindow gameWindow("SpaceGame", "Scenes/Monke.xscn");
-    gameWindow.Run();
+    return gameWindow.Run();
 }

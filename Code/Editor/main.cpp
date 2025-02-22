@@ -6,7 +6,7 @@
 
 using namespace x::Editor;
 
-int main() {
+X_MAIN {
     EditorWindow editor;
     return editor.Run();
 }
