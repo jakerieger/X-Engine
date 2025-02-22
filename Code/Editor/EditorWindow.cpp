@@ -263,7 +263,7 @@ namespace x::Editor {
 
         ImGui::Begin("Entities");
         {
-            for (auto [name, id] : _entities) {
+            for (auto& [name, id] : _entities) {
                 if (ImGui::Selectable(name.c_str(), id == _selectedEntity)) {
                     _selectedEntity = id;
                     _propertiesPanel.Update(id);

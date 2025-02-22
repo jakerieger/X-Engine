@@ -33,6 +33,7 @@ namespace x::Editor {
         auto& state              = _game.GetActiveScene()->GetState();
         auto* transformComponent = state.GetComponentMutable<TransformComponent>(selectedEntity);
         if (transformComponent) {
+            ImGui::Text("Transform");
             ImGui::DragFloat3("Position", _transform.position, 0.01f, -FLT_MAX, FLT_MAX);
             ImGui::DragFloat3("Rotation", _transform.rotation, 0.01f, -FLT_MAX, FLT_MAX);
             ImGui::DragFloat3("Scale", _transform.scale, 0.01f, -FLT_MAX, FLT_MAX);
@@ -40,6 +41,20 @@ namespace x::Editor {
             transformComponent->SetPosition({_transform.position[0], _transform.position[1], _transform.position[2]});
             //
             transformComponent->Update();
+        }
+
+        ImGui::Spacing();
+
+        auto* behaviorComponent = state.GetComponent<BehaviorComponent>(selectedEntity);
+        if (behaviorComponent) {
+            ImGui::Text("Behavior");
+            ImGui::Text("Script: ");
+            ImGui::SameLine();
+            ImGui::Text("%s", behaviorComponent->GetId().c_str());
+            ImGui::Spacing();
+            if (ImGui::Button("Edit Script")) {
+                // .. handle script editing
+            }
         }
     }
 }  // namespace x::Editor
