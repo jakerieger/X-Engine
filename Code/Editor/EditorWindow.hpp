@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "PropertiesPanel.hpp"
 #include "TextureManager.hpp"
 #include "Common/Types.hpp"
 #include "Engine/Game.hpp"
@@ -13,7 +14,8 @@ namespace x::Editor {
     class EditorWindow final : public Window {
     public:
         EditorWindow()
-            : Window("XEditor", 1600, 900), _sceneViewport(_context), _textureManager(_context), _game(_context) {}
+            : Window("XEditor", 1600, 900), _sceneViewport(_context), _textureManager(_context), _game(_context),
+              _propertiesPanel(_game) {}
 
         void OnInitialize() override;
         void OnResize(u32 width, u32 height) override;
@@ -37,7 +39,10 @@ namespace x::Editor {
         unordered_map<str, EntityId> _entities;
         EntityId _selectedEntity;
 
-        void HandleOpenScene(const char* filename);
+        // UI Panels
+        PropertiesPanel _propertiesPanel;
+
+        void OpenScene(const char* filename);
         void TogglePlayMode();
         void NewScene();
 

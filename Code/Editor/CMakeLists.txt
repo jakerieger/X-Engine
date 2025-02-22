@@ -11,6 +11,8 @@ add_executable(xeditor
     ${EDITOR_DIR}/FileDialogs.hpp
     ${EDITOR_DIR}/TextureManager.cpp
     ${EDITOR_DIR}/TextureManager.hpp
+    ${EDITOR_DIR}/PropertiesPanel.cpp
+    ${EDITOR_DIR}/PropertiesPanel.hpp
     ${EDITOR_DIR}/EditorWindow.cpp
     ${EDITOR_DIR}/EditorWindow.hpp
     ${EDITOR_DIR}/main.cpp

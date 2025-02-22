@@ -103,7 +103,7 @@ namespace x::Editor {
                     const char* filter = "Scene (*.xscn)|*.xscn|";
                     char filename[MAX_PATH];
                     if (OpenFileDialog(_hwnd, None, filter, "Open Scene File", filename, MAX_PATH)) {
-                        HandleOpenScene(filename);
+                        OpenScene(filename);
                     }
                 }
                 if (ImGui::MenuItem("Save Scene", "Ctrl+S")) {}
@@ -215,18 +215,18 @@ namespace x::Editor {
                 ImGui::DockBuilderAddNode(dockspaceId, flags | ImGuiDockNodeFlags_DockSpace);
                 ImGui::DockBuilderSetNodeSize(dockspaceId, ImGui::GetWindowSize());
 
-                ImGuiID dockMainId = dockspaceId;
-                const ImGuiID dockRightId =
-                  ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Right, 0.2f, None, &dockMainId);
-                const ImGuiID dockLeftId =
-                  ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Left, 0.2f, None, &dockMainId);
-                const ImGuiID dockBottomId =
-                  ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Down, 0.2f, None, &dockMainId);
+                ImGuiID dockMainId   = dockspaceId;
+                ImGuiID dockRightId  = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Right, 0.2f, None, &dockMainId);
+                ImGuiID dockLeftId   = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Left, 0.2f, None, &dockMainId);
+                ImGuiID dockBottomId = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Down, 0.3f, None, &dockMainId);
+                ImGuiID dockRightBottomId =
+                  ImGui::DockBuilderSplitNode(dockRightId, ImGuiDir_Down, 0.5f, None, &dockRightId);
 
                 ImGui::DockBuilderDockWindow("Entities", dockLeftId);
                 ImGui::DockBuilderDockWindow("Properties", dockRightId);
                 ImGui::DockBuilderDockWindow("Scene", dockMainId);
                 ImGui::DockBuilderDockWindow("Editor Log", dockBottomId);
+                ImGui::DockBuilderDockWindow("World Settings", dockRightBottomId);
 
                 ImGui::DockBuilderFinish(imguiViewport->ID);
             }
@@ -264,13 +264,20 @@ namespace x::Editor {
         ImGui::Begin("Entities");
         {
             for (auto [name, id] : _entities) {
-                if (ImGui::Selectable(name.c_str(), id == _selectedEntity)) { _selectedEntity = id; }
+                if (ImGui::Selectable(name.c_str(), id == _selectedEntity)) {
+                    _selectedEntity = id;
+                    _propertiesPanel.Update(id);
+                }
             }
         }
         ImGui::End();
 
-        ImGui::Begin("Properties");
+        ImGui::Begin("World Settings");
         {}
+        ImGui::End();
+
+        ImGui::Begin("Properties");
+        { _propertiesPanel.Draw(_selectedEntity); }
         ImGui::End();
 
         ImGui::Begin("Editor Log");
@@ -288,12 +295,14 @@ namespace x::Editor {
         return Window::MessageHandler(msg, wParam, lParam);
     }
 
-    void EditorWindow::HandleOpenScene(const char* filename) {
+    void EditorWindow::OpenScene(const char* filename) {
         _game.TransitionScene(filename);
 
         auto& sceneState      = _game.GetActiveScene()->GetState();
         _sceneCamera          = sceneState.MainCamera;  // Cache scene camera
         sceneState.MainCamera = _editorCamera;  // Override scene camera with editor camera while not in play mode
+
+        _propertiesPanel.OnSceneTransition();
     }
 
     void EditorWindow::TogglePlayMode() {
