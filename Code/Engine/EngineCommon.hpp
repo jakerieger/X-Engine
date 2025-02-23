@@ -68,6 +68,12 @@ template<typename... Args>
 #include <fstream>
 #include <iostream>
 
+struct LogEntry {
+    std::string message;
+    std::string timestamp;
+    uint32_t severity;
+};
+
 class Logger;
 Logger& GetLogger();
 
@@ -82,6 +88,8 @@ class Logger {
     X_CLASS_PREVENT_MOVES_COPIES(Logger)
 
 public:
+    static constexpr size_t kMaxEntries = 999;
+
     ~Logger() {
         if (_logFile.is_open()) { _logFile.close(); }
     }
@@ -89,12 +97,20 @@ public:
     void Log(const uint32_t severity, const char* msg) {
         const auto severityStr = GetSeverityString(severity);
         const auto timestamp   = GetTimestamp();
-        const auto logEntry    = std::format("[{}] {} | Engine |: {}\n", timestamp, severityStr, msg);
+        const auto logEntry    = std::format("[{}] {} - {}\n", timestamp, severityStr, msg);
         _logFile << logEntry;
+        _logFile.flush();  // ensure immediate write
 
-#ifndef X_DIST
+#if defined(X_DEBUG)
         std::cout << logEntry;
 #endif
+
+        {
+            std::lock_guard<std::mutex> lock(_bufferMutex);
+            _logEntries[_currentEntry] = {.message = msg, .timestamp = timestamp, .severity = severity};
+            _currentEntry              = (_currentEntry + 1) % kMaxEntries;
+            _totalEntries              = std::min(_totalEntries + 1, kMaxEntries);
+        }
 
         if (severity == X_LOG_SEVERITY_FATAL) { std::abort(); }
     }
@@ -106,8 +122,36 @@ public:
         Log(severity, msg);
     }
 
+    void ClearEntries() {
+        std::lock_guard<std::mutex> lock(_bufferMutex);
+        _totalEntries = 0;
+        _currentEntry = 0;
+    }
+
+    std::mutex& GetBufferMutex() {
+        return _bufferMutex;
+    }
+
+    size_t GetTotalEntries() const {
+        return _totalEntries;
+    }
+
+    size_t GetCurrentEntry() const {
+        return _currentEntry;
+    }
+
+    std::array<LogEntry, kMaxEntries>& GetEntries() {
+        return _logEntries;
+    }
+
 private:
     std::ofstream _logFile;
+
+    size_t _currentEntry = 0;
+    size_t _totalEntries = 0;
+
+    std::array<LogEntry, kMaxEntries> _logEntries {};
+    std::mutex _bufferMutex {};
 
     Logger() : _logFile(GetLogFileName(), std::ios::app) {
         const auto dateTime  = DateTime::Now();

@@ -13,7 +13,7 @@ namespace x {
     class ResourceRegistry {
         friend class ResourceManager;
 
-        using LoaderFactory = unique_ptr<ResourceLoaderBase>(*)();
+        using LoaderFactory = unique_ptr<ResourceLoaderBase> (*)();
         using TypeMap       = std::unordered_map<std::type_index, LoaderFactory>;
 
         static TypeMap& GetLoaderFactories() {
@@ -26,20 +26,18 @@ namespace x {
         struct Registrar {
             Registrar() {
                 ResourceRegistry::GetLoaderFactories()[std::type_index(typeid(ResourceT))] =
-                    []() -> unique_ptr<ResourceLoaderBase> {
-                        return make_unique<LoaderT>();
-                    };
+                  []() -> unique_ptr<ResourceLoaderBase> { return make_unique<LoaderT>(); };
             }
         };
     };
 
-    // Necessary for __LINE__ to expand when used in REGISTER_RESOURCE_LOADER
-    #define CONCAT_IMPL(x, y) x##y
-    #define CONCAT(x, y) CONCAT_IMPL(x, y)
+// Necessary for __LINE__ to expand when used in REGISTER_RESOURCE_LOADER
+#define CONCAT_IMPL(x, y) x##y
+#define CONCAT(x, y) CONCAT_IMPL(x, y)
 
-    #define X_REGISTER_RESOURCE_LOADER(ResourceType, LoaderType) \
-    namespace { \
-        static const x::ResourceRegistry::Registrar<ResourceType, LoaderType> CONCAT(resourceRegistrar, __LINE__); \
+#define X_REGISTER_RESOURCE_LOADER(ResourceType, LoaderType)                                                           \
+    namespace {                                                                                                        \
+        static const x::ResourceRegistry::Registrar<ResourceType, LoaderType> CONCAT(resourceRegistrar, __LINE__);     \
     }
 
     class ResourceBase {
@@ -58,7 +56,7 @@ namespace x {
 
     class ResourceLoaderBase {
     public:
-        virtual ~ResourceLoaderBase() = default;
+        virtual ~ResourceLoaderBase()                                                                  = default;
         virtual ResourceBase* Load(RenderContext& context, ArenaAllocator& allocator, const str& path) = 0;
     };
 
@@ -67,9 +65,8 @@ namespace x {
     public:
         ResourceBase* Load(RenderContext& context, ArenaAllocator& allocator, const str& path) override {
             void* memory = allocator.Allocate(sizeof(Resource<T>), alignof(Resource<T>));
-            if (!memory)
-                return None;
-            return new(memory) Resource<T>(LoadImpl(context, path));
+            if (!memory) return None;
+            return new (memory) Resource<T>(LoadImpl(context, path));
         }
 
     private:
@@ -88,9 +85,8 @@ namespace x {
         std::unordered_map<std::type_index, unique_ptr<ResourceLoaderBase>> _loaders;
 
     public:
-        explicit ResourceManager(RenderContext& context, const size_t arenaSize = Memory::BYTES_1GB) :
-            _allocator(arenaSize),
-            _renderContext(context) {
+        explicit ResourceManager(RenderContext& context, const size_t arenaSize = Memory::BYTES_1GB)
+            : _allocator(arenaSize), _renderContext(context) {
             for (const auto& [type, factory] : ResourceRegistry::GetLoaderFactories()) {
                 _loaders[type] = factory();
             }
@@ -108,17 +104,17 @@ namespace x {
         template<typename T>
         bool LoadResource(const str& path) {
             if (_resources.contains(path)) {
-                return true; // loader already exists
+                return true;  // loader already exists
             }
 
             auto loaderIt = _loaders.find(std::type_index(typeid(T)));
             if (loaderIt == _loaders.end()) {
-                return false; // no registered loader for type
+                return false;  // no registered loader for type
             }
 
             ResourceBase* resource = loaderIt->second->Load(_renderContext, _allocator, path);
             if (!resource) {
-                return false; // loading failed
+                return false;  // loading failed
             }
 
             _resources[path] = resource;
@@ -129,13 +125,11 @@ namespace x {
         std::optional<ResourceHandle<T>> FetchResource(const str& path) {
             auto it = _resources.find(path);
             if (it == _resources.end()) {
-                return {}; // nullopt
+                return {};  // nullopt
             }
 
             Resource<T>* typedResource = DCAST<Resource<T>*>(it->second);
-            if (!typedResource) {
-                return {};
-            }
+            if (!typedResource) { return {}; }
 
             return ResourceHandle<T>(this, path, &typedResource->data);
         }
@@ -182,4 +176,4 @@ namespace x {
             return (_manager != None) && (_data != None) && (!_path.empty());
         }
     };
-}
+}  // namespace x

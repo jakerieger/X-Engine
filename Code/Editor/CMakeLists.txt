@@ -7,6 +7,9 @@ add_executable(xeditor
     ${IMGUI_SOURCES}
     ${STB_SOURCES}
     ${COMMON_SOURCES}
+    ${CODE_DIR}/Vendor/TextEditor.h
+    ${CODE_DIR}/Vendor/TextEditor.cpp
+    ${EDITOR_DIR}/Controls.hpp
     ${EDITOR_DIR}/FileDialogs.cpp
     ${EDITOR_DIR}/FileDialogs.hpp
     ${EDITOR_DIR}/TextureManager.cpp

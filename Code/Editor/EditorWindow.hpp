@@ -15,8 +15,9 @@ namespace x::Editor {
     public:
         EditorWindow()
             : Window("XEditor", 1600, 900), _sceneViewport(_context), _textureManager(_context), _game(_context),
-              _propertiesPanel(_game) {}
+              _propertiesPanel(*this) {}
 
+        bool LoadTextures();
         void OnInitialize() override;
         void OnResize(u32 width, u32 height) override;
         void OnShutdown() override;
@@ -24,15 +25,21 @@ namespace x::Editor {
         void Update() override;
         void Render() override;
 
+        X_NODISCARD bool InPlayMode() const {
+            return _gameRunning;
+        }
+
         LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) override;
 
     private:
+        bool _layoutSetup {false};
         Viewport _sceneViewport;
         TextureManager _textureManager;
+        unordered_map<str, ImFont*> _fonts;
+        ImFont* _defaultFont {None};
 
         Game _game;
-        bool _gameRunning = false;
-
+        bool _gameRunning {false};
         Camera _editorCamera;
         Camera _sceneCamera;
 
@@ -40,7 +47,17 @@ namespace x::Editor {
         EntityId _selectedEntity;
 
         // UI Panels
+        friend PropertiesPanel;
         PropertiesPanel _propertiesPanel;
+
+        void MainMenu();
+        void SetupDockspace(f32 yOffset);
+        void SceneView();
+        void EntitiesView();
+        void WorldSettingsView();
+        void PropertiesView();
+        void AssetsView();
+        void EditorLogView();
 
         void OpenScene(const char* filename);
         void TogglePlayMode();

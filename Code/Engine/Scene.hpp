@@ -36,6 +36,7 @@ namespace x {
         unordered_map<str, EntityId>& GetEntities();
         X_NODISCARD const SceneState& GetState() const;
         X_NODISCARD u32 GetNumEntities() const;
+        X_NODISCARD ResourceManager& GetResourceManager();
 
         void RegisterVolatiles(vector<Volatile*>& volatiles);
 

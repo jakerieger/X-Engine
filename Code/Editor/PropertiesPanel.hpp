@@ -6,12 +6,13 @@
 
 #include "Common/Types.hpp"
 #include "Engine/EntityId.hpp"
+#include "Engine/SceneState.hpp"
 
-namespace x {
-    class Game;
-}
+#include <TextEditor.h>
 
 namespace x::Editor {
+    class EditorWindow;
+
     struct TransformValues {
         f32 position[3];
         f32 rotation[3];
@@ -19,10 +20,10 @@ namespace x::Editor {
     };
 
     class PropertiesPanel {
-        Game& _game;
+        EditorWindow& _editor;
 
     public:
-        explicit PropertiesPanel(Game& game) : _game(game) {}
+        explicit PropertiesPanel(EditorWindow& editor) : _editor(editor) {}
 
         void OnSceneTransition() {}
 
@@ -30,6 +31,11 @@ namespace x::Editor {
         void Draw(EntityId selectedEntity);
 
     private:
+        TextEditor _textEditor;
         TransformValues _transform {};
+
+        void BehaviorProperties(EntityId selectedEntity, const SceneState& state);
+        void TransformProperties(EntityId selectedEntity, SceneState& state);
+        void UpdateTransformProperties(EntityId selectedEntity, SceneState& state);
     };
 }  // namespace x::Editor

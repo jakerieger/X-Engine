@@ -195,9 +195,9 @@ namespace x {
             auto& lua = _scriptEngine.GetLuaState();
 
             // register game globals
-            // auto gameGlobal    = lua.new_usertype<Game>("Game");
-            // gameGlobal["Quit"] = [this] { Quit(); };
-            // _input.RegisterLuaGlobals(lua);
+            auto gameGlobal    = lua.new_usertype<Game>("Game");
+            gameGlobal["Quit"] = [this] { _window->Quit(); };
+            _input.RegisterLuaGlobals(lua);
 
             // TODO: register scene globals
 
@@ -273,7 +273,7 @@ namespace x {
         // additional checks here...
         return true;
     }
-    
+
     PostProcessSystem* Game::GetPostProcess() const {
         return _renderSystem->GetPostProcess();
     }

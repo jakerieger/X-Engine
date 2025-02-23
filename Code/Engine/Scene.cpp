@@ -168,6 +168,10 @@ namespace x {
         return _entities.size();
     }
 
+    ResourceManager& Scene::GetResourceManager() {
+        return _resources;
+    }
+
     void Scene::RegisterVolatiles(vector<Volatile*>& volatiles) {
         volatiles.push_back(&_state.GetMainCamera());
     }

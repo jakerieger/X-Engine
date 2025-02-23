@@ -73,12 +73,18 @@ namespace x {
             return false;
         }
 
+        // Calculate screen center for window
+        const int scrX = ::GetSystemMetrics(SM_CXSCREEN);
+        const int scrY = ::GetSystemMetrics(SM_CYSCREEN);
+        const int winX = (scrX - (i32)_currentWidth) / 2;
+        const int winY = (scrY - (i32)_currentHeight) / 2;
+
         _hwnd = ::CreateWindowExA(WS_EX_APPWINDOW,
                                   wc.lpszClassName,
                                   _title.c_str(),
                                   WS_OVERLAPPEDWINDOW,
-                                  CW_USEDEFAULT,
-                                  CW_USEDEFAULT,
+                                  winX,
+                                  winY,
                                   CAST<i32>(_currentWidth),
                                   CAST<i32>(_currentHeight),
                                   None,
