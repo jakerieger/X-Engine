@@ -77,6 +77,34 @@ namespace x::Editor {
             X_LOG_ERROR("Failed to load 'PlayIcon'");
             return false;
         }
+        if (!_textureManager.LoadFromMemory(UNDO_BYTES, 24, 24, 4, "UndoIcon")) {
+            X_LOG_ERROR("Failed to load 'UndoIcon'");
+            return false;
+        }
+        if (!_textureManager.LoadFromMemory(REDO_BYTES, 24, 24, 4, "RedoIcon")) {
+            X_LOG_ERROR("Failed to load 'RedoIcon'");
+            return false;
+        }
+        if (!_textureManager.LoadFromMemory(SEPARATOR_BYTES, 24, 24, 4, "SeparatorIcon")) {
+            X_LOG_ERROR("Failed to load 'SeparatorIcon'");
+            return false;
+        }
+        if (!_textureManager.LoadFromMemory(SETTINGS_BYTES, 24, 24, 4, "SettingsIcon")) {
+            X_LOG_ERROR("Failed to load 'SettingsIcon'");
+            return false;
+        }
+        if (!_textureManager.LoadFromMemory(SNAP_TO_GRID_BYTES, 24, 24, 4, "SnapToGridIcon")) {
+            X_LOG_ERROR("Failed to load 'SnapToGridIcon'");
+            return false;
+        }
+        if (!_textureManager.LoadFromMemory(PAUSE_BYTES, 24, 24, 4, "PauseIcon")) {
+            X_LOG_ERROR("Failed to load 'PauseIcon'");
+            return false;
+        }
+        if (!_textureManager.LoadFromMemory(STOP_BYTES, 24, 24, 4, "StopIcon")) {
+            X_LOG_ERROR("Failed to load 'StopIcon'");
+            return false;
+        }
         return true;
     }
 
@@ -352,7 +380,7 @@ namespace x::Editor {
         // TOOL BAR
         //============================================================================================================//
 
-        Toolbar(_textureManager, menuBarHeight);
+        Toolbar(this, _textureManager, menuBarHeight);
 
         //============================================================================================================//
         // EDITOR PANELS

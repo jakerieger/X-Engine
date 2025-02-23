@@ -31,6 +31,10 @@ namespace x::Editor {
 
         LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) override;
 
+        void OpenScene(const char* filename);
+        void TogglePlayMode();
+        void NewScene();
+
     private:
         bool _layoutSetup {false};
         Viewport _sceneViewport;
@@ -58,10 +62,6 @@ namespace x::Editor {
         void PropertiesView();
         void AssetsView();
         void EditorLogView();
-
-        void OpenScene(const char* filename);
-        void TogglePlayMode();
-        void NewScene();
 
         static void ApplyTheme();
     };

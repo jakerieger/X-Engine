@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Common/Types.hpp"
-#include "Engine/Platform.hpp"
+#include "EditorWindow.hpp"
 #include <imgui.h>
 
 namespace x::Editor {
@@ -97,7 +97,7 @@ namespace x::Editor {
     }
 #pragma endregion
 
-    inline bool ToggleButtonIcon(
+    inline bool IconButtonToggle(
       ImVec2 size, ID3D11ShaderResourceView* icon, const str& name, bool active, ImVec4 tint = ImVec4(1, 1, 1, 0.5)) {
         const auto* colors = ImGui::GetStyle().Colors;
 
@@ -126,8 +126,32 @@ namespace x::Editor {
         return pressed;
     }
 
-    inline void Toolbar(TextureManager& textureManager, f32 menuBarHeight) {
-        static int selectedTool                 = 0;
+    inline bool
+    IconButton(ImVec2 size, ID3D11ShaderResourceView* icon, const str& name, ImVec4 tint = ImVec4(1, 1, 1, 0.5)) {
+        const auto* colors = ImGui::GetStyle().Colors;
+        ImGui::PushStyleColor(ImGuiCol_Button, colors[ImGuiCol_WindowBg]);
+        const bool pressed = ImGui::ImageButton(name.c_str(),
+                                                (ImTextureID)icon,
+                                                size,
+                                                ImVec2(0, 0),
+                                                ImVec2(1, 1),
+                                                ImVec4(0, 0, 0, 0),
+                                                tint);
+        ImGui::PopStyleColor();
+        return pressed;
+    }
+
+    inline void SeparatorVertical(ImVec2 size,
+                                  ID3D11ShaderResourceView* icon,
+                                  const str& name,
+                                  ImVec4 tint = ImVec4(1, 1, 1, 0.25)) {
+        ImGui::Image((ImTextureID)icon, size, ImVec2(0, 0), ImVec2(1, 1), tint);
+    }
+
+    inline void Toolbar(EditorWindow* parent, TextureManager& textureManager, f32 menuBarHeight) {
+        static int selectedTool = 0;
+        static bool snapToGrid  = false;
+
         constexpr ImGuiWindowFlags toolbarFlags = ImGuiWindowFlags_NoTitleBar |            // No title bar needed
                                                   ImGuiWindowFlags_NoScrollbar |           // Disable scrolling
                                                   ImGuiWindowFlags_NoMove |                // Prevent moving
@@ -143,21 +167,63 @@ namespace x::Editor {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2, 2));
 
         if (ImGui::Begin("##Toolbar", None, toolbarFlags)) {
+            const auto separatorIcon = textureManager.GetTexture("SeparatorIcon")->srv.Get();
+
             const auto selectIcon = textureManager.GetTexture("SelectIcon")->srv.Get();
             const auto moveIcon   = textureManager.GetTexture("MoveIcon")->srv.Get();
             const auto rotateIcon = textureManager.GetTexture("RotateIcon")->srv.Get();
             const auto scaleIcon  = textureManager.GetTexture("ScaleIcon")->srv.Get();
-            // const auto playIcon   = textureManager.GetTexture("PlayIcon")->srv.Get();
+
+            const auto playIcon  = textureManager.GetTexture("PlayIcon")->srv.Get();
+            const auto pauseIcon = textureManager.GetTexture("PauseIcon")->srv.Get();
+            const auto stopIcon  = textureManager.GetTexture("StopIcon")->srv.Get();
+
+            const auto undoIcon       = textureManager.GetTexture("UndoIcon")->srv.Get();
+            const auto redoIcon       = textureManager.GetTexture("RedoIcon")->srv.Get();
+            const auto snapToGridIcon = textureManager.GetTexture("SnapToGridIcon")->srv.Get();
+            const auto settingsIcon   = textureManager.GetTexture("SettingsIcon")->srv.Get();
 
             static constexpr auto btnSize = ImVec2(24, 24);
 
-            if (ToggleButtonIcon(btnSize, selectIcon, "##select", selectedTool == 0)) { selectedTool = 0; }
+            if (IconButtonToggle(btnSize, selectIcon, "##select", selectedTool == 0)) { selectedTool = 0; }
             ImGui::SameLine();
-            if (ToggleButtonIcon(btnSize, moveIcon, "##move", selectedTool == 1)) { selectedTool = 1; }
+            if (IconButtonToggle(btnSize, moveIcon, "##move", selectedTool == 1)) { selectedTool = 1; }
             ImGui::SameLine();
-            if (ToggleButtonIcon(btnSize, rotateIcon, "##rotate", selectedTool == 2)) { selectedTool = 2; }
+            if (IconButtonToggle(btnSize, rotateIcon, "##rotate", selectedTool == 2)) { selectedTool = 2; }
             ImGui::SameLine();
-            if (ToggleButtonIcon(btnSize, scaleIcon, "##scale", selectedTool == 3)) { selectedTool = 3; }
+            if (IconButtonToggle(btnSize, scaleIcon, "##scale", selectedTool == 3)) { selectedTool = 3; }
+
+            ImGui::SameLine();
+            SeparatorVertical(ImVec2(28, 28), separatorIcon, "##sep1");
+            ImGui::SameLine();
+
+            if (IconButton(btnSize, undoIcon, "##undo")) {}
+            ImGui::SameLine();
+            if (IconButton(btnSize, redoIcon, "##redo")) {}
+            ImGui::SameLine();
+            if (IconButtonToggle(btnSize, snapToGridIcon, "##snap_to_grid", snapToGrid)) { snapToGrid = !snapToGrid; }
+
+            // Move the next 3 buttons to the window center
+            // Total width is (24*3) + (2*3) or (72) + (6) or 78
+
+            auto windowWidth        = ImGui::GetWindowWidth();
+            auto middleButtonsWidth = (btnSize.x * 3) + 40;  // Calculated the '+ 40' using photoshop, no clue how it's
+                                                             // derived, but I'll be damned if it ain't centered
+            auto xOffset = (windowWidth / 2) - (middleButtonsWidth / 2);
+
+            ImGui::SameLine(xOffset);
+
+            if (IconButton(btnSize, playIcon, "##play")) { parent->TogglePlayMode(); }  // 24
+            ImGui::SameLine();                                                          // 4
+            if (IconButton(btnSize, pauseIcon, "##pause")) {}                           // 24
+            ImGui::SameLine();                                                          // 4
+            if (IconButton(btnSize, stopIcon, "##stop")) { parent->TogglePlayMode(); }  // 24
+
+            // Move the last settings button to the right
+            auto xOffsetFromRight = windowWidth - 36;
+
+            ImGui::SameLine(xOffsetFromRight);
+            if (IconButton(btnSize, settingsIcon, "Settings")) {}
 
             ImGui::End();
         }
