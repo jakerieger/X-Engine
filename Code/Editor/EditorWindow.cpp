@@ -152,6 +152,9 @@ namespace x::Editor {
     void EditorWindow::Update() {
         _game.Update(!_gameRunning);
         _entities = _game.GetActiveScene()->GetEntities();
+
+        // Update scene with zero tick
+        if (!InPlayMode()) { _game.GetActiveScene()->Update(0.f); }
     }
 
     void EditorWindow::MainMenu() {
