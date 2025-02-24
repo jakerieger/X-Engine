@@ -54,9 +54,12 @@ namespace x::Editor {
         friend PropertiesPanel;
         PropertiesPanel _propertiesPanel;
 
+        TextEditor _textEditor;
+
         void MainMenu();
         void SetupDockspace(f32 yOffset);
         void SceneView();
+        void ScriptingView();
         void EntitiesView();
         void WorldSettingsView();
         void PropertiesView();

@@ -34,8 +34,8 @@ namespace x::Editor {
         UpdateTransformProperties(selectedEntity, state);
     }
 
-    void PropertiesPanel::BehaviorProperties(EntityId selectedEntity, const SceneState& state) {
-        auto* behaviorComponent = state.GetComponent<BehaviorComponent>(selectedEntity);
+    void PropertiesPanel::BehaviorProperties(EntityId selectedEntity, SceneState& state) {
+        auto* behaviorComponent = state.GetComponentMutable<BehaviorComponent>(selectedEntity);
         if (behaviorComponent) {
             ImGui::Text("Behavior");
             ImGui::Text("Script: ");
@@ -75,7 +75,14 @@ namespace x::Editor {
             ImGui::PopFont();
             ImGui::PopStyleVar();
 
-            if (ImGui::Button("Save")) { ImGui::CloseCurrentPopup(); }
+            if (ImGui::Button("Save")) {
+                auto updatedSource = _textEditor.GetText();
+                if (behaviorComponent && updatedSource != behaviorComponent->GetSource()) {
+                    behaviorComponent->UpdateSource(updatedSource);
+                    _editor._game.GetScriptEngine().LoadScript(updatedSource, behaviorComponent->GetId());
+                }
+                ImGui::CloseCurrentPopup();
+            }
 
             ImGui::SameLine();
             if (ImGui::Button("Cancel")) { ImGui::CloseCurrentPopup(); }

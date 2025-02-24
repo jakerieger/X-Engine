@@ -158,6 +158,10 @@ namespace x::Editor {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
+                if (ImGui::MenuItem("New Project", "Ctrl+Shift+N")) {}
+                if (ImGui::MenuItem("Open Project", "Ctrl+Shift+O")) {}
+                if (ImGui::MenuItem("Save Project", "Ctrl+Shift+S")) {}
+                ImGui::Separator();
                 if (ImGui::MenuItem("New Scene", "Ctrl+N")) { NewScene(); }
                 if (ImGui::MenuItem("Open Scene", "Ctrl+O")) {
                     const char* filter = "Scene (*.xscn)|*.xscn|";
@@ -226,6 +230,7 @@ namespace x::Editor {
                 ImGui::DockBuilderDockWindow("Entities", dockLeftId);
                 ImGui::DockBuilderDockWindow("Properties", dockRightId);
                 ImGui::DockBuilderDockWindow("Scene", dockMainId);
+                ImGui::DockBuilderDockWindow("Scripting", dockMainId);
                 ImGui::DockBuilderDockWindow("Assets", dockBottomId);
                 ImGui::DockBuilderDockWindow("Editor Log", dockBottomId);
                 ImGui::DockBuilderDockWindow("World Settings", dockRightBottomId);
@@ -262,6 +267,34 @@ namespace x::Editor {
         ImGui::PopStyleVar();
     }
 
+    void EditorWindow::ScriptingView() {
+        ImGui::Begin("Scripting");
+        {
+            const f32 windowWidth      = ImGui::GetContentRegionAvail().x;
+            const auto leftPanelWidth  = windowWidth * 0.25f;
+            const auto rightPanelWidth = windowWidth * 0.75f;
+
+            ImGui::BeginChild("Scripts", ImVec2(leftPanelWidth, 0), true);
+            {}
+            ImGui::EndChild();
+
+            ImGui::SameLine();
+
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.f, 0.f});
+            ImGui::BeginChild("Source", ImVec2(rightPanelWidth, 0), true);
+            {
+                const auto size = ImGui::GetContentRegionAvail();
+
+                ImGui::PushFont(_fonts["mono"]);
+                _textEditor.Render("##script_source", size, true);
+                ImGui::PopFont();
+            }
+            ImGui::EndChild();
+            ImGui::PopStyleVar();
+        }
+        ImGui::End();
+    }
+
     void EditorWindow::EntitiesView() {
         ImGui::Begin("Entities");
         {
@@ -277,7 +310,27 @@ namespace x::Editor {
 
     void EditorWindow::WorldSettingsView() {
         ImGui::Begin("World Settings");
-        {}
+        {
+            // TODO: These changes don't persist or update shadow maps
+            auto& state = _game.GetActiveScene()->GetState();
+
+            static Float4 skyColor = {0.3921569, 0.5843138, 0.9294118, 1};
+            u32& sunEnabled        = state.Lights.Sun.enabled;
+            Float4& sunDirection   = state.Lights.Sun.direction;
+            Float4& sunColor       = state.Lights.Sun.color;
+
+            if (ImGui::CollapsingHeader("Sky")) { ImGui::ColorPicker4("Sky Color", (float*)&skyColor); }
+
+            if (ImGui::CollapsingHeader("Camera")) {}
+
+            if (ImGui::CollapsingHeader("Lights")) {
+                ImGui::Checkbox("Enabled", (bool*)&sunEnabled);
+                ImGui::DragFloat4("Direction", (float*)&sunDirection, 0.01f, -1.f, 1.f);
+            }
+
+            // Update world
+            _sceneViewport.SetClearColor(skyColor.x, skyColor.y, skyColor.z, skyColor.w);
+        }
         ImGui::End();
     }
 
@@ -389,6 +442,7 @@ namespace x::Editor {
         SetupDockspace(menuBarHeight + kToolbarHeight);
 
         SceneView();
+        ScriptingView();
         EntitiesView();
         WorldSettingsView();
         PropertiesView();

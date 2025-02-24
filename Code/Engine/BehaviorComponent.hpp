@@ -16,14 +16,18 @@ namespace x {
             if (!scriptSource.empty()) {
                 _scriptSource = std::move(scriptSource);
                 _scriptPath   = filename;
-                _scriptId     = Path(filename).Filename();
+                _scriptId     = Path(filename).Str();
             }
         }
 
         void Reload() {
-            if (!_scriptPath.empty()) {
-                LoadFromFile(_scriptPath);
-            }
+            if (!_scriptPath.empty()) { LoadFromFile(_scriptPath); }
+        }
+
+        void UpdateSource(const str& source) {
+            using namespace Filesystem;
+            _scriptSource = source;
+            FileWriter::WriteAllText(Path(_scriptPath), source);
         }
 
         X_NODISCARD const str& GetSource() const {
@@ -39,4 +43,4 @@ namespace x {
         str _scriptPath;
         str _scriptId;
     };
-}
+}  // namespace x

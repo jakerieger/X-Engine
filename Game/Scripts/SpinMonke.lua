@@ -1,4 +1,4 @@
-local rotSpeed = 45.0
+local rotSpeed = 100.0
 
 function onAwake(entity)
 end
@@ -12,3 +12,4 @@ end
 
 function onDestroyed(entity)
 end
+

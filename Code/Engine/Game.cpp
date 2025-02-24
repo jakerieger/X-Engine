@@ -277,4 +277,8 @@ namespace x {
     PostProcessSystem* Game::GetPostProcess() const {
         return _renderSystem->GetPostProcess();
     }
+
+    ScriptEngine& Game::GetScriptEngine() {
+        return _scriptEngine;
+    }
 }  // namespace x

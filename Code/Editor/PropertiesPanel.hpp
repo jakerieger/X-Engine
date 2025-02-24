@@ -34,7 +34,7 @@ namespace x::Editor {
         TextEditor _textEditor;
         TransformValues _transform {};
 
-        void BehaviorProperties(EntityId selectedEntity, const SceneState& state);
+        void BehaviorProperties(EntityId selectedEntity, SceneState& state);
         void TransformProperties(EntityId selectedEntity, SceneState& state);
         void UpdateTransformProperties(EntityId selectedEntity, SceneState& state);
     };
