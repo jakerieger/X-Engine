@@ -10,21 +10,21 @@ namespace x {
     class EventEmitter {
     public:
         void AddListener(EventListener* listener) {
-            _listeners.push_back(listener);
+            mListeners.push_back(listener);
         }
 
         void RemoveListener(EventListener* listener) {
-            _listeners.erase(std::remove(_listeners.begin(), _listeners.end(), listener));
+            mListeners.erase(std::remove(mListeners.begin(), mListeners.end(), listener));
         }
 
     protected:
         void Emit(const Event& e) const {
-            for (const auto& listener : _listeners) {
+            for (const auto& listener : mListeners) {
                 listener->HandleEvent(e);
             }
         }
 
     private:
-        vector<EventListener*> _listeners;
+        vector<EventListener*> mListeners;
     };
 }  // namespace x

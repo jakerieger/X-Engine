@@ -6,16 +6,16 @@
 namespace x {
     class RenderContext;
 
-    #pragma region IShader
+#pragma region IShader
     class IShader {
     protected:
-        RenderContext& _renderer;
-        ComPtr<ID3DBlob> _shaderBlob;
-        ComPtr<ID3D11ShaderReflection> _reflection;
-        ComPtr<ID3D11DeviceChild> _shader;
+        RenderContext& mRenderer;
+        ComPtr<ID3DBlob> mShaderBlob;
+        ComPtr<ID3D11ShaderReflection> mReflection;
+        ComPtr<ID3D11DeviceChild> mShader;
 
     public:
-        explicit IShader(RenderContext& renderer) : _renderer(renderer) {}
+        explicit IShader(RenderContext& renderer) : mRenderer(renderer) {}
         virtual ~IShader() = default;
 
     protected:
@@ -23,11 +23,11 @@ namespace x {
         void InitFromMemory(const u8* data, size_t size);
         [[nodiscard]] D3D11_SHADER_DESC GetShaderDesc() const;
     };
-    #pragma endregion
+#pragma endregion
 
-    #pragma region VertexShader
+#pragma region VertexShader
     class VertexShader final : public IShader {
-        ComPtr<ID3D11InputLayout> _inputLayout;
+        ComPtr<ID3D11InputLayout> mInputLayout;
 
     public:
         explicit VertexShader(RenderContext& renderer) : IShader(renderer) {}
@@ -39,9 +39,9 @@ namespace x {
         void CreateInputLayout();
         DXGI_FORMAT GetDXGIFormat(u8 mask, D3D_REGISTER_COMPONENT_TYPE componentType);
     };
-    #pragma endregion
+#pragma endregion
 
-    #pragma region PixelShader
+#pragma region PixelShader
     class PixelShader final : public IShader {
     public:
         explicit PixelShader(RenderContext& renderer) : IShader(renderer) {}
@@ -49,13 +49,13 @@ namespace x {
         void LoadFromMemory(const u8* data, size_t size);
         void Bind();
     };
-    #pragma endregion
+#pragma endregion
 
-    #pragma region ComputeShader
+#pragma region ComputeShader
     class ComputeShader final : public IShader {
-        u32 _threadGroupSizeX = 0;
-        u32 _threadGroupSizeY = 0;
-        u32 _threadGroupSizeZ = 0;
+        u32 mThreadGroupSizeX = 0;
+        u32 mThreadGroupSizeY = 0;
+        u32 mThreadGroupSizeZ = 0;
 
     public:
         explicit ComputeShader(RenderContext& renderer) : IShader(renderer) {}
@@ -66,19 +66,19 @@ namespace x {
         void DispatchWithThreadCount(u32 threadCountX, u32 threadCountY, u32 threadCountZ) const;
 
         [[nodiscard]] u32 GetThreadGroupSizeX() const {
-            return _threadGroupSizeX;
+            return mThreadGroupSizeX;
         }
 
         [[nodiscard]] u32 GetThreadGroupSizeY() const {
-            return _threadGroupSizeY;
+            return mThreadGroupSizeY;
         }
 
         [[nodiscard]] u32 GetThreadGroupSizeZ() const {
-            return _threadGroupSizeZ;
+            return mThreadGroupSizeZ;
         }
 
     private:
         void ExtractThreadGroupSize();
     };
-    #pragma endregion
-}
+#pragma endregion
+}  // namespace x

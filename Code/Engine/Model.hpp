@@ -5,33 +5,33 @@
 
 namespace x {
     class Mesh {
-        GeometryBuffer _geometryBuffer;
+        GeometryBuffer mGeometryBuffer;
 
     public:
         Mesh(const RenderContext& context, const vector<VSInputPBR>& vertices, const vector<u32>& indices) {
-            _geometryBuffer
-                .Create(context, vertices.data(), sizeof(VSInputPBR), vertices.size(), indices.data(), indices.size());
+            mGeometryBuffer
+              .Create(context, vertices.data(), sizeof(VSInputPBR), vertices.size(), indices.data(), indices.size());
         }
 
         void Draw(RenderContext& context) const {
-            _geometryBuffer.Bind(context);
-            context.DrawIndexed(_geometryBuffer.GetIndexCount());
+            mGeometryBuffer.Bind(context);
+            context.DrawIndexed(mGeometryBuffer.GetIndexCount());
         }
     };
 
     class Model {
         friend class ModelLoader;
-        vector<Mesh> _meshes;
+        vector<Mesh> mMeshes;
 
     public:
         Model() = default;
 
         void Draw(RenderContext& context) const {
-            for (auto& mesh : _meshes) {
+            for (auto& mesh : mMeshes) {
                 mesh.Draw(context);
             }
         }
     };
 
     using ModelHandle = Model*;
-}
+}  // namespace x

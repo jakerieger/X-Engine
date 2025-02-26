@@ -22,7 +22,7 @@ namespace x {
     struct LuaTypeRegistration {};
 
     struct LuaRegisterable {
-        virtual ~LuaRegisterable() = default;
+        virtual ~LuaRegisterable()                          = default;
         virtual void RegisterWithLua(sol::state& lua) const = 0;
     };
 
@@ -31,7 +31,7 @@ namespace x {
         static constexpr std::string_view typeName = LuaTypeTraits<T>::typeName;
 
         void RegisterWithLua(sol::state& lua) const override {
-            auto usertype = lua.new_usertype<T>(std::string{typeName});
+            auto usertype = lua.new_usertype<T>(std::string {typeName});
             LuaTypeTraits<T>::RegisterMembers(usertype);
         }
     };
@@ -58,42 +58,35 @@ namespace x {
         }
 
         sol::state& GetLuaState() {
-            return _lua;
+            return mLua;
         }
 
-        bool LoadScript(const str& source,
-                        const str& scriptId,
-                        const ScriptType type = ScriptType::Behavior) {
+        bool LoadScript(const str& source, const str& scriptId, const ScriptType type = ScriptType::Behavior) {
             try {
-                auto env = sol::environment(_lua, sol::create, _lua.globals());
-                _lua.script(source, env);
+                auto env = sol::environment(mLua, sol::create, mLua.globals());
+                mLua.script(source, env);
 
                 if (type == ScriptType::Behavior) {
                     sol::protected_function awakeFunc     = env["onAwake"];
                     sol::protected_function updateFunc    = env["onUpdate"];
                     sol::protected_function destroyedFunc = env["onDestroyed"];
 
-                    _behaviorContexts[scriptId] = {std::move(env),
+                    mBehaviorContexts[scriptId] = {std::move(env),
                                                    std::move(awakeFunc),
                                                    std::move(updateFunc),
                                                    std::move(destroyedFunc)};
                 }
 
                 return true;
-            } catch (const sol::error&) {
-                return false;
-            }
+            } catch (const sol::error&) { return false; }
         }
 
-        void CallAwakeBehavior(const str& scriptId,
-                               const BehaviorEntity& entity) {
-            if (!_behaviorContexts.contains(scriptId)) {
-                X_PANIC(
-                    "Could not find associated script in behavior contexts for id '%s'",
-                    scriptId.c_str());
+        void CallAwakeBehavior(const str& scriptId, const BehaviorEntity& entity) {
+            if (!mBehaviorContexts.contains(scriptId)) {
+                X_PANIC("Could not find associated script in behavior contexts for id '%s'", scriptId.c_str());
             }
 
-            const auto& context = _behaviorContexts[scriptId];
+            const auto& context = mBehaviorContexts[scriptId];
             if (context.onAwake.valid()) {
                 try {
                     _i_ = context.onAwake(entity);
@@ -101,34 +94,25 @@ namespace x {
             }
         }
 
-        void CallUpdateBehavior(const str& scriptId,
-                                f32 deltaTime,
-                                const BehaviorEntity& entity) {
-            if (!_behaviorContexts.contains(scriptId)) {
-                X_PANIC(
-                    "Could not find associated script in behavior contexts for id '%s'",
-                    scriptId.c_str());
+        void CallUpdateBehavior(const str& scriptId, f32 deltaTime, const BehaviorEntity& entity) {
+            if (!mBehaviorContexts.contains(scriptId)) {
+                X_PANIC("Could not find associated script in behavior contexts for id '%s'", scriptId.c_str());
             }
 
-            const auto& context = _behaviorContexts[scriptId];
+            const auto& context = mBehaviorContexts[scriptId];
             if (context.onUpdate.valid()) {
                 try {
                     _i_ = context.onUpdate(deltaTime, entity);
-                } catch (const sol::error& e) {
-                    X_PANIC(e.what());
-                }
+                } catch (const sol::error& e) { X_PANIC(e.what()); }
             }
         }
 
-        void CallDestroyedBehavior(const str& scriptId,
-                                   const BehaviorEntity& entity) {
-            if (!_behaviorContexts.contains(scriptId)) {
-                X_PANIC(
-                    "Could not find associated script in behavior contexts for id '%s'",
-                    scriptId.c_str());
+        void CallDestroyedBehavior(const str& scriptId, const BehaviorEntity& entity) {
+            if (!mBehaviorContexts.contains(scriptId)) {
+                X_PANIC("Could not find associated script in behavior contexts for id '%s'", scriptId.c_str());
             }
 
-            const auto& context = _behaviorContexts[scriptId];
+            const auto& context = mBehaviorContexts[scriptId];
             if (context.onDestroyed.valid()) {
                 try {
                     _i_ = context.onDestroyed(entity);
@@ -138,21 +122,21 @@ namespace x {
 
         bool ExecuteFile(const str& filename) {
             try {
-                _lua.script_file(filename);
+                mLua.script_file(filename);
                 return true;
             } catch (const sol::error&) { return false; }
         }
 
         bool Execute(const str& script) {
             try {
-                _lua.script(script);
+                mLua.script(script);
                 return true;
             } catch (const sol::error&) { return false; }
         }
 
         template<typename T>
         void RegisterType() {
-            LuaRegistry<T>{}.RegisterWithLua(_lua);
+            LuaRegistry<T> {}.RegisterWithLua(mLua);
         }
 
         template<typename... Types>
@@ -162,14 +146,10 @@ namespace x {
 
     private:
         void InitializeLua() {
-            _lua.open_libraries(sol::lib::base,
-                                sol::lib::math,
-                                sol::lib::string,
-                                sol::lib::table,
-                                sol::lib::debug);
+            mLua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string, sol::lib::table, sol::lib::debug);
         }
 
-        sol::state _lua;
-        unordered_map<str, BehaviorScriptContext> _behaviorContexts;
+        sol::state mLua;
+        unordered_map<str, BehaviorScriptContext> mBehaviorContexts;
     };
-}
+}  // namespace x

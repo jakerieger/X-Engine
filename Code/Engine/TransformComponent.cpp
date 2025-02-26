@@ -7,91 +7,88 @@
 
 namespace x {
     TransformComponent::TransformComponent()
-        : _position(0.0f, 0.0f, 0.0f), _rotation(0.0f, 0.0f, 0.0f), _scale(1.0f, 1.0f, 1.0f),
-          _transform(XMMatrixIdentity()), _needsUpdate(true) {}
+        : mPosition(0.0f, 0.0f, 0.0f), mRotation(0.0f, 0.0f, 0.0f), mScale(1.0f, 1.0f, 1.0f),
+          mTransform(XMMatrixIdentity()), mNeedsUpdate(true) {}
 
     void TransformComponent::SetPosition(const Float3& position) {
-        _position    = position;
-        _needsUpdate = true;
+        mPosition    = position;
+        mNeedsUpdate = true;
     }
 
     void TransformComponent::SetRotation(const Float3& rotation) {
-        _rotation    = rotation;
-        _needsUpdate = true;
+        mRotation    = rotation;
+        mNeedsUpdate = true;
     }
 
     void TransformComponent::SetScale(const Float3& scale) {
-        _scale       = scale;
-        _needsUpdate = true;
+        mScale       = scale;
+        mNeedsUpdate = true;
     }
 
     Float3 TransformComponent::GetPosition() const {
-        return _position;
+        return mPosition;
     }
 
     Float3 TransformComponent::GetRotation() const {
-        return _rotation;
+        return mRotation;
     }
 
     Float3 TransformComponent::GetScale() const {
-        return _scale;
+        return mScale;
     }
 
     Matrix TransformComponent::GetTransformMatrix() const {
-        return _transform;
+        return mTransform;
     }
 
     Matrix TransformComponent::GetInverseTransformMatrix() const {
-        return XMMatrixInverse(None, _transform);
+        return XMMatrixInverse(None, mTransform);
     }
 
     void TransformComponent::Translate(const Float3& translation) {
-        const XMVECTOR pos   = XMLoadFloat3(&_position);
+        const XMVECTOR pos   = XMLoadFloat3(&mPosition);
         const XMVECTOR trans = XMLoadFloat3(&translation);
-        XMStoreFloat3(&_position, XMVectorAdd(pos, trans));
-        _needsUpdate = true;
+        XMStoreFloat3(&mPosition, XMVectorAdd(pos, trans));
+        mNeedsUpdate = true;
     }
 
     void TransformComponent::Rotate(const Float3& rotation) {
-        const XMVECTOR currentRot = XMLoadFloat3(&_rotation);
+        const XMVECTOR currentRot = XMLoadFloat3(&mRotation);
         const XMVECTOR deltaRot   = XMLoadFloat3(&rotation);
-        XMStoreFloat3(&_position, XMVectorAdd(currentRot, deltaRot));
-        _needsUpdate = true;
+        XMStoreFloat3(&mPosition, XMVectorAdd(currentRot, deltaRot));
+        mNeedsUpdate = true;
     }
 
     void TransformComponent::Scale(const Float3& scale) {
-        const XMVECTOR currentScale = XMLoadFloat3(&_scale);
+        const XMVECTOR currentScale = XMLoadFloat3(&mScale);
         const XMVECTOR deltaScale   = XMLoadFloat3(&scale);
-        XMStoreFloat3(&_position, XMVectorAdd(currentScale, deltaScale));
-        _needsUpdate = true;
+        XMStoreFloat3(&mPosition, XMVectorAdd(currentScale, deltaScale));
+        mNeedsUpdate = true;
     }
 
     void TransformComponent::Update() {
-        if (_needsUpdate)
-            UpdateTransformMatrix();
+        if (mNeedsUpdate) UpdateTransformMatrix();
     }
 
     void TransformComponent::UpdateTransformMatrix() {
-        const auto translation = MatrixTranslation(_position);
-        const auto rotation    = MatrixRotation(_rotation);
-        const auto scale       = MatrixScale(_scale);
-        _transform             = scale * rotation * translation;
-        _needsUpdate           = false;
+        const auto translation = MatrixTranslation(mPosition);
+        const auto rotation    = MatrixRotation(mRotation);
+        const auto scale       = MatrixScale(mScale);
+        mTransform             = scale * rotation * translation;
+        mNeedsUpdate           = false;
     }
 
-    Matrix
-    TransformComponent::MatrixRotation(const Float3& eulerAngles) {
+    Matrix TransformComponent::MatrixRotation(const Float3& eulerAngles) {
         const auto vecAngles     = XMLoadFloat3(&eulerAngles);
         const auto radiansAngles = XMVectorMultiply(vecAngles, XMVectorReplicate(XM_PI / 180.0f));
         return XMMatrixRotationRollPitchYawFromVector(radiansAngles);
     }
 
-    Matrix
-    TransformComponent::MatrixTranslation(const Float3& translation) {
+    Matrix TransformComponent::MatrixTranslation(const Float3& translation) {
         return XMMatrixTranslation(translation.x, translation.y, translation.z);
     }
 
     Matrix TransformComponent::MatrixScale(const Float3& scale) {
         return XMMatrixScaling(scale.x, scale.y, scale.z);
     }
-} // namespace x
+}  // namespace x

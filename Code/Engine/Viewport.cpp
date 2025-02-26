@@ -6,32 +6,32 @@
 
 namespace x {
     bool Viewport::Resize(u32 width, u32 height, bool attachToBackBuffer) {
-        _width  = width;
-        _height = height;
+        mWidth  = width;
+        mHeight = height;
 
-        _renderTarget.Reset();
-        _renderTargetView.Reset();
-        _depthStencilView.Reset();
-        _depthStencilState.Reset();
-        _shaderResourceView.Reset();
+        mRenderTarget.Reset();
+        mRenderTargetView.Reset();
+        mDepthStencilView.Reset();
+        mDepthStencilState.Reset();
+        mShaderResourceView.Reset();
 
-        _viewport.Width    = CAST<f32>(width);
-        _viewport.Height   = CAST<f32>(height);
-        _viewport.MinDepth = 0.0f;
-        _viewport.MaxDepth = 1.0f;
-        _viewport.TopLeftX = 0.0f;
-        _viewport.TopLeftY = 0.0f;
+        mViewport.Width    = CAST<f32>(width);
+        mViewport.Height   = CAST<f32>(height);
+        mViewport.MinDepth = 0.0f;
+        mViewport.MaxDepth = 1.0f;
+        mViewport.TopLeftX = 0.0f;
+        mViewport.TopLeftY = 0.0f;
 
-        auto* ctx    = _context.GetDeviceContext();
-        auto* device = _context.GetDevice();
+        auto* ctx    = mContext.GetDeviceContext();
+        auto* device = mContext.GetDevice();
         HRESULT hr;
         bool createdRenderTarget = false;
 
         if (attachToBackBuffer) {
             ID3D11RenderTargetView* nullRTV = nullptr;
             ctx->OMSetRenderTargets(1, &nullRTV, nullptr);
-            _context.ResizeSwapchainBuffers(width, height);
-            hr = device->CreateRenderTargetView(_context.GetBackBuffer(), None, &_renderTargetView);
+            mContext.ResizeSwapchainBuffers(width, height);
+            hr = device->CreateRenderTargetView(mContext.GetBackBuffer(), None, &mRenderTargetView);
             if (FAILED(hr)) {
                 X_LOG_ERROR("Failed to create render target");
                 return false;
@@ -63,7 +63,7 @@ namespace x {
         depthStencilViewDesc.ViewDimension                 = D3D11_DSV_DIMENSION_TEXTURE2D;
         depthStencilViewDesc.Texture2D.MipSlice            = 0;
 
-        hr = device->CreateDepthStencilView(depthStencilTexture.Get(), &depthStencilViewDesc, &_depthStencilView);
+        hr = device->CreateDepthStencilView(depthStencilTexture.Get(), &depthStencilViewDesc, &mDepthStencilView);
         if (FAILED(hr)) {
             X_LOG_ERROR("Failed to create depth stencil view");
             return false;
@@ -76,7 +76,7 @@ namespace x {
         depthStencilStateDesc.DepthFunc                = D3D11_COMPARISON_LESS;
         depthStencilStateDesc.StencilEnable            = FALSE;
 
-        hr = device->CreateDepthStencilState(&depthStencilStateDesc, &_depthStencilState);
+        hr = device->CreateDepthStencilState(&depthStencilStateDesc, &mDepthStencilState);
         if (FAILED(hr)) {
             X_LOG_ERROR("Failed to create depth stencil state");
             return false;
@@ -89,24 +89,24 @@ namespace x {
         sceneDesc.Height           = height;
         sceneDesc.MipLevels        = 1;
         sceneDesc.ArraySize        = 1;
-        sceneDesc.Format           = _format;
+        sceneDesc.Format           = mFormat;
         sceneDesc.SampleDesc.Count = 1;
         sceneDesc.Usage            = D3D11_USAGE_DEFAULT;
         sceneDesc.BindFlags        = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
-        hr = device->CreateTexture2D(&sceneDesc, None, &_renderTarget);
+        hr = device->CreateTexture2D(&sceneDesc, None, &mRenderTarget);
         if (FAILED(hr)) {
             X_LOG_ERROR("Failed to create render target texture");
             return false;
         }
 
-        hr = device->CreateRenderTargetView(_renderTarget.Get(), None, &_renderTargetView);
+        hr = device->CreateRenderTargetView(mRenderTarget.Get(), None, &mRenderTargetView);
         if (FAILED(hr)) {
             X_LOG_ERROR("Failed to create render target view");
             return false;
         }
 
-        hr = device->CreateShaderResourceView(_renderTarget.Get(), None, &_shaderResourceView);
+        hr = device->CreateShaderResourceView(mRenderTarget.Get(), None, &mShaderResourceView);
         if (FAILED(hr)) {
             X_LOG_ERROR("Failed to create shader resource view");
             return false;
@@ -116,21 +116,21 @@ namespace x {
     }
 
     void Viewport::AttachViewport() const {
-        _context.GetDeviceContext()->RSSetViewports(1, &_viewport);
+        mContext.GetDeviceContext()->RSSetViewports(1, &mViewport);
     }
 
     void Viewport::DetachViewport() const {
-        _context.GetDeviceContext()->RSSetViewports(1, None);
+        mContext.GetDeviceContext()->RSSetViewports(1, None);
     }
 
     void Viewport::ClearRenderTargetView() const {
-        auto* ctx = _context.GetDeviceContext();
-        ctx->ClearRenderTargetView(_renderTargetView.Get(), _clearColor);
+        auto* ctx = mContext.GetDeviceContext();
+        ctx->ClearRenderTargetView(mRenderTargetView.Get(), mClearColor);
     }
 
     void Viewport::ClearDepthStencilView(f32 depth, u8 stencil) const {
-        auto* ctx = _context.GetDeviceContext();
-        ctx->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, stencil);
+        auto* ctx = mContext.GetDeviceContext();
+        ctx->ClearDepthStencilView(mDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, stencil);
     }
 
     void Viewport::ClearAll(f32 depth, u8 stencil) const {
@@ -139,50 +139,50 @@ namespace x {
     }
 
     void Viewport::BindRenderTarget() const {
-        auto* ctx = _context.GetDeviceContext();
-        ctx->OMSetRenderTargets(1, _renderTargetView.GetAddressOf(), _depthStencilView.Get());
-        ctx->OMSetDepthStencilState(_depthStencilState.Get(), 0);
+        auto* ctx = mContext.GetDeviceContext();
+        ctx->OMSetRenderTargets(1, mRenderTargetView.GetAddressOf(), mDepthStencilView.Get());
+        ctx->OMSetDepthStencilState(mDepthStencilState.Get(), 0);
     }
 
     void Viewport::SetClearColor(f32 r, f32 g, f32 b, f32 a) {
-        _clearColor[0] = r;
-        _clearColor[1] = g;
-        _clearColor[2] = b;
-        _clearColor[3] = a;
+        mClearColor[0] = r;
+        mClearColor[1] = g;
+        mClearColor[2] = b;
+        mClearColor[3] = a;
     }
 
     void Viewport::SetClearColor(XMVECTORF32 color) {
-        _clearColor[0] = color[0];
-        _clearColor[1] = color[1];
-        _clearColor[2] = color[2];
-        _clearColor[3] = color[3];
+        mClearColor[0] = color[0];
+        mClearColor[1] = color[1];
+        mClearColor[2] = color[2];
+        mClearColor[3] = color[3];
     }
 
     ComPtr<ID3D11RenderTargetView> const& Viewport::GetRenderTargetView() {
-        return _renderTargetView;
+        return mRenderTargetView;
     }
 
     ComPtr<ID3D11DepthStencilView> const& Viewport::GetDepthStencilView() {
-        return _depthStencilView;
+        return mDepthStencilView;
     }
 
     ComPtr<ID3D11DepthStencilState> const& Viewport::GetDepthStencilState() {
-        return _depthStencilState;
+        return mDepthStencilState;
     }
 
     ComPtr<ID3D11ShaderResourceView> const& Viewport::GetShaderResourceView() {
-        return _shaderResourceView;
+        return mShaderResourceView;
     }
 
     D3D11_VIEWPORT Viewport::GetViewport() const {
-        return _viewport;
+        return mViewport;
     }
 
     u32 Viewport::GetWidth() const {
-        return _width;
+        return mWidth;
     }
 
     u32 Viewport::GetHeight() const {
-        return _height;
+        return mHeight;
     }
 }  // namespace x

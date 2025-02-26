@@ -20,19 +20,19 @@ namespace x {
         template<EventType T>
         void RegisterHandler(EventHandler<T> handler) {
             const auto type = std::type_index(typeid(T));
-            _handlers[type].push_back([handler](const Event& e) { handler(CAST<const T&>(e)); });
+            mHandlers[type].push_back([handler](const Event& e) { handler(CAST<const T&>(e)); });
         }
 
         void HandleEvent(const Event& e) {
             const auto type = std::type_index(typeid(e));
-            if (_handlers.contains(type)) {
-                for (auto& handler : _handlers[type]) {
+            if (mHandlers.contains(type)) {
+                for (auto& handler : mHandlers[type]) {
                     handler(e);
                 }
             }
         }
 
     private:
-        unordered_map<std::type_index, vector<EventCallback>> _handlers;
+        unordered_map<std::type_index, vector<EventCallback>> mHandlers;
     };
 }  // namespace x

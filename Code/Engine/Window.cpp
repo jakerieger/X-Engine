@@ -9,12 +9,12 @@
 #include <windowsx.h>
 
 namespace x {
-    Window::Window(const str& title, const int width, const int height) : _context() {
-        _instance      = None;
-        _hwnd          = None;
-        _currentWidth  = width;
-        _currentHeight = height;
-        _title         = title;
+    Window::Window(const str& title, const int width, const int height) : mContext() {
+        mInstance      = None;
+        mHwnd          = None;
+        mCurrentWidth  = width;
+        mCurrentHeight = height;
+        mTitle         = title;
     }
 
     Window::~Window() {
@@ -22,7 +22,7 @@ namespace x {
     }
 
     int Window::Run() {
-        _focused = true;
+        mFocused = true;
 
         if (!Initialize()) {
             X_LOG_ERROR("Failed to initialize window");
@@ -40,7 +40,7 @@ namespace x {
 
             Update();
             Render();
-            _context.Present();
+            mContext.Present();
         }
 
         Shutdown();
@@ -65,7 +65,7 @@ namespace x {
         wc.cbSize        = sizeof(WNDCLASSEXA);
         wc.style         = CS_HREDRAW | CS_VREDRAW;
         wc.lpfnWndProc   = WndProc;
-        wc.hInstance     = _instance;
+        wc.hInstance     = mInstance;
         wc.lpszClassName = "XEditorWindowClass";
 
         if (!::RegisterClassExA(&wc)) {
@@ -76,36 +76,36 @@ namespace x {
         // Calculate screen center for window
         const int scrX = ::GetSystemMetrics(SM_CXSCREEN);
         const int scrY = ::GetSystemMetrics(SM_CYSCREEN);
-        const int winX = (scrX - (i32)_currentWidth) / 2;
-        const int winY = (scrY - (i32)_currentHeight) / 2;
+        const int winX = (scrX - (i32)mCurrentWidth) / 2;
+        const int winY = (scrY - (i32)mCurrentHeight) / 2;
 
-        _hwnd = ::CreateWindowExA(WS_EX_APPWINDOW,
+        mHwnd = ::CreateWindowExA(WS_EX_APPWINDOW,
                                   wc.lpszClassName,
-                                  _title.c_str(),
+                                  mTitle.c_str(),
                                   WS_OVERLAPPEDWINDOW,
                                   winX,
                                   winY,
-                                  CAST<i32>(_currentWidth),
-                                  CAST<i32>(_currentHeight),
+                                  CAST<i32>(mCurrentWidth),
+                                  CAST<i32>(mCurrentHeight),
                                   None,
                                   None,
-                                  _instance,
+                                  mInstance,
                                   this);
 
-        if (!_hwnd) {
+        if (!mHwnd) {
             X_LOG_ERROR("Failed to create window");
             return false;
         }
 
-        ::ShowWindow(_hwnd, SW_SHOWDEFAULT);
-        ::UpdateWindow(_hwnd);
+        ::ShowWindow(mHwnd, SW_SHOWDEFAULT);
+        ::UpdateWindow(mHwnd);
 
         // Initialize DirectX context and window viewport (final render output)
-        _context.Initialize(_hwnd, _currentWidth, _currentHeight);
-        RasterizerStates::Initialize(_context);
-        _windowViewport = make_unique<Viewport>(_context);
+        mContext.Initialize(mHwnd, mCurrentWidth, mCurrentHeight);
+        RasterizerStates::Initialize(mContext);
+        mWindowViewport = make_unique<Viewport>(mContext);
 
-        if (!_windowViewport->Resize(_currentWidth, _currentHeight, true)) {
+        if (!mWindowViewport->Resize(mCurrentWidth, mCurrentHeight, true)) {
             X_LOG_ERROR("Failed to resize window viewport");
             return false;
         }
@@ -119,25 +119,25 @@ namespace x {
     void Window::Shutdown() {
         OnShutdown();
 
-        if (_windowViewport) {
-            _windowViewport->BindRenderTarget();
+        if (mWindowViewport) {
+            mWindowViewport->BindRenderTarget();
             ID3D11RenderTargetView* nullRTV = None;
-            _context.GetDeviceContext()->OMSetRenderTargets(1, &nullRTV, None);
-            _windowViewport.reset();
+            mContext.GetDeviceContext()->OMSetRenderTargets(1, &nullRTV, None);
+            mWindowViewport.reset();
         }
 
         ::CoUninitialize();
     }
 
     LRESULT Window::ResizeHandler(u32 width, u32 height) {
-        if (!_focused) return S_OK;
+        if (!mFocused) return S_OK;
 
-        _currentWidth  = width;
-        _currentHeight = height;
+        mCurrentWidth  = width;
+        mCurrentHeight = height;
 
         // Resize DirectX resources
-        if (_windowViewport.get() != None) {
-            if (!_windowViewport->Resize(_currentWidth, _currentHeight, true)) {
+        if (mWindowViewport.get() != None) {
+            if (!mWindowViewport->Resize(mCurrentWidth, mCurrentHeight, true)) {
                 X_LOG_ERROR("Failed to resize window viewport");
                 return E_FAIL;
             }
@@ -187,12 +187,12 @@ namespace x {
             }
                 return 0;
             case WM_KILLFOCUS: {
-                _focused = false;
+                mFocused = false;
                 Emit(WindowLostFocusEvent());
             }
                 return 0;
             case WM_SETFOCUS: {
-                _focused = true;
+                mFocused = true;
                 Emit(WindowFocusEvent());
             }
                 return 0;
@@ -200,7 +200,7 @@ namespace x {
                 break;
         }
 
-        return ::DefWindowProcA(_hwnd, msg, wParam, lParam);
+        return ::DefWindowProcA(mHwnd, msg, wParam, lParam);
     }
 
     LRESULT Window::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {

@@ -18,4 +18,4 @@ namespace x {
     private:
         RasterizerStates() = default;
     };
-}
+}  // namespace x

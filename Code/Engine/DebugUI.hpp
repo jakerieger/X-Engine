@@ -10,14 +10,14 @@
 
 namespace x {
     class DebugUI {
-        RenderContext& _renderer;
-        bool _showFrameGraph = false;
-        bool _showDeviceInfo = false;
-        bool _showFrameInfo  = true;
-        ImFont* _font        = None;
+        RenderContext& mRenderer;
+        bool mShowFrameGraph = false;
+        bool mShowDeviceInfo = false;
+        bool mShowFrameInfo  = true;
+        ImFont* mFont        = None;
 
     public:
-        explicit DebugUI(RenderContext& renderer) : _renderer(renderer) {
+        explicit DebugUI(RenderContext& renderer) : mRenderer(renderer) {
             Initialize();
         }
 
@@ -33,22 +33,22 @@ namespace x {
         }
 
         void SetShowFrameGraph(const bool show) {
-            _showFrameGraph = show;
+            mShowFrameGraph = show;
         }
 
         void SetShowDeviceInfo(const bool show) {
-            _showDeviceInfo = show;
+            mShowDeviceInfo = show;
         }
 
         void SetShowFrameInfo(const bool show) {
-            _showFrameInfo = show;
+            mShowFrameInfo = show;
         }
 
         /// Make sure to call this between BeginFrame() and EndFrame()
         void Draw(const RenderContext& renderer, const Clock& clock) {
-            if (_showFrameGraph) { DrawFrameGraph(clock); }
-            if (_showDeviceInfo) { DrawDeviceInfo(renderer.GetDeviceInfo()); }
-            if (_showFrameInfo) { DrawFrameInfo(clock, renderer.GetFrameInfo()); }
+            if (mShowFrameGraph) { DrawFrameGraph(clock); }
+            if (mShowDeviceInfo) { DrawDeviceInfo(renderer.GetDeviceInfo()); }
+            if (mShowFrameInfo) { DrawFrameInfo(clock, renderer.GetFrameInfo()); }
         }
 
     private:
@@ -57,7 +57,7 @@ namespace x {
             (void)io;
             io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
-            _font = io.Fonts->AddFontFromMemoryCompressedTTF(JetBrainsMono_TTF_compressed_data,
+            mFont = io.Fonts->AddFontFromMemoryCompressedTTF(JetBrainsMono_TTF_compressed_data,
                                                              JetBrainsMono_TTF_compressed_size,
                                                              16.0f);
         }

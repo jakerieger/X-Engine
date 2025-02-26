@@ -27,29 +27,29 @@ namespace x {
         virtual void Render() {}
 
         X_NODISCARD u32 GetWidth() const {
-            return _currentWidth;
+            return mCurrentWidth;
         }
 
         X_NODISCARD u32 GetHeight() const {
-            return _currentHeight;
+            return mCurrentHeight;
         }
 
         X_NODISCARD HWND GetHandle() const {
-            return _hwnd;
+            return mHwnd;
         }
 
     protected:
-        HINSTANCE _instance;
-        HWND _hwnd;
-        u32 _currentWidth, _currentHeight;
-        str _title;
-        RenderContext _context;
-        unique_ptr<Viewport> _windowViewport;
+        HINSTANCE mInstance;
+        HWND mHwnd;
+        u32 mCurrentWidth, mCurrentHeight;
+        str mTitle;
+        RenderContext mContext;
+        unique_ptr<Viewport> mWindowViewport;
 
         virtual LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam);
 
     private:
-        bool _focused = false;
+        bool mFocused = false;
 
         bool Initialize();
         void Shutdown();

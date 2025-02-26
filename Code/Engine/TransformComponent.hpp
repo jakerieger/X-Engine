@@ -26,15 +26,15 @@ namespace x {
         void Update();
 
     private:
-        Float3 _position;
-        Float3 _rotation;
-        Float3 _scale;
-        Matrix _transform;
-        bool _needsUpdate;
+        Float3 mPosition;
+        Float3 mRotation;
+        Float3 mScale;
+        Matrix mTransform;
+        bool mNeedsUpdate;
 
         void UpdateTransformMatrix();
         static Matrix MatrixRotation(const Float3& eulerAngles);
         static Matrix MatrixTranslation(const Float3& translation);
         static Matrix MatrixScale(const Float3& scale);
     };
-} // namespace x
+}  // namespace x

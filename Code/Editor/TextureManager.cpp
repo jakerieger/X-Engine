@@ -27,7 +27,7 @@ namespace x {
             subResource.SysMemPitch            = width * channels;
 
             ID3D11Texture2D* tex2D = None;
-            auto* device           = _context.GetDevice();
+            auto* device           = mContext.GetDevice();
             if (SUCCEEDED(device->CreateTexture2D(&desc, &subResource, &tex2D))) {
                 D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
                 srvDesc.Format                          = desc.Format;
@@ -36,7 +36,7 @@ namespace x {
                 srvDesc.Texture2D.MostDetailedMip       = 0;
 
                 if (SUCCEEDED(device->CreateShaderResourceView(tex2D, &srvDesc, &texture.srv))) {
-                    _textures[name] = texture;
+                    mTextures[name] = texture;
                 }
 
                 tex2D->Release();
@@ -49,8 +49,8 @@ namespace x {
 
         std::optional<TextureData> TextureManager::GetTexture(const str& name) {
             if (name.empty()) return std::nullopt;
-            if (!_textures.contains(name)) return std::nullopt;
-            return _textures[name];
+            if (!mTextures.contains(name)) return std::nullopt;
+            return mTextures[name];
         }
     }  // namespace Editor
 }  // namespace x

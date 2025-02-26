@@ -4,32 +4,42 @@
 
 namespace x {
     bool ColorGradeEffect::Initialize() {
-        _computeShader.LoadFromMemory(X_ARRAY_W_SIZE(kColorGrade_CSBytes));
+        mComputeShader.LoadFromMemory(X_ARRAY_W_SIZE(kColorGrade_CSBytes));
         return CreateResources();
     }
 
-    void ColorGradeEffect::SetSaturation(f32 saturation) { _saturation = saturation; }
+    void ColorGradeEffect::SetSaturation(f32 saturation) {
+        mSaturation = saturation;
+    }
 
-    void ColorGradeEffect::SetContrast(f32 contrast) { _contrast = contrast; }
+    void ColorGradeEffect::SetContrast(f32 contrast) {
+        mContrast = contrast;
+    }
 
-    void ColorGradeEffect::SetTemperature(f32 temperature) { _temperature = temperature; }
+    void ColorGradeEffect::SetTemperature(f32 temperature) {
+        mTemperature = temperature;
+    }
 
-    void ColorGradeEffect::SetExposureAdjustment(f32 exposureAdjustment) { _exposureAdjustment = exposureAdjustment; }
+    void ColorGradeEffect::SetExposureAdjustment(f32 exposureAdjustment) {
+        mExposureAdjustment = exposureAdjustment;
+    }
 
-    bool ColorGradeEffect::CreateResources() { return CreateConstantBuffer<ColorGradeParams>(); }
+    bool ColorGradeEffect::CreateResources() {
+        return CreateConstantBuffer<ColorGradeParams>();
+    }
 
     void ColorGradeEffect::UpdateConstants() {
         D3D11_MAPPED_SUBRESOURCE mapped;
         if (SUCCEEDED(
-            _renderer.GetDeviceContext()->Map(_constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped))) {
+              mRenderer.GetDeviceContext()->Map(mConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped))) {
             auto* params = CAST<ColorGradeParams*>(mapped.pData);
 
-            params->saturation         = _saturation;
-            params->contrast           = _contrast;
-            params->temperature        = _temperature;
-            params->exposureAdjustment = _exposureAdjustment;
+            params->saturation         = mSaturation;
+            params->contrast           = mContrast;
+            params->temperature        = mTemperature;
+            params->exposureAdjustment = mExposureAdjustment;
 
-            _renderer.GetDeviceContext()->Unmap(_constantBuffer.Get(), 0);
+            mRenderer.GetDeviceContext()->Unmap(mConstantBuffer.Get(), 0);
         }
     }
-} // namespace x
+}  // namespace x

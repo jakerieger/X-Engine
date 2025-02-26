@@ -4,14 +4,14 @@
 
 namespace x {
     void Texture2D::Bind(const u32 slot) const {
-        _renderer.GetDeviceContext()->PSSetShaderResources(slot, 1, _textureView.GetAddressOf());
-        _renderer.GetDeviceContext()->PSSetSamplers(slot, 1, _samplerState.GetAddressOf());
+        mRenderer.GetDeviceContext()->PSSetShaderResources(slot, 1, mTextureView.GetAddressOf());
+        mRenderer.GetDeviceContext()->PSSetSamplers(slot, 1, mSamplerState.GetAddressOf());
     }
 
     void Texture2D::Unbind(const u32 slot) const {
         ID3D11ShaderResourceView* nullSRV = None;
         ID3D11SamplerState* nullSS        = None;
-        _renderer.GetDeviceContext()->PSSetShaderResources(slot, 1, &nullSRV);
-        _renderer.GetDeviceContext()->PSSetSamplers(slot, 1, &nullSS);
+        mRenderer.GetDeviceContext()->PSSetShaderResources(slot, 1, &nullSRV);
+        mRenderer.GetDeviceContext()->PSSetSamplers(slot, 1, &nullSS);
     }
-}
+}  // namespace x

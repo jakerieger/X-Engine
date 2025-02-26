@@ -14,8 +14,8 @@ namespace x::Editor {
     class EditorWindow final : public Window {
     public:
         EditorWindow()
-            : Window("XEditor", 1600, 900), _sceneViewport(_context), _textureManager(_context), _game(_context),
-              _propertiesPanel(*this) {}
+            : Window("XEditor", 1600, 900), mSceneViewport(mContext), mTextureManager(mContext), mGame(mContext),
+              mPropertiesPanel(*this) {}
 
         bool LoadTextures();
         void OnInitialize() override;
@@ -26,7 +26,7 @@ namespace x::Editor {
         void Render() override;
 
         X_NODISCARD bool InPlayMode() const {
-            return _gameRunning;
+            return mGameRunning;
         }
 
         LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) override;
@@ -36,25 +36,25 @@ namespace x::Editor {
         void NewScene();
 
     private:
-        bool _layoutSetup {false};
-        Viewport _sceneViewport;
-        TextureManager _textureManager;
-        unordered_map<str, ImFont*> _fonts;
-        ImFont* _defaultFont {None};
+        bool mLayoutSetup {false};
+        Viewport mSceneViewport;
+        TextureManager mTextureManager;
+        unordered_map<str, ImFont*> mFonts;
+        ImFont* mDefaultFont {None};
 
-        Game _game;
-        bool _gameRunning {false};
-        Camera _editorCamera;
-        Camera _sceneCamera;
+        Game mGame;
+        bool mGameRunning {false};
+        Camera mEditorCamera;
+        Camera mSceneCamera;
 
-        unordered_map<str, EntityId> _entities;
-        EntityId _selectedEntity;
+        unordered_map<str, EntityId> mEntities;
+        EntityId mSelectedEntity;
 
         // UI Panels
         friend PropertiesPanel;
-        PropertiesPanel _propertiesPanel;
+        PropertiesPanel mPropertiesPanel;
 
-        TextEditor _textEditor;
+        TextEditor mTextEditor;
 
         void MainMenu();
         void SetupDockspace(f32 yOffset);

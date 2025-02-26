@@ -35,23 +35,24 @@ namespace x {
         X_NODISCARD bool SceneValid() const;
         X_NODISCARD PostProcessSystem* GetPostProcess() const;
         X_NODISCARD ScriptEngine& GetScriptEngine();
+        X_NODISCARD RenderSystem* GetRenderSystem() const;
 
     private:
-        bool _debugUIEnabled {false};
-        bool _isRunning {false};
-        bool _isPaused {false};
-        bool _isFocused {true};
-        Clock _clock;
-        unique_ptr<RenderSystem> _renderSystem;
-        unique_ptr<Scene> _activeScene;
-        std::unique_ptr<DebugUI> _debugUI;
-        vector<Volatile*> _volatiles;
-        DevConsole _devConsole;
-        RenderContext& _renderContext;
-        ScriptEngine _scriptEngine;
-        Input _input;
-        Mouse _mouse;
-        Window* _window;
+        bool mDebugUIEnabled {false};
+        bool mIsRunning {false};
+        bool mIsPaused {false};
+        bool mIsFocused {true};
+        Clock mClock;
+        unique_ptr<RenderSystem> mRenderSystem;
+        unique_ptr<Scene> mActiveScene;
+        std::unique_ptr<DebugUI> mDebugUI;
+        vector<Volatile*> mVolatiles;
+        DevConsole mDevConsole;
+        RenderContext& mRenderContext;
+        ScriptEngine mScriptEngine;
+        Input mInput;
+        Mouse mMouse;
+        Window* mWindow;
 
         void Pause();
         void Resume();

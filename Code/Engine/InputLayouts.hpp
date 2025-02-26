@@ -51,4 +51,4 @@ namespace x {
 
     template<typename T>
     concept HasWeights = requires(T t) { t.weights; };
-}
+}  // namespace x

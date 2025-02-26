@@ -2,8 +2,8 @@
 
 namespace x {
     void Mouse::CaptureMouse(HWND hwnd) {
-        if (!_captured) {
-            _captured = true;
+        if (!mCaptured) {
+            mCaptured = true;
             ::ShowCursor(FALSE);
             ::SetCapture(hwnd);
 
@@ -15,7 +15,7 @@ namespace x {
               (windowRect.bottom - windowRect.top) / 2,
             };
 
-            _lastPos = center;
+            mLastPos = center;
 
             ::ClientToScreen(hwnd, &center);
             ::SetCursorPos(center.x, center.y);
@@ -23,18 +23,18 @@ namespace x {
     }
 
     void Mouse::ReleaseMouse(HWND hwnd) {
-        if (_captured) {
-            _captured = false;
+        if (mCaptured) {
+            mCaptured = false;
             ::ShowCursor(TRUE);
             ::ReleaseCapture();
 
-            ::ClientToScreen(hwnd, &_lastPos);
-            ::SetCursorPos(_lastPos.x, _lastPos.y);
+            ::ClientToScreen(hwnd, &mLastPos);
+            ::SetCursorPos(mLastPos.x, mLastPos.y);
         }
     }
 
     void Mouse::OnMouseMove(HWND hwnd, Input& input, i32 xPos, i32 yPos) const {
-        if (_captured) {
+        if (mCaptured) {
             RECT windowRect;
             ::GetClientRect(hwnd, &windowRect);
             POINT centerPoint = {(windowRect.right - windowRect.left) / 2, (windowRect.bottom - windowRect.top) / 2};

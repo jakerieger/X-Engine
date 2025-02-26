@@ -13,14 +13,14 @@ namespace x {
         using CommandHandler = std::function<void(const vector<str>&)>;
 
     private:
-        bool _visible     = false;
-        bool _shouldFocus = false;
-        char _inputBuffer[kMaxInputLength];
-        vector<str> _items;
-        vector<str> _commands;
-        int _historyPos = -1; // -1: newline, 0..history.size()-1 is browsing history
-        vector<str> _history;
-        unordered_map<str, CommandHandler> _handlers;
+        bool mVisible     = false;
+        bool mShouldFocus = false;
+        char mInputBuffer[kMaxInputLength];
+        vector<str> mItems;
+        vector<str> mCommands;
+        int mHistoryPos = -1;  // -1: newline, 0..history.size()-1 is browsing history
+        vector<str> mHistory;
+        unordered_map<str, CommandHandler> mHandlers;
 
     public:
         void Execute(const char* cmdLine);
@@ -31,4 +31,4 @@ namespace x {
         void ToggleVisible();
         bool IsVisible() const;
     };
-}
+}  // namespace x

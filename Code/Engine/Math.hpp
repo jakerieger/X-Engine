@@ -35,8 +35,7 @@ namespace x {
     }
 
     inline float Abs(const float x) {
-        if (x < 0.0f)
-            return -x;
+        if (x < 0.0f) return -x;
         return x;
     }
-}
+}  // namespace x

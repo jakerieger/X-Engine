@@ -5,14 +5,14 @@
 
 namespace x {
     class Clock {
-        LARGE_INTEGER _frequency;
-        LARGE_INTEGER _lastTime;
-        f64 _deltaTime;
-        f64 _totalTime;
-        f64 _framesPerSecond;
-        f64 _fpsUpdateInterval;
-        f64 _timeSinceLastFpsUpdate;
-        u32 _frameCount;
+        LARGE_INTEGER mFrequency;
+        LARGE_INTEGER mLastTime;
+        f64 mDeltaTime;
+        f64 mTotalTime;
+        f64 mFramesPerSecond;
+        f64 mFpsUpdateInterval;
+        f64 mTimeSinceLastFpsUpdate;
+        u32 mFrameCount;
 
     public:
         Clock();
@@ -24,4 +24,4 @@ namespace x {
         u64 GetRawCounter() const;
         u64 GetCounterFrequency() const;
     };
-}
+}  // namespace x

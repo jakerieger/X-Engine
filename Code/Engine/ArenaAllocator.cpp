@@ -5,65 +5,64 @@ namespace x {
         return (addr + (alignment - 1)) & ~(alignment - 1);
     }
 
-    ArenaAllocator::ArenaAllocator(size_t size): _totalSize(size) {
-        _memory     = new u8[size];
-        _currentPos = _memory;
+    ArenaAllocator::ArenaAllocator(size_t size) : mTotalSize(size) {
+        mMemory     = new u8[size];
+        mCurrentPos = mMemory;
     }
 
     ArenaAllocator::~ArenaAllocator() {
-        delete[] _memory;
+        delete[] mMemory;
     }
 
-    ArenaAllocator::ArenaAllocator(ArenaAllocator&& other) noexcept: _memory(other._memory),
-                                                                     _currentPos(other._currentPos),
-                                                                     _totalSize(other._totalSize) {
-        other._memory     = None;
-        other._currentPos = None;
-        other._totalSize  = 0;
+    ArenaAllocator::ArenaAllocator(ArenaAllocator&& other) noexcept
+        : mMemory(other.mMemory), mCurrentPos(other.mCurrentPos), mTotalSize(other.mTotalSize) {
+        other.mMemory     = None;
+        other.mCurrentPos = None;
+        other.mTotalSize  = 0;
     }
 
     ArenaAllocator& ArenaAllocator::operator=(ArenaAllocator&& other) noexcept {
         if (this != &other) {
-            delete[] _memory;
+            delete[] mMemory;
 
-            _memory     = other._memory;
-            _currentPos = other._currentPos;
-            _totalSize  = other._totalSize;
+            mMemory     = other.mMemory;
+            mCurrentPos = other.mCurrentPos;
+            mTotalSize  = other.mTotalSize;
 
-            other._memory     = None;
-            other._currentPos = None;
-            other._totalSize  = 0;
+            other.mMemory     = None;
+            other.mCurrentPos = None;
+            other.mTotalSize  = 0;
         }
 
         return *this;
     }
 
     void* ArenaAllocator::Allocate(size_t size, size_t alignment) {
-        size_t currentAddr = RCAST<size_t>(_currentPos);
+        size_t currentAddr = RCAST<size_t>(mCurrentPos);
         size_t alignAddr   = AlignForward(currentAddr, alignment);
         size_t adjustment  = alignAddr - currentAddr;
 
-        if (_currentPos + size + adjustment > _memory + _totalSize) {
-            return None; // out of memory :(
+        if (mCurrentPos + size + adjustment > mMemory + mTotalSize) {
+            return None;  // out of memory :(
         }
 
-        _currentPos = RCAST<u8*>(alignAddr + size);
+        mCurrentPos = RCAST<u8*>(alignAddr + size);
         return RCAST<void*>(alignAddr);
     }
 
     void ArenaAllocator::Reset() {
-        _currentPos = _memory;
+        mCurrentPos = mMemory;
     }
 
     size_t ArenaAllocator::GetUsedMemory() const {
-        return CAST<size_t>(_currentPos - _memory);
+        return CAST<size_t>(mCurrentPos - mMemory);
     }
 
     size_t ArenaAllocator::GetSize() const {
-        return _totalSize;
+        return mTotalSize;
     }
 
     size_t ArenaAllocator::GetAvailableMemory() const {
-        return _totalSize - GetUsedMemory();
+        return mTotalSize - GetUsedMemory();
     }
-}
+}  // namespace x

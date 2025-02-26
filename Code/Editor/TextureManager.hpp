@@ -18,13 +18,13 @@ namespace x::Editor {
 
     class TextureManager {
     public:
-        explicit TextureManager(RenderContext& context) : _context(context) {}
+        explicit TextureManager(RenderContext& context) : mContext(context) {}
 
         bool LoadFromMemory(const u8* data, int width, int height, int channels, const str& name);
         std::optional<TextureData> GetTexture(const str& name);
 
     private:
-        RenderContext& _context;
-        unordered_map<str, TextureData> _textures;
+        RenderContext& mContext;
+        unordered_map<str, TextureData> mTextures;
     };
 }  // namespace x::Editor

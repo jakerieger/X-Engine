@@ -6,10 +6,8 @@ namespace x::StaticResources {
     bool Init(RenderContext& context) {
         Material_PBR = PBRMaterial::Create(context);
 
-        if (!Material_PBR) {
-            return false;
-        }
+        if (!Material_PBR) { return false; }
 
         return true;
     }
-}
+}  // namespace x::StaticResources

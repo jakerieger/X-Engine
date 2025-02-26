@@ -57,51 +57,51 @@ namespace x::Editor {
     }
 
     bool EditorWindow::LoadTextures() {
-        if (!_textureManager.LoadFromMemory(MOVE_BYTES, 24, 24, 4, "MoveIcon")) {
+        if (!mTextureManager.LoadFromMemory(MOVE_BYTES, 24, 24, 4, "MoveIcon")) {
             X_LOG_ERROR("Failed to load 'MoveIcon'");
             return false;
         }
-        if (!_textureManager.LoadFromMemory(SELECT_BYTES, 24, 24, 4, "SelectIcon")) {
+        if (!mTextureManager.LoadFromMemory(SELECT_BYTES, 24, 24, 4, "SelectIcon")) {
             X_LOG_ERROR("Failed to load 'SelectIcon'");
             return false;
         }
-        if (!_textureManager.LoadFromMemory(ROTATE_BYTES, 24, 24, 4, "RotateIcon")) {
+        if (!mTextureManager.LoadFromMemory(ROTATE_BYTES, 24, 24, 4, "RotateIcon")) {
             X_LOG_ERROR("Failed to load 'RotateIcon'");
             return false;
         }
-        if (!_textureManager.LoadFromMemory(SCALE_BYTES, 24, 24, 4, "ScaleIcon")) {
+        if (!mTextureManager.LoadFromMemory(SCALE_BYTES, 24, 24, 4, "ScaleIcon")) {
             X_LOG_ERROR("Failed to load 'ScaleIcon'");
             return false;
         }
-        if (!_textureManager.LoadFromMemory(PLAY_BYTES, 24, 24, 4, "PlayIcon")) {
+        if (!mTextureManager.LoadFromMemory(PLAY_BYTES, 24, 24, 4, "PlayIcon")) {
             X_LOG_ERROR("Failed to load 'PlayIcon'");
             return false;
         }
-        if (!_textureManager.LoadFromMemory(UNDO_BYTES, 24, 24, 4, "UndoIcon")) {
+        if (!mTextureManager.LoadFromMemory(UNDO_BYTES, 24, 24, 4, "UndoIcon")) {
             X_LOG_ERROR("Failed to load 'UndoIcon'");
             return false;
         }
-        if (!_textureManager.LoadFromMemory(REDO_BYTES, 24, 24, 4, "RedoIcon")) {
+        if (!mTextureManager.LoadFromMemory(REDO_BYTES, 24, 24, 4, "RedoIcon")) {
             X_LOG_ERROR("Failed to load 'RedoIcon'");
             return false;
         }
-        if (!_textureManager.LoadFromMemory(SEPARATOR_BYTES, 24, 24, 4, "SeparatorIcon")) {
+        if (!mTextureManager.LoadFromMemory(SEPARATOR_BYTES, 24, 24, 4, "SeparatorIcon")) {
             X_LOG_ERROR("Failed to load 'SeparatorIcon'");
             return false;
         }
-        if (!_textureManager.LoadFromMemory(SETTINGS_BYTES, 24, 24, 4, "SettingsIcon")) {
+        if (!mTextureManager.LoadFromMemory(SETTINGS_BYTES, 24, 24, 4, "SettingsIcon")) {
             X_LOG_ERROR("Failed to load 'SettingsIcon'");
             return false;
         }
-        if (!_textureManager.LoadFromMemory(SNAP_TO_GRID_BYTES, 24, 24, 4, "SnapToGridIcon")) {
+        if (!mTextureManager.LoadFromMemory(SNAP_TO_GRID_BYTES, 24, 24, 4, "SnapToGridIcon")) {
             X_LOG_ERROR("Failed to load 'SnapToGridIcon'");
             return false;
         }
-        if (!_textureManager.LoadFromMemory(PAUSE_BYTES, 24, 24, 4, "PauseIcon")) {
+        if (!mTextureManager.LoadFromMemory(PAUSE_BYTES, 24, 24, 4, "PauseIcon")) {
             X_LOG_ERROR("Failed to load 'PauseIcon'");
             return false;
         }
-        if (!_textureManager.LoadFromMemory(STOP_BYTES, 24, 24, 4, "StopIcon")) {
+        if (!mTextureManager.LoadFromMemory(STOP_BYTES, 24, 24, 4, "StopIcon")) {
             X_LOG_ERROR("Failed to load 'StopIcon'");
             return false;
         }
@@ -117,28 +117,31 @@ namespace x::Editor {
         io.IniFilename = "XEditorConfig.ini";
 
         ImFontAtlas* fontAtlas = io.Fonts;
-        _defaultFont           = fontAtlas->AddFontDefault();
-        _fonts["display"] =
+        mDefaultFont           = fontAtlas->AddFontDefault();
+        mFonts["display"] =
           fontAtlas->AddFontFromMemoryCompressedTTF(Inter_compressed_data, Inter_compressed_size, 16.0f);
-        _fonts["mono"] = fontAtlas->AddFontFromMemoryCompressedTTF(JetBrainsMono_TTF_compressed_data,
+        mFonts["mono"] = fontAtlas->AddFontFromMemoryCompressedTTF(JetBrainsMono_TTF_compressed_data,
                                                                    JetBrainsMono_TTF_compressed_size,
                                                                    16.0f);
         fontAtlas->Build();
 
-        ImGui_ImplWin32_Init(_hwnd);
-        ImGui_ImplDX11_Init(_context.GetDevice(), _context.GetDeviceContext());
+        ImGui_ImplWin32_Init(mHwnd);
+        ImGui_ImplDX11_Init(mContext.GetDevice(), mContext.GetDeviceContext());
 
         ApplyTheme();
 
         // Load icons
         if (!LoadTextures()) { X_PANIC("Failed to load editor textures."); }
 
+        mTextEditor.SetLanguageDefinition(TextEditor::LanguageDefinition::Lua());
+        mTextEditor.SetShowWhitespaces(false);
+
         // Initialize the engine core
-        _windowViewport->SetClearColor(Colors::Black);
-        _sceneViewport.SetClearColor(Colors::CornflowerBlue);
-        _sceneViewport.Resize(100,
+        mWindowViewport->SetClearColor(Colors::Black);
+        mSceneViewport.SetClearColor(Colors::CornflowerBlue);
+        mSceneViewport.Resize(100,
                               100);  // Give the viewport a default size to prevent DX11 resource creation from failing.
-        _game.Initialize(this, &_sceneViewport);
+        mGame.Initialize(this, &mSceneViewport);
     }
 
     void EditorWindow::OnResize(u32 width, u32 height) {}
@@ -150,11 +153,11 @@ namespace x::Editor {
     }
 
     void EditorWindow::Update() {
-        _game.Update(!_gameRunning);
-        _entities = _game.GetActiveScene()->GetEntities();
+        mGame.Update(!mGameRunning);
+        mEntities = mGame.GetActiveScene()->GetEntities();
 
         // Update scene with zero tick
-        if (!InPlayMode()) { _game.GetActiveScene()->Update(0.f); }
+        if (!InPlayMode()) { mGame.GetActiveScene()->Update(0.f); }
     }
 
     void EditorWindow::MainMenu() {
@@ -169,7 +172,7 @@ namespace x::Editor {
                 if (ImGui::MenuItem("Open Scene", "Ctrl+O")) {
                     const char* filter = "Scene (*.xscn)|*.xscn|";
                     char filename[MAX_PATH];
-                    if (OpenFileDialog(_hwnd, None, filter, "Open Scene File", filename, MAX_PATH)) {
+                    if (OpenFileDialog(mHwnd, None, filter, "Open Scene File", filename, MAX_PATH)) {
                         OpenScene(filename);
                     }
                 }
@@ -186,7 +189,7 @@ namespace x::Editor {
             if (ImGui::BeginMenu("View")) {
                 if (ImGui::MenuItem("Reset Layout")) {
                     // Trigger first-time layout setup again
-                    _layoutSetup = false;
+                    mLayoutSetup = false;
                 }
                 ImGui::EndMenu();
             }
@@ -216,8 +219,8 @@ namespace x::Editor {
             const ImGuiID dockspaceId = ImGui::GetID("Editor::DockSpace");
             ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), flags);
 
-            if (!_layoutSetup) {
-                _layoutSetup = true;
+            if (!mLayoutSetup) {
+                mLayoutSetup = true;
 
                 ImGui::DockBuilderRemoveNode(dockspaceId);
                 ImGui::DockBuilderAddNode(dockspaceId, flags | ImGuiDockNodeFlags_DockSpace);
@@ -255,15 +258,15 @@ namespace x::Editor {
             const auto contentWidth  = CAST<u32>(contentSize.x);
             const auto contentHeight = CAST<u32>(contentSize.y);
 
-            _sceneViewport.Resize(contentWidth, contentHeight);
-            _sceneViewport.BindRenderTarget();
-            _sceneViewport.ClearRenderTargetView();
-            _sceneViewport.AttachViewport();
+            mSceneViewport.Resize(contentWidth, contentHeight);
+            mSceneViewport.BindRenderTarget();
+            mSceneViewport.ClearRenderTargetView();
+            mSceneViewport.AttachViewport();
 
-            _game.Resize(contentWidth, contentHeight);
-            _game.RenderFrame();
+            mGame.Resize(contentWidth, contentHeight);
+            mGame.RenderFrame();
 
-            auto* srv = _sceneViewport.GetShaderResourceView().Get();
+            auto* srv = mSceneViewport.GetShaderResourceView().Get();
             ImGui::Image(ImTextureID((void*)srv), contentSize);
         }
         ImGui::End();
@@ -288,8 +291,8 @@ namespace x::Editor {
             {
                 const auto size = ImGui::GetContentRegionAvail();
 
-                ImGui::PushFont(_fonts["mono"]);
-                _textEditor.Render("##script_source", size, true);
+                ImGui::PushFont(mFonts["mono"]);
+                mTextEditor.Render("##script_source", size, true);
                 ImGui::PopFont();
             }
             ImGui::EndChild();
@@ -301,10 +304,10 @@ namespace x::Editor {
     void EditorWindow::EntitiesView() {
         ImGui::Begin("Entities");
         {
-            for (auto& [name, id] : _entities) {
-                if (ImGui::Selectable(name.c_str(), id == _selectedEntity)) {
-                    _selectedEntity = id;
-                    _propertiesPanel.Update(id);
+            for (auto& [name, id] : mEntities) {
+                if (ImGui::Selectable(name.c_str(), id == mSelectedEntity)) {
+                    mSelectedEntity = id;
+                    mPropertiesPanel.Update(id);
                 }
             }
         }
@@ -315,16 +318,19 @@ namespace x::Editor {
         ImGui::Begin("World Settings");
         {
             // TODO: These changes don't persist or update shadow maps
-            auto& state = _game.GetActiveScene()->GetState();
+            auto& state = mGame.GetActiveScene()->GetState();
 
             static Float4 skyColor = {0.3921569, 0.5843138, 0.9294118, 1};
             u32& sunEnabled        = state.Lights.Sun.enabled;
             Float4& sunDirection   = state.Lights.Sun.direction;
             Float4& sunColor       = state.Lights.Sun.color;
+            // f32 cameraFOV          = state.MainCamera.GetFovY();
 
             if (ImGui::CollapsingHeader("Sky")) { ImGui::ColorPicker4("Sky Color", (float*)&skyColor); }
 
-            if (ImGui::CollapsingHeader("Camera")) {}
+            if (ImGui::CollapsingHeader("Camera")) {
+                // ImGui::SliderFloat("FOV", &cameraFOV, 1.0f, 100.0f);
+            }
 
             if (ImGui::CollapsingHeader("Lights")) {
                 ImGui::Checkbox("Enabled", (bool*)&sunEnabled);
@@ -332,14 +338,15 @@ namespace x::Editor {
             }
 
             // Update world
-            _sceneViewport.SetClearColor(skyColor.x, skyColor.y, skyColor.z, skyColor.w);
+            mGame.GetRenderSystem()->SetClearColor(skyColor.x, skyColor.y, skyColor.z, 1.0f);
+            // state.MainCamera.SetFOV(cameraFOV);
         }
         ImGui::End();
     }
 
     void EditorWindow::PropertiesView() {
         ImGui::Begin("Properties");
-        { _propertiesPanel.Draw(_selectedEntity); }
+        { mPropertiesPanel.Draw(mSelectedEntity); }
         ImGui::End();
     }
 
@@ -417,13 +424,13 @@ namespace x::Editor {
     }
 
     void EditorWindow::Render() {
-        _windowViewport->ClearAll();
+        mWindowViewport->ClearAll();
 
         ImGui_ImplDX11_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::PushFont(_fonts["display"]);
+        ImGui::PushFont(mFonts["display"]);
 
         //============================================================================================================//
         // MENU BAR
@@ -436,7 +443,7 @@ namespace x::Editor {
         // TOOL BAR
         //============================================================================================================//
 
-        Toolbar(this, _textureManager, menuBarHeight);
+        Toolbar(this, mTextureManager, menuBarHeight);
 
         //============================================================================================================//
         // EDITOR PANELS
@@ -454,51 +461,51 @@ namespace x::Editor {
 
         ImGui::PopFont();
 
-        _windowViewport->AttachViewport();
-        _windowViewport->BindRenderTarget();
+        mWindowViewport->AttachViewport();
+        mWindowViewport->BindRenderTarget();
         ImGui::Render();
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
     }
 
     LRESULT EditorWindow::MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) {
-        if (ImGui_ImplWin32_WndProcHandler(_hwnd, msg, wParam, lParam)) return true;
+        if (ImGui_ImplWin32_WndProcHandler(mHwnd, msg, wParam, lParam)) return true;
         return Window::MessageHandler(msg, wParam, lParam);
     }
 
     void EditorWindow::OpenScene(const char* filename) {
-        _game.TransitionScene(filename);
+        mGame.TransitionScene(filename);
 
-        auto& sceneState      = _game.GetActiveScene()->GetState();
-        _sceneCamera          = sceneState.MainCamera;  // Cache scene camera
-        sceneState.MainCamera = _editorCamera;  // Override scene camera with editor camera while not in play mode
+        auto& sceneState      = mGame.GetActiveScene()->GetState();
+        mSceneCamera          = sceneState.MainCamera;  // Cache scene camera
+        sceneState.MainCamera = mEditorCamera;  // Override scene camera with editor camera while not in play mode
 
-        _propertiesPanel.OnSceneTransition();
+        mPropertiesPanel.OnSceneTransition();
     }
 
     void EditorWindow::TogglePlayMode() {
-        if (!_game.SceneValid()) return;
+        if (!mGame.SceneValid()) return;
 
-        if (_gameRunning) {
+        if (mGameRunning) {
             // Reset camera back to editor camera
-            _game.GetActiveScene()->ResetToInitialState();
-            _game.GetActiveScene()->Update(0.0f);
-            auto& sceneState      = _game.GetActiveScene()->GetState();
-            sceneState.MainCamera = _editorCamera;
+            mGame.GetActiveScene()->ResetToInitialState();
+            mGame.GetActiveScene()->Update(0.0f);
+            auto& sceneState      = mGame.GetActiveScene()->GetState();
+            sceneState.MainCamera = mEditorCamera;
 
-            _gameRunning = false;
+            mGameRunning = false;
         } else {
             // Reset camera back to scene camera
-            _game.GetActiveScene()->Update(0.0f);
-            auto& sceneState      = _game.GetActiveScene()->GetState();
-            sceneState.MainCamera = _sceneCamera;
+            mGame.GetActiveScene()->Update(0.0f);
+            auto& sceneState      = mGame.GetActiveScene()->GetState();
+            sceneState.MainCamera = mSceneCamera;
 
-            _gameRunning = true;
+            mGameRunning = true;
         }
     }
 
     void EditorWindow::NewScene() {
-        _game.GetActiveScene()->Reset();
-        _entities.clear();
+        mGame.GetActiveScene()->Reset();
+        mEntities.clear();
     }
 
     void EditorWindow::ApplyTheme() {

@@ -13,15 +13,15 @@ namespace x {
         Mouse() = default;
 
     private:
-        bool _captured = false;
-        POINT _lastPos = {0, 0};
+        bool mCaptured = false;
+        POINT mLastPos = {0, 0};
 
         void CaptureMouse(HWND hwnd);
         void ReleaseMouse(HWND hwnd);
         void OnMouseMove(HWND hwnd, Input& input, i32 xPos, i32 yPos) const;
 
         X_NODISCARD bool IsCaptured() const {
-            return _captured;
+            return mCaptured;
         }
     };
-}
+}  // namespace x

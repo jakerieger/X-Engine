@@ -2,45 +2,45 @@
 
 namespace x {
     Clock::Clock() {
-        QueryPerformanceFrequency(&_frequency);
-        QueryPerformanceCounter(&_lastTime);
+        QueryPerformanceFrequency(&mFrequency);
+        QueryPerformanceCounter(&mLastTime);
 
-        _deltaTime              = 0.0;
-        _totalTime              = 0.0;
-        _frameCount             = 0;
-        _framesPerSecond        = 0.0;
-        _fpsUpdateInterval      = 0.5; // In seconds
-        _timeSinceLastFpsUpdate = 0.0;
+        mDeltaTime              = 0.0;
+        mTotalTime              = 0.0;
+        mFrameCount             = 0;
+        mFramesPerSecond        = 0.0;
+        mFpsUpdateInterval      = 0.5;  // In seconds
+        mTimeSinceLastFpsUpdate = 0.0;
     }
 
     void Clock::Tick() {
         LARGE_INTEGER currentTime;
         QueryPerformanceCounter(&currentTime);
 
-        _deltaTime = CAST<f64>(currentTime.QuadPart - _lastTime.QuadPart) / CAST<f64>(_frequency.QuadPart);
-        _totalTime += _deltaTime;
-        _frameCount++;
-        _timeSinceLastFpsUpdate += _deltaTime;
+        mDeltaTime = CAST<f64>(currentTime.QuadPart - mLastTime.QuadPart) / CAST<f64>(mFrequency.QuadPart);
+        mTotalTime += mDeltaTime;
+        mFrameCount++;
+        mTimeSinceLastFpsUpdate += mDeltaTime;
 
-        if (_timeSinceLastFpsUpdate >= _fpsUpdateInterval) {
-            _framesPerSecond        = CAST<f64>(_frameCount) / _timeSinceLastFpsUpdate;
-            _frameCount             = 0;
-            _timeSinceLastFpsUpdate = 0.0;
+        if (mTimeSinceLastFpsUpdate >= mFpsUpdateInterval) {
+            mFramesPerSecond        = CAST<f64>(mFrameCount) / mTimeSinceLastFpsUpdate;
+            mFrameCount             = 0;
+            mTimeSinceLastFpsUpdate = 0.0;
         }
 
-        _lastTime = currentTime;
+        mLastTime = currentTime;
     }
 
     f64 Clock::GetDeltaTime() const {
-        return _deltaTime;
+        return mDeltaTime;
     }
 
     f64 Clock::GetTotalTime() const {
-        return _totalTime;
+        return mTotalTime;
     }
 
     f64 Clock::GetFramesPerSecond() const {
-        return _framesPerSecond;
+        return mFramesPerSecond;
     }
 
     u64 Clock::GetRawCounter() const {
@@ -50,6 +50,6 @@ namespace x {
     }
 
     u64 Clock::GetCounterFrequency() const {
-        return _frequency.QuadPart;
+        return mFrequency.QuadPart;
     }
-}
+}  // namespace x

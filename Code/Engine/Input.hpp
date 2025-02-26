@@ -15,40 +15,40 @@ namespace x {
         Input() = default;
 
         bool GetKeyDown(int key) {
-            return _keyStates[key].pressed;
+            return mKeyStates[key].pressed;
         }
 
         bool GetKeyUp(int key) {
-            return _keyStates[key].released;
+            return mKeyStates[key].released;
         }
 
         bool GetMouseButtonDown(int button) {
-            return _mouseStates[button].pressed;
+            return mMouseStates[button].pressed;
         }
 
         bool GetMouseButtonUp(int button) {
-            return _mouseStates[button].released;
+            return mMouseStates[button].released;
         }
 
         X_NODISCARD int GetMouseX() const {
-            return _mouseX;
+            return mMouseX;
         }
 
         X_NODISCARD int GetMouseY() const {
-            return _mouseY;
+            return mMouseY;
         }
 
         X_NODISCARD f32 GetMouseDeltaX() const {
-            return _mouseDeltaX;
+            return mMouseDeltaX;
         }
 
         X_NODISCARD f32 GetMouseDeltaY() const {
-            return _mouseDeltaY;
+            return mMouseDeltaY;
         }
 
         void ResetMouseDeltas() {
-            _mouseDeltaX = 0.0f;
-            _mouseDeltaY = 0.0f;
+            mMouseDeltaX = 0.0f;
+            mMouseDeltaY = 0.0f;
         }
 
     private:
@@ -142,35 +142,35 @@ namespace x {
         }
 
         void UpdateKeyState(int key, bool pressed) {
-            if (!_enabled) return;
+            if (!mEnabled) return;
 
-            _keyStates[key].pressed  = pressed;
-            _keyStates[key].released = !pressed;
+            mKeyStates[key].pressed  = pressed;
+            mKeyStates[key].released = !pressed;
         }
 
         void UpdateMouseButtonState(int button, bool pressed) {
-            if (!_enabled) return;
+            if (!mEnabled) return;
 
-            _mouseStates[button].pressed  = pressed;
-            _mouseStates[button].released = !pressed;
+            mMouseStates[button].pressed  = pressed;
+            mMouseStates[button].released = !pressed;
         }
 
         void UpdateMousePosition(const int x, const int y) {
-            if (!_enabled) return;
+            if (!mEnabled) return;
 
-            _mouseDeltaX = CAST<f32>(x);
-            _mouseDeltaY = CAST<f32>(y);
+            mMouseDeltaX = CAST<f32>(x);
+            mMouseDeltaY = CAST<f32>(y);
 
             constexpr f32 deadZone = 2.5f;  // Might need to tweak this, also frame-rate dependent :(
-            if (std::abs(_mouseDeltaX) < deadZone) _mouseDeltaX = 0.0f;
-            if (std::abs(_mouseDeltaY) < deadZone) _mouseDeltaY = 0.0f;
+            if (std::abs(mMouseDeltaX) < deadZone) mMouseDeltaX = 0.0f;
+            if (std::abs(mMouseDeltaY) < deadZone) mMouseDeltaY = 0.0f;
 
-            _mouseX += x;
-            _mouseY += y;
+            mMouseX += x;
+            mMouseY += y;
         }
 
         void SetEnabled(bool enabled) {
-            _enabled = enabled;
+            mEnabled = enabled;
         }
 
         struct KeyState {
@@ -178,10 +178,10 @@ namespace x {
             bool released = false;
         };
 
-        unordered_map<int, KeyState> _keyStates;
-        unordered_map<int, KeyState> _mouseStates;
-        int _mouseX = 0, _mouseY = 0;
-        f32 _mouseDeltaX = 0.f, _mouseDeltaY = 0.f;
-        bool _enabled = true;
+        unordered_map<int, KeyState> mKeyStates;
+        unordered_map<int, KeyState> mMouseStates;
+        int mMouseX = 0, mMouseY = 0;
+        f32 mMouseDeltaX = 0.f, mMouseDeltaY = 0.f;
+        bool mEnabled = true;
     };
 }  // namespace x

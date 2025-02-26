@@ -29,4 +29,4 @@ namespace x {
             this->modelViewProjection = XMMatrixTranspose(mvp);
         }
     };
-}
+}  // namespace x

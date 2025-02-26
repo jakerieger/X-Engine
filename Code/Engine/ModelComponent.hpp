@@ -8,45 +8,45 @@
 
 namespace x {
     class ModelComponent {
-        ResourceHandle<Model> _modelHandle;
-        PBRMaterialInstance _materialInstance;
-        bool _castsShadows = true;
+        ResourceHandle<Model> mModelHandle;
+        PBRMaterialInstance mMaterialInstance;
+        bool mCastsShadows = true;
 
     public:
         ModelComponent() = default;
 
         ModelComponent& SetModelHandle(const ResourceHandle<Model>& model) {
-            _modelHandle = model;
+            mModelHandle = model;
             return *this;
         }
 
         ModelComponent& SetMaterial(const shared_ptr<PBRMaterial>& material) {
-            _materialInstance.SetBaseMaterial(material);
+            mMaterialInstance.SetBaseMaterial(material);
             return *this;
         }
 
         ModelComponent& SetCastsShadows(const bool casts) {
-            _castsShadows = casts;
+            mCastsShadows = casts;
             return *this;
         }
 
         PBRMaterialInstance& GetMaterialInstance() {
-            return _materialInstance;
+            return mMaterialInstance;
         }
 
         void Draw(RenderContext& context,
                   const TransformMatrices& transforms,
                   const LightState& lights,
                   const Float3& eyePosition) const {
-            if (_materialInstance.GetBaseMaterial()) {
-                _materialInstance.Bind(transforms, lights, eyePosition);
-                _modelHandle->Draw(context);
-                _materialInstance.Unbind();
+            if (mMaterialInstance.GetBaseMaterial()) {
+                mMaterialInstance.Bind(transforms, lights, eyePosition);
+                mModelHandle->Draw(context);
+                mMaterialInstance.Unbind();
             }
         }
 
         void Draw(RenderContext& context) const {
-            _modelHandle->Draw(context);
+            mModelHandle->Draw(context);
         }
     };
-}
+}  // namespace x

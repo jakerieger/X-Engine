@@ -14,22 +14,22 @@ namespace x::Editor {
             auto rot   = transformComponent->GetRotation();
             auto scale = transformComponent->GetScale();
 
-            _transform.position[0] = pos.x;
-            _transform.position[1] = pos.y;
-            _transform.position[2] = pos.z;
+            mTransform.position[0] = pos.x;
+            mTransform.position[1] = pos.y;
+            mTransform.position[2] = pos.z;
 
-            _transform.rotation[0] = rot.x;
-            _transform.rotation[1] = rot.y;
-            _transform.rotation[2] = rot.z;
+            mTransform.rotation[0] = rot.x;
+            mTransform.rotation[1] = rot.y;
+            mTransform.rotation[2] = rot.z;
 
-            _transform.scale[0] = scale.x;
-            _transform.scale[1] = scale.y;
-            _transform.scale[2] = scale.z;
+            mTransform.scale[0] = scale.x;
+            mTransform.scale[1] = scale.y;
+            mTransform.scale[2] = scale.z;
         }
     }
 
     void PropertiesPanel::Update(EntityId selectedEntity) {
-        const auto& game = _editor._game;
+        const auto& game = mEditor.mGame;
         auto& state      = game.GetActiveScene()->GetState();
         UpdateTransformProperties(selectedEntity, state);
     }
@@ -44,8 +44,8 @@ namespace x::Editor {
             ImGui::Spacing();
             if (ImGui::Button("Edit")) {
                 auto lang = TextEditor::LanguageDefinition::Lua();
-                _textEditor.SetLanguageDefinition(lang);
-                _textEditor.SetText(behaviorComponent->GetSource());
+                mTextEditor.SetLanguageDefinition(lang);
+                mTextEditor.SetText(behaviorComponent->GetSource());
                 ImGui::OpenPopup("Script Editor");
             }
         }
@@ -68,18 +68,18 @@ namespace x::Editor {
             }
 
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
-            ImGui::PushFont(_editor._fonts["mono"]);
-            _textEditor.Render("LuaEditor",
+            ImGui::PushFont(mEditor.mFonts["mono"]);
+            mTextEditor.Render("LuaEditor",
                                ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - 30),
                                true);
             ImGui::PopFont();
             ImGui::PopStyleVar();
 
             if (ImGui::Button("Save")) {
-                auto updatedSource = _textEditor.GetText();
+                auto updatedSource = mTextEditor.GetText();
                 if (behaviorComponent && updatedSource != behaviorComponent->GetSource()) {
                     behaviorComponent->UpdateSource(updatedSource);
-                    _editor._game.GetScriptEngine().LoadScript(updatedSource, behaviorComponent->GetId());
+                    mEditor.mGame.GetScriptEngine().LoadScript(updatedSource, behaviorComponent->GetId());
                 }
                 ImGui::CloseCurrentPopup();
             }
@@ -95,23 +95,23 @@ namespace x::Editor {
         auto* transformComponent = state.GetComponentMutable<TransformComponent>(selectedEntity);
         if (transformComponent) {
             ImGui::Text("Transform");
-            ImGui::DragFloat3("Position", _transform.position, 0.01f, -FLT_MAX, FLT_MAX);
-            ImGui::DragFloat3("Rotation", _transform.rotation, 0.1f, -FLT_MAX, FLT_MAX);
-            ImGui::DragFloat3("Scale", _transform.scale, 0.01f, -FLT_MAX, FLT_MAX);
+            ImGui::DragFloat3("Position", mTransform.position, 0.01f, -FLT_MAX, FLT_MAX);
+            ImGui::DragFloat3("Rotation", mTransform.rotation, 0.1f, -FLT_MAX, FLT_MAX);
+            ImGui::DragFloat3("Scale", mTransform.scale, 0.01f, -FLT_MAX, FLT_MAX);
 
-            if (!_editor.InPlayMode()) {
+            if (!mEditor.InPlayMode()) {
                 transformComponent->SetPosition(
-                  {_transform.position[0], _transform.position[1], _transform.position[2]});
+                  {mTransform.position[0], mTransform.position[1], mTransform.position[2]});
                 transformComponent->SetRotation(
-                  {_transform.rotation[0], _transform.rotation[1], _transform.rotation[2]});
-                transformComponent->SetScale({_transform.scale[0], _transform.scale[1], _transform.scale[2]});
+                  {mTransform.rotation[0], mTransform.rotation[1], mTransform.rotation[2]});
+                transformComponent->SetScale({mTransform.scale[0], mTransform.scale[1], mTransform.scale[2]});
                 transformComponent->Update();
             }
         }
     }
 
     void PropertiesPanel::Draw(EntityId selectedEntity) {
-        const auto& game = _editor._game;
+        const auto& game = mEditor.mGame;
         auto* scene      = game.GetActiveScene();
         auto& resources  = scene->GetResourceManager();
         auto& state      = scene->GetState();

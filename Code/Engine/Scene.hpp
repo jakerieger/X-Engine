@@ -9,14 +9,14 @@
 
 namespace x {
     class Scene {
-        ResourceManager _resources;
-        SceneState _state;
-        SceneState _initialState;
-        RenderContext& _context;
-        ScriptEngine& _scriptEngine;
-        str _name;
-        str _description;
-        unordered_map<str, EntityId> _entities;
+        ResourceManager mResources;
+        SceneState mState;
+        SceneState mInitialState;
+        RenderContext& mContext;
+        ScriptEngine& mScriptEngine;
+        str mName;
+        str mDescription;
+        unordered_map<str, EntityId> mEntities;
 
     public:
         explicit Scene(RenderContext& context, ScriptEngine& scriptEngine);

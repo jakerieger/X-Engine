@@ -91,25 +91,25 @@ public:
     static constexpr size_t kMaxEntries = 999;
 
     ~Logger() {
-        if (_logFile.is_open()) { _logFile.close(); }
+        if (mLogFile.is_open()) { mLogFile.close(); }
     }
 
     void Log(const uint32_t severity, const char* msg) {
         const auto severityStr = GetSeverityString(severity);
         const auto timestamp   = GetTimestamp();
         const auto logEntry    = std::format("[{}] {} - {}\n", timestamp, severityStr, msg);
-        _logFile << logEntry;
-        _logFile.flush();  // ensure immediate write
+        mLogFile << logEntry;
+        mLogFile.flush();  // ensure immediate write
 
 #if defined(X_DEBUG)
         std::cout << logEntry;
 #endif
 
         {
-            std::lock_guard<std::mutex> lock(_bufferMutex);
-            _logEntries[_currentEntry] = {.message = msg, .timestamp = timestamp, .severity = severity};
-            _currentEntry              = (_currentEntry + 1) % kMaxEntries;
-            _totalEntries              = std::min(_totalEntries + 1, kMaxEntries);
+            std::lock_guard<std::mutex> lock(mBufferMutex);
+            mLogEntries[mCurrentEntry] = {.message = msg, .timestamp = timestamp, .severity = severity};
+            mCurrentEntry              = (mCurrentEntry + 1) % kMaxEntries;
+            mTotalEntries              = std::min(mTotalEntries + 1, kMaxEntries);
         }
 
         if (severity == X_LOG_SEVERITY_FATAL) { std::abort(); }
@@ -123,41 +123,41 @@ public:
     }
 
     void ClearEntries() {
-        std::lock_guard<std::mutex> lock(_bufferMutex);
-        _totalEntries = 0;
-        _currentEntry = 0;
+        std::lock_guard<std::mutex> lock(mBufferMutex);
+        mTotalEntries = 0;
+        mCurrentEntry = 0;
     }
 
     std::mutex& GetBufferMutex() {
-        return _bufferMutex;
+        return mBufferMutex;
     }
 
     size_t GetTotalEntries() const {
-        return _totalEntries;
+        return mTotalEntries;
     }
 
     size_t GetCurrentEntry() const {
-        return _currentEntry;
+        return mCurrentEntry;
     }
 
     std::array<LogEntry, kMaxEntries>& GetEntries() {
-        return _logEntries;
+        return mLogEntries;
     }
 
 private:
-    std::ofstream _logFile;
+    std::ofstream mLogFile;
 
-    size_t _currentEntry = 0;
-    size_t _totalEntries = 0;
+    size_t mCurrentEntry = 0;
+    size_t mTotalEntries = 0;
 
-    std::array<LogEntry, kMaxEntries> _logEntries {};
-    std::mutex _bufferMutex {};
+    std::array<LogEntry, kMaxEntries> mLogEntries {};
+    std::mutex mBufferMutex {};
 
-    Logger() : _logFile(GetLogFileName(), std::ios::app) {
+    Logger() : mLogFile(GetLogFileName(), std::ios::app) {
         const auto dateTime  = DateTime::Now();
         const auto timestamp = dateTime.LocalString();
         const auto header    = std::format("-- Log opened at {} --\n", timestamp);
-        _logFile << header;
+        mLogFile << header;
     }
 
     X_NODISCARD static std::string GetTimestamp() {

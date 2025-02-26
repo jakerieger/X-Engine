@@ -4,11 +4,12 @@
 #include "Common/Types.hpp"
 
 namespace x {
-    /// @brief Heap-allocates a fixed size block of memory and returns a chunk of that memory when an allocation is requested. All memory gets freed at once.
+    /// @brief Heap-allocates a fixed size block of memory and returns a chunk of that memory when an allocation is
+    /// requested. All memory gets freed at once.
     class ArenaAllocator {
-        u8* _memory;
-        u8* _currentPos;
-        size_t _totalSize;
+        u8* mMemory;
+        u8* mCurrentPos;
+        size_t mTotalSize;
         static constexpr size_t kMinAlignment = alignof(std::max_align_t);
 
         static size_t AlignForward(size_t addr, size_t alignment);
@@ -39,4 +40,4 @@ namespace x {
         /// @brief Returns the available (free) memory in the arena in bytes
         size_t GetAvailableMemory() const;
     };
-}
+}  // namespace x

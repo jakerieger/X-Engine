@@ -4,16 +4,16 @@
 
 namespace x {
     bool TonemapEffect::Initialize() {
-        _computeShader.LoadFromMemory(X_ARRAY_W_SIZE(kTonemap_CSBytes));
+        mComputeShader.LoadFromMemory(X_ARRAY_W_SIZE(kTonemap_CSBytes));
         return CreateResources();
     }
 
     void TonemapEffect::SetExposure(const f32 exposure) {
-        _exposure = exposure;
+        mExposure = exposure;
     }
 
     void TonemapEffect::SetOperator(const TonemapOperator op) {
-        _op = op;
+        mOp = op;
     }
 
     bool TonemapEffect::CreateResources() {
@@ -23,13 +23,13 @@ namespace x {
     void TonemapEffect::UpdateConstants() {
         D3D11_MAPPED_SUBRESOURCE mapped;
         if (SUCCEEDED(
-            _renderer.GetDeviceContext()->Map(_constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped))) {
+              mRenderer.GetDeviceContext()->Map(mConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped))) {
             auto* params = CAST<TonemapParams*>(mapped.pData);
 
-            params->exposure = _exposure;
-            params->op       = CAST<u32>(_op);
+            params->exposure = mExposure;
+            params->op       = CAST<u32>(mOp);
 
-            _renderer.GetDeviceContext()->Unmap(_constantBuffer.Get(), 0);
+            mRenderer.GetDeviceContext()->Unmap(mConstantBuffer.Get(), 0);
         }
     }
-}
+}  // namespace x

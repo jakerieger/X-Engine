@@ -20,20 +20,20 @@ namespace x {
     };
 
     class PBRMaterial {
-        RenderContext& _renderer;
-        ComPtr<ID3D11Buffer> _transformsCB;
-        ComPtr<ID3D11Buffer> _lightsCB;
-        ComPtr<ID3D11Buffer> _materialCB;
-        ComPtr<ID3D11Buffer> _cameraCB;
-        unique_ptr<VertexShader> _vertexShader;
-        unique_ptr<PixelShader> _pixelShader;
+        RenderContext& mRenderer;
+        ComPtr<ID3D11Buffer> mTransformsCB;
+        ComPtr<ID3D11Buffer> mLightsCB;
+        ComPtr<ID3D11Buffer> mMaterialCB;
+        ComPtr<ID3D11Buffer> mCameraCB;
+        unique_ptr<VertexShader> mVertexShader;
+        unique_ptr<PixelShader> mPixelShader;
 
         struct alignas(16) MaterialProperties {
             Float3 albedo;
             f32 metallic;
             f32 roughness;
             f32 ao;
-            f32 _pad[2];
+            f32 mPad[2];
             Float3 emissive;
             f32 emissiveStrength;
         };
@@ -56,27 +56,27 @@ namespace x {
 
     class PBRMaterialInstance {
         // Base material handle
-        shared_ptr<PBRMaterial> _baseMaterial;
+        shared_ptr<PBRMaterial> mBaseMaterial;
 
         // Texture maps for this instance
-        ResourceHandle<Texture2D> _albedoMap;
-        ResourceHandle<Texture2D> _metallicMap;
-        ResourceHandle<Texture2D> _roughnessMap;
-        ResourceHandle<Texture2D> _normalMap;
+        ResourceHandle<Texture2D> mAlbedoMap;
+        ResourceHandle<Texture2D> mMetallicMap;
+        ResourceHandle<Texture2D> mRoughnessMap;
+        ResourceHandle<Texture2D> mNormalMap;
 
         // Material properties for this instance
-        Float3 _albedo;
-        f32 _metallic;
-        f32 _roughness;
-        f32 _ao;
-        Float3 _emissive;
-        f32 _emissiveStrength;
+        Float3 mAlbedo;
+        f32 mMetallic;
+        f32 mRoughness;
+        f32 mAo;
+        Float3 mEmissive;
+        f32 mEmissiveStrength;
 
     public:
         PBRMaterialInstance() = default;
 
         void SetBaseMaterial(const shared_ptr<PBRMaterial>& baseMaterial) {
-            _baseMaterial = baseMaterial;
+            mBaseMaterial = baseMaterial;
         }
 
         void SetAlbedo(const Float3& albedo);
@@ -95,7 +95,7 @@ namespace x {
                             const ResourceHandle<Texture2D>& normal);
 
         const PBRMaterial* GetBaseMaterial() const {
-            return _baseMaterial.get();
+            return mBaseMaterial.get();
         }
 
         void Bind(const TransformMatrices& transforms, const LightState& lights, Float3 eyePos) const;
@@ -104,4 +104,4 @@ namespace x {
     private:
         void UpdateInstanceParams(const TransformMatrices& transforms, const LightState& lights, Float3 eyePos) const;
     };
-}
+}  // namespace x

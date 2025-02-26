@@ -20,10 +20,10 @@ namespace x {
                                           scratchImage.GetImages(),
                                           scratchImage.GetImageCount(),
                                           metadata,
-                                          &texture._textureView);
+                                          &texture.mTextureView);
             X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create shader resource view from texture.")
 
-            D3D11_SAMPLER_DESC samplerDesc{};
+            D3D11_SAMPLER_DESC samplerDesc {};
             samplerDesc.Filter         = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
             samplerDesc.AddressU       = D3D11_TEXTURE_ADDRESS_WRAP;
             samplerDesc.AddressV       = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -32,7 +32,7 @@ namespace x {
             samplerDesc.MinLOD         = 0;
             samplerDesc.MaxLOD         = D3D11_FLOAT32_MAX;
 
-            hr = context.GetDevice()->CreateSamplerState(&samplerDesc, &texture._samplerState);
+            hr = context.GetDevice()->CreateSamplerState(&samplerDesc, &texture.mSamplerState);
             X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create sampler state for texture.");
 
             return texture;
@@ -40,4 +40,4 @@ namespace x {
     };
 
     X_REGISTER_RESOURCE_LOADER(Texture2D, TextureLoader2D)
-}
+}  // namespace x

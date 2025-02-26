@@ -18,21 +18,21 @@ namespace x {
 
     class WindowResizeEvent final : public Event {
     public:
-        WindowResizeEvent(u32 width, u32 height) : _width(width), _height(height) {}
+        WindowResizeEvent(u32 width, u32 height) : mWidth(width), mHeight(height) {}
 
         str GetType() const override {
             return "WindowResizeEvent";
         }
         u32 GetWidth() const {
-            return _width;
+            return mWidth;
         }
         u32 GetHeight() const {
-            return _height;
+            return mHeight;
         }
 
     private:
-        u32 _width;
-        u32 _height;
+        u32 mWidth;
+        u32 mHeight;
     };
 
     class WindowLostFocusEvent final : public Event {
@@ -54,86 +54,86 @@ namespace x {
 
     class KeyPressedEvent final : public Event {
     public:
-        explicit KeyPressedEvent(u32 keycode) : _keycode(keycode) {};
+        explicit KeyPressedEvent(u32 keycode) : mKeycode(keycode) {};
 
         str GetType() const override {
             return "KeyPressedEvent";
         }
 
         u32 GetKey() const {
-            return _keycode;
+            return mKeycode;
         }
 
     private:
-        u32 _keycode;
+        u32 mKeycode;
     };
 
     class KeyReleasedEvent final : public Event {
     public:
-        explicit KeyReleasedEvent(u32 keycode) : _keycode(keycode) {};
+        explicit KeyReleasedEvent(u32 keycode) : mKeycode(keycode) {};
 
         str GetType() const override {
             return "KeyPressedEvent";
         }
 
         u32 GetKey() const {
-            return _keycode;
+            return mKeycode;
         }
 
     private:
-        u32 _keycode;
+        u32 mKeycode;
     };
 
     class MouseButtonPressedEvent final : public Event {
     public:
-        explicit MouseButtonPressedEvent(u32 button) : _button(button) {};
+        explicit MouseButtonPressedEvent(u32 button) : mButton(button) {};
 
         str GetType() const override {
             return "MouseButtonPressedEvent";
         }
 
         u32 GetButton() const {
-            return _button;
+            return mButton;
         }
 
     private:
-        u32 _button;
+        u32 mButton;
     };
 
     class MouseButtonReleasedEvent final : public Event {
     public:
-        explicit MouseButtonReleasedEvent(u32 button) : _button(button) {};
+        explicit MouseButtonReleasedEvent(u32 button) : mButton(button) {};
 
         str GetType() const override {
             return "MouseButtonReleasedEvent";
         }
 
         u32 GetButton() const {
-            return _button;
+            return mButton;
         }
 
     private:
-        u32 _button;
+        u32 mButton;
     };
 
     class MouseMoveEvent final : public Event {
     public:
-        explicit MouseMoveEvent(i32 x, i32 y) : _x(x), _y(y) {};
+        explicit MouseMoveEvent(i32 x, i32 y) : mX(x), mY(y) {};
 
         str GetType() const override {
             return "MouseMoveEvent";
         }
 
         i32 GetX() const {
-            return _x;
+            return mX;
         }
 
         i32 GetY() const {
-            return _y;
+            return mY;
         }
 
     private:
-        i32 _x;
-        i32 _y;
+        i32 mX;
+        i32 mY;
     };
 }  // namespace x

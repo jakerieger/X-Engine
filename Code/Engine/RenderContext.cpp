@@ -23,7 +23,7 @@ namespace x {
         D3D_FEATURE_LEVEL featureLevel;
 
         UINT createDeviceFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-#ifdef _DEBUG
+#ifdef mDEBUG
         createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
@@ -40,27 +40,27 @@ namespace x {
                                                    numFeatureLevels,
                                                    D3D11_SDK_VERSION,
                                                    &swapChainDesc,
-                                                   &_swapChain,
-                                                   &_device,
+                                                   &mSwapChain,
+                                                   &mDevice,
                                                    &featureLevel,
-                                                   &_context);
+                                                   &mContext);
 
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create device and swapchain.")
 
         // Create render target view
-        hr = _swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &_backBuffer);
+        hr = mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &mBackBuffer);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to get swapchain back buffer.")
 
         QueryDeviceInfo();  // Cache device information
     }
 
     void RenderContext::ResizeSwapchainBuffers(u32 width, u32 height) {
-        _backBuffer.Reset();
+        mBackBuffer.Reset();
 
-        auto hr = _swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
+        auto hr = mSwapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to resize swapchain buffers.")
 
-        hr = _swapChain->GetBuffer(0, IID_PPV_ARGS(&_backBuffer));
+        hr = mSwapChain->GetBuffer(0, IID_PPV_ARGS(&mBackBuffer));
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to get swapchain back buffer.")
     }
 
@@ -96,27 +96,27 @@ namespace x {
             throw std::runtime_error("Failed to get GPU description.");
         }
 
-        _deviceInfo.vendor              = GetVendorNameFromId(desc.VendorId);
-        _deviceInfo.model               = WideToAnsi(desc.Description);
-        _deviceInfo.videoMemoryInBytes  = desc.DedicatedVideoMemory;
-        _deviceInfo.sharedMemoryInBytes = desc.SharedSystemMemory;
+        mDeviceInfo.vendor              = GetVendorNameFromId(desc.VendorId);
+        mDeviceInfo.model               = WideToAnsi(desc.Description);
+        mDeviceInfo.videoMemoryInBytes  = desc.DedicatedVideoMemory;
+        mDeviceInfo.sharedMemoryInBytes = desc.SharedSystemMemory;
 
         adapter->Release();
         factory->Release();
     }
 
     void RenderContext::Present() {
-        _context->Flush();
-        const auto hr = _swapChain->Present(1, 0);
+        mContext->Flush();
+        const auto hr = mSwapChain->Present(1, 0);
         if (FAILED(hr)) { _i_ = fprintf(stderr, "Failed to present.\n"); }
     }
 
     void RenderContext::Draw(const u32 vertexCount) {
-        _context->Draw(vertexCount, 0);
+        mContext->Draw(vertexCount, 0);
     }
 
     void RenderContext::DrawIndexed(const u32 indexCount) {
-        _context->DrawIndexed(indexCount, 0, 0);
+        mContext->DrawIndexed(indexCount, 0, 0);
     }
 
     void RenderContext::AddTriangleCountToFrame(u32 count) {}

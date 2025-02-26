@@ -21,20 +21,20 @@ namespace x {
     };
 
     class PostProcessSystem final {
-        RenderContext& _renderer;
-        VertexShader _fullscreenVS;
-        PixelShader _fullscreenPS;
-        u32 _width  = 0;
-        u32 _height = 0;
-        vector<unique_ptr<IComputeEffect>> _effects;
-        vector<RenderTarget> _intermediateTargets;
+        RenderContext& mRenderer;
+        VertexShader mFullscreenVS;
+        PixelShader mFullscreenPS;
+        u32 mWidth  = 0;
+        u32 mHeight = 0;
+        vector<unique_ptr<IComputeEffect>> mEffects;
+        vector<RenderTarget> mIntermediateTargets;
 
         bool CreateIntermediateTargets();
         void RenderToScreen(ID3D11ShaderResourceView* input, ID3D11RenderTargetView* output);
 
     public:
-        explicit PostProcessSystem(RenderContext& renderer) : _renderer(renderer), _fullscreenVS(renderer),
-                                                              _fullscreenPS(renderer) {}
+        explicit PostProcessSystem(RenderContext& renderer)
+            : mRenderer(renderer), mFullscreenVS(renderer), mFullscreenPS(renderer) {}
 
         bool Initialize(u32 width, u32 height);
         void Resize(u32 width, u32 height);
@@ -43,16 +43,14 @@ namespace x {
         template<typename T, typename... Args>
             requires std::is_base_of_v<IComputeEffect, T>
         T* AddEffect(Args&&... args) {
-            auto effect = make_unique<T>(_renderer, std::forward<Args>(args)...);
+            auto effect = make_unique<T>(mRenderer, std::forward<Args>(args)...);
 
-            if (!effect->Initialize()) {
-                return None;
-            }
+            if (!effect->Initialize()) { return None; }
 
-            effect->OnResize(_width, _height);
+            effect->OnResize(mWidth, mHeight);
 
             T* ptr = effect.get();
-            _effects.push_back(std::move(effect));
+            mEffects.push_back(std::move(effect));
             CreateIntermediateTargets();
 
             return ptr;
@@ -60,12 +58,11 @@ namespace x {
 
         template<typename T>
         T* GetEffect() {
-            for (auto& effect : _effects) {
+            for (auto& effect : mEffects) {
                 T* ptr = effect->As<T>();
-                if (ptr)
-                    return ptr;
+                if (ptr) return ptr;
             }
             return nullptr;
         }
     };
-}
+}  // namespace x

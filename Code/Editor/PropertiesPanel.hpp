@@ -20,10 +20,10 @@ namespace x::Editor {
     };
 
     class PropertiesPanel {
-        EditorWindow& _editor;
+        EditorWindow& mEditor;
 
     public:
-        explicit PropertiesPanel(EditorWindow& editor) : _editor(editor) {}
+        explicit PropertiesPanel(EditorWindow& editor) : mEditor(editor) {}
 
         void OnSceneTransition() {}
 
@@ -31,8 +31,8 @@ namespace x::Editor {
         void Draw(EntityId selectedEntity);
 
     private:
-        TextEditor _textEditor;
-        TransformValues _transform {};
+        TextEditor mTextEditor;
+        TransformValues mTransform {};
 
         void BehaviorProperties(EntityId selectedEntity, SceneState& state);
         void TransformProperties(EntityId selectedEntity, SceneState& state);

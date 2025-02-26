@@ -20,15 +20,15 @@ namespace x {
         friend TextureLoader;
         friend class TextureLoader2D;
 
-        ComPtr<ID3D11ShaderResourceView> _textureView;
-        ComPtr<ID3D11Resource> _textureResource;
-        ComPtr<ID3D11SamplerState> _samplerState;
-        RenderContext& _renderer;
+        ComPtr<ID3D11ShaderResourceView> mTextureView;
+        ComPtr<ID3D11Resource> mTextureResource;
+        ComPtr<ID3D11SamplerState> mSamplerState;
+        RenderContext& mRenderer;
 
-        explicit Texture2D(RenderContext& renderer) : _renderer(renderer) {}
+        explicit Texture2D(RenderContext& renderer) : mRenderer(renderer) {}
 
     public:
         void Bind(u32 slot) const;
         void Unbind(u32 slot) const;
     };
-}
+}  // namespace x

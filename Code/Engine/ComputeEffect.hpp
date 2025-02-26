@@ -10,24 +10,24 @@ namespace x {
         friend class PostProcessSystem;
 
     public:
-        explicit IComputeEffect(RenderContext& renderer) : _renderer(renderer), _computeShader(renderer) {}
+        explicit IComputeEffect(RenderContext& renderer) : mRenderer(renderer), mComputeShader(renderer) {}
         virtual ~IComputeEffect() = default;
 
         virtual bool Initialize() = 0;
 
         virtual void Execute(ID3D11ShaderResourceView* input, ID3D11UnorderedAccessView* output) {
-            _computeShader.Bind();
+            mComputeShader.Bind();
 
-            auto* context = _renderer.GetDeviceContext();
+            auto* context = mRenderer.GetDeviceContext();
             context->CSSetShaderResources(0, 1, &input);
             context->CSSetUnorderedAccessViews(0, 1, &output, None);
 
-            if (_constantBuffer) {
+            if (mConstantBuffer) {
                 UpdateConstants();
-                context->CSSetConstantBuffers(0, 1, _constantBuffer.GetAddressOf());
+                context->CSSetConstantBuffers(0, 1, mConstantBuffer.GetAddressOf());
             }
 
-            _computeShader.DispatchWithThreadCount(_width, _height, 1);
+            mComputeShader.DispatchWithThreadCount(mWidth, mHeight, 1);
 
             ID3D11ShaderResourceView* nullSRV  = None;
             ID3D11UnorderedAccessView* nullUAV = None;
@@ -36,15 +36,15 @@ namespace x {
         }
 
         virtual void OnResize(const u32 width, const u32 height) {
-            _width  = width;
-            _height = height;
+            mWidth  = width;
+            mHeight = height;
         }
 
         bool IsEnabled() const {
-            return _enabled;
+            return mEnabled;
         }
         void SetEnabled(const bool enabled) {
-            _enabled = enabled;
+            mEnabled = enabled;
         }
 
         template<typename T>
@@ -53,13 +53,13 @@ namespace x {
         }
 
     protected:
-        RenderContext& _renderer;
-        ComputeShader _computeShader;
-        ComPtr<ID3D11Buffer> _constantBuffer;
-        bool _enabled       = true;
-        u32 _width          = 0;
-        u32 _height         = 0;
-        DXGI_FORMAT _format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        RenderContext& mRenderer;
+        ComputeShader mComputeShader;
+        ComPtr<ID3D11Buffer> mConstantBuffer;
+        bool mEnabled       = true;
+        u32 mWidth          = 0;
+        u32 mHeight         = 0;
+        DXGI_FORMAT mFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 
         virtual bool CreateResources() {
             return true;
@@ -74,7 +74,7 @@ namespace x {
             desc.BindFlags      = D3D11_BIND_CONSTANT_BUFFER;
             desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-            return SUCCEEDED(_renderer.GetDevice()->CreateBuffer(&desc, None, &_constantBuffer));
+            return SUCCEEDED(mRenderer.GetDevice()->CreateBuffer(&desc, None, &mConstantBuffer));
         }
     };
 }  // namespace x

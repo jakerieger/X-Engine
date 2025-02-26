@@ -20,26 +20,26 @@ namespace x {
     class RenderContext final {
         X_CLASS_PREVENT_MOVES_COPIES(RenderContext)
 
-        ComPtr<IDXGISwapChain> _swapChain;
-        ComPtr<ID3D11Device> _device;
-        ComPtr<ID3D11DeviceContext> _context;
-        ComPtr<ID3D11Texture2D> _backBuffer;
+        ComPtr<IDXGISwapChain> mSwapChain;
+        ComPtr<ID3D11Device> mDevice;
+        ComPtr<ID3D11DeviceContext> mContext;
+        ComPtr<ID3D11Texture2D> mBackBuffer;
 
-        DeviceInfo _deviceInfo;
-        FrameInfo _frameInfo;
+        DeviceInfo mDeviceInfo;
+        FrameInfo mFrameInfo;
 
     public:
         RenderContext() = default;
 
         // clang-format off
         // D3D objects
-        X_NODISCARD ID3D11Device* GetDevice() const { return _device.Get(); }
-        X_NODISCARD ID3D11DeviceContext* GetDeviceContext() const { return _context.Get(); }
-        X_NODISCARD ID3D11Texture2D* GetBackBuffer() const { return _backBuffer.Get(); }
+        X_NODISCARD ID3D11Device* GetDevice() const { return mDevice.Get(); }
+        X_NODISCARD ID3D11DeviceContext* GetDeviceContext() const { return mContext.Get(); }
+        X_NODISCARD ID3D11Texture2D* GetBackBuffer() const { return mBackBuffer.Get(); }
 
         // Debug information / profiler
-        X_NODISCARD DeviceInfo GetDeviceInfo() const { return _deviceInfo; }
-        X_NODISCARD FrameInfo GetFrameInfo() const { return _frameInfo; }
+        X_NODISCARD DeviceInfo GetDeviceInfo() const { return mDeviceInfo; }
+        X_NODISCARD FrameInfo GetFrameInfo() const { return mFrameInfo; }
         //
         // clang-format on
 

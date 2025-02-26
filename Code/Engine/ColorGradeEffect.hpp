@@ -12,10 +12,10 @@ namespace x {
             f32 exposureAdjustment;
         };
 
-        f32 _saturation         = 1.0f;
-        f32 _contrast           = 1.0f;
-        f32 _temperature        = 6500.0f;
-        f32 _exposureAdjustment = 0.0f;
+        f32 mSaturation         = 1.0f;
+        f32 mContrast           = 1.0f;
+        f32 mTemperature        = 6500.0f;
+        f32 mExposureAdjustment = 0.0f;
 
     public:
         explicit ColorGradeEffect(RenderContext& renderer) : IComputeEffect(renderer) {}
@@ -31,4 +31,4 @@ namespace x {
         bool CreateResources() override;
         void UpdateConstants() override;
     };
-} // namespace x
+}  // namespace x

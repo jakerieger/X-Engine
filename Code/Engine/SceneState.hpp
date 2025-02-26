@@ -24,25 +24,25 @@ namespace x {
         SceneState() = default;
 
         EntityId CreateEntity() {
-            const auto newId = ++_nextId;
+            const auto newId = ++mNextId;
             return EntityId(newId);
         }
 
         void DestroyEntity(EntityId entity) {
-            _transforms.RemoveComponent(entity);
+            mTransforms.RemoveComponent(entity);
         }
 
         [[nodiscard]] SceneState Clone() const {
             SceneState newState;
 
-            newState._nextId = _nextId;
+            newState.mNextId = mNextId;
 
             newState.Lights     = Lights;
             newState.MainCamera = MainCamera;
 
-            newState._transforms = _transforms;
-            newState._models     = _models;
-            newState._behaviors  = _behaviors;
+            newState.mTransforms = mTransforms;
+            newState.mModels     = mModels;
+            newState.mBehaviors  = mBehaviors;
 
             return newState;
         }
@@ -50,11 +50,11 @@ namespace x {
         template<typename T>
             requires IsValidComponent<T>
         const T* GetComponent(EntityId entity) const {
-            if constexpr (Same<T, TransformComponent>) { return _transforms.GetComponent(entity); }
+            if constexpr (Same<T, TransformComponent>) { return mTransforms.GetComponent(entity); }
 
-            if constexpr (Same<T, ModelComponent>) { return _models.GetComponent(entity); }
+            if constexpr (Same<T, ModelComponent>) { return mModels.GetComponent(entity); }
 
-            if constexpr (Same<T, BehaviorComponent>) { return _behaviors.GetComponent(entity); }
+            if constexpr (Same<T, BehaviorComponent>) { return mBehaviors.GetComponent(entity); }
 
             return None;
         }
@@ -62,11 +62,11 @@ namespace x {
         template<typename T>
             requires IsValidComponent<T>
         T* GetComponentMutable(EntityId entity) {
-            if constexpr (Same<T, TransformComponent>) { return _transforms.GetComponentMutable(entity); }
+            if constexpr (Same<T, TransformComponent>) { return mTransforms.GetComponentMutable(entity); }
 
-            if constexpr (Same<T, ModelComponent>) { return _models.GetComponentMutable(entity); }
+            if constexpr (Same<T, ModelComponent>) { return mModels.GetComponentMutable(entity); }
 
-            if constexpr (Same<T, BehaviorComponent>) { return _behaviors.GetComponentMutable(entity); }
+            if constexpr (Same<T, BehaviorComponent>) { return mBehaviors.GetComponentMutable(entity); }
 
             return None;
         }
@@ -74,27 +74,27 @@ namespace x {
         template<typename T>
             requires IsValidComponent<T>
         T& AddComponent(EntityId entity) {
-            if constexpr (Same<T, TransformComponent>) { return _transforms.AddComponent(entity).component; }
+            if constexpr (Same<T, TransformComponent>) { return mTransforms.AddComponent(entity).component; }
 
-            if constexpr (Same<T, ModelComponent>) { return _models.AddComponent(entity).component; }
+            if constexpr (Same<T, ModelComponent>) { return mModels.AddComponent(entity).component; }
 
-            if constexpr (Same<T, BehaviorComponent>) { return _behaviors.AddComponent(entity).component; }
+            if constexpr (Same<T, BehaviorComponent>) { return mBehaviors.AddComponent(entity).component; }
         }
 
         template<typename T>
             requires IsValidComponent<T>
         const ComponentManager<T>& GetComponents() const {
-            if constexpr (Same<T, TransformComponent>) { return _transforms; }
-            if constexpr (Same<T, ModelComponent>) { return _models; }
-            if constexpr (Same<T, BehaviorComponent>) { return _behaviors; }
+            if constexpr (Same<T, TransformComponent>) { return mTransforms; }
+            if constexpr (Same<T, ModelComponent>) { return mModels; }
+            if constexpr (Same<T, BehaviorComponent>) { return mBehaviors; }
         }
 
         template<typename T>
             requires IsValidComponent<T>
         ComponentManager<T>& GetComponents() {
-            if constexpr (Same<T, TransformComponent>) { return _transforms; }
-            if constexpr (Same<T, ModelComponent>) { return _models; }
-            if constexpr (Same<T, BehaviorComponent>) { return _behaviors; }
+            if constexpr (Same<T, TransformComponent>) { return mTransforms; }
+            if constexpr (Same<T, ModelComponent>) { return mModels; }
+            if constexpr (Same<T, BehaviorComponent>) { return mBehaviors; }
         }
 
         LightState& GetLightState() {
@@ -114,12 +114,12 @@ namespace x {
         }
 
         void Reset() {
-            _nextId     = 0;
+            mNextId     = 0;
             Lights      = {};
             MainCamera  = {};
-            _transforms = {};
-            _models     = {};
-            _behaviors  = {};
+            mTransforms = {};
+            mModels     = {};
+            mBehaviors  = {};
         }
 
         // Global state
@@ -127,11 +127,11 @@ namespace x {
         Camera MainCamera;
 
     private:
-        u64 _nextId = 0;
+        u64 mNextId = 0;
 
         // Component managers
-        ComponentManager<TransformComponent> _transforms;
-        ComponentManager<ModelComponent> _models;
-        ComponentManager<BehaviorComponent> _behaviors;
+        ComponentManager<TransformComponent> mTransforms;
+        ComponentManager<ModelComponent> mModels;
+        ComponentManager<BehaviorComponent> mBehaviors;
     };
 }  // namespace x

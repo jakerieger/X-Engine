@@ -5,12 +5,12 @@
 #include "Lit_PS.h"
 
 namespace x {
-    PBRMaterial::PBRMaterial(RenderContext& renderer) : _renderer(renderer) {
-        _vertexShader = make_unique<VertexShader>(renderer);
-        _pixelShader  = make_unique<PixelShader>(renderer);
+    PBRMaterial::PBRMaterial(RenderContext& renderer) : mRenderer(renderer) {
+        mVertexShader = make_unique<VertexShader>(renderer);
+        mPixelShader  = make_unique<PixelShader>(renderer);
 
-        _vertexShader->LoadFromMemory(X_ARRAY_W_SIZE(kLit_VSBytes));
-        _pixelShader->LoadFromMemory(X_ARRAY_W_SIZE(kLit_PSBytes));
+        mVertexShader->LoadFromMemory(X_ARRAY_W_SIZE(kLit_VSBytes));
+        mPixelShader->LoadFromMemory(X_ARRAY_W_SIZE(kLit_PSBytes));
 
         CreateBuffers();
     }
@@ -28,7 +28,7 @@ namespace x {
         transformBufDesc.MiscFlags           = 0;
         transformBufDesc.StructureByteStride = 0;
 
-        auto hr = _renderer.GetDevice()->CreateBuffer(&transformBufDesc, None, &_transformsCB);
+        auto hr = mRenderer.GetDevice()->CreateBuffer(&transformBufDesc, None, &mTransformsCB);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create transforms constant buffer.")
 
         D3D11_BUFFER_DESC lightsBufDesc;
@@ -39,7 +39,7 @@ namespace x {
         lightsBufDesc.MiscFlags           = 0;
         lightsBufDesc.StructureByteStride = 0;
 
-        hr = _renderer.GetDevice()->CreateBuffer(&lightsBufDesc, None, &_lightsCB);
+        hr = mRenderer.GetDevice()->CreateBuffer(&lightsBufDesc, None, &mLightsCB);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create lights constant buffer.")
 
         D3D11_BUFFER_DESC materialBufDesc;
@@ -50,7 +50,7 @@ namespace x {
         materialBufDesc.MiscFlags           = 0;
         materialBufDesc.StructureByteStride = 0;
 
-        hr = _renderer.GetDevice()->CreateBuffer(&materialBufDesc, None, &_materialCB);
+        hr = mRenderer.GetDevice()->CreateBuffer(&materialBufDesc, None, &mMaterialCB);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create material constant buffer.")
 
         D3D11_BUFFER_DESC cameraBufDesc;
@@ -61,7 +61,7 @@ namespace x {
         cameraBufDesc.MiscFlags           = 0;
         cameraBufDesc.StructureByteStride = 0;
 
-        hr = _renderer.GetDevice()->CreateBuffer(&cameraBufDesc, None, &_cameraCB);
+        hr = mRenderer.GetDevice()->CreateBuffer(&cameraBufDesc, None, &mCameraCB);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create camera constant buffer.")
     }
 
@@ -69,87 +69,87 @@ namespace x {
                                     const LightState& lights,
                                     const MaterialProperties& matProps,
                                     const Float3& eyePosition) {
-        auto* context = _renderer.GetDeviceContext();
+        auto* context = mRenderer.GetDeviceContext();
 
         // Update transform buffer
         D3D11_MAPPED_SUBRESOURCE mapped;
-        auto hr = context->Map(_transformsCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+        auto hr = context->Map(mTransformsCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to map transforms buffer.")
         memcpy(mapped.pData, &transforms, sizeof(transforms));
-        context->Unmap(_transformsCB.Get(), 0);
+        context->Unmap(mTransformsCB.Get(), 0);
 
         // Update light state buffer
-        hr = context->Map(_lightsCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+        hr = context->Map(mLightsCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to map lights buffer.")
         memcpy(mapped.pData, &lights, sizeof(lights));
-        context->Unmap(_lightsCB.Get(), 0);
+        context->Unmap(mLightsCB.Get(), 0);
 
         // Update material properties buffer
-        hr = context->Map(_materialCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+        hr = context->Map(mMaterialCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to map material buffer.")
         memcpy(mapped.pData, &matProps, sizeof(MaterialProperties));
-        context->Unmap(_materialCB.Get(), 0);
+        context->Unmap(mMaterialCB.Get(), 0);
 
         // Camera buffer
-        hr = context->Map(_cameraCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+        hr = context->Map(mCameraCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to map camera buffer.")
         Float4 paddedPos = Float4(eyePosition.x, eyePosition.y, eyePosition.z, 0.0f);
         memcpy(mapped.pData, &paddedPos, sizeof(paddedPos));
-        context->Unmap(_cameraCB.Get(), 0);
+        context->Unmap(mCameraCB.Get(), 0);
     }
 
     void PBRMaterial::BindShaders() {
-        _vertexShader->Bind();
-        _pixelShader->Bind();
+        mVertexShader->Bind();
+        mPixelShader->Bind();
     }
 
     void PBRMaterial::BindBuffers() {
-        auto* context = _renderer.GetDeviceContext();
-        context->VSSetConstantBuffers(0, 1, _transformsCB.GetAddressOf());
-        context->PSSetConstantBuffers(1, 1, _lightsCB.GetAddressOf());
-        context->VSSetConstantBuffers(1, 1, _lightsCB.GetAddressOf());
-        context->PSSetConstantBuffers(2, 1, _materialCB.GetAddressOf());
-        context->PSSetConstantBuffers(3, 1, _cameraCB.GetAddressOf());
+        auto* context = mRenderer.GetDeviceContext();
+        context->VSSetConstantBuffers(0, 1, mTransformsCB.GetAddressOf());
+        context->PSSetConstantBuffers(1, 1, mLightsCB.GetAddressOf());
+        context->VSSetConstantBuffers(1, 1, mLightsCB.GetAddressOf());
+        context->PSSetConstantBuffers(2, 1, mMaterialCB.GetAddressOf());
+        context->PSSetConstantBuffers(3, 1, mCameraCB.GetAddressOf());
     }
 
     //=====================================================================================================================//
     //=====================================================================================================================//
 
     void PBRMaterialInstance::SetAlbedo(const Float3& albedo) {
-        _albedo = albedo;
+        mAlbedo = albedo;
     }
 
     void PBRMaterialInstance::SetMetallic(f32 metallic) {
-        _metallic = metallic;
+        mMetallic = metallic;
     }
 
     void PBRMaterialInstance::SetRoughness(f32 roughness) {
-        _roughness = roughness;
+        mRoughness = roughness;
     }
 
     void PBRMaterialInstance::SetAO(f32 ao) {
-        _ao = ao;
+        mAo = ao;
     }
 
     void PBRMaterialInstance::SetEmissive(const Float3& emissive, f32 strength) {
-        _emissive         = emissive;
-        _emissiveStrength = strength;
+        mEmissive         = emissive;
+        mEmissiveStrength = strength;
     }
 
     void PBRMaterialInstance::SetAlbedoMap(const ResourceHandle<Texture2D>& albedo) {
-        _albedoMap = albedo;
+        mAlbedoMap = albedo;
     }
 
     void PBRMaterialInstance::SetMetallicMap(const ResourceHandle<Texture2D>& metallic) {
-        _metallicMap = metallic;
+        mMetallicMap = metallic;
     }
 
     void PBRMaterialInstance::SetRoughnessMap(const ResourceHandle<Texture2D>& roughness) {
-        _roughnessMap = roughness;
+        mRoughnessMap = roughness;
     }
 
     void PBRMaterialInstance::SetNormalMap(const ResourceHandle<Texture2D>& normal) {
-        _normalMap = normal;
+        mNormalMap = normal;
     }
 
     void PBRMaterialInstance::SetTextureMaps(const ResourceHandle<Texture2D>& albedo,
@@ -167,24 +167,24 @@ namespace x {
                                    const Float3 eyePos) const {
         UpdateInstanceParams(transforms, lights, eyePos);
 
-        _baseMaterial->BindShaders();
+        mBaseMaterial->BindShaders();
 
         // ReSharper disable CppCStyleCast
-        if (_albedoMap.Get()) { _albedoMap->Bind((u32)TextureMapSlot::Albedo); }
-        if (_metallicMap.Get()) { _metallicMap->Bind((u32)TextureMapSlot::Metallic); }
-        if (_roughnessMap.Get()) { _roughnessMap->Bind((u32)TextureMapSlot::Roughness); }
-        if (_normalMap.Get()) { _normalMap->Bind((u32)TextureMapSlot::Normal); }
+        if (mAlbedoMap.Get()) { mAlbedoMap->Bind((u32)TextureMapSlot::Albedo); }
+        if (mMetallicMap.Get()) { mMetallicMap->Bind((u32)TextureMapSlot::Metallic); }
+        if (mRoughnessMap.Get()) { mRoughnessMap->Bind((u32)TextureMapSlot::Roughness); }
+        if (mNormalMap.Get()) { mNormalMap->Bind((u32)TextureMapSlot::Normal); }
         // ReSharper restore CppCStyleCast
 
-        _baseMaterial->BindBuffers();
+        mBaseMaterial->BindBuffers();
     }
 
     void PBRMaterialInstance::Unbind() const {
         // ReSharper disable CppCStyleCast
-        if (_albedoMap.Get()) { _albedoMap->Unbind((u32)TextureMapSlot::Albedo); }
-        if (_metallicMap.Get()) { _metallicMap->Unbind((u32)TextureMapSlot::Metallic); }
-        if (_roughnessMap.Get()) { _roughnessMap->Unbind((u32)TextureMapSlot::Roughness); }
-        if (_normalMap.Get()) { _normalMap->Unbind((u32)TextureMapSlot::Normal); }
+        if (mAlbedoMap.Get()) { mAlbedoMap->Unbind((u32)TextureMapSlot::Albedo); }
+        if (mMetallicMap.Get()) { mMetallicMap->Unbind((u32)TextureMapSlot::Metallic); }
+        if (mRoughnessMap.Get()) { mRoughnessMap->Unbind((u32)TextureMapSlot::Roughness); }
+        if (mNormalMap.Get()) { mNormalMap->Unbind((u32)TextureMapSlot::Normal); }
         // ReSharper restore CppCStyleCast
     }
 
@@ -192,13 +192,13 @@ namespace x {
                                                    const LightState& lights,
                                                    const Float3 eyePos) const {
         PBRMaterial::MaterialProperties materialProperties;
-        materialProperties.albedo           = _albedo;
-        materialProperties.metallic         = _metallic;
-        materialProperties.roughness        = _roughness;
-        materialProperties.ao               = _ao;
-        materialProperties.emissive         = _emissive;
-        materialProperties.emissiveStrength = _emissiveStrength;
+        materialProperties.albedo           = mAlbedo;
+        materialProperties.metallic         = mMetallic;
+        materialProperties.roughness        = mRoughness;
+        materialProperties.ao               = mAo;
+        materialProperties.emissive         = mEmissive;
+        materialProperties.emissiveStrength = mEmissiveStrength;
 
-        _baseMaterial->UpdateBuffers(transforms, lights, materialProperties, eyePos);
+        mBaseMaterial->UpdateBuffers(transforms, lights, materialProperties, eyePos);
     }
-}
+}  // namespace x

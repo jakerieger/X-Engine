@@ -9,64 +9,71 @@
 namespace x {
 #pragma region RenderSystem
     RenderSystem::RenderSystem(RenderContext& context, Viewport* viewport)
-        : _renderContext(context), _viewport(viewport), _shadowPass(context), _lightPass(context),
-          _postProcess(context) {}
+        : mRenderContext(context), mViewport(viewport), mShadowPass(context), mLightPass(context),
+          mPostProcess(context) {}
 
     void RenderSystem::Initialize() {
-        const auto width  = _viewport->GetWidth();
-        const auto height = _viewport->GetHeight();
+        const auto width  = mViewport->GetWidth();
+        const auto height = mViewport->GetHeight();
 
         // Initialize all our render passes
-        _shadowPass.Initialize(width, height);
-        _lightPass.Initialize(width, height);
-        _postProcess.Initialize(width, height);
+        mShadowPass.Initialize(width, height);
+        mLightPass.Initialize(width, height);
+        mPostProcess.Initialize(width, height);
 
-        _postProcess.AddEffect<TonemapEffect>()->SetOperator(TonemapOperator::ACES);
+        mPostProcess.AddEffect<TonemapEffect>()->SetOperator(TonemapOperator::ACES);
     }
 
     void RenderSystem::OnResize(u32, u32) {
-        const auto width  = _viewport->GetWidth();
-        const auto height = _viewport->GetHeight();
+        const auto width  = mViewport->GetWidth();
+        const auto height = mViewport->GetHeight();
 
-        _shadowPass.Resize(width, height);
-        _lightPass.Resize(width, height);
-        _postProcess.Resize(width, height);
+        mShadowPass.Resize(width, height);
+        mLightPass.Resize(width, height);
+        mPostProcess.Resize(width, height);
+    }
+
+    void RenderSystem::SetClearColor(float r, float g, float b, float a) {
+        mClearColor[0] = r;
+        mClearColor[1] = g;
+        mClearColor[2] = b;
+        mClearColor[3] = a;
     }
 
     void RenderSystem::BeginShadowPass() {
-        _shadowPass.BeginPass();
+        mShadowPass.BeginPass();
     }
 
     ID3D11ShaderResourceView* RenderSystem::EndShadowPass() {
-        return _shadowPass.EndPass();
+        return mShadowPass.EndPass();
     }
 
     void RenderSystem::BeginLightPass(ID3D11ShaderResourceView* depthSRV) {
-        _lightPass.BeginPass(depthSRV);
+        mLightPass.BeginPass(depthSRV, mClearColor);
     }
 
     ID3D11ShaderResourceView* RenderSystem::EndLightPass() {
-        return _lightPass.EndPass();
+        return mLightPass.EndPass();
     }
 
     void RenderSystem::PostProcessPass(ID3D11ShaderResourceView* input) {
-        const auto& rtv = _viewport->GetRenderTargetView();
-        _viewport->BindRenderTarget();
-        _postProcess.Execute(input, rtv.Get());
+        const auto& rtv = mViewport->GetRenderTargetView();
+        mViewport->BindRenderTarget();
+        mPostProcess.Execute(input, rtv.Get());
     }
 
     void RenderSystem::UpdateShadowPassParameters(const Matrix& lightViewProj, const Matrix& world) {
-        _shadowPass.UpdateState({lightViewProj, world});
+        mShadowPass.UpdateState({lightViewProj, world});
     }
 #pragma endregion
 
 #pragma region ShadowPass
     ShadowPass::ShadowPass(RenderContext& context)
-        : _renderContext(context), _vertexShader(context), _pixelShader(context) {}
+        : mRenderContext(context), mVertexShader(context), mPixelShader(context) {}
 
     void ShadowPass::Initialize(u32 width, u32 height) {
-        _vertexShader.LoadFromMemory(X_ARRAY_W_SIZE(kShadowPass_VSBytes));
-        _pixelShader.LoadFromMemory(X_ARRAY_W_SIZE(kShadowPass_PSBytes));
+        mVertexShader.LoadFromMemory(X_ARRAY_W_SIZE(kShadowPass_VSBytes));
+        mPixelShader.LoadFromMemory(X_ARRAY_W_SIZE(kShadowPass_PSBytes));
 
         D3D11_BUFFER_DESC desc {};
         desc.ByteWidth      = sizeof(ShadowMapParams);
@@ -74,44 +81,44 @@ namespace x {
         desc.BindFlags      = D3D11_BIND_CONSTANT_BUFFER;
         desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-        auto hr = _renderContext.GetDevice()->CreateBuffer(&desc, None, &_shadowParamsCB);
+        auto hr = mRenderContext.GetDevice()->CreateBuffer(&desc, None, &mShadowParamsCB);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create shadow map constant buffer.")
 
         Resize(width, height);
     }
 
     void ShadowPass::BeginPass() {
-        _renderContext.GetDeviceContext()->OMSetRenderTargets(0, None, _depthStencilView.Get());
-        _renderContext.GetDeviceContext()->OMSetDepthStencilState(_depthStencilState.Get(), 0);
-        _renderContext.GetDeviceContext()->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+        mRenderContext.GetDeviceContext()->OMSetRenderTargets(0, None, mDepthStencilView.Get());
+        mRenderContext.GetDeviceContext()->OMSetDepthStencilState(mDepthStencilState.Get(), 0);
+        mRenderContext.GetDeviceContext()->ClearDepthStencilView(mDepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-        _vertexShader.Bind();
-        _pixelShader.Bind();
+        mVertexShader.Bind();
+        mPixelShader.Bind();
 
-        _renderContext.GetDeviceContext()->VSSetConstantBuffers(0, 1, _shadowParamsCB.GetAddressOf());
+        mRenderContext.GetDeviceContext()->VSSetConstantBuffers(0, 1, mShadowParamsCB.GetAddressOf());
     }
 
     ID3D11ShaderResourceView* ShadowPass::EndPass() {
-        return _depthSRV.Get();
+        return mDepthSRV.Get();
     }
 
     void ShadowPass::UpdateState(const ShadowMapParams& state) {
         D3D11_MAPPED_SUBRESOURCE mapped;
         const auto hr =
-          _renderContext.GetDeviceContext()->Map(_shadowParamsCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+          mRenderContext.GetDeviceContext()->Map(mShadowParamsCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
         if (SUCCEEDED(hr)) {
             auto* params          = CAST<ShadowMapParams*>(mapped.pData);
             params->lightViewProj = state.lightViewProj;
             params->world         = state.world;
 
-            _renderContext.GetDeviceContext()->Unmap(_shadowParamsCB.Get(), 0);
+            mRenderContext.GetDeviceContext()->Unmap(mShadowParamsCB.Get(), 0);
         }
     }
 
     void ShadowPass::Resize(u32 width, u32 height) {
-        _depthSRV.Reset();
-        _depthStencilState.Reset();
-        _depthStencilView.Reset();
+        mDepthSRV.Reset();
+        mDepthStencilState.Reset();
+        mDepthStencilView.Reset();
 
         D3D11_TEXTURE2D_DESC depthTexDesc = {};
         depthTexDesc.Width                = width;
@@ -125,7 +132,7 @@ namespace x {
         depthTexDesc.BindFlags            = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 
         ComPtr<ID3D11Texture2D> depthStencilTexture;
-        auto hr = _renderContext.GetDevice()->CreateTexture2D(&depthTexDesc, None, &depthStencilTexture);
+        auto hr = mRenderContext.GetDevice()->CreateTexture2D(&depthTexDesc, None, &depthStencilTexture);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil Texture")
 
         D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -134,7 +141,7 @@ namespace x {
         srvDesc.Texture2D.MipLevels             = 1;
         srvDesc.Texture2D.MostDetailedMip       = 0;
 
-        hr = _renderContext.GetDevice()->CreateShaderResourceView(depthStencilTexture.Get(), &srvDesc, &_depthSRV);
+        hr = mRenderContext.GetDevice()->CreateShaderResourceView(depthStencilTexture.Get(), &srvDesc, &mDepthSRV);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth SRV")
 
         // Create depth stencil view
@@ -143,9 +150,9 @@ namespace x {
         depthStencilViewDesc.ViewDimension                 = D3D11_DSV_DIMENSION_TEXTURE2D;
         depthStencilViewDesc.Texture2D.MipSlice            = 0;
 
-        hr = _renderContext.GetDevice()->CreateDepthStencilView(depthStencilTexture.Get(),
+        hr = mRenderContext.GetDevice()->CreateDepthStencilView(depthStencilTexture.Get(),
                                                                 &depthStencilViewDesc,
-                                                                &_depthStencilView);
+                                                                &mDepthStencilView);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil View")
 
         // Create depth stencil state
@@ -155,7 +162,7 @@ namespace x {
         depthStencilStateDesc.DepthFunc                = D3D11_COMPARISON_LESS;
         depthStencilStateDesc.StencilEnable            = FALSE;
 
-        hr = _renderContext.GetDevice()->CreateDepthStencilState(&depthStencilStateDesc, &_depthStencilState);
+        hr = mRenderContext.GetDevice()->CreateDepthStencilState(&depthStencilStateDesc, &mDepthStencilState);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil State")
     }
 #pragma endregion
@@ -173,37 +180,37 @@ namespace x {
         comparisonSamplerDesc.BorderColor[3] = 1.0f;
         comparisonSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS;  // Key setting!
 
-        auto hr = _renderContext.GetDevice()->CreateSamplerState(&comparisonSamplerDesc, &_depthSamplerState);
+        auto hr = mRenderContext.GetDevice()->CreateSamplerState(&comparisonSamplerDesc, &mDepthSamplerState);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create sampler state for shadow pass");
 
         Resize(width, height);
     }
 
-    void LightPass::BeginPass(ID3D11ShaderResourceView* depthSRV) {
-        _renderContext.GetDeviceContext()->OMSetRenderTargets(1,
-                                                              _renderTargetView.GetAddressOf(),
-                                                              _depthStencilView.Get());
-        _renderContext.GetDeviceContext()->OMSetDepthStencilState(_depthStencilState.Get(), 0);
+    void LightPass::BeginPass(ID3D11ShaderResourceView* depthSRV, f32 clearColor[4]) {
+        mRenderContext.GetDeviceContext()->OMSetRenderTargets(1,
+                                                              mRenderTargetView.GetAddressOf(),
+                                                              mDepthStencilView.Get());
+        mRenderContext.GetDeviceContext()->OMSetDepthStencilState(mDepthStencilState.Get(), 0);
 
-        _renderContext.GetDeviceContext()->ClearRenderTargetView(_renderTargetView.Get(), Colors::CornflowerBlue);
-        _renderContext.GetDeviceContext()->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+        mRenderContext.GetDeviceContext()->ClearRenderTargetView(mRenderTargetView.Get(), clearColor);
+        mRenderContext.GetDeviceContext()->ClearDepthStencilView(mDepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-        _renderContext.GetDeviceContext()->PSSetShaderResources((u32)TextureMapSlot::ShadowZBuffer, 1, &depthSRV);
-        _renderContext.GetDeviceContext()->PSSetSamplers((u32)TextureMapSlot::ShadowZBuffer,
+        mRenderContext.GetDeviceContext()->PSSetShaderResources((u32)TextureMapSlot::ShadowZBuffer, 1, &depthSRV);
+        mRenderContext.GetDeviceContext()->PSSetSamplers((u32)TextureMapSlot::ShadowZBuffer,
                                                          1,
-                                                         _depthSamplerState.GetAddressOf());
+                                                         mDepthSamplerState.GetAddressOf());
     }
 
     ID3D11ShaderResourceView* LightPass::EndPass() {
-        return _outputSRV.Get();
+        return mOutputSRV.Get();
     }
 
     void LightPass::Resize(u32 width, u32 height) {
-        _renderTargetView.Reset();
-        _depthStencilView.Reset();
-        _depthStencilState.Reset();
-        _outputSRV.Reset();
-        _sceneTexture.Reset();
+        mRenderTargetView.Reset();
+        mDepthStencilView.Reset();
+        mDepthStencilState.Reset();
+        mOutputSRV.Reset();
+        mSceneTexture.Reset();
 
         D3D11_TEXTURE2D_DESC depthStencilDesc = {};
         depthStencilDesc.Width                = width;
@@ -217,7 +224,7 @@ namespace x {
         depthStencilDesc.BindFlags            = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 
         ComPtr<ID3D11Texture2D> depthStencilTexture;
-        auto hr = _renderContext.GetDevice()->CreateTexture2D(&depthStencilDesc, None, &depthStencilTexture);
+        auto hr = mRenderContext.GetDevice()->CreateTexture2D(&depthStencilDesc, None, &depthStencilTexture);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil Texture")
 
         // Create depth stencil view
@@ -226,9 +233,9 @@ namespace x {
         depthStencilViewDesc.ViewDimension                 = D3D11_DSV_DIMENSION_TEXTURE2D;
         depthStencilViewDesc.Texture2D.MipSlice            = 0;
 
-        hr = _renderContext.GetDevice()->CreateDepthStencilView(depthStencilTexture.Get(),
+        hr = mRenderContext.GetDevice()->CreateDepthStencilView(depthStencilTexture.Get(),
                                                                 &depthStencilViewDesc,
-                                                                &_depthStencilView);
+                                                                &mDepthStencilView);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil View")
 
         // Create depth stencil state
@@ -238,7 +245,7 @@ namespace x {
         depthStencilStateDesc.DepthFunc                = D3D11_COMPARISON_LESS;
         depthStencilStateDesc.StencilEnable            = FALSE;
 
-        hr = _renderContext.GetDevice()->CreateDepthStencilState(&depthStencilStateDesc, &_depthStencilState);
+        hr = mRenderContext.GetDevice()->CreateDepthStencilState(&depthStencilStateDesc, &mDepthStencilState);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil State")
         // ==================================================================================================================//
         // ==================================================================================================================//
@@ -252,13 +259,13 @@ namespace x {
         sceneDesc.Usage            = D3D11_USAGE_DEFAULT;
         sceneDesc.BindFlags        = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
-        hr = _renderContext.GetDevice()->CreateTexture2D(&sceneDesc, None, &_sceneTexture);
+        hr = mRenderContext.GetDevice()->CreateTexture2D(&sceneDesc, None, &mSceneTexture);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create scene texture")
 
-        hr = _renderContext.GetDevice()->CreateRenderTargetView(_sceneTexture.Get(), None, &_renderTargetView);
+        hr = mRenderContext.GetDevice()->CreateRenderTargetView(mSceneTexture.Get(), None, &mRenderTargetView);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create render target view.");
 
-        hr = _renderContext.GetDevice()->CreateShaderResourceView(_sceneTexture.Get(), None, &_outputSRV);
+        hr = mRenderContext.GetDevice()->CreateShaderResourceView(mSceneTexture.Get(), None, &mOutputSRV);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create shader resource view")
     }
 #pragma endregion

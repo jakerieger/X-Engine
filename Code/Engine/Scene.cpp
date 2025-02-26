@@ -6,21 +6,21 @@
 
 namespace x {
     Scene::Scene(RenderContext& context, ScriptEngine& scriptEngine)
-        : _resources(context, Memory::BYTES_128MB), _state(), _context(context), _scriptEngine(scriptEngine) {}
+        : mResources(context, Memory::BYTES_128MB), mState(), mContext(context), mScriptEngine(scriptEngine) {}
 
     Scene::~Scene() {
         Unload();
     }
 
     void Scene::Load(const str& path) {
-        _state.Reset();
-        _initialState.Reset();
+        mState.Reset();
+        mInitialState.Reset();
 
         SceneDescriptor descriptor {};
         SceneParser::Parse(path, descriptor);
 
-        auto& mainCamera = _state.MainCamera;
-        auto& sun        = _state.Lights.Sun;
+        auto& mainCamera = mState.MainCamera;
+        auto& sun        = mState.Lights.Sun;
 
         const auto& cameraDescriptor = descriptor.world.camera;
         mainCamera.SetPosition(Float3ToVectorSet(cameraDescriptor.position));
@@ -35,11 +35,11 @@ namespace x {
         sun.castsShadows = sunDescriptor.castsShadows;
 
         for (auto& entity : descriptor.entities) {
-            const EntityId newEntity = _state.CreateEntity();
+            const EntityId newEntity = mState.CreateEntity();
 
             // Create and attach components
             auto transformDescriptor = entity.transform;
-            auto& transformComponent = _state.AddComponent<TransformComponent>(newEntity);
+            auto& transformComponent = mState.AddComponent<TransformComponent>(newEntity);
             transformComponent.SetPosition(transformDescriptor.position);
             transformComponent.SetRotation(transformDescriptor.rotation);
             transformComponent.SetScale(transformDescriptor.scale);
@@ -47,12 +47,12 @@ namespace x {
 
             if (entity.model.has_value()) {
                 auto& model          = entity.model.value();
-                auto& modelComponent = _state.AddComponent<ModelComponent>(newEntity);
+                auto& modelComponent = mState.AddComponent<ModelComponent>(newEntity);
                 modelComponent.SetCastsShadows(model.castsShadows);
 
                 // Load model resource
-                if (!_resources.LoadResource<Model>(model.resource)) { X_LOG_FATAL("Failed to load model"); }
-                auto modelHandle = _resources.FetchResource<Model>(model.resource);
+                if (!mResources.LoadResource<Model>(model.resource)) { X_LOG_FATAL("Failed to load model"); }
+                auto modelHandle = mResources.FetchResource<Model>(model.resource);
                 if (!modelHandle.has_value()) { X_LOG_FATAL("Failed to fetch model resource"); }
                 modelComponent.SetModelHandle(*modelHandle);
 
@@ -63,18 +63,18 @@ namespace x {
 
             if (entity.behavior.has_value()) {
                 auto& behavior          = entity.behavior.value();
-                auto& behaviorComponent = _state.AddComponent<BehaviorComponent>(newEntity);
+                auto& behaviorComponent = mState.AddComponent<BehaviorComponent>(newEntity);
                 behaviorComponent.LoadFromFile(behavior.script);
 
                 const auto loadResult =
-                  _scriptEngine.LoadScript(behaviorComponent.GetSource(), behaviorComponent.GetId());
+                  mScriptEngine.LoadScript(behaviorComponent.GetSource(), behaviorComponent.GetId());
                 if (!loadResult) { X_LOG_FATAL("Failed to load behavior script"); }
             }
 
-            _entities[entity.name] = newEntity;
+            mEntities[entity.name] = newEntity;
         }
 
-        _initialState = _state;  // Cache init state so scene can be reset
+        mInitialState = mState;  // Cache init state so scene can be reset
 
         Awake();
         X_LOG_INFO("Loaded scene: '%s'", path.c_str())
@@ -83,54 +83,54 @@ namespace x {
     void Scene::Unload() {
         Destroyed();
 
-        _state.Reset();
-        _entities.clear();
-        _resources.Clear();
+        mState.Reset();
+        mEntities.clear();
+        mResources.Clear();
     }
 
     void Scene::Reset() {
-        _state.Reset();
-        _entities.clear();
-        _resources.Clear();
+        mState.Reset();
+        mEntities.clear();
+        mResources.Clear();
     }
 
     void Scene::ResetToInitialState() {
-        _state.Reset();
-        _state = _initialState;
+        mState.Reset();
+        mState = mInitialState;
     }
 
     void Scene::Awake() {
-        for (const auto& [name, entityId] : _entities) {
-            const auto* behaviorComponent = _state.GetComponent<BehaviorComponent>(entityId);
-            auto* transformComponent      = _state.GetComponentMutable<TransformComponent>(entityId);
+        for (const auto& [name, entityId] : mEntities) {
+            const auto* behaviorComponent = mState.GetComponent<BehaviorComponent>(entityId);
+            auto* transformComponent      = mState.GetComponentMutable<TransformComponent>(entityId);
             if (behaviorComponent) {
                 BehaviorEntity entity(name, transformComponent);
-                _scriptEngine.CallAwakeBehavior(behaviorComponent->GetId(), entity);
+                mScriptEngine.CallAwakeBehavior(behaviorComponent->GetId(), entity);
             }
         }
     }
 
     void Scene::Update(f32 deltaTime) {
-        const auto& camera    = _state.GetMainCamera();
+        const auto& camera    = mState.GetMainCamera();
         const auto clipPlanes = camera.GetClipPlanes();
 
         // Calculate LVP
         // TODO: I only need to update this if either the light direction or the screen size changes; this can be
         // optimized!
-        const auto lvp                           = CalculateLightViewProjection(_state.GetLightState().Sun,
+        const auto lvp                           = CalculateLightViewProjection(mState.GetLightState().Sun,
                                                       10.0f,
                                                       camera.GetAspectRatio(),
                                                       clipPlanes.first,
                                                       clipPlanes.second);
-        _state.GetLightState().Sun.lightViewProj = XMMatrixTranspose(lvp);
+        mState.GetLightState().Sun.lightViewProj = XMMatrixTranspose(lvp);
 
         // Update scene entities
-        for (const auto& [name, entityId] : _entities) {
-            const auto* behaviorComponent = _state.GetComponentMutable<BehaviorComponent>(entityId);
-            auto* transformComponent      = _state.GetComponentMutable<TransformComponent>(entityId);
+        for (const auto& [name, entityId] : mEntities) {
+            const auto* behaviorComponent = mState.GetComponentMutable<BehaviorComponent>(entityId);
+            auto* transformComponent      = mState.GetComponentMutable<TransformComponent>(entityId);
             if (behaviorComponent) {
                 BehaviorEntity entity(name, transformComponent);
-                _scriptEngine.CallUpdateBehavior(behaviorComponent->GetId(), deltaTime, entity);
+                mScriptEngine.CallUpdateBehavior(behaviorComponent->GetId(), deltaTime, entity);
             }
 
             if (transformComponent) {
@@ -142,56 +142,56 @@ namespace x {
     }
 
     void Scene::Destroyed() {
-        for (const auto& [name, entityId] : _entities) {
-            const auto* behaviorComponent = _state.GetComponent<BehaviorComponent>(entityId);
-            auto* transformComponent      = _state.GetComponentMutable<TransformComponent>(entityId);
+        for (const auto& [name, entityId] : mEntities) {
+            const auto* behaviorComponent = mState.GetComponent<BehaviorComponent>(entityId);
+            auto* transformComponent      = mState.GetComponentMutable<TransformComponent>(entityId);
             if (behaviorComponent) {
                 BehaviorEntity entity(name, transformComponent);
-                _scriptEngine.CallDestroyedBehavior(behaviorComponent->GetId(), entity);
+                mScriptEngine.CallDestroyedBehavior(behaviorComponent->GetId(), entity);
             }
         }
     }
 
     SceneState& Scene::GetState() {
-        return _state;
+        return mState;
     }
 
     unordered_map<str, EntityId>& Scene::GetEntities() {
-        return _entities;
+        return mEntities;
     }
 
     const SceneState& Scene::GetState() const {
-        return _state;
+        return mState;
     }
 
     u32 Scene::GetNumEntities() const {
-        return _entities.size();
+        return mEntities.size();
     }
 
     ResourceManager& Scene::GetResourceManager() {
-        return _resources;
+        return mResources;
     }
 
     void Scene::RegisterVolatiles(vector<Volatile*>& volatiles) {
-        volatiles.push_back(&_state.GetMainCamera());
+        volatiles.push_back(&mState.GetMainCamera());
     }
 
     void Scene::LoadMaterial(const MaterialDescriptor& material, ModelComponent& modelComponent) {
         if (material.baseMaterial == "PBR") {
             // TODO: Move the base materials to somewhere in static memory so they aren't being created for every single
             // material instance.
-            const auto baseMatHandle = PBRMaterial::Create(_context);
+            const auto baseMatHandle = PBRMaterial::Create(mContext);
             modelComponent.SetMaterial(baseMatHandle);
             PBRMaterialInstance& instance = modelComponent.GetMaterialInstance();
 
             for (const auto& texture : material.textures) {
                 // Load texture resource
-                if (!_resources.LoadResource<Texture2D>(texture.resource)) {
+                if (!mResources.LoadResource<Texture2D>(texture.resource)) {
                     X_LOG_FATAL("Failed to to load texture resource: '%s'", texture.resource)
                 }
 
                 std::optional<ResourceHandle<Texture2D>> resource =
-                  _resources.FetchResource<Texture2D>(texture.resource);
+                  mResources.FetchResource<Texture2D>(texture.resource);
 
                 if (!resource.has_value()) { X_LOG_FATAL("Failed to fetch texture resource: '%s'", texture.resource) }
                 if (!resource->Valid()) { X_LOG_FATAL("Resource invalid: '%s'", texture.resource) }

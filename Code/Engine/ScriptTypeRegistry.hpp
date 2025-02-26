@@ -72,4 +72,4 @@ namespace x {
             // TODO: Register camera members
         }
     };
-}
+}  // namespace x

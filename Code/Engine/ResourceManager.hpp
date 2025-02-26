@@ -79,52 +79,52 @@ namespace x {
     class ResourceManager {
         X_CLASS_PREVENT_MOVES_COPIES(ResourceManager)
 
-        ArenaAllocator _allocator;
-        RenderContext& _renderContext;
-        std::unordered_map<str, ResourceBase*> _resources;
-        std::unordered_map<std::type_index, unique_ptr<ResourceLoaderBase>> _loaders;
+        ArenaAllocator mAllocator;
+        RenderContext& mRenderContext;
+        std::unordered_map<str, ResourceBase*> mResources;
+        std::unordered_map<std::type_index, unique_ptr<ResourceLoaderBase>> mLoaders;
 
     public:
         explicit ResourceManager(RenderContext& context, const size_t arenaSize = Memory::BYTES_1GB)
-            : _allocator(arenaSize), _renderContext(context) {
+            : mAllocator(arenaSize), mRenderContext(context) {
             for (const auto& [type, factory] : ResourceRegistry::GetLoaderFactories()) {
-                _loaders[type] = factory();
+                mLoaders[type] = factory();
             }
         }
 
         ~ResourceManager() {
-            _allocator.Reset();
+            mAllocator.Reset();
         }
 
         template<typename T, typename LoaderT>
         void RegisterLoader() {
-            _loaders[std::type_index(typeid(T))] = make_unique<LoaderT>();
+            mLoaders[std::type_index(typeid(T))] = make_unique<LoaderT>();
         }
 
         template<typename T>
         bool LoadResource(const str& path) {
-            if (_resources.contains(path)) {
+            if (mResources.contains(path)) {
                 return true;  // loader already exists
             }
 
-            auto loaderIt = _loaders.find(std::type_index(typeid(T)));
-            if (loaderIt == _loaders.end()) {
+            auto loaderIt = mLoaders.find(std::type_index(typeid(T)));
+            if (loaderIt == mLoaders.end()) {
                 return false;  // no registered loader for type
             }
 
-            ResourceBase* resource = loaderIt->second->Load(_renderContext, _allocator, path);
+            ResourceBase* resource = loaderIt->second->Load(mRenderContext, mAllocator, path);
             if (!resource) {
                 return false;  // loading failed
             }
 
-            _resources[path] = resource;
+            mResources[path] = resource;
             return true;
         }
 
         template<typename T>
         std::optional<ResourceHandle<T>> FetchResource(const str& path) {
-            auto it = _resources.find(path);
-            if (it == _resources.end()) {
+            auto it = mResources.find(path);
+            if (it == mResources.end()) {
                 return {};  // nullopt
             }
 
@@ -135,45 +135,45 @@ namespace x {
         }
 
         void Clear() {
-            _resources.clear();
-            _allocator.Reset();
+            mResources.clear();
+            mAllocator.Reset();
         }
 
         const ArenaAllocator& GetAllocator() {
-            return _allocator;
+            return mAllocator;
         }
     };
 
     template<typename T>
     class ResourceHandle {
-        ResourceManager* _manager;
-        str _path;
-        T* _data;
+        ResourceManager* mManager;
+        str mPath;
+        T* mData;
 
     public:
-        ResourceHandle() : _manager(None), _data(None) {}
+        ResourceHandle() : mManager(None), mData(None) {}
 
         ResourceHandle(ResourceManager* manager, const str& path, T* data)
-            : _manager(manager), _path(path), _data(data) {}
+            : mManager(manager), mPath(path), mData(data) {}
 
         T* Get() {
-            return _data;
+            return mData;
         }
 
         const T* Get() const {
-            return _data;
+            return mData;
         }
 
         T* operator->() {
-            return _data;
+            return mData;
         }
 
         const T* operator->() const {
-            return _data;
+            return mData;
         }
 
         [[nodiscard]] bool Valid() const {
-            return (_manager != None) && (_data != None) && (!_path.empty());
+            return (mManager != None) && (mData != None) && (!mPath.empty());
         }
     };
 }  // namespace x

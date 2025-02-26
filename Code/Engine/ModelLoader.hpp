@@ -28,7 +28,7 @@ namespace x {
         void ProcessNode(const RenderContext& context, const aiNode* node, const aiScene* scene, Model& model) {
             for (u32 i = 0; i < node->mNumMeshes; i++) {
                 const auto* mesh = scene->mMeshes[node->mMeshes[i]];
-                model._meshes.push_back(ProcessMesh(context, mesh));
+                model.mMeshes.push_back(ProcessMesh(context, mesh));
             }
 
             for (u32 i = 0; i < node->mNumChildren; i++) {

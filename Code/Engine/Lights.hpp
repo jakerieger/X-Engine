@@ -17,32 +17,32 @@ namespace x {
         Float4 direction     = {0.0f, 0.0f, 0.0f, 1.0f};  // 16 bytes
         Float4 color         = {1.0f, 1.0f, 1.0f, 1.0f};  // 16 bytes
         f32 intensity        = 1.0f;                      // 4 bytes
-        f32 _pad1[3]         = {0.0f, 0.0f, 0.0f};
+        f32 mPad1[3]         = {0.0f, 0.0f, 0.0f};
         u32 castsShadows     = HLSL_TRUE;  // 4 bytes
         u32 enabled          = HLSL_TRUE;  // 4 bytes
-        f32 _pad2[2]         = {0.0f, 0.0f};
+        f32 mPad2[2]         = {0.0f, 0.0f};
         Matrix lightViewProj = XMMatrixIdentity();
     };
 
     struct alignas(16) PointLight {
         Float3 position = {0.0f, 0.0f, 0.0f};
-        f32 _pad1       = 0.f;
+        f32 mPad1       = 0.f;
         Float3 color    = {1.0f, 1.0f, 1.0f};
         f32 intensity   = 1.0f;
         f32 constant    = 1.0f;
         f32 linear      = 0.09f;
         f32 quadratic   = 0.032f;
         f32 radius      = 45.f;
-        f32 _pad2       = 0.f;
+        f32 mPad2       = 0.f;
         u32 castsShadow = HLSL_TRUE;
         u32 enabled     = HLSL_FALSE;
     };
 
     struct alignas(16) SpotLight {
         Float3 position  = {0.0f, 0.0f, 0.0f};  // Origin of the light
-        f32 _pad1        = 0.f;
+        f32 mPad1        = 0.f;
         Float3 direction = {0.0f, -1.0f, 0.0f};  // Direction the cone points
-        f32 _pad2        = 0.f;
+        f32 mPad2        = 0.f;
         Float3 color     = {1.0f, 1.0f, 1.0f};  // Light's color
         f32 intensity    = 1.0f;                // Overall brightness
         f32 innerAngle   = 0.8f;                // Inner cone angle (cosine)
@@ -50,21 +50,21 @@ namespace x {
         f32 range        = 50.0f;               // Maximum distance light travels
         u32 castsShadow  = HLSL_TRUE;
         u32 enabled      = HLSL_FALSE;
-        f32 _pad3[3]     = {0.0f, 0.0f, 0.0f};
+        f32 mPad3[3]     = {0.0f, 0.0f, 0.0f};
     };
 
     struct alignas(16) AreaLight {
         Float3 position = {0.0f, 0.0f, 0.0f};  // Center position
-        f32 _pad1;
+        f32 mPad1;
         Float3 direction = {0.0f, -1.0f, 0.0f};  // Normal direction
-        f32 _pad2;
+        f32 mPad2;
         Float3 color = {1.0f, 1.0f, 1.0f};  // Light's color
-        f32 _pad3;
+        f32 mPad3;
         Float2 dimensions = {1.0f, 1.0f};  // Width and height of the area
         f32 intensity     = 1.0f;          // Overall brightness
         u32 castsShadow   = HLSL_TRUE;
         u32 enabled       = HLSL_FALSE;
-        f32 _pad4[3];
+        f32 mPad4[3];
     };
 
     struct LightState {

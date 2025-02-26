@@ -14,33 +14,33 @@ namespace x {
             auto scriptSource = FileReader::ReadAllText(Path(filename));
 
             if (!scriptSource.empty()) {
-                _scriptSource = std::move(scriptSource);
-                _scriptPath   = filename;
-                _scriptId     = Path(filename).Str();
+                mScriptSource = std::move(scriptSource);
+                mScriptPath   = filename;
+                mScriptId     = Path(filename).Str();
             }
         }
 
         void Reload() {
-            if (!_scriptPath.empty()) { LoadFromFile(_scriptPath); }
+            if (!mScriptPath.empty()) { LoadFromFile(mScriptPath); }
         }
 
         void UpdateSource(const str& source) {
             using namespace Filesystem;
-            _scriptSource = source;
-            FileWriter::WriteAllText(Path(_scriptPath), source);
+            mScriptSource = source;
+            FileWriter::WriteAllText(Path(mScriptPath), source);
         }
 
         X_NODISCARD const str& GetSource() const {
-            return _scriptSource;
+            return mScriptSource;
         }
 
         X_NODISCARD const str& GetId() const {
-            return _scriptId;
+            return mScriptId;
         }
 
     private:
-        str _scriptSource;
-        str _scriptPath;
-        str _scriptId;
+        str mScriptSource;
+        str mScriptPath;
+        str mScriptId;
     };
 }  // namespace x

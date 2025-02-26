@@ -10,9 +10,9 @@
 namespace x {
     template<typename T>
     class ComponentManager {
-        vector<T> _components;
-        unordered_map<EntityId, size_t> _entityToIndex;
-        vector<EntityId> _indexToEntity;
+        vector<T> mComponents;
+        unordered_map<EntityId, size_t> mEntityToIndex;
+        vector<EntityId> mIndexToEntity;
 
     public:
         struct ComponentView {
@@ -26,81 +26,79 @@ namespace x {
         };
 
         class Iterator {
-            vector<T>& _components;
-            vector<EntityId>& _entities;
-            size_t _index;
+            vector<T>& mComponents;
+            vector<EntityId>& mEntities;
+            size_t mIndex;
 
         public:
             Iterator(vector<T>& components, vector<EntityId>& entities, size_t index)
-                : _components(components), _entities(entities), _index(index) {}
+                : mComponents(components), mEntities(entities), mIndex(index) {}
 
             ComponentView operator*() const {
-                return {_entities[_index], _components[_index]};
+                return {mEntities[mIndex], mComponents[mIndex]};
             }
 
             Iterator& operator++() {
-                ++_index;
+                ++mIndex;
                 return *this;
             }
 
             bool operator!=(const Iterator& other) const {
-                return _index != other._index;
+                return mIndex != other.mIndex;
             }
 
             bool operator==(const Iterator& other) const {
-                return _index == other._index;
+                return mIndex == other.mIndex;
             }
         };
 
         class ConstIterator {
-            const vector<T>& _components;
-            const vector<EntityId>& _entities;
-            size_t _index;
+            const vector<T>& mComponents;
+            const vector<EntityId>& mEntities;
+            size_t mIndex;
 
         public:
-            ConstIterator(const vector<T>& components,
-                          const vector<EntityId>& entities,
-                          size_t index)
-                : _components(components), _entities(entities), _index(index) {}
+            ConstIterator(const vector<T>& components, const vector<EntityId>& entities, size_t index)
+                : mComponents(components), mEntities(entities), mIndex(index) {}
 
             ConstComponentView operator*() const {
-                return {_entities[_index], _components[_index]};
+                return {mEntities[mIndex], mComponents[mIndex]};
             }
 
             ConstIterator& operator++() {
-                ++_index;
+                ++mIndex;
                 return *this;
             }
 
             bool operator!=(const ConstIterator& other) const {
-                return _index != other._index;
+                return mIndex != other.mIndex;
             }
 
             bool operator==(const ConstIterator& other) const {
-                return _index == other._index;
+                return mIndex == other.mIndex;
             }
         };
 
         Iterator BeginMutable() {
-            return {_components, _indexToEntity, 0};
+            return {mComponents, mIndexToEntity, 0};
         };
 
         Iterator EndMutable() {
-            return {_components, _indexToEntity, _components.size()};
+            return {mComponents, mIndexToEntity, mComponents.size()};
         }
 
         class MutableView {
-            ComponentManager& _manager;
+            ComponentManager& mManager;
 
         public:
-            MutableView(ComponentManager& manager) : _manager(manager) {}
+            MutableView(ComponentManager& manager) : mManager(manager) {}
 
             Iterator begin() const {
-                return _manager.BeginMutable();
+                return mManager.BeginMutable();
             }
 
             Iterator end() const {
-                return _manager.EndMutable();
+                return mManager.EndMutable();
             }
         };
 
@@ -109,59 +107,58 @@ namespace x {
         }
 
         ConstIterator begin() const {
-            return ConstIterator(_components, _indexToEntity, 0);
+            return ConstIterator(mComponents, mIndexToEntity, 0);
         }
 
         ConstIterator end() const {
-            return ConstIterator(_components, _indexToEntity, _components.size());
+            return ConstIterator(mComponents, mIndexToEntity, mComponents.size());
         }
 
         ComponentView AddComponent(EntityId entity) {
-            const size_t newIndex = _components.size();
-            _components.emplace_back();
-            _entityToIndex[entity] = newIndex;
-            _indexToEntity.push_back(entity);
-            return {entity, _components.back()};
+            const size_t newIndex = mComponents.size();
+            mComponents.emplace_back();
+            mEntityToIndex[entity] = newIndex;
+            mIndexToEntity.push_back(entity);
+            return {entity, mComponents.back()};
         }
 
         void RemoveComponent(EntityId entity) {
-            const auto it = _entityToIndex.find(entity);
-            if (it != _entityToIndex.end()) {
+            const auto it = mEntityToIndex.find(entity);
+            if (it != mEntityToIndex.end()) {
                 size_t indexToRemove = it->second;
-                size_t lastIndex     = _components.size() - 1;
+                size_t lastIndex     = mComponents.size() - 1;
                 if (indexToRemove != lastIndex) {
-                    _components[indexToRemove]    = std::move(_components[lastIndex]);
-                    EntityId movedEntity          = _indexToEntity[lastIndex];
-                    _entityToIndex[movedEntity]   = indexToRemove;
-                    _indexToEntity[indexToRemove] = movedEntity;
+                    mComponents[indexToRemove]    = std::move(mComponents[lastIndex]);
+                    EntityId movedEntity          = mIndexToEntity[lastIndex];
+                    mEntityToIndex[movedEntity]   = indexToRemove;
+                    mIndexToEntity[indexToRemove] = movedEntity;
                 }
-                _components.pop_back();
-                _indexToEntity.pop_back();
-                _entityToIndex.erase(entity);
+                mComponents.pop_back();
+                mIndexToEntity.pop_back();
+                mEntityToIndex.erase(entity);
             }
         }
 
         const T* GetComponent(EntityId entity) const {
-            const auto it = _entityToIndex.find(entity);
-            if (it != _entityToIndex.end()) { return &_components[it->second]; }
+            const auto it = mEntityToIndex.find(entity);
+            if (it != mEntityToIndex.end()) { return &mComponents[it->second]; }
             return None;
         }
 
         T* GetComponentMutable(EntityId entity) {
-            const auto it = _entityToIndex.find(entity);
-            if (it != _entityToIndex.end()) { return &_components[it->second]; }
+            const auto it = mEntityToIndex.find(entity);
+            if (it != mEntityToIndex.end()) { return &mComponents[it->second]; }
             return None;
         }
 
         EntityId GetEntity(const T* component) const {
-            size_t index = component - _components.data();
-            if (index < _components.size())
-                return _indexToEntity[index];
-            return EntityId{0};
+            size_t index = component - mComponents.data();
+            if (index < mComponents.size()) return mIndexToEntity[index];
+            return EntityId {0};
         }
 
         const vector<T>& GetRawComponents() const {
-            return _components;
+            return mComponents;
         }
     };
-} // namespace x
+}  // namespace x

@@ -12,6 +12,6 @@ using namespace DirectX;
 #include <stdexcept>
 
 #ifndef PLATFORM_INCLUDED
-#include <wrl/client.h>
+    #include <wrl/client.h>
 using Microsoft::WRL::ComPtr;
 #endif

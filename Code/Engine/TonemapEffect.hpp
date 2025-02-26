@@ -14,15 +14,14 @@ namespace x {
         struct alignas(16) TonemapParams {
             f32 exposure;
             u32 op;
-            f32 _pad[2];
+            f32 mPad[2];
         };
 
-        f32 _exposure       = 1.0f;
-        TonemapOperator _op = TonemapOperator::ACES;
+        f32 mExposure       = 1.0f;
+        TonemapOperator mOp = TonemapOperator::ACES;
 
     public:
-        explicit TonemapEffect(RenderContext& renderer)
-            : IComputeEffect(renderer) {}
+        explicit TonemapEffect(RenderContext& renderer) : IComputeEffect(renderer) {}
 
         bool Initialize() override;
 
@@ -33,4 +32,4 @@ namespace x {
         bool CreateResources() override;
         void UpdateConstants() override;
     };
-} // namespace x
+}  // namespace x

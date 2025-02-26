@@ -12,7 +12,7 @@ namespace x {
     class Viewport {
     public:
         explicit Viewport(RenderContext& context, DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM)
-            : _format(format), _context(context), _width(0), _height(0) {}
+            : mFormat(format), mContext(context), mWidth(0), mHeight(0) {}
 
         bool Resize(u32 width, u32 height, bool attachToBackBuffer = false);
         void AttachViewport() const;
@@ -35,15 +35,15 @@ namespace x {
         X_NODISCARD u32 GetHeight() const;
 
     private:
-        DXGI_FORMAT _format;
-        D3D11_VIEWPORT _viewport {};
-        RenderContext& _context;
-        u32 _width, _height;
-        f32 _clearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
-        ComPtr<ID3D11Texture2D> _renderTarget;
-        ComPtr<ID3D11RenderTargetView> _renderTargetView;
-        ComPtr<ID3D11DepthStencilView> _depthStencilView;
-        ComPtr<ID3D11DepthStencilState> _depthStencilState;
-        ComPtr<ID3D11ShaderResourceView> _shaderResourceView;
+        DXGI_FORMAT mFormat;
+        D3D11_VIEWPORT mViewport {};
+        RenderContext& mContext;
+        u32 mWidth, mHeight;
+        f32 mClearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+        ComPtr<ID3D11Texture2D> mRenderTarget;
+        ComPtr<ID3D11RenderTargetView> mRenderTargetView;
+        ComPtr<ID3D11DepthStencilView> mDepthStencilView;
+        ComPtr<ID3D11DepthStencilState> mDepthStencilState;
+        ComPtr<ID3D11ShaderResourceView> mShaderResourceView;
     };
 }  // namespace x

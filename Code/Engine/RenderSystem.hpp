@@ -12,13 +12,13 @@ namespace x {
     class RenderContext;
 
     class ShadowPass {
-        RenderContext& _renderContext;
-        VertexShader _vertexShader;
-        PixelShader _pixelShader;
-        ComPtr<ID3D11Buffer> _shadowParamsCB;
-        ComPtr<ID3D11DepthStencilView> _depthStencilView;
-        ComPtr<ID3D11DepthStencilState> _depthStencilState;
-        ComPtr<ID3D11ShaderResourceView> _depthSRV;
+        RenderContext& mRenderContext;
+        VertexShader mVertexShader;
+        PixelShader mPixelShader;
+        ComPtr<ID3D11Buffer> mShadowParamsCB;
+        ComPtr<ID3D11DepthStencilView> mDepthStencilView;
+        ComPtr<ID3D11DepthStencilState> mDepthStencilState;
+        ComPtr<ID3D11ShaderResourceView> mDepthSRV;
 
         struct alignas(16) ShadowMapParams {
             Matrix lightViewProj;
@@ -37,19 +37,19 @@ namespace x {
     };
 
     class LightPass {
-        RenderContext& _renderContext;
-        ComPtr<ID3D11RenderTargetView> _renderTargetView;
-        ComPtr<ID3D11DepthStencilView> _depthStencilView;
-        ComPtr<ID3D11DepthStencilState> _depthStencilState;
-        ComPtr<ID3D11ShaderResourceView> _outputSRV;
-        ComPtr<ID3D11Texture2D> _sceneTexture;
-        ComPtr<ID3D11SamplerState> _depthSamplerState;
+        RenderContext& mRenderContext;
+        ComPtr<ID3D11RenderTargetView> mRenderTargetView;
+        ComPtr<ID3D11DepthStencilView> mDepthStencilView;
+        ComPtr<ID3D11DepthStencilState> mDepthStencilState;
+        ComPtr<ID3D11ShaderResourceView> mOutputSRV;
+        ComPtr<ID3D11Texture2D> mSceneTexture;
+        ComPtr<ID3D11SamplerState> mDepthSamplerState;
 
     public:
-        explicit LightPass(RenderContext& context) : _renderContext(context) {}
+        explicit LightPass(RenderContext& context) : mRenderContext(context) {}
         void Initialize(u32 width, u32 height);
 
-        void BeginPass(ID3D11ShaderResourceView* depthSRV);
+        void BeginPass(ID3D11ShaderResourceView* depthSRV, f32 clearColor[4]);
         ID3D11ShaderResourceView* EndPass();
 
         void Resize(u32 width, u32 height);
@@ -68,19 +68,22 @@ namespace x {
         void PostProcessPass(ID3D11ShaderResourceView* input);
 
         PostProcessSystem* GetPostProcess() {
-            return &_postProcess;
+            return &mPostProcess;
         }
 
         void OnResize(u32 width, u32 height);
 
+        void SetClearColor(f32 r, f32 g, f32 b, f32 a);
+
     private:
         friend class Game;
 
-        RenderContext& _renderContext;
-        Viewport* _viewport;
-        ShadowPass _shadowPass;
-        LightPass _lightPass;
-        PostProcessSystem _postProcess;
+        RenderContext& mRenderContext;
+        Viewport* mViewport;
+        ShadowPass mShadowPass;
+        LightPass mLightPass;
+        PostProcessSystem mPostProcess;
+        f32 mClearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 
         void UpdateShadowPassParameters(const Matrix& lightViewProj, const Matrix& world);
     };
