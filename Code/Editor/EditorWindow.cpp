@@ -7,13 +7,14 @@
 #include "Controls.hpp"
 #include "FileDialogs.hpp"
 
+#include "EditorIcons.h"
+
+#include <Inter.h>
 #include <imgui.h>
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
 #include <imgui_internal.h>
-#include <Inter.h>
 #include <yaml-cpp/yaml.h>
-#include "EditorIcons.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -264,7 +265,24 @@ namespace x::Editor {
             mSceneViewport.AttachViewport();
 
             mGame.Resize(contentWidth, contentHeight);
-            mGame.RenderFrame();
+            // mGame.RenderFrame();
+
+            if (mSelectedEntity.value() != 0) {
+                // Draw model for outline buffer
+                auto& state          = mGame.GetActiveScene()->GetState();
+                auto* modelComponent = state.GetComponentMutable<ModelComponent>(mSelectedEntity);
+                if (modelComponent) {
+                    Matrix world                  = XMMatrixIdentity();
+                    auto view                     = state.GetMainCamera().GetViewMatrix();
+                    auto proj                     = state.GetMainCamera().GetProjectionMatrix();
+                    const auto transformComponent = state.GetComponent<TransformComponent>(mSelectedEntity);
+                    if (transformComponent) { world = transformComponent->GetTransformMatrix(); }
+                    modelComponent->Draw(mContext,
+                                         {world, view, proj},
+                                         state.Lights,
+                                         state.GetMainCamera().GetPosition());
+                }
+            }
 
             auto* srv = mSceneViewport.GetShaderResourceView().Get();
             ImGui::Image(ImTextureID((void*)srv), contentSize);

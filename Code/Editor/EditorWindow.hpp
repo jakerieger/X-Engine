@@ -41,6 +41,8 @@ namespace x::Editor {
         TextureManager mTextureManager;
         unordered_map<str, ImFont*> mFonts;
         ImFont* mDefaultFont {None};
+        unique_ptr<VertexShader> mOutlineVS;
+        unique_ptr<PixelShader> mOutlinePS;
 
         Game mGame;
         bool mGameRunning {false};

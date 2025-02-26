@@ -1,36 +1,40 @@
 {
-  "compiler": {
-    "fxcPath": "C:/Tools/fxc.exe"
-  },
-  "shaderModel": 5,
-  "shaders": {
-    "binOutput": "Compiled",
-    "headerOutput": "Header",
-    "sourceDir": "Source",
-    "graphics": [
-      {
-        "name": "Lit",
-        "source": "PBR_TexMaps.hlsl"
-      },
-      {
-        "name": "ShadowPass",
-        "source": "ShadowPass.hlsl"
-      },
-      {
-        "name": "ScreenTexture",
-        "source": "ScreenTexture.hlsl"
-      }
-    ],
-    "compute": [
-      {
-        "name": "ColorGrade",
-        "source": "ColorGrade.hlsl"
-      },
-      {
-        "name": "Tonemap",
-        "source": "Tonemap.hlsl"
-      }
-    ]
-  },
-  "version": "1.0"
+    "compiler": {
+        "fxcPath": "C:/Tools/fxc.exe"
+    },
+    "shaderModel": 5,
+    "shaders": {
+        "binOutput": "Compiled",
+        "headerOutput": "Header",
+        "sourceDir": "Source",
+        "graphics": [
+            {
+                "name": "Lit",
+                "source": "PBR_TexMaps.hlsl"
+            },
+            {
+                "name": "ShadowPass",
+                "source": "ShadowPass.hlsl"
+            },
+            {
+                "name": "ScreenTexture",
+                "source": "ScreenTexture.hlsl"
+            },
+            {
+                "name": "Outline",
+                "source": "ViewportOutline.hlsl"
+            }
+        ],
+        "compute": [
+            {
+                "name": "ColorGrade",
+                "source": "ColorGrade.hlsl"
+            },
+            {
+                "name": "Tonemap",
+                "source": "Tonemap.hlsl"
+            }
+        ]
+    },
+    "version": "1.0"
 }
