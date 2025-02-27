@@ -10,7 +10,15 @@
 #include "Engine/Game.hpp"
 #include "Engine/Window.hpp"
 
+#include <filesystem>
+
 namespace x::Editor {
+    struct EditorFiles {
+        vector<std::filesystem::path> mAssets;
+        vector<std::filesystem::path> mMaterials;
+        vector<std::filesystem::path> mScripts;
+    };
+
     class EditorWindow final : public Window {
     public:
         EditorWindow()
@@ -34,8 +42,11 @@ namespace x::Editor {
         void OpenScene(const char* filename);
         void TogglePlayMode();
         void NewScene();
+        void OpenProject(const char* filename);
 
     private:
+        EditorFiles mEditorFiles;
+
         bool mLayoutSetup {false};
         Viewport mSceneViewport;
         TextureManager mTextureManager;
@@ -62,12 +73,14 @@ namespace x::Editor {
         void SetupDockspace(f32 yOffset);
         void SceneView();
         void ScriptingView();
+        void MaterialView();
         void EntitiesView();
         void WorldSettingsView();
         void PropertiesView();
         void AssetsView();
         void EditorLogView();
 
+        void UpdateWindowTitle(const str& title) const;
         static void ApplyTheme();
     };
 }  // namespace x::Editor

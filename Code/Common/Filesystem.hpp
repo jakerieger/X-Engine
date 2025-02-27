@@ -10,10 +10,13 @@
 #include <algorithm>
 #include <stdexcept>
 #include <future>
+#include <stack>
+
 #ifdef _WIN32
-#include <direct.h>
-#define getcwd _getcwd
-#define PATH_SEPARATOR '\\'
+    #include <Windows.h>
+    #include <direct.h>
+    #define getcwd _getcwd
+    #define PATH_SEPARATOR '\\'
 #else
     #include <unistd.h>
     #define PATH_SEPARATOR '/'
@@ -45,15 +48,13 @@ namespace x {
             static std::future<std::vector<u8>> ReadAllBytes(const Path& path);
             static std::future<str> ReadAllText(const Path& path);
             static std::future<std::vector<str>> ReadAllLines(const Path& path);
-            static std::future<std::vector<u8>>
-            ReadBlock(const Path& path, size_t size, u64 offset = 0);
+            static std::future<std::vector<u8>> ReadBlock(const Path& path, size_t size, u64 offset = 0);
 
         private:
             template<typename Func>
             static auto runAsync(Func&& func) -> std::future<decltype(func())> {
                 using ReturnType = decltype(func());
-                auto task        =
-                    std::make_shared<std::packaged_task<ReturnType()>>(std::forward<Func>(func));
+                auto task        = std::make_shared<std::packaged_task<ReturnType()>>(std::forward<Func>(func));
                 std::future<ReturnType> future = task->get_future();
                 std::thread([task]() { (*task)(); }).detach();
                 return future;
@@ -65,15 +66,13 @@ namespace x {
             static std::future<bool> WriteAllBytes(const Path& path, const std::vector<u8>& data);
             static std::future<bool> WriteAllText(const Path& path, const str& text);
             static std::future<bool> WriteAllLines(const Path& path, const std::vector<str>& lines);
-            static std::future<bool>
-            WriteBlock(const Path& path, const std::vector<u8>& data, u64 offset = 0);
+            static std::future<bool> WriteBlock(const Path& path, const std::vector<u8>& data, u64 offset = 0);
 
         private:
             template<typename Func>
             static auto runAsync(Func&& func) -> std::future<decltype(func())> {
                 using ReturnType = decltype(func());
-                auto task        =
-                    std::make_shared<std::packaged_task<ReturnType()>>(std::forward<Func>(func));
+                auto task        = std::make_shared<std::packaged_task<ReturnType()>>(std::forward<Func>(func));
                 std::future<ReturnType> future = task->get_future();
                 std::thread([task]() { (*task)(); }).detach();
                 return future;
@@ -131,8 +130,11 @@ namespace x {
             std::ofstream _stream;
         };
 
+        class DirectoryIterator;
+
         class Path {
         public:
+            Path() = default;
             explicit Path(const str& path) : path(Normalize(path)) {}
             static Path Current();
 
@@ -154,10 +156,115 @@ namespace x {
             [[nodiscard]] bool Create() const;
             [[nodiscard]] bool CreateAll() const;
 
+            // Iterator methods
+            [[nodiscard]] DirectoryIterator begin() const;
+            [[nodiscard]] DirectoryIterator end() const;
+            [[nodiscard]] DirectoryIterator recursive_begin() const;
+            [[nodiscard]] DirectoryIterator recursive_end() const;
+
         private:
             str path;
             static str Join(const str& lhs, const str& rhs);
             static str Normalize(const str& rawPath);
         };
-    }; // namespace Filesystem
-} // namespace x
+
+        namespace detail {
+            struct IteratorState {
+                virtual ~IteratorState()                             = default;
+                virtual bool MoveNext()                              = 0;
+                virtual Path Current() const                         = 0;
+                virtual std::unique_ptr<IteratorState> Clone() const = 0;
+            };
+
+            // No recursive directory iterator
+            class FlatIteratorState final : public IteratorState {
+            public:
+                explicit FlatIteratorState(const Path& directory);
+                bool MoveNext() override;
+                Path Current() const override;
+                std::unique_ptr<IteratorState> Clone() const override;
+
+            private:
+                Path mRootDir;
+                Path mCurrent;
+                bool mInitialized {false};
+
+#ifdef _WIN32
+                HANDLE mFileHandle {INVALID_HANDLE_VALUE};
+                WIN32_FIND_DATAA mFindData {};
+#else
+                DIR* mDir {nullptr};
+#endif
+
+                void Initialize();
+                void Cleanup();
+            };
+
+            class RecursiveIteratorState final : public IteratorState {
+            public:
+                explicit RecursiveIteratorState(const Path& directory);
+                bool MoveNext() override;
+                Path Current() const override;
+                std::unique_ptr<IteratorState> Clone() const override;
+
+            private:
+                Path mRootDir;
+                Path mCurrent;
+                std::stack<Path> mDirectories;
+                bool mInitialized {false};
+
+#ifdef _WIN32
+                HANDLE mFileHandle {INVALID_HANDLE_VALUE};
+                WIN32_FIND_DATAA mFindData {};
+#else
+                DIR* mDir {nullptr};
+                std::string mCurrentDirName;
+#endif
+
+                void Initialize();
+                void Cleanup();
+                bool OpenNextDirectory();
+            };
+
+            class EndIteratorState final : public IteratorState {
+            public:
+                bool MoveNext() override;
+                Path Current() const override;
+                std::unique_ptr<IteratorState> Clone() const override {
+                    return std::make_unique<EndIteratorState>();
+                }
+            };
+        }  // namespace detail
+
+        class DirectoryIterator {
+        public:
+            using iterator_category = std::input_iterator_tag;
+            using value_type        = Path;
+            using difference_type   = std::ptrdiff_t;
+            using pointer           = const Path*;
+            using reference         = const Path&;
+
+            explicit DirectoryIterator(const Path& directory, bool recursive = false);
+            DirectoryIterator();
+
+            DirectoryIterator(const DirectoryIterator& other);
+            DirectoryIterator& operator=(const DirectoryIterator& other);
+
+            DirectoryIterator(DirectoryIterator&& other) noexcept;
+            DirectoryIterator& operator=(DirectoryIterator&& other) noexcept;
+
+            ~DirectoryIterator() = default;
+
+            reference operator*() const;
+            pointer operator->() const;
+            DirectoryIterator& operator++();
+            DirectoryIterator operator++(int);
+            bool operator==(const DirectoryIterator& other) const;
+            bool operator!=(const DirectoryIterator& other) const;
+
+        private:
+            std::unique_ptr<detail::IteratorState> mState;
+            mutable Path mCurrent;
+        };
+    }  // namespace Filesystem
+}  // namespace x

@@ -6,7 +6,6 @@
 #include "EditorWindow.hpp"
 #include "Controls.hpp"
 #include "FileDialogs.hpp"
-
 #include "EditorIcons.h"
 
 #include <Inter.h>
@@ -166,7 +165,13 @@ namespace x::Editor {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("New Project", "Ctrl+Shift+N")) {}
-                if (ImGui::MenuItem("Open Project", "Ctrl+Shift+O")) {}
+                if (ImGui::MenuItem("Open Project", "Ctrl+Shift+O")) {
+                    const char* filter = "Project (*.xproj)|*.xproj|";
+                    char filename[MAX_PATH];
+                    if (OpenFileDialog(mHwnd, None, filter, "Open Project", filename, MAX_PATH)) {
+                        OpenProject(filename);
+                    }
+                }
                 if (ImGui::MenuItem("Save Project", "Ctrl+Shift+S")) {}
                 ImGui::Separator();
                 if (ImGui::MenuItem("New Scene", "Ctrl+N")) { NewScene(); }
@@ -238,6 +243,7 @@ namespace x::Editor {
                 ImGui::DockBuilderDockWindow("Properties", dockRightId);
                 ImGui::DockBuilderDockWindow("Scene", dockMainId);
                 ImGui::DockBuilderDockWindow("Scripting", dockMainId);
+                ImGui::DockBuilderDockWindow("Material", dockMainId);
                 ImGui::DockBuilderDockWindow("Assets", dockBottomId);
                 ImGui::DockBuilderDockWindow("Editor Log", dockBottomId);
                 ImGui::DockBuilderDockWindow("World Settings", dockRightBottomId);
@@ -265,23 +271,13 @@ namespace x::Editor {
             mSceneViewport.AttachViewport();
 
             mGame.Resize(contentWidth, contentHeight);
-            // mGame.RenderFrame();
+            mGame.RenderFrame();
 
             if (mSelectedEntity.value() != 0) {
                 // Draw model for outline buffer
                 auto& state          = mGame.GetActiveScene()->GetState();
                 auto* modelComponent = state.GetComponentMutable<ModelComponent>(mSelectedEntity);
-                if (modelComponent) {
-                    Matrix world                  = XMMatrixIdentity();
-                    auto view                     = state.GetMainCamera().GetViewMatrix();
-                    auto proj                     = state.GetMainCamera().GetProjectionMatrix();
-                    const auto transformComponent = state.GetComponent<TransformComponent>(mSelectedEntity);
-                    if (transformComponent) { world = transformComponent->GetTransformMatrix(); }
-                    modelComponent->Draw(mContext,
-                                         {world, view, proj},
-                                         state.Lights,
-                                         state.GetMainCamera().GetPosition());
-                }
+                if (modelComponent) {}
             }
 
             auto* srv = mSceneViewport.GetShaderResourceView().Get();
@@ -294,12 +290,39 @@ namespace x::Editor {
     void EditorWindow::ScriptingView() {
         ImGui::Begin("Scripting");
         {
-            const f32 windowWidth      = ImGui::GetContentRegionAvail().x;
+            const f32 windowWidth = ImGui::GetContentRegionAvail().x;
+            static std::filesystem::path selectedScript;
+
+            ImGui::BeginChild("##scripting_options", ImVec2(windowWidth, 32));
+            {
+                if (ImGui::Button("New")) {}
+                ImGui::SameLine();
+                if (ImGui::Button("Save")) {
+                    Filesystem::FileWriter::WriteAllText(Filesystem::Path(selectedScript.string()),
+                                                         mTextEditor.GetText());
+                    X_LOG_DEBUG("Script saved: '%s'", selectedScript.string().c_str());
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Save As")) {}
+            }
+            ImGui::EndChild();
+
             const auto leftPanelWidth  = windowWidth * 0.25f;
             const auto rightPanelWidth = windowWidth * 0.75f;
 
             ImGui::BeginChild("Scripts", ImVec2(leftPanelWidth, 0), true);
-            {}
+            {
+                for (const auto& script : mEditorFiles.mScripts) {
+                    if (ImGui::Selectable(script.filename().string().c_str(), selectedScript == script)) {
+                        selectedScript = script;
+                        if (exists(selectedScript)) {
+                            const auto& text =
+                              Filesystem::FileReader::ReadAllText(Filesystem::Path(selectedScript.string()));
+                            mTextEditor.SetText(text);
+                        }
+                    }
+                }
+            }
             ImGui::EndChild();
 
             ImGui::SameLine();
@@ -308,7 +331,6 @@ namespace x::Editor {
             ImGui::BeginChild("Source", ImVec2(rightPanelWidth, 0), true);
             {
                 const auto size = ImGui::GetContentRegionAvail();
-
                 ImGui::PushFont(mFonts["mono"]);
                 mTextEditor.Render("##script_source", size, true);
                 ImGui::PopFont();
@@ -316,6 +338,12 @@ namespace x::Editor {
             ImGui::EndChild();
             ImGui::PopStyleVar();
         }
+        ImGui::End();
+    }
+
+    void EditorWindow::MaterialView() {
+        ImGui::Begin("Material");
+        {}
         ImGui::End();
     }
 
@@ -338,7 +366,7 @@ namespace x::Editor {
             // TODO: These changes don't persist or update shadow maps
             auto& state = mGame.GetActiveScene()->GetState();
 
-            static Float4 skyColor = {0.3921569, 0.5843138, 0.9294118, 1};
+            static Float4 skyColor = {0.3921569f, 0.5843138f, 0.9294118f, 1.0f};
             u32& sunEnabled        = state.Lights.Sun.enabled;
             Float4& sunDirection   = state.Lights.Sun.direction;
             Float4& sunColor       = state.Lights.Sun.color;
@@ -441,6 +469,11 @@ namespace x::Editor {
         ImGui::End();
     }
 
+    void EditorWindow::UpdateWindowTitle(const str& title) const {
+        const auto windowTitle = std::format("XEditor | {}", title);
+        ::SetWindowTextA(mHwnd, windowTitle.c_str());
+    }
+
     void EditorWindow::Render() {
         mWindowViewport->ClearAll();
 
@@ -471,6 +504,7 @@ namespace x::Editor {
 
         SceneView();
         ScriptingView();
+        MaterialView();
         EntitiesView();
         WorldSettingsView();
         PropertiesView();
@@ -524,6 +558,38 @@ namespace x::Editor {
     void EditorWindow::NewScene() {
         mGame.GetActiveScene()->Reset();
         mEntities.clear();
+    }
+
+    void EditorWindow::OpenProject(const char* filename) {
+        using namespace std::filesystem;
+
+        mEditorFiles = EditorFiles {};
+
+        // Capture project metadata
+        YAML::Node project        = YAML::LoadFile(filename);
+        const auto& projectName   = project["name"].as<str>();
+        const auto& engineVersion = project["engineVersion"].as<str>();
+        if (engineVersion != "1.0") { X_LOG_FATAL("EditorWindow::OpenProject: Engine version mismatch!"); }
+
+        UpdateWindowTitle(projectName);
+
+        // Retrieve file listings for use in editor (scripts, materials, assets)
+        const auto projectDir   = path(filename).parent_path();
+        const auto scriptDir    = projectDir / "Scripts";
+        const auto materialsDir = projectDir / "Materials";
+        const auto assetsDir    = projectDir / "Content";
+
+        for (const auto& entry : std::filesystem::directory_iterator(scriptDir)) {
+            mEditorFiles.mScripts.push_back(entry.path());
+        }
+
+        for (const auto& entry : std::filesystem::directory_iterator(materialsDir)) {
+            mEditorFiles.mMaterials.push_back(entry.path());
+        }
+
+        for (const auto& entry : std::filesystem::directory_iterator(assetsDir)) {
+            mEditorFiles.mAssets.push_back(entry.path());
+        }
     }
 
     void EditorWindow::ApplyTheme() {
