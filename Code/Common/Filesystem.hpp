@@ -156,115 +156,12 @@ namespace x {
             [[nodiscard]] bool Create() const;
             [[nodiscard]] bool CreateAll() const;
 
-            // Iterator methods
-            [[nodiscard]] DirectoryIterator begin() const;
-            [[nodiscard]] DirectoryIterator end() const;
-            [[nodiscard]] DirectoryIterator recursive_begin() const;
-            [[nodiscard]] DirectoryIterator recursive_end() const;
+            // TODO: Iterator methods
 
         private:
             str path;
             static str Join(const str& lhs, const str& rhs);
             static str Normalize(const str& rawPath);
-        };
-
-        namespace detail {
-            struct IteratorState {
-                virtual ~IteratorState()                             = default;
-                virtual bool MoveNext()                              = 0;
-                virtual Path Current() const                         = 0;
-                virtual std::unique_ptr<IteratorState> Clone() const = 0;
-            };
-
-            // No recursive directory iterator
-            class FlatIteratorState final : public IteratorState {
-            public:
-                explicit FlatIteratorState(const Path& directory);
-                bool MoveNext() override;
-                Path Current() const override;
-                std::unique_ptr<IteratorState> Clone() const override;
-
-            private:
-                Path mRootDir;
-                Path mCurrent;
-                bool mInitialized {false};
-
-#ifdef _WIN32
-                HANDLE mFileHandle {INVALID_HANDLE_VALUE};
-                WIN32_FIND_DATAA mFindData {};
-#else
-                DIR* mDir {nullptr};
-#endif
-
-                void Initialize();
-                void Cleanup();
-            };
-
-            class RecursiveIteratorState final : public IteratorState {
-            public:
-                explicit RecursiveIteratorState(const Path& directory);
-                bool MoveNext() override;
-                Path Current() const override;
-                std::unique_ptr<IteratorState> Clone() const override;
-
-            private:
-                Path mRootDir;
-                Path mCurrent;
-                std::stack<Path> mDirectories;
-                bool mInitialized {false};
-
-#ifdef _WIN32
-                HANDLE mFileHandle {INVALID_HANDLE_VALUE};
-                WIN32_FIND_DATAA mFindData {};
-#else
-                DIR* mDir {nullptr};
-                std::string mCurrentDirName;
-#endif
-
-                void Initialize();
-                void Cleanup();
-                bool OpenNextDirectory();
-            };
-
-            class EndIteratorState final : public IteratorState {
-            public:
-                bool MoveNext() override;
-                Path Current() const override;
-                std::unique_ptr<IteratorState> Clone() const override {
-                    return std::make_unique<EndIteratorState>();
-                }
-            };
-        }  // namespace detail
-
-        class DirectoryIterator {
-        public:
-            using iterator_category = std::input_iterator_tag;
-            using value_type        = Path;
-            using difference_type   = std::ptrdiff_t;
-            using pointer           = const Path*;
-            using reference         = const Path&;
-
-            explicit DirectoryIterator(const Path& directory, bool recursive = false);
-            DirectoryIterator();
-
-            DirectoryIterator(const DirectoryIterator& other);
-            DirectoryIterator& operator=(const DirectoryIterator& other);
-
-            DirectoryIterator(DirectoryIterator&& other) noexcept;
-            DirectoryIterator& operator=(DirectoryIterator&& other) noexcept;
-
-            ~DirectoryIterator() = default;
-
-            reference operator*() const;
-            pointer operator->() const;
-            DirectoryIterator& operator++();
-            DirectoryIterator operator++(int);
-            bool operator==(const DirectoryIterator& other) const;
-            bool operator!=(const DirectoryIterator& other) const;
-
-        private:
-            std::unique_ptr<detail::IteratorState> mState;
-            mutable Path mCurrent;
         };
     }  // namespace Filesystem
 }  // namespace x
