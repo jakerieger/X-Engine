@@ -8,9 +8,7 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
-#include <stdexcept>
 #include <future>
-#include <stack>
 
 #ifdef _WIN32
     #include <Windows.h>
@@ -131,6 +129,7 @@ namespace x {
         };
 
         class DirectoryIterator;
+        class DirectoryEntries;
 
         class Path {
         public:
@@ -156,12 +155,74 @@ namespace x {
             [[nodiscard]] bool Create() const;
             [[nodiscard]] bool CreateAll() const;
 
-            // TODO: Iterator methods
+            [[nodiscard]] DirectoryEntries Entries() const;
 
         private:
             str path;
             static str Join(const str& lhs, const str& rhs);
             static str Normalize(const str& rawPath);
+        };
+
+        class FindHandleWrapper {
+        public:
+            FindHandleWrapper();
+
+            explicit FindHandleWrapper(HANDLE handle);
+
+            ~FindHandleWrapper();
+
+            FindHandleWrapper(const FindHandleWrapper&)            = delete;
+            FindHandleWrapper& operator=(const FindHandleWrapper&) = delete;
+
+            FindHandleWrapper(FindHandleWrapper&& other) noexcept;
+            FindHandleWrapper& operator=(FindHandleWrapper&& other) noexcept;
+
+            HANDLE Get() const;
+            bool IsValid() const;
+
+        private:
+            HANDLE mHandle;
+        };
+
+        class DirectoryEntries {
+        public:
+            explicit DirectoryEntries(const Path& path);
+
+            DirectoryIterator begin();
+            DirectoryIterator end();
+
+        private:
+            Path mPath;
+        };
+
+        class DirectoryIterator {
+        public:
+            using iterator_category = std::input_iterator_tag;
+            using value_type        = Path;
+            using difference_type   = std::ptrdiff_t;
+            using pointer           = const Path*;
+            using reference         = const Path&;
+
+            DirectoryIterator();
+            explicit DirectoryIterator(const Path& path);
+
+            reference operator*() const;
+            pointer operator->() const;
+            DirectoryIterator& operator++();
+
+            // Disallow post-increment operator
+            DirectoryIterator& operator++(int) = delete;
+
+            bool operator==(const DirectoryIterator& other) const;
+            bool operator!=(const DirectoryIterator& other) const;
+
+        private:
+            bool mIsEnd;
+            Path mRoot;
+            Path mCurrent;
+            FindHandleWrapper mFindHandle;
+
+            void ProcessCurrentEntry(const WIN32_FIND_DATAA& findData);
         };
     }  // namespace Filesystem
 }  // namespace x

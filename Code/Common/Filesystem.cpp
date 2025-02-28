@@ -359,7 +359,11 @@ namespace x::Filesystem {
     }
 
     str Path::Filename() const {
+#ifdef _WIN32
+        return path.substr(path.find_last_of('\\') + 1);
+#else
         return path.substr(path.find_last_of('/') + 1);
+#endif
     }
 
     bool Path::operator==(const Path& other) const {
@@ -395,6 +399,10 @@ namespace x::Filesystem {
         return Create();
     }
 
+    DirectoryEntries Path::Entries() const {
+        return DirectoryEntries(*this);
+    }
+
     str Path::Join(const str& lhs, const str& rhs) {
         if (lhs.empty()) { return lhs; }
         if (rhs.empty()) { return rhs; }
@@ -427,6 +435,105 @@ namespace x::Filesystem {
 #endif
 
         return result.empty() ? str(1, PATH_SEPARATOR) : result;
+    }
+
+    FindHandleWrapper::FindHandleWrapper() : mHandle(INVALID_HANDLE_VALUE) {}
+
+    FindHandleWrapper::FindHandleWrapper(HANDLE handle) : mHandle(handle) {}
+
+    FindHandleWrapper::~FindHandleWrapper() {
+        if (mHandle != INVALID_HANDLE_VALUE) { ::FindClose(mHandle); }
+    }
+
+    FindHandleWrapper::FindHandleWrapper(FindHandleWrapper&& other) noexcept : mHandle(other.mHandle) {
+        other.mHandle = INVALID_HANDLE_VALUE;
+    }
+
+    FindHandleWrapper& FindHandleWrapper::operator=(FindHandleWrapper&& other) noexcept {
+        if (this != &other) {
+            if (mHandle != INVALID_HANDLE_VALUE) { ::FindClose(mHandle); }
+            mHandle       = other.mHandle;
+            other.mHandle = INVALID_HANDLE_VALUE;
+        }
+        return *this;
+    }
+
+    HANDLE FindHandleWrapper::Get() const {
+        return mHandle;
+    }
+
+    bool FindHandleWrapper::IsValid() const {
+        return mHandle != INVALID_HANDLE_VALUE;
+    }
+
+    DirectoryEntries::DirectoryEntries(const Path& path) : mPath(path) {}
+
+    DirectoryIterator::DirectoryIterator() : mIsEnd(true) {}
+
+    DirectoryIterator::DirectoryIterator(const Path& path) : mIsEnd(false), mRoot(path) {
+        if (!mRoot.IsDirectory()) {
+            mIsEnd = true;
+            return;
+        }
+
+        str searchPattern = mRoot.Str() + "\\*";
+        WIN32_FIND_DATA findData;
+        mFindHandle = FindHandleWrapper(::FindFirstFileA(searchPattern.c_str(), &findData));
+
+        if (!mFindHandle.IsValid()) {
+            mIsEnd = true;
+            return;
+        }
+
+        ProcessCurrentEntry(findData);
+    }
+
+    DirectoryIterator::reference DirectoryIterator::operator*() const {
+        return mCurrent;
+    }
+
+    DirectoryIterator::pointer DirectoryIterator::operator->() const {
+        return &mCurrent;
+    }
+
+    DirectoryIterator& DirectoryIterator::operator++() {
+        if (mIsEnd) { return *this; }
+
+        WIN32_FIND_DATAA findData;
+        if (::FindNextFileA(mFindHandle.Get(), &findData) == 0) {
+            mIsEnd = true;
+            return *this;
+        }
+
+        ProcessCurrentEntry(findData);
+        return *this;
+    }
+
+    bool DirectoryIterator::operator==(const DirectoryIterator& other) const {
+        if (mIsEnd && other.mIsEnd) { return true; }
+        if (mIsEnd || other.mIsEnd) { return false; }
+        return mCurrent == other.mCurrent;
+    }
+
+    bool DirectoryIterator::operator!=(const DirectoryIterator& other) const {
+        return !(*this == other);
+    }
+
+    void DirectoryIterator::ProcessCurrentEntry(const WIN32_FIND_DATAA& findData) {
+        if (strcmp(findData.cFileName, ".") == 0 || strcmp(findData.cFileName, "..") == 0) {
+            this->operator++();
+            return;
+        }
+
+        mCurrent = mRoot / findData.cFileName;
+    }
+
+    DirectoryIterator DirectoryEntries::begin() {
+        return DirectoryIterator(mPath);
+    }
+
+    DirectoryIterator DirectoryEntries::end() {
+        return DirectoryIterator();
     }
 #pragma endregion
 }  // namespace x::Filesystem

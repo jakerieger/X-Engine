@@ -10,13 +10,11 @@
 #include "Engine/Game.hpp"
 #include "Engine/Window.hpp"
 
-#include <filesystem>
-
 namespace x::Editor {
     struct EditorFiles {
-        vector<std::filesystem::path> mAssets;
-        vector<std::filesystem::path> mMaterials;
-        vector<std::filesystem::path> mScripts;
+        vector<Filesystem::Path> mAssets;
+        vector<Filesystem::Path> mMaterials;
+        vector<Filesystem::Path> mScripts;
     };
 
     class EditorWindow final : public Window {

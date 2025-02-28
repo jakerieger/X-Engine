@@ -291,16 +291,15 @@ namespace x::Editor {
         ImGui::Begin("Scripting");
         {
             const f32 windowWidth = ImGui::GetContentRegionAvail().x;
-            static std::filesystem::path selectedScript;
+            static Filesystem::Path selectedScript;
 
             ImGui::BeginChild("##scripting_options", ImVec2(windowWidth, 32));
             {
                 if (ImGui::Button("New")) {}
                 ImGui::SameLine();
                 if (ImGui::Button("Save")) {
-                    Filesystem::FileWriter::WriteAllText(Filesystem::Path(selectedScript.string()),
-                                                         mTextEditor.GetText());
-                    X_LOG_DEBUG("Script saved: '%s'", selectedScript.string().c_str());
+                    Filesystem::FileWriter::WriteAllText(selectedScript, mTextEditor.GetText());
+                    X_LOG_DEBUG("Script saved: '%s'", selectedScript.CStr());
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Save As")) {}
@@ -313,11 +312,10 @@ namespace x::Editor {
             ImGui::BeginChild("Scripts", ImVec2(leftPanelWidth, 0), true);
             {
                 for (const auto& script : mEditorFiles.mScripts) {
-                    if (ImGui::Selectable(script.filename().string().c_str(), selectedScript == script)) {
+                    if (ImGui::Selectable(script.Filename().c_str(), selectedScript == script)) {
                         selectedScript = script;
-                        if (exists(selectedScript)) {
-                            const auto& text =
-                              Filesystem::FileReader::ReadAllText(Filesystem::Path(selectedScript.string()));
+                        if (selectedScript.Exists()) {
+                            const auto& text = Filesystem::FileReader::ReadAllText(selectedScript);
                             mTextEditor.SetText(text);
                         }
                     }
@@ -561,7 +559,7 @@ namespace x::Editor {
     }
 
     void EditorWindow::OpenProject(const char* filename) {
-        using namespace std::filesystem;
+        using namespace Filesystem;
 
         mEditorFiles = EditorFiles {};
 
@@ -574,21 +572,21 @@ namespace x::Editor {
         UpdateWindowTitle(projectName);
 
         // Retrieve file listings for use in editor (scripts, materials, assets)
-        const auto projectDir   = path(filename).parent_path();
+        const auto projectDir   = Path(filename).Parent();
         const auto scriptDir    = projectDir / "Scripts";
         const auto materialsDir = projectDir / "Materials";
         const auto assetsDir    = projectDir / "Content";
 
-        for (const auto& entry : std::filesystem::directory_iterator(scriptDir)) {
-            mEditorFiles.mScripts.push_back(entry.path());
+        for (const auto& entry : scriptDir.Entries()) {
+            mEditorFiles.mScripts.push_back(entry);
         }
 
-        for (const auto& entry : std::filesystem::directory_iterator(materialsDir)) {
-            mEditorFiles.mMaterials.push_back(entry.path());
+        for (const auto& entry : materialsDir.Entries()) {
+            mEditorFiles.mMaterials.push_back(entry);
         }
 
-        for (const auto& entry : std::filesystem::directory_iterator(assetsDir)) {
-            mEditorFiles.mAssets.push_back(entry.path());
+        for (const auto& entry : assetsDir.Entries()) {
+            mEditorFiles.mAssets.push_back(entry);
         }
     }
 
