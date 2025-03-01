@@ -8,14 +8,9 @@
 
 namespace x {
 #pragma region Material Parameters
-    struct LitMaterialParameters {
+    struct MaterialParameters {
         TransformMatrices mTransformMatrices;
         LightState mLightState;
-        Float3 mCameraEye;
-    };
-
-    struct UnlitMaterialParameters {
-        TransformMatrices mTransformMatrices;
         Float3 mCameraEye;
     };
 #pragma endregion
@@ -29,12 +24,15 @@ namespace x {
     static constexpr u32 kCustomBufferSlotIndex2 = 4;
     static constexpr u32 kCustomBufferSlotIndex3 = 5;
 
-    struct LitMaterialBuffers {
+    struct MaterialBuffers {
         ComPtr<ID3D11Buffer> mTransforms;
         ComPtr<ID3D11Buffer> mLights;
         ComPtr<ID3D11Buffer> mCamera;
+        bool mLit {true};
 
-        void Create(const RenderContext& context) {
+        // Set lit param to false if creating an unlit material
+        void Create(const RenderContext& context, bool lit = true) {
+            mLit         = lit;
             auto* device = context.GetDevice();
 
             D3D11_BUFFER_DESC transformBufDesc;
@@ -48,17 +46,6 @@ namespace x {
             auto hr = device->CreateBuffer(&transformBufDesc, None, &mTransforms);
             X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create transforms constant buffer.")
 
-            D3D11_BUFFER_DESC lightsBufDesc;
-            lightsBufDesc.ByteWidth           = sizeof(LightState);
-            lightsBufDesc.Usage               = D3D11_USAGE_DYNAMIC;
-            lightsBufDesc.BindFlags           = D3D11_BIND_CONSTANT_BUFFER;
-            lightsBufDesc.CPUAccessFlags      = D3D11_CPU_ACCESS_WRITE;
-            lightsBufDesc.MiscFlags           = 0;
-            lightsBufDesc.StructureByteStride = 0;
-
-            hr = device->CreateBuffer(&lightsBufDesc, None, &mLights);
-            X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create lights constant buffer.")
-
             D3D11_BUFFER_DESC cameraBufDesc;
             cameraBufDesc.ByteWidth           = sizeof(Float4);
             cameraBufDesc.Usage               = D3D11_USAGE_DYNAMIC;
@@ -69,9 +56,22 @@ namespace x {
 
             hr = device->CreateBuffer(&cameraBufDesc, None, &mCamera);
             X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create camera constant buffer.")
+
+            if (lit) {
+                D3D11_BUFFER_DESC lightsBufDesc;
+                lightsBufDesc.ByteWidth           = sizeof(LightState);
+                lightsBufDesc.Usage               = D3D11_USAGE_DYNAMIC;
+                lightsBufDesc.BindFlags           = D3D11_BIND_CONSTANT_BUFFER;
+                lightsBufDesc.CPUAccessFlags      = D3D11_CPU_ACCESS_WRITE;
+                lightsBufDesc.MiscFlags           = 0;
+                lightsBufDesc.StructureByteStride = 0;
+
+                hr = device->CreateBuffer(&lightsBufDesc, None, &mLights);
+                X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create lights constant buffer.")
+            }
         }
 
-        void Update(const RenderContext& context, const LitMaterialParameters& params) const {
+        void Update(const RenderContext& context, const MaterialParameters& params) const {
             const auto ctx = context.GetDeviceContext();
 
             // Update transform buffer
@@ -81,38 +81,31 @@ namespace x {
             memcpy(mapped.pData, &params.mTransformMatrices, sizeof(params.mTransformMatrices));
             ctx->Unmap(mTransforms.Get(), 0);
 
-            // Update lights buffer
-            hr = ctx->Map(mLights.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-            X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to map lights buffer.")
-            memcpy(mapped.pData, &params.mLightState, sizeof(params.mLightState));
-            ctx->Unmap(mLights.Get(), 0);
-
             // Update camera state
-            hr = ctx->Map(mLights.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+            hr = ctx->Map(mCamera.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
             X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to map camera buffer.")
             auto pos = Float4(params.mCameraEye.x, params.mCameraEye.y, params.mCameraEye.z, 0);
             memcpy(mapped.pData, &pos, sizeof(pos));
-            ctx->Unmap(mLights.Get(), 0);
+            ctx->Unmap(mCamera.Get(), 0);
+
+            if (mLit) {
+                // Update lights buffer
+                hr = ctx->Map(mLights.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+                X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to map lights buffer.")
+                memcpy(mapped.pData, &params.mLightState, sizeof(params.mLightState));
+                ctx->Unmap(mLights.Get(), 0);
+            }
         }
 
         void Bind(const RenderContext& context) const {
             const auto ctx = context.GetDeviceContext();
             ctx->VSSetConstantBuffers(kTransformBufferSlotIndex, 1, mTransforms.GetAddressOf());
-            ctx->PSSetConstantBuffers(kLightBufferSlotIndex, 1, mLights.GetAddressOf());
-            ctx->VSSetConstantBuffers(kLightBufferSlotIndex, 1, mLights.GetAddressOf());
             ctx->PSSetConstantBuffers(kCameraBufferSlotIndex, 1, mCamera.GetAddressOf());
+            if (mLit) {
+                ctx->PSSetConstantBuffers(kLightBufferSlotIndex, 1, mLights.GetAddressOf());
+                ctx->VSSetConstantBuffers(kLightBufferSlotIndex, 1, mLights.GetAddressOf());
+            }
         }
-    };
-
-    struct UnlitMaterialBuffers {
-        ComPtr<ID3D11Buffer> mTransforms;
-        ComPtr<ID3D11Buffer> mCamera;
-
-        void Create(RenderContext& context) {}
-
-        void Update(const UnlitMaterialParameters& params) {}
-
-        void Bind(RenderContext& context) {}
     };
 #pragma endregion
 
@@ -128,15 +121,10 @@ namespace x {
 
         X_CAST_DYNAMIC_AS
 
-        virtual void Bind(const TransformMatrices& transforms, const LightState& lights, const Float3 eyePos) const {
-            UpdateBuffers({transforms, lights, eyePos});
-        }
-
-        virtual void Bind(const TransformMatrices& transforms, const Float3 eyePos) const {
-            UpdateBuffers({transforms, eyePos});
-        }
-
+        virtual void Bind(const TransformMatrices& transforms, const LightState& lights, const Float3 eyePos) const {}
+        virtual void Bind(const TransformMatrices& transforms, const Float3 eyePos) const {}
         virtual void Bind() const {}
+
         virtual void Unbind() const {}
 
     protected:
@@ -146,9 +134,7 @@ namespace x {
         virtual void CreateBuffers()     = 0;
         virtual void BindBuffers() const = 0;
 
-        virtual void UpdateBuffers(const LitMaterialParameters& params) const {}
-
-        virtual void UpdateBuffers(const UnlitMaterialParameters& params) const {}
+        virtual void UpdateBuffers(const MaterialParameters& params) const = 0;
 
         virtual void BindShaders() const {
             mShader->Bind();

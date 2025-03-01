@@ -65,8 +65,7 @@ float4 PS_Main(VSOutputPBR input) : SV_Target {
             shadowFactor = ShadowZBuffer.SampleCmpLevelZero(ShadowZBufferState, shadowTexCoords, projCoords.z - bias);
         }
 
-        float3 lighting = (diffuse / PI + specular);
-        Lo += (lighting * shadowFactor) * radiance * NdotL;
+        Lo += ((diffuse / PI) * NdotL + specular) * shadowFactor * radiance;
     }
 
     // PBRMaterial mat;

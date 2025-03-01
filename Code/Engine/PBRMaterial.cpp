@@ -56,11 +56,11 @@ namespace x {
     }
 
     void PBRMaterial::CreateBuffers() {
-        mBuffers.Create(mContext);
+        mBuffers.Create(mContext, true);
         // Create additional buffers if needed
     }
 
-    void PBRMaterial::UpdateBuffers(const LitMaterialParameters& params) const {
+    void PBRMaterial::UpdateBuffers(const MaterialParameters& params) const {
         mBuffers.Update(mContext, params);
         // Update additional buffers if needed
     }

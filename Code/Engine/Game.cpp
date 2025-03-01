@@ -70,6 +70,18 @@ namespace x {
         }
     }
 
+    void Game::RegisterEventHandlers() {
+        RegisterHandler<WindowResizeEvent>(
+          [this](const WindowResizeEvent& e) { OnResize(e.GetWidth(), e.GetHeight()); });
+        RegisterHandler<KeyPressedEvent>([this](const KeyPressedEvent& e) { OnKeyDown(e.GetKey()); });
+        RegisterHandler<KeyReleasedEvent>([this](const KeyReleasedEvent& e) { OnKeyUp(e.GetKey()); });
+        RegisterHandler<MouseButtonPressedEvent>(
+          [this](const MouseButtonPressedEvent& e) { OnMouseButtonDown(e.GetButton()); });
+        RegisterHandler<MouseButtonReleasedEvent>(
+          [this](const MouseButtonReleasedEvent& e) { OnMouseButtonUp(e.GetButton()); });
+        RegisterHandler<MouseMoveEvent>([this](const MouseMoveEvent& e) { OnMouseMove(e.GetX(), e.GetY()); });
+    }
+
     void Game::RenderFrame() {
         if (!mIsFocused) return;
 
@@ -150,16 +162,7 @@ namespace x {
     }
 
     Game::Game(RenderContext& context) : mRenderContext(context) {
-        // Register event listeners for window and input events
-        RegisterHandler<WindowResizeEvent>(
-          [this](const WindowResizeEvent& e) { OnResize(e.GetWidth(), e.GetHeight()); });
-        RegisterHandler<KeyPressedEvent>([this](const KeyPressedEvent& e) { OnKeyDown(e.GetKey()); });
-        RegisterHandler<KeyReleasedEvent>([this](const KeyReleasedEvent& e) { OnKeyUp(e.GetKey()); });
-        RegisterHandler<MouseButtonPressedEvent>(
-          [this](const MouseButtonPressedEvent& e) { OnMouseButtonDown(e.GetButton()); });
-        RegisterHandler<MouseButtonReleasedEvent>(
-          [this](const MouseButtonReleasedEvent& e) { OnMouseButtonUp(e.GetButton()); });
-        RegisterHandler<MouseMoveEvent>([this](const MouseMoveEvent& e) { OnMouseMove(e.GetX(), e.GetY()); });
+        RegisterEventHandlers();
     }
 
     Game::~Game() {
@@ -174,6 +177,7 @@ namespace x {
 
         mRenderSystem = make_unique<RenderSystem>(mRenderContext, viewport);
         mRenderSystem->Initialize();
+        mRenderSystem->SetClearColor(0.392f, 0.584f, 0.929f, 1.f);  // Cornflower Blue
 
         RegisterVolatile(mRenderSystem.get());
         InitializeEngine();

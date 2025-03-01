@@ -65,14 +65,14 @@ namespace x {
                             const ResourceHandle<Texture2D>& normal);
 
     protected:
-        LitMaterialBuffers mBuffers;
+        MaterialBuffers mBuffers;
         ResourceHandle<Texture2D> mAlbedoMap;
         ResourceHandle<Texture2D> mMetallicMap;
         ResourceHandle<Texture2D> mRoughnessMap;
         ResourceHandle<Texture2D> mNormalMap;
 
         void CreateBuffers() override;
-        void UpdateBuffers(const LitMaterialParameters& params) const override;
+        void UpdateBuffers(const MaterialParameters& params) const override;
         void BindBuffers() const override;
     };
 }  // namespace x

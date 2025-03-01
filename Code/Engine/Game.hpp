@@ -62,6 +62,7 @@ namespace x {
         void RenderDepthOnly(const SceneState& state) const;
         void RenderScene(const SceneState& state) const;
 
+        void RegisterEventHandlers();
         void OnResize(u32 width, u32 height) const;
 
         void OnKeyDown(u32 key);
