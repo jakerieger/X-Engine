@@ -180,9 +180,8 @@ namespace x {
         if (material.baseMaterial == "PBR") {
             // TODO: Move the base materials to somewhere in static memory so they aren't being created for every single
             // material instance.
-            const auto baseMatHandle = PBRMaterial::Create(mContext);
-            modelComponent.SetMaterial(baseMatHandle);
-            PBRMaterialInstance& instance = modelComponent.GetMaterialInstance();
+            const auto mat = make_shared<PBRMaterial>(mContext);
+            modelComponent.SetMaterial(mat);
 
             for (const auto& texture : material.textures) {
                 // Load texture resource
@@ -196,10 +195,10 @@ namespace x {
                 if (!resource.has_value()) { X_LOG_FATAL("Failed to fetch texture resource: '%s'", texture.resource) }
                 if (!resource->Valid()) { X_LOG_FATAL("Resource invalid: '%s'", texture.resource) }
 
-                if (texture.name == "albedo") { instance.SetAlbedoMap(*resource); }
-                if (texture.name == "metallic") { instance.SetMetallicMap(*resource); }
-                if (texture.name == "roughness") { instance.SetRoughnessMap(*resource); }
-                if (texture.name == "normal") { instance.SetNormalMap(*resource); }
+                if (texture.name == "albedo") { mat->SetAlbedoMap(*resource); }
+                if (texture.name == "metallic") { mat->SetMetallicMap(*resource); }
+                if (texture.name == "roughness") { mat->SetRoughnessMap(*resource); }
+                if (texture.name == "normal") { mat->SetNormalMap(*resource); }
             }
         }
     }

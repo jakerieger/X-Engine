@@ -81,16 +81,6 @@ struct AreaLight {
     float3 _pad;
 };
 
-struct PBRMaterial {
-    float3 albedo;
-    float metallic;
-    float roughness;
-    float ao;
-    float2 _pad;
-    float3 emissive;
-    float emissiveStrength;
-};
-
 //-----------------------------------------------------------------------------
 // Buffers
 //-----------------------------------------------------------------------------
@@ -103,9 +93,9 @@ cbuffer LightBuffer : register(b1) {
     AreaLight AreaLights[MAX_AREA_LIGHTS];
 }
 
-cbuffer PBRMaterialBuffer : register(b2) { PBRMaterial Material; }
+cbuffer CameraBuffer : register(b2) { float4 CameraPosition; }
 
-cbuffer CameraBuffer : register(b3) { float4 CameraPosition; }
+// Additional buffers can be bound to 3..n
 
 //-----------------------------------------------------------------------------
 // Samplers
@@ -196,34 +186,34 @@ float3 EnergyConservation(float3 specular, float metallic, float3 albedo) {
 }
 
 // Calculate point light contribution with PBR
-float3 CalculatePointLightPBR(PointLight light, float3 worldPos, float3 normal, float3 viewDir, PBRMaterial material) {
-    float3 lightDir = light.position - worldPos;
-    float distance  = length(lightDir);
-    lightDir        = normalize(lightDir);
+// float3 CalculatePointLightPBR(PointLight light, float3 worldPos, float3 normal, float3 viewDir, PBRMaterial material) {
+//     float3 lightDir = light.position - worldPos;
+//     float distance  = length(lightDir);
+//     lightDir        = normalize(lightDir);
     
-    float falloffStart = light.radius * 0.4;
-    float falloffRange = light.radius - falloffStart;
-    float falloffFactor = 1.0;
+//     float falloffStart = light.radius * 0.4;
+//     float falloffRange = light.radius - falloffStart;
+//     float falloffFactor = 1.0;
     
-    if (distance > falloffStart) {
-        float x = (distance - falloffStart) / falloffRange;
-        float smoothFalloff = pow(1.0 - x, 3.0);
-        float expFalloff = exp(-x * 2.0);
-        falloffFactor = saturate(lerp(smoothFalloff, expFalloff, 0.6));
-    }
+//     if (distance > falloffStart) {
+//         float x = (distance - falloffStart) / falloffRange;
+//         float smoothFalloff = pow(1.0 - x, 3.0);
+//         float expFalloff = exp(-x * 2.0);
+//         falloffFactor = saturate(lerp(smoothFalloff, expFalloff, 0.6));
+//     }
     
-    float baseAttenuation = 1.0 / (light.constant + light.lin * distance + light.quadratic * distance * distance);
-    float finalAttenuation = baseAttenuation * falloffFactor;
+//     float baseAttenuation = 1.0 / (light.constant + light.lin * distance + light.quadratic * distance * distance);
+//     float finalAttenuation = baseAttenuation * falloffFactor;
     
-    float3 F0 = lerp(float3(0.04, 0.04, 0.04), material.albedo, material.metallic);
-    float3 specular = SpecularBRDF(normal, viewDir, lightDir, material.roughness, F0);
-    float3 diffuse = EnergyConservation(specular, material.metallic, material.albedo);
+//     float3 F0 = lerp(float3(0.04, 0.04, 0.04), material.albedo, material.metallic);
+//     float3 specular = SpecularBRDF(normal, viewDir, lightDir, material.roughness, F0);
+//     float3 diffuse = EnergyConservation(specular, material.metallic, material.albedo);
     
-    float NdotL     = max(dot(normal, lightDir), 0.0);
-    float3 radiance = light.color * light.intensity * finalAttenuation;
+//     float NdotL     = max(dot(normal, lightDir), 0.0);
+//     float3 radiance = light.color * light.intensity * finalAttenuation;
 
-    return (diffuse / PI + specular) * radiance * NdotL;
-}
+//     return (diffuse / PI + specular) * radiance * NdotL;
+// }
 
 // Area light helper functions
 float3 ClosestPointRect(float3 pos, float3 rectPos, float3 rectRight, float3 rectUp, float2 dimensions) {
@@ -244,31 +234,31 @@ float3 ClosestPointRect(float3 pos, float3 rectPos, float3 rectRight, float3 rec
 }
 
 // Calculate area light contribution
-float3 CalculateAreaLightPBR(AreaLight light, float3 worldPos, float3 normal, float3 viewDir, PBRMaterial material) {
-    // Calculate basis vectors for the area light
-    float3 right = normalize(cross(light.direction, float3(0, 1, 0)));
-    float3 up    = normalize(cross(right, light.direction));
+// float3 CalculateAreaLightPBR(AreaLight light, float3 worldPos, float3 normal, float3 viewDir, PBRMaterial material) {
+//     // Calculate basis vectors for the area light
+//     float3 right = normalize(cross(light.direction, float3(0, 1, 0)));
+//     float3 up    = normalize(cross(right, light.direction));
 
-    // Find closest point on area light
-    float3 closestPoint = ClosestPointRect(worldPos, light.position, right, up, light.dimensions);
+//     // Find closest point on area light
+//     float3 closestPoint = ClosestPointRect(worldPos, light.position, right, up, light.dimensions);
 
-    float3 lightDir     = normalize(closestPoint - worldPos);
-    float distance      = length(closestPoint - worldPos);
+//     float3 lightDir     = normalize(closestPoint - worldPos);
+//     float distance      = length(closestPoint - worldPos);
 
-    // Calculate area light influence
-    float area        = light.dimensions.x * light.dimensions.y;
-    float attenuation = 1.0 / (distance * distance);
+//     // Calculate area light influence
+//     float area        = light.dimensions.x * light.dimensions.y;
+//     float attenuation = 1.0 / (distance * distance);
 
-    // Rest of PBR calculation similar to point light...
-    float3 F0       = lerp(float3(0.04, 0.04, 0.04), material.albedo, material.metallic);
-    float3 specular = SpecularBRDF(normal, viewDir, lightDir, material.roughness, F0);
-    float3 diffuse  = EnergyConservation(specular, material.metallic, material.albedo);
+//     // Rest of PBR calculation similar to point light...
+//     float3 F0       = lerp(float3(0.04, 0.04, 0.04), material.albedo, material.metallic);
+//     float3 specular = SpecularBRDF(normal, viewDir, lightDir, material.roughness, F0);
+//     float3 diffuse  = EnergyConservation(specular, material.metallic, material.albedo);
 
-    float NdotL     = max(dot(normal, lightDir), 0.0);
-    float3 radiance = light.color * light.intensity * attenuation * area;
+//     float NdotL     = max(dot(normal, lightDir), 0.0);
+//     float3 radiance = light.color * light.intensity * attenuation * area;
 
-    return (diffuse / PI + specular) * radiance * NdotL;
-}
+//     return (diffuse / PI + specular) * radiance * NdotL;
+// }
 
 float3 CalculateIBLDiffuse(float3 N, float3 albedo, float ao) {
     // This would normally sample from an irradiance cubemap

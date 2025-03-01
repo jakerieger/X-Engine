@@ -4,12 +4,13 @@
 #include "Math.hpp"
 #include "Model.hpp"
 #include "Material.hpp"
+#include "PBRMaterial.hpp"
 #include "ResourceManager.hpp"
 
 namespace x {
     class ModelComponent {
         ResourceHandle<Model> mModelHandle;
-        PBRMaterialInstance mMaterialInstance;
+        shared_ptr<PBRMaterial> mMaterial;
         bool mCastsShadows = true;
 
     public:
@@ -21,7 +22,7 @@ namespace x {
         }
 
         ModelComponent& SetMaterial(const shared_ptr<PBRMaterial>& material) {
-            mMaterialInstance.SetBaseMaterial(material);
+            mMaterial = material;
             return *this;
         }
 
@@ -30,19 +31,13 @@ namespace x {
             return *this;
         }
 
-        PBRMaterialInstance& GetMaterialInstance() {
-            return mMaterialInstance;
-        }
-
         void Draw(RenderContext& context,
                   const TransformMatrices& transforms,
                   const LightState& lights,
                   const Float3& eyePosition) const {
-            if (mMaterialInstance.GetBaseMaterial()) {
-                mMaterialInstance.Bind(transforms, lights, eyePosition);
-                mModelHandle->Draw(context);
-                mMaterialInstance.Unbind();
-            }
+            if (mMaterial) { mMaterial->Bind(transforms, lights, eyePosition); }
+            mModelHandle->Draw(context);
+            if (mMaterial) { mMaterial->Unbind(); }
         }
 
         void Draw(RenderContext& context) const {

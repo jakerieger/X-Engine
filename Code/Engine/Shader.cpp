@@ -246,5 +246,10 @@ namespace x {
             X_PANIC("Invalid thread group size in compute shader");
         }
     }
+
+    void GraphicsShader::Bind() const {
+        mVertexShader->Bind();
+        mPixelShader->Bind();
+    }
 #pragma endregion
 }  // namespace x

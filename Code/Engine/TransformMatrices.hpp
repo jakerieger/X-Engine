@@ -15,6 +15,8 @@ namespace x {
         Matrix viewProjection;
         Matrix modelViewProjection;
 
+        TransformMatrices() = default;
+
         TransformMatrices(const Matrix& m, const Matrix& v, const Matrix& p) {
             this->model      = XMMatrixTranspose(m);
             this->view       = XMMatrixTranspose(v);

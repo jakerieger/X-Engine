@@ -6,6 +6,9 @@
 #include "Window.hpp"
 #include <imgui.h>
 
+#include "ShaderManager.hpp"
+#include "StaticResources.hpp"
+
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace x {
@@ -147,6 +150,7 @@ namespace x {
     }
 
     Game::Game(RenderContext& context) : mRenderContext(context) {
+        // Register event listeners for window and input events
         RegisterHandler<WindowResizeEvent>(
           [this](const WindowResizeEvent& e) { OnResize(e.GetWidth(), e.GetHeight()); });
         RegisterHandler<KeyPressedEvent>([this](const KeyPressedEvent& e) { OnKeyDown(e.GetKey()); });
@@ -164,6 +168,9 @@ namespace x {
 
     void Game::Initialize(Window* window, Viewport* viewport) {
         mWindow = window;
+
+        // These need to be loaded first before the rest of the engine can use them!
+        if (!ShaderManager::LoadShaders(mRenderContext)) { X_LOG_FATAL("Failed to load shaders!"); }
 
         mRenderSystem = make_unique<RenderSystem>(mRenderContext, viewport);
         mRenderSystem->Initialize();

@@ -15,3 +15,5 @@ using namespace DirectX;
     #include <wrl/client.h>
 using Microsoft::WRL::ComPtr;
 #endif
+
+#define X_ALIGNED_STRUCT struct alignas(16)

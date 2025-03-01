@@ -1,107 +1,157 @@
 #pragma once
 
-#include "Common/Types.hpp"
-#include "D3D.hpp"
-#include "Math.hpp"
 #include "Lights.hpp"
+#include "Common/Types.hpp"
 #include "ResourceManager.hpp"
 #include "Shader.hpp"
-#include "Texture.hpp"
 #include "TransformMatrices.hpp"
 
 namespace x {
-    enum class TextureMapSlot : u32 {
-        Albedo,
-        Metallic,
-        Roughness,
-        AmbientOcclusion,
-        Normal,
-        ShadowZBuffer,
+#pragma region Material Parameters
+    struct LitMaterialParameters {
+        TransformMatrices mTransformMatrices;
+        LightState mLightState;
+        Float3 mCameraEye;
     };
 
-    class PBRMaterial {
-        RenderContext& mRenderer;
-        ComPtr<ID3D11Buffer> mTransformsCB;
-        ComPtr<ID3D11Buffer> mLightsCB;
-        ComPtr<ID3D11Buffer> mMaterialCB;
-        ComPtr<ID3D11Buffer> mCameraCB;
-        unique_ptr<VertexShader> mVertexShader;
-        unique_ptr<PixelShader> mPixelShader;
+    struct UnlitMaterialParameters {
+        TransformMatrices mTransformMatrices;
+        Float3 mCameraEye;
+    };
+#pragma endregion
 
-        struct alignas(16) MaterialProperties {
-            Float3 albedo;
-            f32 metallic;
-            f32 roughness;
-            f32 ao;
-            f32 mPad[2];
-            Float3 emissive;
-            f32 emissiveStrength;
-        };
+#pragma region Material Buffers
+    static constexpr u32 kTransformBufferSlotIndex = 0;
+    static constexpr u32 kLightBufferSlotIndex     = 1;
+    static constexpr u32 kCameraBufferSlotIndex    = 2;
+    // Additional slot indices for whatever additional constant buffers a material might define
+    static constexpr u32 kCustomBufferSlotIndex1 = 3;
+    static constexpr u32 kCustomBufferSlotIndex2 = 4;
+    static constexpr u32 kCustomBufferSlotIndex3 = 5;
 
-    public:
-        explicit PBRMaterial(RenderContext& renderer);
-        static shared_ptr<PBRMaterial> Create(RenderContext& renderer);
+    struct LitMaterialBuffers {
+        ComPtr<ID3D11Buffer> mTransforms;
+        ComPtr<ID3D11Buffer> mLights;
+        ComPtr<ID3D11Buffer> mCamera;
 
-    private:
-        friend class PBRMaterialInstance;
+        void Create(const RenderContext& context) {
+            auto* device = context.GetDevice();
 
-        void CreateBuffers();
-        void UpdateBuffers(const TransformMatrices& transforms,
-                           const LightState& lights,
-                           const MaterialProperties& matProps,
-                           const Float3& eyePosition);
-        void BindBuffers();
-        void BindShaders();
+            D3D11_BUFFER_DESC transformBufDesc;
+            transformBufDesc.ByteWidth           = sizeof(TransformMatrices);
+            transformBufDesc.Usage               = D3D11_USAGE_DYNAMIC;
+            transformBufDesc.BindFlags           = D3D11_BIND_CONSTANT_BUFFER;
+            transformBufDesc.CPUAccessFlags      = D3D11_CPU_ACCESS_WRITE;
+            transformBufDesc.MiscFlags           = 0;
+            transformBufDesc.StructureByteStride = 0;
+
+            auto hr = device->CreateBuffer(&transformBufDesc, None, &mTransforms);
+            X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create transforms constant buffer.")
+
+            D3D11_BUFFER_DESC lightsBufDesc;
+            lightsBufDesc.ByteWidth           = sizeof(LightState);
+            lightsBufDesc.Usage               = D3D11_USAGE_DYNAMIC;
+            lightsBufDesc.BindFlags           = D3D11_BIND_CONSTANT_BUFFER;
+            lightsBufDesc.CPUAccessFlags      = D3D11_CPU_ACCESS_WRITE;
+            lightsBufDesc.MiscFlags           = 0;
+            lightsBufDesc.StructureByteStride = 0;
+
+            hr = device->CreateBuffer(&lightsBufDesc, None, &mLights);
+            X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create lights constant buffer.")
+
+            D3D11_BUFFER_DESC cameraBufDesc;
+            cameraBufDesc.ByteWidth           = sizeof(Float4);
+            cameraBufDesc.Usage               = D3D11_USAGE_DYNAMIC;
+            cameraBufDesc.BindFlags           = D3D11_BIND_CONSTANT_BUFFER;
+            cameraBufDesc.CPUAccessFlags      = D3D11_CPU_ACCESS_WRITE;
+            cameraBufDesc.MiscFlags           = 0;
+            cameraBufDesc.StructureByteStride = 0;
+
+            hr = device->CreateBuffer(&cameraBufDesc, None, &mCamera);
+            X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create camera constant buffer.")
+        }
+
+        void Update(const RenderContext& context, const LitMaterialParameters& params) const {
+            const auto ctx = context.GetDeviceContext();
+
+            // Update transform buffer
+            D3D11_MAPPED_SUBRESOURCE mapped;
+            auto hr = ctx->Map(mTransforms.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+            X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to map transforms buffer.")
+            memcpy(mapped.pData, &params.mTransformMatrices, sizeof(params.mTransformMatrices));
+            ctx->Unmap(mTransforms.Get(), 0);
+
+            // Update lights buffer
+            hr = ctx->Map(mLights.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+            X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to map lights buffer.")
+            memcpy(mapped.pData, &params.mLightState, sizeof(params.mLightState));
+            ctx->Unmap(mLights.Get(), 0);
+
+            // Update camera state
+            hr = ctx->Map(mLights.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+            X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to map camera buffer.")
+            auto pos = Float4(params.mCameraEye.x, params.mCameraEye.y, params.mCameraEye.z, 0);
+            memcpy(mapped.pData, &pos, sizeof(pos));
+            ctx->Unmap(mLights.Get(), 0);
+        }
+
+        void Bind(const RenderContext& context) const {
+            const auto ctx = context.GetDeviceContext();
+            ctx->VSSetConstantBuffers(kTransformBufferSlotIndex, 1, mTransforms.GetAddressOf());
+            ctx->PSSetConstantBuffers(kLightBufferSlotIndex, 1, mLights.GetAddressOf());
+            ctx->VSSetConstantBuffers(kLightBufferSlotIndex, 1, mLights.GetAddressOf());
+            ctx->PSSetConstantBuffers(kCameraBufferSlotIndex, 1, mCamera.GetAddressOf());
+        }
     };
 
-    class PBRMaterialInstance {
-        // Base material handle
-        shared_ptr<PBRMaterial> mBaseMaterial;
+    struct UnlitMaterialBuffers {
+        ComPtr<ID3D11Buffer> mTransforms;
+        ComPtr<ID3D11Buffer> mCamera;
 
-        // Texture maps for this instance
-        ResourceHandle<Texture2D> mAlbedoMap;
-        ResourceHandle<Texture2D> mMetallicMap;
-        ResourceHandle<Texture2D> mRoughnessMap;
-        ResourceHandle<Texture2D> mNormalMap;
+        void Create(RenderContext& context) {}
 
-        // Material properties for this instance
-        Float3 mAlbedo;
-        f32 mMetallic;
-        f32 mRoughness;
-        f32 mAo;
-        Float3 mEmissive;
-        f32 mEmissiveStrength;
+        void Update(const UnlitMaterialParameters& params) {}
 
+        void Bind(RenderContext& context) {}
+    };
+#pragma endregion
+
+    struct MaterialUpdateParams {
+        virtual ~MaterialUpdateParams() = default;
+        X_CAST_DYNAMIC_AS
+    };
+
+    class IMaterial {
     public:
-        PBRMaterialInstance() = default;
+        explicit IMaterial(RenderContext& context) : mContext(context) {}
+        virtual ~IMaterial() = default;
 
-        void SetBaseMaterial(const shared_ptr<PBRMaterial>& baseMaterial) {
-            mBaseMaterial = baseMaterial;
+        X_CAST_DYNAMIC_AS
+
+        virtual void Bind(const TransformMatrices& transforms, const LightState& lights, const Float3 eyePos) const {
+            UpdateBuffers({transforms, lights, eyePos});
         }
 
-        void SetAlbedo(const Float3& albedo);
-        void SetMetallic(f32 metallic);
-        void SetRoughness(f32 roughness);
-        void SetAO(f32 ao);
-        void SetEmissive(const Float3& emissive, f32 strength);
-
-        void SetAlbedoMap(const ResourceHandle<Texture2D>& albedo);
-        void SetMetallicMap(const ResourceHandle<Texture2D>& metallic);
-        void SetRoughnessMap(const ResourceHandle<Texture2D>& roughness);
-        void SetNormalMap(const ResourceHandle<Texture2D>& normal);
-        void SetTextureMaps(const ResourceHandle<Texture2D>& albedo,
-                            const ResourceHandle<Texture2D>& metallic,
-                            const ResourceHandle<Texture2D>& roughness,
-                            const ResourceHandle<Texture2D>& normal);
-
-        const PBRMaterial* GetBaseMaterial() const {
-            return mBaseMaterial.get();
+        virtual void Bind(const TransformMatrices& transforms, const Float3 eyePos) const {
+            UpdateBuffers({transforms, eyePos});
         }
 
-        void Bind(const TransformMatrices& transforms, const LightState& lights, Float3 eyePos) const;
-        void Unbind() const;
+        virtual void Bind() const {}
+        virtual void Unbind() const {}
 
-    private:
-        void UpdateInstanceParams(const TransformMatrices& transforms, const LightState& lights, Float3 eyePos) const;
+    protected:
+        RenderContext& mContext;
+        shared_ptr<GraphicsShader> mShader;
+
+        virtual void CreateBuffers()     = 0;
+        virtual void BindBuffers() const = 0;
+
+        virtual void UpdateBuffers(const LitMaterialParameters& params) const {}
+
+        virtual void UpdateBuffers(const UnlitMaterialParameters& params) const {}
+
+        virtual void BindShaders() const {
+            mShader->Bind();
+        }
     };
 }  // namespace x

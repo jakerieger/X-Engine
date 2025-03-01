@@ -74,8 +74,6 @@ float4 PS_Main(VSOutputPBR input) : SV_Target {
     // mat.metallic         = metallicSample;
     // mat.roughness        = roughnessSample;
     // mat.ao               = ao;
-    // mat.emissive         = float3(0.0, 0.0, 0.0);
-    // mat.emissiveStrength = 0.0;
     //
     // for (uint i = 0; i < MAX_POINT_LIGHTS; ++i) {
     //     PointLight light = PointLights[i];

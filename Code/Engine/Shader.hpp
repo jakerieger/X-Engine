@@ -81,4 +81,11 @@ namespace x {
         void ExtractThreadGroupSize();
     };
 #pragma endregion
+
+    struct GraphicsShader {
+        unique_ptr<VertexShader> mVertexShader;
+        unique_ptr<PixelShader> mPixelShader;
+
+        void Bind() const;
+    };
 }  // namespace x

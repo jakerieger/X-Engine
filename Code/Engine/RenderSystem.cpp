@@ -2,6 +2,7 @@
 #include "RenderContext.hpp"
 #include "TonemapEffect.hpp"
 #include "Material.hpp"
+#include "PBRMaterial.hpp"
 
 #include "ShadowPass_VS.h"
 #include "ShadowPass_PS.h"
@@ -195,10 +196,8 @@ namespace x {
         mRenderContext.GetDeviceContext()->ClearRenderTargetView(mRenderTargetView.Get(), clearColor);
         mRenderContext.GetDeviceContext()->ClearDepthStencilView(mDepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-        mRenderContext.GetDeviceContext()->PSSetShaderResources((u32)TextureMapSlot::ShadowZBuffer, 1, &depthSRV);
-        mRenderContext.GetDeviceContext()->PSSetSamplers((u32)TextureMapSlot::ShadowZBuffer,
-                                                         1,
-                                                         mDepthSamplerState.GetAddressOf());
+        mRenderContext.GetDeviceContext()->PSSetShaderResources(kShadowMapSlot, 1, &depthSRV);
+        mRenderContext.GetDeviceContext()->PSSetSamplers(kShadowMapSlot, 1, mDepthSamplerState.GetAddressOf());
     }
 
     ID3D11ShaderResourceView* LightPass::EndPass() {

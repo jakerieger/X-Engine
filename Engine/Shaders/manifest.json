@@ -9,8 +9,8 @@
         "sourceDir": "Source",
         "graphics": [
             {
-                "name": "Lit",
-                "source": "PBR_TexMaps.hlsl"
+                "name": "OpaquePBR",
+                "source": "OpaquePBR.hlsl"
             },
             {
                 "name": "ShadowPass",

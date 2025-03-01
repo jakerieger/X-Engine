@@ -99,7 +99,7 @@
 // NormalMap                         texture  float4          2d             t4      1 
 // ShadowZBuffer                     texture  float4          2d             t5      1 
 // LightBuffer                       cbuffer      NA          NA            cb1      1 
-// CameraBuffer                      cbuffer      NA          NA            cb3      1 
+// CameraBuffer                      cbuffer      NA          NA            cb2      1 
 //
 //
 //
@@ -127,7 +127,7 @@
 ps_5_0
 dcl_globalFlags refactoringAllowed
 dcl_constantbuffer CB1[4], immediateIndexed
-dcl_constantbuffer CB3[1], immediateIndexed
+dcl_constantbuffer CB2[1], immediateIndexed
 dcl_sampler s0, mode_default
 dcl_sampler s1, mode_default
 dcl_sampler s2, mode_default
@@ -168,7 +168,7 @@ if_nz cb1[3].y
   mul r2.xyz, r1.wwww, r2.xyzx
   sample_indexable(texture2d)(float,float,float,float) r1.w, v1.xyxx, t1.yzwx, s1
   sample_indexable(texture2d)(float,float,float,float) r2.w, v1.xyxx, t2.yzwx, s2
-  add r3.xyz, -v5.xyzx, cb3[0].xyzx
+  add r3.xyz, -v5.xyzx, cb2[0].xyzx
   dp3 r3.w, r3.xyzx, r3.xyzx
   rsq r3.w, r3.w
   mul r4.xyz, r3.wwww, r3.xyzx
@@ -244,12 +244,12 @@ ret
 // Approximately 95 instruction slots used
 #endif
 
-const BYTE kLit_PSBytes[] =
+const BYTE kOpaquePBR_PSBytes[] =
 {
-     68,  88,  66,  67,  10, 214, 
-    171, 189, 227, 104, 131, 209, 
-     69, 199,  71, 156,   8,  84, 
-     33, 197,   1,   0,   0,   0, 
+     68,  88,  66,  67, 118, 159, 
+    206,  64,  33,  20,  80, 143, 
+    224,  75, 241, 224, 112,  82, 
+    244,  40,   1,   0,   0,   0, 
     176,  22,   0,   0,   5,   0, 
       0,   0,  52,   0,   0,   0, 
     160,   8,   0,   0, 184,   9, 
@@ -328,7 +328,7 @@ const BYTE kLit_PSBytes[] =
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
-      3,   0,   0,   0,   1,   0, 
+      2,   0,   0,   0,   1,   0, 
       0,   0,   1,   0,   0,   0, 
      65, 108,  98, 101, 100, 111, 
      83, 116,  97, 116, 101,   0, 
@@ -676,7 +676,7 @@ const BYTE kLit_PSBytes[] =
       0,   4,  70, 142,  32,   0, 
       1,   0,   0,   0,   4,   0, 
       0,   0,  89,   0,   0,   4, 
-     70, 142,  32,   0,   3,   0, 
+     70, 142,  32,   0,   2,   0, 
       0,   0,   1,   0,   0,   0, 
      90,   0,   0,   3,   0,  96, 
      16,   0,   0,   0,   0,   0, 
@@ -837,7 +837,7 @@ const BYTE kLit_PSBytes[] =
       3,   0,   0,   0,  70,  18, 
      16, 128,  65,   0,   0,   0, 
       5,   0,   0,   0,  70, 130, 
-     32,   0,   3,   0,   0,   0, 
+     32,   0,   2,   0,   0,   0, 
       0,   0,   0,   0,  16,   0, 
       0,   7, 130,   0,  16,   0, 
       3,   0,   0,   0,  70,   2, 

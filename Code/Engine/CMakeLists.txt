@@ -37,7 +37,6 @@ add_library(x STATIC
     ${ENGINE_DIR}/InputCodes.hpp
     ${ENGINE_DIR}/InputLayouts.hpp
     ${ENGINE_DIR}/Lights.hpp
-    ${ENGINE_DIR}/Material.cpp
     ${ENGINE_DIR}/Material.hpp
     ${ENGINE_DIR}/MaterialParser.cpp
     ${ENGINE_DIR}/MaterialParser.hpp
@@ -56,6 +55,8 @@ add_library(x STATIC
     ${ENGINE_DIR}/PoolAllocator.hpp
     ${ENGINE_DIR}/PostProcessSystem.cpp
     ${ENGINE_DIR}/PostProcessSystem.hpp
+    ${ENGINE_DIR}/PBRMaterial.hpp
+    ${ENGINE_DIR}/PBRMaterial.cpp
     ${ENGINE_DIR}/RasterizerState.cpp
     ${ENGINE_DIR}/RasterizerState.hpp
     ${ENGINE_DIR}/RenderContext.cpp
@@ -74,6 +75,8 @@ add_library(x STATIC
     ${ENGINE_DIR}/ScriptTypeRegistry.hpp
     ${ENGINE_DIR}/Shader.cpp
     ${ENGINE_DIR}/Shader.hpp
+    ${ENGINE_DIR}/ShaderManager.cpp
+    ${ENGINE_DIR}/ShaderManager.hpp
     ${ENGINE_DIR}/StaticResources.cpp
     ${ENGINE_DIR}/StaticResources.hpp
     ${ENGINE_DIR}/Texture.cpp
