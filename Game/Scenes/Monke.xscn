@@ -3,14 +3,8 @@ name: Monke
 description: A basic demo scene containing a floor and rotating Suzane model.
 world:
   camera:
-    position:
-      x: 0
-      y: 1
-      z: -5
-    eye:
-      x: 0
-      y: 0
-      z: 0
+    position: [ 0, 1, -5 ]
+    eye: [ 0, 0, 0 ]
     fovY: 60
     nearZ: 0.1
     farZ: 1000
@@ -18,37 +12,22 @@ world:
     sun:
       enabled: true
       intensity: 2
-      color:
-        r: 1
-        g: 1
-        b: 1
-      direction:
-        x: 0.6
-        y: 0.6
-        z: -0.6
+      color: [ 1, 1, 1 ]
+      direction: [ 0.6, 0.6, -0.6 ]
       castsShadows: true
-    pointLights: []
-    areaLights: []
-    spotLights: []
+    pointLights: [ ]
+    areaLights: [ ]
+    spotLights: [ ]
 entities:
   - id: 0
-    name: floor
+    name: room
     components:
       transform:
-        position:
-          x: 0
-          y: -1
-          z: 0
-        rotation:
-          x: 0
-          y: 0
-          z: 0
-        scale:
-          x: 1
-          y: 1
-          z: 1
+        position: [ 0, -0.5, 0 ]
+        rotation: [ 0, 0, 0 ]
+        scale: [ 1, 1, 1 ]
       model:
-        resource: C:\Users\conta\Code\SpaceGame\Game\Content\Floor.glb
+        resource: C:\Users\conta\Code\SpaceGame\Game\Content\BasicRoom.glb
         material: C:\Users\conta\Code\SpaceGame\Game\Materials\Floor.xmat
         castsShadows: true
         receiveShadows: true
@@ -56,18 +35,9 @@ entities:
     name: monke
     components:
       transform:
-        position:
-          x: 0
-          y: 0
-          z: 0
-        rotation:
-          x: 0
-          y: 0
-          z: 0
-        scale:
-          x: 1
-          y: 1
-          z: 1
+        position: [ 0, 0, 0 ]
+        rotation: [ 0, 0, 0 ]
+        scale: [ 1, 1, 1 ]
       model:
         resource: C:\Users\conta\Code\SpaceGame\Game\Content\Monke.glb
         material: C:\Users\conta\Code\SpaceGame\Game\Materials\Monke.xmat

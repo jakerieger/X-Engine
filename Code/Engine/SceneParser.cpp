@@ -1,10 +1,12 @@
 #include "SceneParser.hpp"
 #include <yaml-cpp/yaml.h>
 
+#include "EngineCommon.hpp"
+
 namespace x {
     static void ParseWorld(const YAML::Node& world, SceneDescriptor& descriptor);
     static void ParseEntities(const YAML::Node& entities, SceneDescriptor& descriptor);
-    static Float3 ParseFloat3(const YAML::Node& node, bool rgb = false);
+    static Float3 ParseFloat3(const YAML::Node& node);
 
     void SceneParser::Parse(const str& filename, SceneDescriptor& descriptor) {
         YAML::Node scene = YAML::LoadFile(filename);
@@ -36,7 +38,7 @@ namespace x {
 
         descriptor.world.lights.sun.enabled      = sunNode["enabled"].as<bool>();
         descriptor.world.lights.sun.intensity    = sunNode["intensity"].as<f32>();
-        descriptor.world.lights.sun.color        = ParseFloat3(sunNode["color"], true);
+        descriptor.world.lights.sun.color        = ParseFloat3(sunNode["color"]);
         descriptor.world.lights.sun.direction    = ParseFloat3(sunNode["direction"]);
         descriptor.world.lights.sun.castsShadows = sunNode["castsShadows"].as<bool>();
     }
@@ -82,11 +84,12 @@ namespace x {
         }
     }
 
-    Float3 ParseFloat3(const YAML::Node& node, const bool rgb) {
-        const auto x = node[rgb ? "r" : "x"].as<f32>();
-        const auto y = node[rgb ? "g" : "y"].as<f32>();
-        const auto z = node[rgb ? "b" : "z"].as<f32>();
-
-        return {x, y, z};
+    Float3 ParseFloat3(const YAML::Node& node) {
+        if (node.IsSequence() && node.size() == 3) {
+            return {node[0].as<f32>(), node[1].as<f32>(), node[2].as<f32>()};
+        } else {
+            X_LOG_ERROR("Failed to parse float3 in scene descriptor.")
+            return {std::numeric_limits<f32>::max(), std::numeric_limits<f32>::max(), std::numeric_limits<f32>::max()};
+        }
     }
 }  // namespace x

@@ -6,7 +6,8 @@
 
 namespace x {
     Scene::Scene(RenderContext& context, ScriptEngine& scriptEngine)
-        : mResources(context, Memory::BYTES_128MB), mState(), mContext(context), mScriptEngine(scriptEngine) {}
+        : mResources(context, Memory::BYTES_128MB), mState(), mInitialState(), mContext(context),
+          mScriptEngine(scriptEngine) {}
 
     Scene::~Scene() {
         Unload();
@@ -118,7 +119,7 @@ namespace x {
         // TODO: I only need to update this if either the light direction or the screen size changes; this can be
         // optimized!
         const auto lvp                           = CalculateLightViewProjection(mState.GetLightState().Sun,
-                                                      10.0f,
+                                                      5.0f,  // TODO: this needs tweaking depending on the light height
                                                       camera.GetAspectRatio(),
                                                       clipPlanes.first,
                                                       clipPlanes.second);
