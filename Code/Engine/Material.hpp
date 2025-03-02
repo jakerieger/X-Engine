@@ -10,7 +10,7 @@ namespace x {
 #pragma region Material Parameters
     struct MaterialParameters {
         TransformMatrices mTransformMatrices;
-        LightState mLightState;
+        std::optional<LightState> mLightState;
         Float3 mCameraEye;
     };
 #pragma endregion
@@ -28,7 +28,7 @@ namespace x {
         ComPtr<ID3D11Buffer> mTransforms;
         ComPtr<ID3D11Buffer> mLights;
         ComPtr<ID3D11Buffer> mCamera;
-        bool mLit {true};
+        bool mLit {true};  // Determines whether we create the Lights buffer
 
         // Set lit param to false if creating an unlit material
         void Create(const RenderContext& context, bool lit = true) {
@@ -89,10 +89,17 @@ namespace x {
             ctx->Unmap(mCamera.Get(), 0);
 
             if (mLit) {
+                if (!params.mLightState.has_value()) {
+                    X_LOG_ERROR("Light state not set but params are defined as lit");
+                    return;
+                }
+
+                const auto& lightState = *params.mLightState;
+
                 // Update lights buffer
                 hr = ctx->Map(mLights.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
                 X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to map lights buffer.")
-                memcpy(mapped.pData, &params.mLightState, sizeof(params.mLightState));
+                memcpy(mapped.pData, &lightState, sizeof(lightState));
                 ctx->Unmap(mLights.Get(), 0);
             }
         }

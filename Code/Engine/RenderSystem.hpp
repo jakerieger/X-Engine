@@ -13,8 +13,7 @@ namespace x {
 
     class ShadowPass {
         RenderContext& mRenderContext;
-        VertexShader mVertexShader;
-        PixelShader mPixelShader;
+        shared_ptr<GraphicsShader> mShader;
         ComPtr<ID3D11Buffer> mShadowParamsCB;
         ComPtr<ID3D11DepthStencilView> mDepthStencilView;
         ComPtr<ID3D11DepthStencilState> mDepthStencilState;

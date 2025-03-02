@@ -3,6 +3,7 @@
 #include "TonemapEffect.hpp"
 #include "Material.hpp"
 #include "PBRMaterial.hpp"
+#include "ShaderManager.hpp"
 
 #include "ShadowPass_VS.h"
 #include "ShadowPass_PS.h"
@@ -69,13 +70,11 @@ namespace x {
 #pragma endregion
 
 #pragma region ShadowPass
-    ShadowPass::ShadowPass(RenderContext& context)
-        : mRenderContext(context), mVertexShader(context), mPixelShader(context) {}
+    ShadowPass::ShadowPass(RenderContext& context) : mRenderContext(context) {
+        mShader = ShaderManager::GetGraphicsShader(kShadowMapShaderId);
+    }
 
     void ShadowPass::Initialize(u32 width, u32 height) {
-        mVertexShader.LoadFromMemory(X_ARRAY_W_SIZE(kShadowPass_VSBytes));
-        mPixelShader.LoadFromMemory(X_ARRAY_W_SIZE(kShadowPass_PSBytes));
-
         D3D11_BUFFER_DESC desc {};
         desc.ByteWidth      = sizeof(ShadowMapParams);
         desc.Usage          = D3D11_USAGE_DYNAMIC;
@@ -93,8 +92,7 @@ namespace x {
         mRenderContext.GetDeviceContext()->OMSetDepthStencilState(mDepthStencilState.Get(), 0);
         mRenderContext.GetDeviceContext()->ClearDepthStencilView(mDepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-        mVertexShader.Bind();
-        mPixelShader.Bind();
+        mShader->Bind();
 
         mRenderContext.GetDeviceContext()->VSSetConstantBuffers(0, 1, mShadowParamsCB.GetAddressOf());
     }

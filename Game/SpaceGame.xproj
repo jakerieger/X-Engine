@@ -1,2 +1,3 @@
-name: SpaceGame
-engineVersion: 1.0
+project:
+  name: SpaceGame
+  engineVersion: 1.0

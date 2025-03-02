@@ -1,4 +1,4 @@
-#include "Common.hlsli"
+#include "PBRCommon.hlsli"
 #include "IO.hlsli"
 
 VSOutputPBR VS_Main(VSInputPBR input) {
@@ -69,16 +69,15 @@ float4 PS_Main(VSOutputPBR input) : SV_Target {
     }
 
     // PBRMaterial mat;
-    // mat.albedo           = albedoSample.rgb;
-    // mat.metallic         = metallicSample;
-    // mat.roughness        = roughnessSample;
-    // mat.ao               = ao;
-    //
+    // mat.albedo = albedoSample.rgb;
+    // mat.metallic = metallicSample;
+    // mat.roughness = roughnessSample;
+
     // for (uint i = 0; i < MAX_POINT_LIGHTS; ++i) {
     //     PointLight light = PointLights[i];
     //     if (light.enabled) { Lo += CalculatePointLightPBR(light, input.worldPos, N, V, mat); }
     // }
-    //
+    
     // for (uint j = 0; j < MAX_AREA_LIGHTS; ++j) {
     //     AreaLight light = AreaLights[j];
     //     if (light.enabled) {
