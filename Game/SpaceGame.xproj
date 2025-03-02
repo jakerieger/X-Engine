@@ -1,3 +1,8 @@
 project:
   name: SpaceGame
   engineVersion: 1.0
+  assetDirectories:
+    content: Content
+    scripts: Scripts
+    materials: Materials
+    scenes: Scenes

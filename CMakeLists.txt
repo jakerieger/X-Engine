@@ -37,7 +37,7 @@ if (WIN32)
     add_subdirectory(${CODE_DIR}/Game)
 
     # Tools
-    add_subdirectory(${CODE_DIR}/Tools)
+    add_subdirectory(${CODE_DIR}/Tools/XPak)
 else ()
     message(FATAL_ERROR "Project only supports Windows 10 and 11.")
 endif ()

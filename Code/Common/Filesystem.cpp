@@ -359,11 +359,7 @@ namespace x::Filesystem {
     }
 
     str Path::Filename() const {
-#ifdef _WIN32
-        return path.substr(path.find_last_of('\\') + 1);
-#else
-        return path.substr(path.find_last_of('/') + 1);
-#endif
+        return path.substr(PATH_SEPARATOR + 1);
     }
 
     bool Path::operator==(const Path& other) const {

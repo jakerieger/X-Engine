@@ -49,10 +49,21 @@ set(BUILD_DX12 OFF CACHE BOOL "Build with DirectX12 support" FORCE)
 set(BUILD_TOOLS OFF CACHE BOOL "Build DirectXTex command-line tools" FORCE)
 set(ENABLE_OPENEXR OFF CACHE BOOL "Enable OpenEXR support" FORCE)
 
+FetchContent_Declare(
+    brotli
+    GIT_REPOSITORY https://github.com/google/brotli.git
+    GIT_TAG v1.1.0
+)
+
+set(BROTLI_DISABLE_TESTS ON CACHE BOOL "Disable Brotli tests" FORCE)
+set(BROTLI_BUNDLED_MODE ON CACHE BOOL "Configure Brotli for bundled usage" FORCE)
+
+set(BROTLI_LIBS brotlienc brotlidec brotlicommon)
 
 FetchContent_MakeAvailable(
     assimp
     sol2
     yaml-cpp
     directxtex
+    brotli
 )

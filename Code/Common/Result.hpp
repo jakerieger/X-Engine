@@ -74,6 +74,11 @@ public:
         return defaultValue;
     }
 
+    T operator*() const {
+        if (IsErr()) { throw std::runtime_error("Called operator*() on an error value"); }
+        return OkValue();
+    }
+
     template<typename F>
     auto Map(F&& f) const -> Result<decltype(f(OkValue())), E> {
         if (IsOk()) { return Ok(f(std::get<T>(result))); }

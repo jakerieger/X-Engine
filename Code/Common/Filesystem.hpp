@@ -11,6 +11,14 @@
 #include <future>
 
 #ifdef _WIN32
+    #ifndef NOMINMAX
+        #define NOMINMAX
+    #endif
+
+    #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+    #endif
+
     #include <Windows.h>
     #include <direct.h>
     #define getcwd _getcwd
@@ -142,6 +150,10 @@ namespace x {
             [[nodiscard]] bool IsFile() const;
             [[nodiscard]] bool IsDirectory() const;
             [[nodiscard]] bool HasExtension() const;
+
+            /// @brief Returns the file extension without the period '.'
+            ///
+            /// i.e. 'txt' or 'jpeg'
             [[nodiscard]] str Extension() const;
             [[nodiscard]] Path ReplaceExtension(const str& ext) const;
             [[nodiscard]] Path Join(const str& subPath) const;
