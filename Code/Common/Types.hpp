@@ -26,10 +26,10 @@ namespace x {
     using i64  = int64_t;
     using iptr = intptr_t;
 
-    #if defined(__GNUC__) || defined(__clang__)
+#if defined(__GNUC__) || defined(__clang__)
     using u128 = __uint128_t;
     using i128 = __int128_t;
-    #endif
+#endif
 
     using f32 = float;
     using f64 = double;
@@ -60,11 +60,13 @@ namespace x {
     template<class B, class D>
     inline constexpr bool BaseOf = std::is_base_of_v<B, D>;
 
-    #define CAST static_cast
-    #define CCAST const_cast
-    #define DCAST dynamic_cast
-    #define RCAST reinterpret_cast
-} // namespace x
+#define CAST static_cast
+#define CCAST const_cast
+#define DCAST dynamic_cast
+#define RCAST reinterpret_cast
+
+#define CHECK_FLAG(bits, flag) (bits & flag) != 0
+}  // namespace x
 
 constexpr auto HLSL_TRUE  = 1U;
 constexpr auto HLSL_FALSE = 0U;

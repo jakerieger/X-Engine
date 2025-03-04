@@ -61,73 +61,9 @@ namespace x {
         u64 mEntries {0};
         X_ARRAY_PADDING(16)
 
-        bool FromBytes(std::span<const u8> data) {
-            if (data.size() != sizeof(XPakHeader)) {
-                std::cerr << "XPakHeader::FromBytes: Invalid size " << data.size() << std::endl;
-                return false;
-            }
-
-            size_t offset = 0;
-
-            const auto magicSpan = data.subspan(offset, sizeof(mMagic));
-            const auto magic     = RCAST<const char*>(magicSpan.data());
-            for (int i = 0; i < 4; ++i) {
-                if (magic[i] != mMagic[i]) {
-                    std::cerr << "XPakHeader::FromBytes: Invalid magic value " << magic[i] << std::endl;
-                    return false;
-                }
-            }
-            offset += sizeof(mMagic);
-
-            const auto versionSpan = data.subspan(offset, sizeof(mVersion));
-            const auto version     = *(RCAST<const u16*>(versionSpan.data()));
-            if (version != kCurrentVersion) {
-                std::cerr << "XPakHeader::FromBytes: Invalid version " << version << std::endl;
-                return false;
-            }
-            mVersion = version;
-            offset += sizeof(mVersion);
-
-            const auto flagsSpan = data.subspan(offset, sizeof(mFlags));
-            const auto flags     = *(RCAST<const u16*>(flagsSpan.data()));
-            offset += sizeof(mFlags);
-            // Do nothing for now as no flags have been defined
-
-            const auto entriesSpan = data.subspan(offset, sizeof(mEntries));
-            const auto entries     = *(RCAST<const u64*>(entriesSpan.data()));
-            mEntries               = entries;
-
-            return true;
-        }
-
-        std::vector<u8> ToBytes() const {
-            std::vector<u8> data(sizeof(XPakHeader), 0);
-            size_t offset = 0;
-
-            std::copy_n(RCAST<const u8*>(mMagic), sizeof(mMagic), data.data() + offset);
-            offset += sizeof(mMagic);
-
-            std::copy_n(RCAST<const u8*>(&mVersion), sizeof(mVersion), data.data() + offset);
-            offset += sizeof(mVersion);
-
-            std::copy_n(RCAST<const u8*>(&mFlags), sizeof(mFlags), data.data() + offset);
-            offset += sizeof(mFlags);
-
-            std::copy_n(RCAST<const u8*>(&mEntries), sizeof(mEntries), data.data() + offset);
-            // offset += sizeof(mEntries);
-
-            return data;
-        }
-
-        std::string ToString() const {
-            char magicBuffer[5] = {'\0'};
-            std::copy_n(mMagic, sizeof(mMagic), magicBuffer);  // null terminators are awesome! 🙄
-            return std::format("Magic: {}, Version: {}, Flags: {}, Entries: {}",
-                               magicBuffer,
-                               mVersion,
-                               mFlags,
-                               mEntries);
-        }
+        bool FromBytes(std::span<const u8> data);
+        std::vector<u8> ToBytes() const;
+        std::string ToString() const;
     };
 
     struct XPakTableEntry {
@@ -139,40 +75,9 @@ namespace x {
         u64 mSize {0};
         X_ARRAY_PADDING(24)
 
-        bool FromBytes(std::span<const u8> data) {
-            return true;
-        }
-
-        std::vector<u8> ToBytes() const {
-            std::vector<u8> data(sizeof(XPakTableEntry));
-            size_t offset = 0;
-
-            std::copy_n(RCAST<const u8*>(&mAssetId), sizeof(mAssetId), data.data() + offset);
-            offset += sizeof(mAssetId);
-
-            std::copy_n(RCAST<const u8*>(&mAssetType), sizeof(mAssetType), data.data() + offset);
-            offset += sizeof(mAssetType);
-
-            std::copy_n(RCAST<const u8*>(&mAssetFlags), sizeof(mAssetFlags), data.data() + offset);
-            offset += sizeof(mAssetFlags);
-
-            std::copy_n(RCAST<const u8*>(&mOffset), sizeof(mOffset), data.data() + offset);
-            offset += sizeof(mOffset);
-
-            std::copy_n(RCAST<const u8*>(&mCompressedSize), sizeof(mCompressedSize), data.data() + offset);
-            offset += sizeof(mCompressedSize);
-
-            std::copy_n(RCAST<const u8*>(&mSize), sizeof(mSize), data.data() + offset);
-            offset += sizeof(mSize);
-
-            std::copy_n(RCAST<const u8*>(mPadding), sizeof(mPadding), data.data() + offset);
-
-            return data;
-        }
-
-        std::string ToString() const {
-            return "";
-        }
+        bool FromBytes(std::span<const u8> data);
+        std::vector<u8> ToBytes() const;
+        std::string ToString() const;
     };
 
     struct XPakAssetEntry {
@@ -180,30 +85,13 @@ namespace x {
         std::vector<u8> mCompressedData;
         std::vector<u8> mPadding;  // Each asset entry is padded to 64-byte boundaries
 
-        bool FromBytes(std::span<const u8> data) {
-            return true;
-        }
-
-        std::vector<u8> ToBytes() const {
-            const size_t size = 4 + mCompressedData.size() + mPadding.size();
-            std::vector<u8> data(size);
-            size_t offset = 0;
-
-            std::copy_n(RCAST<const u8*>(mMagic), sizeof(mMagic), data.data() + offset);
-            offset += sizeof(mMagic);
-
-            std::copy_n(RCAST<const u8*>(mCompressedData.data()), mCompressedData.size(), data.data() + offset);
-            offset += mCompressedData.size();
-
-            std::copy_n(RCAST<const u8*>(mPadding.data()), mPadding.size(), data.data() + offset);
-
-            return data;
-        }
-
-        std::string ToString() const {
-            return "";
-        }
+        bool FromBytes(std::span<const u8> data);
+        std::vector<u8> ToBytes() const;
+        std::string ToString() const;
     };
+
+    using AssetId    = u64;
+    using AssetTable = std::unordered_map<AssetId, XPakTableEntry>;
 
     class XPak {
     public:
@@ -212,6 +100,8 @@ namespace x {
         bool FromBytes(std::span<const u8> data);
         std::vector<u8> ToBytes() const;
 
+        static AssetTable ReadPakTable(std::span<const u8> data);
+        static vector<u8> FetchAssetData(const Filesystem::Path& pakFile, const XPakTableEntry& entry);
         static std::optional<XPak> Create(const ProjectDescriptor& project);
 
     private:

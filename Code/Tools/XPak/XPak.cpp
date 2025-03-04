@@ -27,7 +27,7 @@ namespace x {
 
                     printf("Processing asset\n  | ID: %llu\n  | Type: %s\n  | Filename: %s\n",
                            asset.mId,
-                           asset.TypeToString().c_str(),
+                           AssetDescriptor::TypeToString(asset.mType).c_str(),
                            asset.mFilename.c_str());
 
                     if (asset.mType == kAssetType_Invalid) {
@@ -71,7 +71,178 @@ namespace x {
         }
     }
 
+    bool XPakHeader::FromBytes(std::span<const u8> data) {
+        if (data.size() != sizeof(XPakHeader)) {
+            std::cerr << "XPakHeader::FromBytes: Invalid size " << data.size() << std::endl;
+            return false;
+        }
+
+        size_t offset = 0;
+
+        const auto magicSpan = data.subspan(offset, sizeof(mMagic));
+        const auto magic     = RCAST<const char*>(magicSpan.data());
+        for (int i = 0; i < 4; ++i) {
+            if (magic[i] != mMagic[i]) {
+                std::cerr << "XPakHeader::FromBytes: Invalid magic value " << magic[i] << std::endl;
+                return false;
+            }
+        }
+        offset += sizeof(mMagic);
+
+        const auto versionSpan = data.subspan(offset, sizeof(mVersion));
+        const auto version     = *(RCAST<const u16*>(versionSpan.data()));
+        if (version != kCurrentVersion) {
+            std::cerr << "XPakHeader::FromBytes: Invalid version " << version << std::endl;
+            return false;
+        }
+        mVersion = version;
+        offset += sizeof(mVersion);
+
+        const auto flagsSpan = data.subspan(offset, sizeof(mFlags));
+        const auto flags     = *(RCAST<const u16*>(flagsSpan.data()));
+        offset += sizeof(mFlags);
+        // Do nothing for now as no flags have been defined
+
+        const auto entriesSpan = data.subspan(offset, sizeof(mEntries));
+        const auto entries     = *(RCAST<const u64*>(entriesSpan.data()));
+        mEntries               = entries;
+
+        return true;
+    }
+
+    std::vector<u8> XPakHeader::ToBytes() const {
+        std::vector<u8> data(sizeof(XPakHeader), 0);
+        size_t offset = 0;
+
+        std::copy_n(RCAST<const u8*>(mMagic), sizeof(mMagic), data.data() + offset);
+        offset += sizeof(mMagic);
+
+        std::copy_n(RCAST<const u8*>(&mVersion), sizeof(mVersion), data.data() + offset);
+        offset += sizeof(mVersion);
+
+        std::copy_n(RCAST<const u8*>(&mFlags), sizeof(mFlags), data.data() + offset);
+        offset += sizeof(mFlags);
+
+        std::copy_n(RCAST<const u8*>(&mEntries), sizeof(mEntries), data.data() + offset);
+        // offset += sizeof(mEntries);
+
+        return data;
+    }
+
+    std::string XPakHeader::ToString() const {
+        char magicBuffer[5] = {'\0'};
+        std::copy_n(mMagic, sizeof(mMagic), magicBuffer);  // null terminators are awesome! 🙄
+        return std::format("Magic: {}, Version: {}, Flags: {}, Entries: {}", magicBuffer, mVersion, mFlags, mEntries);
+    }
+
+    bool XPakTableEntry::FromBytes(std::span<const u8> data) {
+        if (data.size() != sizeof(XPakTableEntry)) {
+            std::cerr << "XPakTableEntry::FromBytes: Invalid size " << data.size() << std::endl;
+            return false;
+        }
+
+        size_t offset = 0;
+        auto idSpan   = data.subspan(offset, sizeof(mAssetId));
+        offset += sizeof(mAssetId);
+        auto typeSpan = data.subspan(offset, sizeof(mAssetType));
+        offset += sizeof(mAssetType);
+        auto flagsSpan = data.subspan(offset, sizeof(mAssetFlags));
+        offset += sizeof(mAssetFlags);
+        auto offsetSpan = data.subspan(offset, sizeof(mOffset));
+        offset += sizeof(mOffset);
+        auto compressedSizeSpan = data.subspan(offset, sizeof(mCompressedSize));
+        offset += sizeof(mCompressedSize);
+        auto sizeSpan = data.subspan(offset, sizeof(mSize));
+
+        mAssetId        = *RCAST<const u64*>(idSpan.data());
+        mAssetType      = *RCAST<const u16*>(typeSpan.data());
+        mAssetFlags     = *RCAST<const u16*>(flagsSpan.data());
+        mOffset         = *RCAST<const u64*>(offsetSpan.data());
+        mCompressedSize = *RCAST<const u64*>(compressedSizeSpan.data());
+        mSize           = *RCAST<const u64*>(sizeSpan.data());
+
+        return true;
+    }
+
+    std::vector<u8> XPakTableEntry::ToBytes() const {
+        std::vector<u8> data(sizeof(XPakTableEntry));
+        size_t offset = 0;
+
+        std::copy_n(RCAST<const u8*>(&mAssetId), sizeof(mAssetId), data.data() + offset);
+        offset += sizeof(mAssetId);
+
+        std::copy_n(RCAST<const u8*>(&mAssetType), sizeof(mAssetType), data.data() + offset);
+        offset += sizeof(mAssetType);
+
+        std::copy_n(RCAST<const u8*>(&mAssetFlags), sizeof(mAssetFlags), data.data() + offset);
+        offset += sizeof(mAssetFlags);
+
+        std::copy_n(RCAST<const u8*>(&mOffset), sizeof(mOffset), data.data() + offset);
+        offset += sizeof(mOffset);
+
+        std::copy_n(RCAST<const u8*>(&mCompressedSize), sizeof(mCompressedSize), data.data() + offset);
+        offset += sizeof(mCompressedSize);
+
+        std::copy_n(RCAST<const u8*>(&mSize), sizeof(mSize), data.data() + offset);
+        offset += sizeof(mSize);
+
+        std::copy_n(RCAST<const u8*>(mPadding), sizeof(mPadding), data.data() + offset);
+
+        return data;
+    }
+
+    std::string XPakTableEntry::ToString() const {
+        return std::format("{}\n{}\n{}\n{}\n{}",
+                           AssetDescriptor::TypeToString(mAssetType),
+                           mAssetFlags,
+                           mOffset,
+                           mCompressedSize,
+                           mSize);
+    }
+
+    bool XPakAssetEntry::FromBytes(std::span<const u8> data) {
+        return true;
+    }
+
+    std::vector<u8> XPakAssetEntry::ToBytes() const {
+        const size_t size = 4 + mCompressedData.size() + mPadding.size();
+        std::vector<u8> data(size);
+        size_t offset = 0;
+
+        std::copy_n(RCAST<const u8*>(mMagic), sizeof(mMagic), data.data() + offset);
+        offset += sizeof(mMagic);
+
+        std::copy_n(RCAST<const u8*>(mCompressedData.data()), mCompressedData.size(), data.data() + offset);
+        offset += mCompressedData.size();
+
+        std::copy_n(RCAST<const u8*>(mPadding.data()), mPadding.size(), data.data() + offset);
+
+        return data;
+    }
+
+    std::string XPakAssetEntry::ToString() const {
+        return "";
+    }
+
     bool XPak::FromBytes(std::span<const u8> data) {
+        size_t offset   = 0;
+        auto headerSpan = data.subspan(0, sizeof(XPakHeader));
+        offset += sizeof(XPakHeader);
+
+        mHeader.FromBytes(headerSpan);
+        const u64 numEntries = mHeader.mEntries;
+
+        size_t tableSize = sizeof(XPakTableEntry) * numEntries;
+        auto tableSpan   = data.subspan(offset, tableSize);
+
+        for (size_t i = 0; i < numEntries; i++) {
+            XPakTableEntry tableEntry;
+            tableEntry.FromBytes(tableSpan.subspan(i * sizeof(XPakTableEntry), sizeof(XPakTableEntry)));
+            mTableOfContents.push_back(tableEntry);
+        }
+
+        offset += tableSize;
+
         return true;
     }
 
@@ -116,6 +287,62 @@ namespace x {
         printf(" - Total size: %zu bytes (%zu MB)\n", pakSize, dataSize / (1024 * 1024));
 
         return pak;
+    }
+
+    AssetTable XPak::ReadPakTable(std::span<const u8> data) {
+        AssetTable assetTable;
+
+        size_t offset   = 0;
+        auto headerSpan = data.subspan(0, sizeof(XPakHeader));
+        offset += sizeof(XPakHeader);
+
+        XPakHeader header;
+        header.FromBytes(headerSpan);
+        const u64 numEntries = header.mEntries;
+
+        size_t tableSize = sizeof(XPakTableEntry) * numEntries;
+        auto tableSpan   = data.subspan(offset, tableSize);
+
+        for (size_t i = 0; i < numEntries; i++) {
+            XPakTableEntry tableEntry;
+            tableEntry.FromBytes(tableSpan.subspan(i * sizeof(XPakTableEntry), sizeof(XPakTableEntry)));
+            assetTable[tableEntry.mAssetId] = tableEntry;
+        }
+
+        return assetTable;
+    }
+
+    vector<u8> XPak::FetchAssetData(const Filesystem::Path& pakFile, const XPakTableEntry& entry) {
+        if (!pakFile.Exists()) {
+            std::cerr << "File not found: " << pakFile.Str() << std::endl;
+            return {};
+        }
+
+        bool compressed = CHECK_FLAG(entry.mAssetFlags, kAssetFlag_Compressed);
+        auto bytes      = FileReader::ReadBlock(pakFile, entry.mCompressedSize, entry.mOffset + kAssetHeaderSize);
+        if (bytes.size() != entry.mCompressedSize) {
+            std::cerr << "File size mismatch: " << pakFile.Str() << std::endl;
+            return {};
+        }
+
+        vector<u8> outBytes(entry.mSize);
+        if (compressed) {
+            auto decompressed = BrotliCompression::Decompress(bytes, entry.mSize);
+            if (decompressed.size() != entry.mSize) {
+                std::cerr << "File size mismatch: " << pakFile.Str() << std::endl;
+                return {};
+            }
+            std::copy_n(decompressed.data(), decompressed.size(), outBytes.data());
+        } else {
+            // The compressed and uncompressed sizes should match in this instance
+            if (entry.mSize != entry.mCompressedSize) {
+                std::cerr << "File size mismatch: " << pakFile.Str() << std::endl;
+                return {};
+            }
+            std::copy_n(bytes.data(), bytes.size(), outBytes.data());
+        }
+
+        return outBytes;
     }
 
     std::optional<XPak> XPak::Create(const ProjectDescriptor& project) {

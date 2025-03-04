@@ -2,6 +2,8 @@
 // Created: 3/2/2025.
 //
 
+#include <assert.h>
+
 #include "Common/Filesystem.hpp"
 #include "ProjectDescriptor.hpp"
 #include "XPak.hpp"
@@ -16,9 +18,11 @@ int main(int argc, char* argv[]) {
     auto xpakResult = XPak::Create(project);
     if (xpakResult.has_value()) {
         auto xpak = *xpakResult;
-        FileWriter::WriteAllBytes(Path("testPak.bin"), xpak.ToBytes());
+        FileWriter::WriteAllBytes(Path("Data.bin"), xpak.ToBytes());
         return EXIT_SUCCESS;
     } else {
         return EXIT_FAILURE;
     }
+
+    return 0;
 }

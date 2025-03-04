@@ -49,8 +49,8 @@ namespace x {
             return true;
         }
 
-        str TypeToString() const {
-            switch (mType) {
+        static str TypeToString(u16 type) {
+            switch (type) {
                 case kAssetType_Texture:
                     return "texture";
                 case kAssetType_Mesh:
