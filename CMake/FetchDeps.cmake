@@ -60,10 +60,17 @@ set(BROTLI_BUNDLED_MODE ON CACHE BOOL "Configure Brotli for bundled usage" FORCE
 
 set(BROTLI_LIBS brotlienc brotlidec brotlicommon)
 
+FetchContent_Declare(
+    CLI11
+    GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
+    GIT_TAG v2.5.0
+)
+
 FetchContent_MakeAvailable(
     assimp
     sol2
     yaml-cpp
     directxtex
     brotli
+    CLI11
 )

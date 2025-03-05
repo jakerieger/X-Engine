@@ -8,17 +8,18 @@
 #include "Common/Types.hpp"
 
 namespace x {
-    static constexpr u16 kAssetType_None     = 0;
-    static constexpr u16 kAssetType_Texture  = 1;
-    static constexpr u16 kAssetType_Mesh     = 2;
-    static constexpr u16 kAssetType_Audio    = 3;
-    static constexpr u16 kAssetType_Material = 4;
-    static constexpr u16 kAssetType_Scene    = 5;
-    static constexpr u16 kAssetType_Invalid  = std::numeric_limits<u16>::max();
+    using AssetType                                = u8;
+    using AssetId                                  = u64;
+    static constexpr AssetId kAssetIdBitmask       = 0x00FFFFFFFFFFFFFF;
+    static constexpr AssetType kAssetType_Invalid  = 0;
+    static constexpr AssetType kAssetType_Texture  = 1;
+    static constexpr AssetType kAssetType_Mesh     = 2;
+    static constexpr AssetType kAssetType_Audio    = 3;
+    static constexpr AssetType kAssetType_Material = 4;
+    static constexpr AssetType kAssetType_Scene    = 5;
 
     struct AssetDescriptor {
         u64 mId;
-        u16 mType;
         str mFilename;
 
         bool FromFile(const str& filename) {
@@ -26,30 +27,37 @@ namespace x {
             const auto& assetNode = root["asset"];
             if (!assetNode.IsDefined()) { return false; }
 
-            mId                   = assetNode["id"].as<u64>();
-            const auto typeString = assetNode["type"].as<str>();
+            mId = assetNode["id"].as<u64>();
 
-            if (typeString == "texture") {
-                mType = kAssetType_Texture;
-            } else if (typeString == "mesh") {
-                mType = kAssetType_Mesh;
-            } else if (typeString == "audio") {
-                mType = kAssetType_Audio;
-            } else if (typeString == "material") {
-                mType = kAssetType_Material;
-            } else if (typeString == "scene") {
-                mType = kAssetType_Scene;
-            } else {
-                mType = kAssetType_Invalid;
-            }
-
-            mFilename = assetNode["filename"].as<str>();
+            mFilename = assetNode["source"].as<str>();
             if (mFilename.empty()) { return false; }
 
             return true;
         }
 
-        static str TypeToString(u16 type) {
+        AssetType GetTypeFromId() const {
+            return GetTypeFromId(mId);
+        }
+
+        str GetTypeString() const {
+            return GetTypeString(GetTypeFromId());
+        }
+
+        AssetId GetBaseId() const {
+            return mId & kAssetIdBitmask;
+        }
+
+        // Returns just the ID bits from the asset ID, omitting the type bits
+        static AssetId GetBaseId(AssetId id) {
+            return id & kAssetIdBitmask;
+        }
+
+        static AssetType GetTypeFromId(AssetId id) {
+            const AssetType type = CAST<u8>(id >> 56);
+            return type;
+        }
+
+        static str GetTypeString(AssetType type) {
             switch (type) {
                 case kAssetType_Texture:
                     return "texture";

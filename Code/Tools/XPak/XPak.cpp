@@ -3,11 +3,11 @@
 //
 
 #include "XPak.hpp"
+#include "Compression.hpp"
 
+#include <iostream>
 #include <numeric>
 #include <brotli/encode.h>
-
-#include "Compression.hpp"
 
 namespace x {
     using namespace Filesystem;
@@ -27,23 +27,24 @@ namespace x {
 
                     printf("Processing asset\n  | ID: %llu\n  | Type: %s\n  | Filename: %s\n",
                            asset.mId,
-                           AssetDescriptor::TypeToString(asset.mType).c_str(),
+                           asset.GetTypeString().c_str(),
                            asset.mFilename.c_str());
 
-                    if (asset.mType == kAssetType_Invalid) {
+                    auto assetType = asset.GetTypeFromId();
+
+                    if (assetType == kAssetType_Invalid) {
                         printf("Invalid asset type '%s'\n", file.CStr());
                         continue;
                     }
 
                     XPakTableEntry tableEntry;
-                    tableEntry.mAssetType = asset.mType;
-                    tableEntry.mAssetId   = asset.mId;
+                    tableEntry.mAssetId = asset.mId;
 
                     const auto filename  = file.Parent() / asset.mFilename;
                     const auto assetData = FileReader::ReadAllBytes(filename);
                     XPakAssetEntry assetEntry;
 
-                    if (asset.mType == kAssetType_Texture || asset.mType == kAssetType_Audio) {
+                    if (assetType == kAssetType_Texture || assetType == kAssetType_Audio) {
                         // Textures are already compressed (DDS) and audio should not be compressed (WAV)
                         assetEntry.mCompressedData = assetData;
                         // Both textures and audio assets can be streamed, no decompression is required
@@ -53,7 +54,7 @@ namespace x {
                         assetEntry.mCompressedData = BrotliCompression::Compress(assetData);
                         auto flags                 = kAssetFlag_Compressed;
 
-                        if (asset.mType == kAssetType_Material || asset.mType == kAssetType_Scene) {
+                        if (assetType == kAssetType_Material || assetType == kAssetType_Scene) {
                             flags |= kAssetFlag_Descriptor;
                         }
 
@@ -144,8 +145,6 @@ namespace x {
         size_t offset = 0;
         auto idSpan   = data.subspan(offset, sizeof(mAssetId));
         offset += sizeof(mAssetId);
-        auto typeSpan = data.subspan(offset, sizeof(mAssetType));
-        offset += sizeof(mAssetType);
         auto flagsSpan = data.subspan(offset, sizeof(mAssetFlags));
         offset += sizeof(mAssetFlags);
         auto offsetSpan = data.subspan(offset, sizeof(mOffset));
@@ -155,7 +154,6 @@ namespace x {
         auto sizeSpan = data.subspan(offset, sizeof(mSize));
 
         mAssetId        = *RCAST<const u64*>(idSpan.data());
-        mAssetType      = *RCAST<const u16*>(typeSpan.data());
         mAssetFlags     = *RCAST<const u16*>(flagsSpan.data());
         mOffset         = *RCAST<const u64*>(offsetSpan.data());
         mCompressedSize = *RCAST<const u64*>(compressedSizeSpan.data());
@@ -170,9 +168,6 @@ namespace x {
 
         std::copy_n(RCAST<const u8*>(&mAssetId), sizeof(mAssetId), data.data() + offset);
         offset += sizeof(mAssetId);
-
-        std::copy_n(RCAST<const u8*>(&mAssetType), sizeof(mAssetType), data.data() + offset);
-        offset += sizeof(mAssetType);
 
         std::copy_n(RCAST<const u8*>(&mAssetFlags), sizeof(mAssetFlags), data.data() + offset);
         offset += sizeof(mAssetFlags);
@@ -192,12 +187,7 @@ namespace x {
     }
 
     std::string XPakTableEntry::ToString() const {
-        return std::format("{}\n{}\n{}\n{}\n{}",
-                           AssetDescriptor::TypeToString(mAssetType),
-                           mAssetFlags,
-                           mOffset,
-                           mCompressedSize,
-                           mSize);
+        return std::format("{}\n{}\n{}\n{}", mAssetFlags, mOffset, mCompressedSize, mSize);
     }
 
     bool XPakAssetEntry::FromBytes(std::span<const u8> data) {
@@ -287,6 +277,11 @@ namespace x {
         printf(" - Total size: %zu bytes (%zu MB)\n", pakSize, dataSize / (1024 * 1024));
 
         return pak;
+    }
+
+    AssetTable XPak::ReadPakTable(const Filesystem::Path& pakFile) {
+        auto pakBytes = FileReader::ReadAllBytes(pakFile);
+        return ReadPakTable(pakBytes);
     }
 
     AssetTable XPak::ReadPakTable(std::span<const u8> data) {
