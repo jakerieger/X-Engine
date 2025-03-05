@@ -23,19 +23,19 @@ namespace x {
         auto& mainCamera = mState.MainCamera;
         auto& sun        = mState.Lights.Sun;
 
-        const auto& cameraDescriptor = descriptor.world.camera;
+        const auto& cameraDescriptor = descriptor.mWorld.mCamera;
         mainCamera.SetPosition(Float3ToVectorSet(cameraDescriptor.position));
         mainCamera.SetFOV(cameraDescriptor.fovY);
         mainCamera.SetClipPlanes(cameraDescriptor.nearZ, cameraDescriptor.farZ);
 
-        const auto& sunDescriptor = descriptor.world.lights.sun;
+        const auto& sunDescriptor = descriptor.mWorld.mLights.sun;
         sun.enabled               = sunDescriptor.enabled;
         sun.intensity             = sunDescriptor.intensity;
         sun.color                 = {sunDescriptor.color.x, sunDescriptor.color.y, sunDescriptor.color.z, 1.0f};
         sun.direction    = {sunDescriptor.direction.x, sunDescriptor.direction.y, sunDescriptor.direction.z, 0.0f};
         sun.castsShadows = sunDescriptor.castsShadows;
 
-        for (auto& entity : descriptor.entities) {
+        for (auto& entity : descriptor.mEntities) {
             const EntityId newEntity = mState.CreateEntity();
 
             // Create and attach components
@@ -52,8 +52,8 @@ namespace x {
                 modelComponent.SetCastsShadows(model.castsShadows);
 
                 // Load model resource
-                if (!mResources.LoadResource<Model>(model.resource)) { X_LOG_FATAL("Failed to load model"); }
-                auto modelHandle = mResources.FetchResource<Model>(model.resource);
+                if (!mResources.LoadResource<Model>(model.assetId)) { X_LOG_FATAL("Failed to load model"); }
+                auto modelHandle = mResources.FetchResource<Model>(model.assetId);
                 if (!modelHandle.has_value()) { X_LOG_FATAL("Failed to fetch model resource"); }
                 modelComponent.SetModelHandle(*modelHandle);
 
@@ -186,15 +186,15 @@ namespace x {
 
             for (const auto& texture : material.textures) {
                 // Load texture resource
-                if (!mResources.LoadResource<Texture2D>(texture.resource)) {
-                    X_LOG_FATAL("Failed to to load texture resource: '%s'", texture.resource)
+                if (!mResources.LoadResource<Texture2D>(texture.assetId)) {
+                    X_LOG_FATAL("Failed to to load texture resource: '%llu'", texture.assetId)
                 }
 
                 std::optional<ResourceHandle<Texture2D>> resource =
-                  mResources.FetchResource<Texture2D>(texture.resource);
+                  mResources.FetchResource<Texture2D>(texture.assetId);
 
-                if (!resource.has_value()) { X_LOG_FATAL("Failed to fetch texture resource: '%s'", texture.resource) }
-                if (!resource->Valid()) { X_LOG_FATAL("Resource invalid: '%s'", texture.resource) }
+                if (!resource.has_value()) { X_LOG_FATAL("Failed to fetch texture resource: '%llu'", texture.assetId) }
+                if (!resource->Valid()) { X_LOG_FATAL("Resource invalid: '%llu'", texture.assetId) }
 
                 if (texture.name == "albedo") { mat->SetAlbedoMap(*resource); }
                 if (texture.name == "metallic") { mat->SetMetallicMap(*resource); }

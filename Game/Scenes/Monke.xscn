@@ -27,7 +27,7 @@ entities:
         rotation: [ 0, 0, 0 ]
         scale: [ 1, 1, 1 ]
       model:
-        resource: C:\Users\conta\Code\SpaceGame\Game\Content\BasicRoom.glb
+        asset: 149289234444072869
         material: C:\Users\conta\Code\SpaceGame\Game\Materials\Floor.xmat
         castsShadows: true
         receiveShadows: true
@@ -39,7 +39,7 @@ entities:
         rotation: [ 0, 0, 0 ]
         scale: [ 1, 1, 1 ]
       model:
-        resource: C:\Users\conta\Code\SpaceGame\Game\Content\Monke.glb
+        asset: 171166596565594018
         material: C:\Users\conta\Code\SpaceGame\Game\Materials\Monke.xmat
         castsShadows: true
         receiveShadows: true

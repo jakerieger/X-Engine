@@ -5,16 +5,25 @@
 #include "Common/Str.hpp"
 #include <DirectXTex.h>
 
+#include "AssetManager.hpp"
+
 namespace x {
     class TextureLoader2D final : public ResourceLoader<Texture2D> {
-        Texture2D LoadImpl(RenderContext& context, const str& path) override {
+        Texture2D LoadImpl(RenderContext& context, const u64 id) override {
             Texture2D texture(context);
 
             TexMetadata metadata;
             ScratchImage scratchImage;
 
-            auto hr = LoadFromDDSFile(AnsiToWide(path).c_str(), DDS_FLAGS_NONE, &metadata, scratchImage);
-            X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to load DDS texture file: %s", path.c_str())
+            const auto textureBytes = AssetManager::GetAssetData(id);
+            if (!textureBytes.has_value()) {
+                X_LOG_ERROR("Failed to load texture with id %llu", id);
+                return texture;
+            }
+
+            auto hr =
+              LoadFromDDSMemory(textureBytes->data(), textureBytes->size(), DDS_FLAGS_NONE, &metadata, scratchImage);
+            X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to load DDS texture file: %llu", id)
 
             hr = CreateShaderResourceView(context.GetDevice(),
                                           scratchImage.GetImages(),

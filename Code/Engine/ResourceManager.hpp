@@ -56,21 +56,21 @@ namespace x {
 
     class ResourceLoaderBase {
     public:
-        virtual ~ResourceLoaderBase()                                                                  = default;
-        virtual ResourceBase* Load(RenderContext& context, ArenaAllocator& allocator, const str& path) = 0;
+        virtual ~ResourceLoaderBase()                                                               = default;
+        virtual ResourceBase* Load(RenderContext& context, ArenaAllocator& allocator, const u64 id) = 0;
     };
 
     template<typename T>
     class ResourceLoader : public ResourceLoaderBase {
     public:
-        ResourceBase* Load(RenderContext& context, ArenaAllocator& allocator, const str& path) override {
+        ResourceBase* Load(RenderContext& context, ArenaAllocator& allocator, const u64 id) override {
             void* memory = allocator.Allocate(sizeof(Resource<T>), alignof(Resource<T>));
             if (!memory) return nullptr;
-            return new (memory) Resource<T>(LoadImpl(context, path));
+            return new (memory) Resource<T>(LoadImpl(context, id));
         }
 
     private:
-        virtual T LoadImpl(RenderContext& context, const str& path) = 0;
+        virtual T LoadImpl(RenderContext& context, const u64 id) = 0;
     };
 
     template<typename T>
@@ -81,7 +81,7 @@ namespace x {
 
         ArenaAllocator mAllocator;
         RenderContext& mRenderContext;
-        std::unordered_map<str, ResourceBase*> mResources;
+        std::unordered_map<u64, ResourceBase*> mResources;
         std::unordered_map<std::type_index, unique_ptr<ResourceLoaderBase>> mLoaders;
 
     public:
@@ -102,9 +102,9 @@ namespace x {
         }
 
         template<typename T>
-        bool LoadResource(const str& path) {
-            if (mResources.contains(path)) {
-                return true;  // loader already exists
+        bool LoadResource(const u64 id) {
+            if (mResources.contains(id)) {
+                return true;  // asset already exists
             }
 
             auto loaderIt = mLoaders.find(std::type_index(typeid(T)));
@@ -112,18 +112,18 @@ namespace x {
                 return false;  // no registered loader for type
             }
 
-            ResourceBase* resource = loaderIt->second->Load(mRenderContext, mAllocator, path);
+            ResourceBase* resource = loaderIt->second->Load(mRenderContext, mAllocator, id);
             if (!resource) {
                 return false;  // loading failed
             }
 
-            mResources[path] = resource;
+            mResources[id] = resource;
             return true;
         }
 
         template<typename T>
-        std::optional<ResourceHandle<T>> FetchResource(const str& path) {
-            auto it = mResources.find(path);
+        std::optional<ResourceHandle<T>> FetchResource(const u64 id) {
+            auto it = mResources.find(id);
             if (it == mResources.end()) {
                 return {};  // nullopt
             }
@@ -131,7 +131,7 @@ namespace x {
             Resource<T>* typedResource = DCAST<Resource<T>*>(it->second);
             if (!typedResource) { return {}; }
 
-            return ResourceHandle<T>(this, path, &typedResource->data);
+            return ResourceHandle<T>(this, id, &typedResource->data);
         }
 
         void Clear() {
@@ -147,14 +147,13 @@ namespace x {
     template<typename T>
     class ResourceHandle {
         ResourceManager* mManager;
-        str mPath;
+        u64 mId {0};
         T* mData;
 
     public:
         ResourceHandle() : mManager(nullptr), mData(nullptr) {}
 
-        ResourceHandle(ResourceManager* manager, const str& path, T* data)
-            : mManager(manager), mPath(path), mData(data) {}
+        ResourceHandle(ResourceManager* manager, const u64 id, T* data) : mManager(manager), mId(id), mData(data) {}
 
         T* Get() {
             return mData;
@@ -173,7 +172,7 @@ namespace x {
         }
 
         [[nodiscard]] bool Valid() const {
-            return (mManager != nullptr) && (mData != nullptr) && (!mPath.empty());
+            return (mManager != nullptr) && (mData != nullptr) && (mId != 0);
         }
     };
 }  // namespace x

@@ -3,10 +3,10 @@ baseMaterial: PBR
 properties: []
 textures:
   - name: albedo
-    resource: C:\Users\conta\Code\SpaceGame\Game\Content\Metal_Albedo.dds
+    asset: 115108353668538089
   - name: metallic
-    resource: C:\Users\conta\Code\SpaceGame\Game\Content\Metal_Metallic.dds
+    asset: 119645366826580079
   - name: roughness
-    resource: C:\Users\conta\Code\SpaceGame\Game\Content\Metal_Roughness.dds
+    asset: 115400681995725697
   - name: normal
-    resource: C:\Users\conta\Code\SpaceGame\Game\Content\Metal_Normal.dds
+    asset: 120940817416006984

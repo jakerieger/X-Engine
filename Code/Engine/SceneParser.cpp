@@ -14,8 +14,8 @@ namespace x {
         const auto name = scene["name"].as<str>();
         const auto desc = scene["description"].as<str>();
 
-        descriptor.name        = name;
-        descriptor.description = desc;
+        descriptor.mName        = name;
+        descriptor.mDescription = desc;
 
         ParseWorld(scene["world"], descriptor);
 
@@ -27,24 +27,24 @@ namespace x {
     void ParseWorld(const YAML::Node& world, SceneDescriptor& descriptor) {
         YAML::Node cameraNode = world["camera"];
 
-        descriptor.world.camera.position = ParseFloat3(cameraNode["position"]);
-        descriptor.world.camera.eye      = ParseFloat3(cameraNode["eye"]);
-        descriptor.world.camera.fovY     = cameraNode["fovY"].as<f32>();
-        descriptor.world.camera.nearZ    = cameraNode["nearZ"].as<f32>();
-        descriptor.world.camera.farZ     = cameraNode["farZ"].as<f32>();
+        descriptor.mWorld.mCamera.position = ParseFloat3(cameraNode["position"]);
+        descriptor.mWorld.mCamera.eye      = ParseFloat3(cameraNode["eye"]);
+        descriptor.mWorld.mCamera.fovY     = cameraNode["fovY"].as<f32>();
+        descriptor.mWorld.mCamera.nearZ    = cameraNode["nearZ"].as<f32>();
+        descriptor.mWorld.mCamera.farZ     = cameraNode["farZ"].as<f32>();
 
         YAML::Node lightNode = world["lights"];
         YAML::Node sunNode   = lightNode["sun"];
 
-        descriptor.world.lights.sun.enabled      = sunNode["enabled"].as<bool>();
-        descriptor.world.lights.sun.intensity    = sunNode["intensity"].as<f32>();
-        descriptor.world.lights.sun.color        = ParseFloat3(sunNode["color"]);
-        descriptor.world.lights.sun.direction    = ParseFloat3(sunNode["direction"]);
-        descriptor.world.lights.sun.castsShadows = sunNode["castsShadows"].as<bool>();
+        descriptor.mWorld.mLights.sun.enabled      = sunNode["enabled"].as<bool>();
+        descriptor.mWorld.mLights.sun.intensity    = sunNode["intensity"].as<f32>();
+        descriptor.mWorld.mLights.sun.color        = ParseFloat3(sunNode["color"]);
+        descriptor.mWorld.mLights.sun.direction    = ParseFloat3(sunNode["direction"]);
+        descriptor.mWorld.mLights.sun.castsShadows = sunNode["castsShadows"].as<bool>();
     }
 
     void ParseEntities(const YAML::Node& entities, SceneDescriptor& descriptor) {
-        auto& entitiesArray = descriptor.entities;
+        auto& entitiesArray = descriptor.mEntities;
 
         for (const auto& entity : entities) {
             EntityDescriptor entityDescriptor {};
@@ -64,7 +64,7 @@ namespace x {
             YAML::Node modelNode = componentsNode["model"];
             if (modelNode.IsDefined()) {
                 ModelDescriptor modelDescriptor {};
-                modelDescriptor.resource       = modelNode["resource"].as<str>();
+                modelDescriptor.assetId        = modelNode["asset"].as<u64>();
                 modelDescriptor.material       = modelNode["material"].as<str>();
                 modelDescriptor.castsShadows   = modelNode["castsShadows"].as<bool>();
                 modelDescriptor.receiveShadows = modelNode["receiveShadows"].as<bool>();

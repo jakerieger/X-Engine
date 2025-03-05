@@ -15,8 +15,8 @@ namespace x {
         if (const auto& textures = root["textures"]; textures.IsDefined() && textures.size() > 0) {
             for (const auto& texture : textures) {
                 TextureDescriptor textureDescriptor;
-                textureDescriptor.name     = texture["name"].as<str>();
-                textureDescriptor.resource = texture["resource"].as<str>();
+                textureDescriptor.name    = texture["name"].as<str>();
+                textureDescriptor.assetId = texture["asset"].as<u64>();
                 material.textures.push_back(textureDescriptor);
             }
         }

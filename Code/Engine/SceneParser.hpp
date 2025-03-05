@@ -40,7 +40,7 @@ namespace x {
     };
 
     struct ModelDescriptor {
-        str resource;
+        u64 assetId;
         str material;
         bool castsShadows;
         bool receiveShadows;
@@ -58,15 +58,16 @@ namespace x {
     };
 
     struct SceneDescriptor {
-        str name;
-        str description;
+        str mName;
+        str mDescription;
 
         struct {
-            CameraDescriptor camera;
-            LightDescriptor lights;
-        } world;
+            CameraDescriptor mCamera;
+            LightDescriptor mLights;
+        } mWorld;
 
-        vector<EntityDescriptor> entities;
+        vector<EntityDescriptor> mEntities;
+        vector<u64> mAssetIds;
     };
 
     class SceneParser {

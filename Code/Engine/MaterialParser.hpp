@@ -9,7 +9,7 @@
 namespace x {
     struct TextureDescriptor {
         str name;
-        str resource;
+        u64 assetId;
     };
 
     struct MaterialDescriptor {

@@ -8,17 +8,28 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
+#include "AssetManager.hpp"
+
 namespace x {
     class ModelLoader final : public ResourceLoader<Model> {
         static constexpr u32 kProcessFlags =
           aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_GenNormals | aiProcess_CalcTangentSpace;
 
-        Model LoadImpl(RenderContext& context, const str& path) override {
+        Model LoadImpl(RenderContext& context, const u64 id) override {
             Model model;
 
+            const auto modelBytes = AssetManager::GetAssetData(id);
+            if (!modelBytes.has_value()) {
+                X_LOG_ERROR("Failed to load model from id {}", id);
+                return {};
+            }
+
             Assimp::Importer importer;
-            const auto* scene = importer.ReadFile(path.c_str(), kProcessFlags);
-            if (!scene) { X_PANIC("Failed to load model: '%s'", path.c_str()); }
+            const auto* scene = importer.ReadFileFromMemory(modelBytes->data(), modelBytes->size(), kProcessFlags);
+            if (!scene) {
+                X_LOG_ERROR("Failed to read model from id {}", id);
+                return {};
+            }
 
             ProcessNode(context, scene->mRootNode, scene, model);
 

@@ -3,6 +3,6 @@ baseMaterial: PBR
 properties: []
 textures:
   - name: albedo
-    resource: C:\Users\conta\Code\SpaceGame\Game\Content\checkerboard.dds
+    asset: 77750487902621717
   - name: normal
-    resource: C:\Users\conta\Code\SpaceGame\Game\Content\Gold_Normal.dds
+    asset: 96829292110996504
