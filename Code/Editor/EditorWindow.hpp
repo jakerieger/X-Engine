@@ -49,7 +49,7 @@ namespace x::Editor {
         Viewport mSceneViewport;
         TextureManager mTextureManager;
         unordered_map<str, ImFont*> mFonts;
-        ImFont* mDefaultFont {None};
+        ImFont* mDefaultFont {nullptr};
         unique_ptr<VertexShader> mOutlineVS;
         unique_ptr<PixelShader> mOutlinePS;
 

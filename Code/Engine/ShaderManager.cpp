@@ -17,7 +17,7 @@ namespace x {
     shared_ptr<GraphicsShader> ShaderManager::GetGraphicsShader(u32 shaderId) {
         if (!mGraphicsShaders.contains(shaderId)) {
             X_LOG_ERROR("Graphics shader with id '%u' does not exist in cache", shaderId);
-            return None;
+            return nullptr;
         }
         return mGraphicsShaders[shaderId];
     }
@@ -25,7 +25,7 @@ namespace x {
     shared_ptr<ComputeShader> ShaderManager::GetComputeShader(u32 shaderId) {
         if (!mComputeShaders.contains(shaderId)) {
             X_LOG_ERROR("Compute shader with id '%u' does not exist in cache", shaderId);
-            return None;
+            return nullptr;
         }
         return mComputeShaders[shaderId];
     }

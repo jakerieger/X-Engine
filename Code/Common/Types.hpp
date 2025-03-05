@@ -39,14 +39,11 @@ namespace x {
     using wstr    = std::wstring;
     using strview = std::string_view;
 
-    inline constexpr auto None            = nullptr;
-    inline constexpr std::nullopt_t Empty = std::nullopt;
-    inline constexpr std::_Ignore _i_     = std::ignore;
-
     // Most used STL objects included for convenience
     using std::array;
     using std::make_shared;
     using std::make_unique;
+    using std::optional;
     using std::shared_ptr;
     using std::unique_ptr;
     using std::unordered_map;
@@ -59,6 +56,12 @@ namespace x {
 
     template<class B, class D>
     inline constexpr bool BaseOf = std::is_base_of_v<B, D>;
+
+    template<class T>
+    inline const T& ValueOr(const std::optional<T>& opt) {
+        if (opt.has_value()) { return *opt; }
+        return T {};
+    }
 
 #define CAST static_cast
 #define CCAST const_cast

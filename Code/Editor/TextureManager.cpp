@@ -26,7 +26,7 @@ namespace x {
             subResource.pSysMem                = data;
             subResource.SysMemPitch            = width * channels;
 
-            ID3D11Texture2D* tex2D = None;
+            ID3D11Texture2D* tex2D = nullptr;
             auto* device           = mContext.GetDevice();
             if (SUCCEEDED(device->CreateTexture2D(&desc, &subResource, &tex2D))) {
                 D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};

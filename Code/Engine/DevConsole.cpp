@@ -5,7 +5,7 @@
 
 namespace x {
     DevConsole::DevConsole() {
-        _i_ = StrCopy(mInputBuffer, kMaxInputLength, "");
+        std::ignore = StrCopy(mInputBuffer, kMaxInputLength, "");
 
         RegisterCommand("clear", [this](const vector<str>&) { mItems.clear(); });
 
@@ -47,7 +47,7 @@ namespace x {
         mHistory.emplace_back(cmdLine);
         mHistoryPos = -1;
 
-        _i_ = StrCopy(mInputBuffer, kMaxInputLength, "");
+        std::ignore = StrCopy(mInputBuffer, kMaxInputLength, "");
     }
 
     DevConsole& DevConsole::RegisterCommand(const str& name, const CommandHandler& handler) {
@@ -62,7 +62,7 @@ namespace x {
         va_list args;
         va_start(args, fmt);
 
-        _i_ = vsnprintf(buffer, IM_ARRAYSIZE(buffer), fmt, args);
+        std::ignore = vsnprintf(buffer, IM_ARRAYSIZE(buffer), fmt, args);
 
         buffer[IM_ARRAYSIZE(buffer) - 1] = 0;
         va_end(args);
@@ -70,7 +70,7 @@ namespace x {
         const auto msg = str(buffer);
         memset(buffer, 0, sizeof(buffer));
 
-        _i_ = snprintf(buffer, sizeof(buffer), "[LOG] %s", msg.c_str());
+        std::ignore = snprintf(buffer, sizeof(buffer), "[LOG] %s", msg.c_str());
         mItems.emplace_back(buffer);
     }
 

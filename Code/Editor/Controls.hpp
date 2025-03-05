@@ -29,7 +29,7 @@ namespace x::Editor {
         ImGui::PushStyleColor(ImGuiCol_WindowBg, titlebarColor);
 
         ImGui::Begin("##titlebar",
-                     None,
+                     nullptr,
                      ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
                        ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
         {
@@ -166,7 +166,7 @@ namespace x::Editor {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2, 2));
 
-        if (ImGui::Begin("##Toolbar", None, toolbarFlags)) {
+        if (ImGui::Begin("##Toolbar", nullptr, toolbarFlags)) {
             const auto separatorIcon = textureManager.GetTexture("SeparatorIcon")->srv.Get();
 
             const auto selectIcon = textureManager.GetTexture("SelectIcon")->srv.Get();

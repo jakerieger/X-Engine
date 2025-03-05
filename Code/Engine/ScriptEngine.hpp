@@ -89,7 +89,7 @@ namespace x {
             const auto& context = mBehaviorContexts[scriptId];
             if (context.onAwake.valid()) {
                 try {
-                    _i_ = context.onAwake(entity);
+                    std::ignore = context.onAwake(entity);
                 } catch (const sol::error& e) { X_PANIC(e.what()); }
             }
         }
@@ -102,7 +102,7 @@ namespace x {
             const auto& context = mBehaviorContexts[scriptId];
             if (context.onUpdate.valid()) {
                 try {
-                    _i_ = context.onUpdate(deltaTime, entity);
+                    std::ignore = context.onUpdate(deltaTime, entity);
                 } catch (const sol::error& e) { X_PANIC(e.what()); }
             }
         }
@@ -115,7 +115,7 @@ namespace x {
             const auto& context = mBehaviorContexts[scriptId];
             if (context.onDestroyed.valid()) {
                 try {
-                    _i_ = context.onDestroyed(entity);
+                    std::ignore = context.onDestroyed(entity);
                 } catch (const sol::error& e) { X_PANIC(e.what()); }
             }
         }

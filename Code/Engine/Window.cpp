@@ -10,8 +10,8 @@
 
 namespace x {
     Window::Window(const str& title, const int width, const int height) : mContext() {
-        mInstance      = None;
-        mHwnd          = None;
+        mInstance      = nullptr;
+        mHwnd          = nullptr;
         mCurrentWidth  = width;
         mCurrentHeight = height;
         mTitle         = title;
@@ -32,7 +32,7 @@ namespace x {
         MSG msg;
         ::ZeroMemory(&msg, sizeof(MSG));
         while (msg.message != WM_QUIT) {
-            if (::PeekMessage(&msg, None, 0, 0, PM_REMOVE)) {
+            if (::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
                 ::TranslateMessage(&msg);
                 ::DispatchMessage(&msg);
                 continue;
@@ -55,7 +55,7 @@ namespace x {
 
     bool Window::Initialize() {
         // Initialize window
-        const auto hr = ::CoInitializeEx(None, COINIT_MULTITHREADED);
+        const auto hr = ::CoInitializeEx(nullptr, COINIT_MULTITHREADED);
         if (FAILED(hr)) {
             X_LOG_ERROR("CoInitializeEx failed, hr = 0x%x", hr);
             return false;
@@ -87,8 +87,8 @@ namespace x {
                                   winY,
                                   CAST<i32>(mCurrentWidth),
                                   CAST<i32>(mCurrentHeight),
-                                  None,
-                                  None,
+                                  nullptr,
+                                  nullptr,
                                   mInstance,
                                   this);
 
@@ -121,8 +121,8 @@ namespace x {
 
         if (mWindowViewport) {
             mWindowViewport->BindRenderTarget();
-            ID3D11RenderTargetView* nullRTV = None;
-            mContext.GetDeviceContext()->OMSetRenderTargets(1, &nullRTV, None);
+            ID3D11RenderTargetView* nullRTV = nullptr;
+            mContext.GetDeviceContext()->OMSetRenderTargets(1, &nullRTV, nullptr);
             mWindowViewport.reset();
         }
 
@@ -136,7 +136,7 @@ namespace x {
         mCurrentHeight = height;
 
         // Resize DirectX resources
-        if (mWindowViewport.get() != None) {
+        if (mWindowViewport.get() != nullptr) {
             if (!mWindowViewport->Resize(mCurrentWidth, mCurrentHeight, true)) {
                 X_LOG_ERROR("Failed to resize window viewport");
                 return E_FAIL;
@@ -204,7 +204,7 @@ namespace x {
     }
 
     LRESULT Window::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-        Window* self = None;
+        Window* self = nullptr;
 
         if (msg == WM_CREATE) {
             const auto* pCreate = RCAST<CREATESTRUCTA*>(lParam);

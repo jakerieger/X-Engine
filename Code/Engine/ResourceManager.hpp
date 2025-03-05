@@ -65,7 +65,7 @@ namespace x {
     public:
         ResourceBase* Load(RenderContext& context, ArenaAllocator& allocator, const str& path) override {
             void* memory = allocator.Allocate(sizeof(Resource<T>), alignof(Resource<T>));
-            if (!memory) return None;
+            if (!memory) return nullptr;
             return new (memory) Resource<T>(LoadImpl(context, path));
         }
 
@@ -151,7 +151,7 @@ namespace x {
         T* mData;
 
     public:
-        ResourceHandle() : mManager(None), mData(None) {}
+        ResourceHandle() : mManager(nullptr), mData(nullptr) {}
 
         ResourceHandle(ResourceManager* manager, const str& path, T* data)
             : mManager(manager), mPath(path), mData(data) {}
@@ -173,7 +173,7 @@ namespace x {
         }
 
         [[nodiscard]] bool Valid() const {
-            return (mManager != None) && (mData != None) && (!mPath.empty());
+            return (mManager != nullptr) && (mData != nullptr) && (!mPath.empty());
         }
     };
 }  // namespace x

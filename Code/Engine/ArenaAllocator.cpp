@@ -16,8 +16,8 @@ namespace x {
 
     ArenaAllocator::ArenaAllocator(ArenaAllocator&& other) noexcept
         : mMemory(other.mMemory), mCurrentPos(other.mCurrentPos), mTotalSize(other.mTotalSize) {
-        other.mMemory     = None;
-        other.mCurrentPos = None;
+        other.mMemory     = nullptr;
+        other.mCurrentPos = nullptr;
         other.mTotalSize  = 0;
     }
 
@@ -29,8 +29,8 @@ namespace x {
             mCurrentPos = other.mCurrentPos;
             mTotalSize  = other.mTotalSize;
 
-            other.mMemory     = None;
-            other.mCurrentPos = None;
+            other.mMemory     = nullptr;
+            other.mCurrentPos = nullptr;
             other.mTotalSize  = 0;
         }
 
@@ -43,7 +43,7 @@ namespace x {
         size_t adjustment  = alignAddr - currentAddr;
 
         if (mCurrentPos + size + adjustment > mMemory + mTotalSize) {
-            return None;  // out of memory :(
+            return nullptr;  // out of memory :(
         }
 
         mCurrentPos = RCAST<u8*>(alignAddr + size);

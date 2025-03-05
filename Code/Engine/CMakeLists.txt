@@ -7,6 +7,8 @@ add_library(x STATIC
     ${STB_SOURCES}
     ${COMMON_SOURCES}
     # Engine sources
+    ${ENGINE_DIR}/AssetManager.cpp
+    ${ENGINE_DIR}/AssetManager.hpp
     ${ENGINE_DIR}/ArenaAllocator.cpp
     ${ENGINE_DIR}/ArenaAllocator.hpp
     ${ENGINE_DIR}/BehaviorComponent.cpp
@@ -111,7 +113,9 @@ target_link_libraries(x
     luajit
     sol2
     yaml-cpp
+    ${BROTLI_LIBS}
     DirectXTex
+    xpak
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -125,5 +129,6 @@ endif ()
 target_compile_definitions(x PRIVATE ${WINDOWS_COMPILE_DEFS} LUA_JIT)
 
 target_include_directories(x PUBLIC
+    ${CODE_DIR}/Tools
     ${CMAKE_SOURCE_DIR}/Engine/Shaders/Header
 )

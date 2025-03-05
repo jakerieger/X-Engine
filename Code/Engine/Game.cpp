@@ -6,6 +6,7 @@
 #include "Window.hpp"
 #include <imgui.h>
 
+#include "AssetManager.hpp"
 #include "ShaderManager.hpp"
 #include "StaticResources.hpp"
 
@@ -174,6 +175,7 @@ namespace x {
 
         // These need to be loaded first before the rest of the engine can use them!
         if (!ShaderManager::LoadShaders(mRenderContext)) { X_LOG_FATAL("Failed to load shaders!"); }
+        if (!AssetManager::LoadAssets()) { X_LOG_FATAL("Failed to load assets"); }
 
         mRenderSystem = make_unique<RenderSystem>(mRenderContext, viewport);
         mRenderSystem->Initialize();
@@ -189,7 +191,7 @@ namespace x {
     void Game::Shutdown() {
         mRenderSystem.reset();
         mActiveScene.reset();  // probably isn't even necessary
-        mWindow = None;
+        mWindow = nullptr;
     }
 
     void Game::Pause() {
@@ -223,25 +225,25 @@ namespace x {
           .RegisterCommand("p_ShowFrameGraph",
                            [this](auto args) {
                                if (args.size() < 1) { return; }
-                               const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                               const auto show = CAST<int>(strtol(args[0].c_str(), nullptr, 10));
                                mDebugUI->SetShowFrameGraph(CAST<bool>(show));
                            })
           .RegisterCommand("p_ShowDeviceInfo",
                            [this](auto args) {
                                if (args.size() < 1) { return; }
-                               const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                               const auto show = CAST<int>(strtol(args[0].c_str(), nullptr, 10));
                                mDebugUI->SetShowDeviceInfo(CAST<bool>(show));
                            })
           .RegisterCommand("p_ShowFrameInfo",
                            [this](auto args) {
                                if (args.size() < 1) { return; }
-                               const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                               const auto show = CAST<int>(strtol(args[0].c_str(), nullptr, 10));
                                mDebugUI->SetShowFrameInfo(CAST<bool>(show));
                            })
           .RegisterCommand("p_ShowAll",
                            [this](auto args) {
                                if (args.size() < 1) { return; }
-                               const auto show = CAST<int>(strtol(args[0].c_str(), None, 10));
+                               const auto show = CAST<int>(strtol(args[0].c_str(), nullptr, 10));
                                mDebugUI->SetShowFrameGraph(CAST<bool>(show));
                                mDebugUI->SetShowDeviceInfo(CAST<bool>(show));
                                mDebugUI->SetShowFrameInfo(CAST<bool>(show));

@@ -56,7 +56,7 @@ namespace x {
 
             if constexpr (Same<T, BehaviorComponent>) { return mBehaviors.GetComponent(entity); }
 
-            return None;
+            return nullptr;
         }
 
         template<typename T>
@@ -68,7 +68,7 @@ namespace x {
 
             if constexpr (Same<T, BehaviorComponent>) { return mBehaviors.GetComponentMutable(entity); }
 
-            return None;
+            return nullptr;
         }
 
         template<typename T>

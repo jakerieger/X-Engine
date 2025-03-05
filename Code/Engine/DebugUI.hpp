@@ -14,7 +14,7 @@ namespace x {
         bool mShowFrameGraph = false;
         bool mShowDeviceInfo = false;
         bool mShowFrameInfo  = true;
-        ImFont* mFont        = None;
+        ImFont* mFont        = nullptr;
 
     public:
         explicit DebugUI(RenderContext& renderer) : mRenderer(renderer) {
@@ -69,7 +69,7 @@ namespace x {
 
             StartWindowTransparent();
             if (!ImGui::Begin("##framegraph",
-                              None,
+                              nullptr,
                               ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse |
                                 ImGuiWindowFlags_NoTitleBar)) {
                 ImGui::End();
@@ -89,7 +89,7 @@ namespace x {
 
             StartWindowTransparent();
             if (!ImGui::Begin("##deviceinfo",
-                              None,
+                              nullptr,
                               ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse |
                                 ImGuiWindowFlags_NoTitleBar)) {
                 ImGui::End();
@@ -118,7 +118,7 @@ namespace x {
 
             StartWindowTransparent();
             if (!ImGui::Begin("##frameinfo",
-                              None,
+                              nullptr,
                               ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse |
                                 ImGuiWindowFlags_NoTitleBar)) {
                 ImGui::End();

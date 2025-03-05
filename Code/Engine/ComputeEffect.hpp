@@ -20,7 +20,7 @@ namespace x {
 
             auto* context = mRenderer.GetDeviceContext();
             context->CSSetShaderResources(0, 1, &input);
-            context->CSSetUnorderedAccessViews(0, 1, &output, None);
+            context->CSSetUnorderedAccessViews(0, 1, &output, nullptr);
 
             if (mConstantBuffer) {
                 UpdateConstants();
@@ -29,10 +29,10 @@ namespace x {
 
             mComputeShader.DispatchWithThreadCount(mWidth, mHeight, 1);
 
-            ID3D11ShaderResourceView* nullSRV  = None;
-            ID3D11UnorderedAccessView* nullUAV = None;
+            ID3D11ShaderResourceView* nullSRV  = nullptr;
+            ID3D11UnorderedAccessView* nullUAV = nullptr;
             context->CSSetShaderResources(0, 1, &nullSRV);
-            context->CSSetUnorderedAccessViews(0, 1, &nullUAV, None);
+            context->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
         }
 
         virtual void OnResize(const u32 width, const u32 height) {
@@ -74,7 +74,7 @@ namespace x {
             desc.BindFlags      = D3D11_BIND_CONSTANT_BUFFER;
             desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-            return SUCCEEDED(mRenderer.GetDevice()->CreateBuffer(&desc, None, &mConstantBuffer));
+            return SUCCEEDED(mRenderer.GetDevice()->CreateBuffer(&desc, nullptr, &mConstantBuffer));
         }
     };
 }  // namespace x

@@ -9,8 +9,8 @@ namespace x {
     }
 
     void Texture2D::Unbind(const u32 slot) const {
-        ID3D11ShaderResourceView* nullSRV = None;
-        ID3D11SamplerState* nullSS        = None;
+        ID3D11ShaderResourceView* nullSRV = nullptr;
+        ID3D11SamplerState* nullSS        = nullptr;
         mRenderer.GetDeviceContext()->PSSetShaderResources(slot, 1, &nullSRV);
         mRenderer.GetDeviceContext()->PSSetSamplers(slot, 1, &nullSS);
     }

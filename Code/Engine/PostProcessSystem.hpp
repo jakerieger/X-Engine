@@ -45,7 +45,7 @@ namespace x {
         T* AddEffect(Args&&... args) {
             auto effect = make_unique<T>(mRenderer, std::forward<Args>(args)...);
 
-            if (!effect->Initialize()) { return None; }
+            if (!effect->Initialize()) { return nullptr; }
 
             effect->OnResize(mWidth, mHeight);
 

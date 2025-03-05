@@ -81,14 +81,14 @@ namespace x {
         desc.BindFlags      = D3D11_BIND_CONSTANT_BUFFER;
         desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-        auto hr = mRenderContext.GetDevice()->CreateBuffer(&desc, None, &mShadowParamsCB);
+        auto hr = mRenderContext.GetDevice()->CreateBuffer(&desc, nullptr, &mShadowParamsCB);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create shadow map constant buffer.")
 
         Resize(width, height);
     }
 
     void ShadowPass::BeginPass() {
-        mRenderContext.GetDeviceContext()->OMSetRenderTargets(0, None, mDepthStencilView.Get());
+        mRenderContext.GetDeviceContext()->OMSetRenderTargets(0, nullptr, mDepthStencilView.Get());
         mRenderContext.GetDeviceContext()->OMSetDepthStencilState(mDepthStencilState.Get(), 0);
         mRenderContext.GetDeviceContext()->ClearDepthStencilView(mDepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
@@ -131,7 +131,7 @@ namespace x {
         depthTexDesc.BindFlags            = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 
         ComPtr<ID3D11Texture2D> depthStencilTexture;
-        auto hr = mRenderContext.GetDevice()->CreateTexture2D(&depthTexDesc, None, &depthStencilTexture);
+        auto hr = mRenderContext.GetDevice()->CreateTexture2D(&depthTexDesc, nullptr, &depthStencilTexture);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil Texture")
 
         D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -221,7 +221,7 @@ namespace x {
         depthStencilDesc.BindFlags            = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 
         ComPtr<ID3D11Texture2D> depthStencilTexture;
-        auto hr = mRenderContext.GetDevice()->CreateTexture2D(&depthStencilDesc, None, &depthStencilTexture);
+        auto hr = mRenderContext.GetDevice()->CreateTexture2D(&depthStencilDesc, nullptr, &depthStencilTexture);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil Texture")
 
         // Create depth stencil view
@@ -256,13 +256,13 @@ namespace x {
         sceneDesc.Usage            = D3D11_USAGE_DEFAULT;
         sceneDesc.BindFlags        = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
-        hr = mRenderContext.GetDevice()->CreateTexture2D(&sceneDesc, None, &mSceneTexture);
+        hr = mRenderContext.GetDevice()->CreateTexture2D(&sceneDesc, nullptr, &mSceneTexture);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create scene texture")
 
-        hr = mRenderContext.GetDevice()->CreateRenderTargetView(mSceneTexture.Get(), None, &mRenderTargetView);
+        hr = mRenderContext.GetDevice()->CreateRenderTargetView(mSceneTexture.Get(), nullptr, &mRenderTargetView);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create render target view.");
 
-        hr = mRenderContext.GetDevice()->CreateShaderResourceView(mSceneTexture.Get(), None, &mOutputSRV);
+        hr = mRenderContext.GetDevice()->CreateShaderResourceView(mSceneTexture.Get(), nullptr, &mOutputSRV);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create shader resource view")
     }
 #pragma endregion

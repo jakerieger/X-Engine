@@ -142,13 +142,13 @@ namespace x {
         const T* GetComponent(EntityId entity) const {
             const auto it = mEntityToIndex.find(entity);
             if (it != mEntityToIndex.end()) { return &mComponents[it->second]; }
-            return None;
+            return nullptr;
         }
 
         T* GetComponentMutable(EntityId entity) {
             const auto it = mEntityToIndex.find(entity);
             if (it != mEntityToIndex.end()) { return &mComponents[it->second]; }
-            return None;
+            return nullptr;
         }
 
         EntityId GetEntity(const T* component) const {

@@ -27,9 +27,9 @@ namespace x::Editor {
         const char green[3] = {hex[2], hex[3], '\0'};
         const char blue[3]  = {hex[4], hex[5], '\0'};
 
-        const int r = strtol(red, None, 16);
-        const int g = strtol(green, None, 16);
-        const int b = strtol(blue, None, 16);
+        const int r = strtol(red, nullptr, 16);
+        const int g = strtol(green, nullptr, 16);
+        const int b = strtol(blue, nullptr, 16);
 
         color.x = (f32)r / 255.0f;
         color.y = (f32)g / 255.0f;
@@ -168,7 +168,7 @@ namespace x::Editor {
                 if (ImGui::MenuItem("Open Project", "Ctrl+Shift+O")) {
                     const char* filter = "Project (*.xproj)|*.xproj|";
                     char filename[MAX_PATH];
-                    if (OpenFileDialog(mHwnd, None, filter, "Open Project", filename, MAX_PATH)) {
+                    if (OpenFileDialog(mHwnd, nullptr, filter, "Open Project", filename, MAX_PATH)) {
                         OpenProject(filename);
                     }
                 }
@@ -178,7 +178,7 @@ namespace x::Editor {
                 if (ImGui::MenuItem("Open Scene", "Ctrl+O")) {
                     const char* filter = "Scene (*.xscn)|*.xscn|";
                     char filename[MAX_PATH];
-                    if (OpenFileDialog(mHwnd, None, filter, "Open Scene File", filename, MAX_PATH)) {
+                    if (OpenFileDialog(mHwnd, nullptr, filter, "Open Scene File", filename, MAX_PATH)) {
                         OpenScene(filename);
                     }
                 }
@@ -221,7 +221,7 @@ namespace x::Editor {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
-        if (ImGui::Begin("DockSpace", None, windowFlags)) {
+        if (ImGui::Begin("DockSpace", nullptr, windowFlags)) {
             const ImGuiID dockspaceId = ImGui::GetID("Editor::DockSpace");
             ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), flags);
 
@@ -233,8 +233,8 @@ namespace x::Editor {
                 ImGui::DockBuilderSetNodeSize(dockspaceId, ImGui::GetWindowSize());
 
                 ImGuiID dockMainId   = dockspaceId;
-                ImGuiID dockRightId  = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Right, 0.2f, None, &dockMainId);
-                ImGuiID dockLeftId   = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Left, 0.2f, None, &dockMainId);
+                ImGuiID dockRightId  = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Right, 0.2f, nullptr, &dockMainId);
+                ImGuiID dockLeftId   = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Left, 0.2f, nullptr, &dockMainId);
                 ImGuiID dockBottomId = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Down, 0.3f, None, &dockMainId);
                 ImGuiID dockRightBottomId =
                   ImGui::DockBuilderSplitNode(dockRightId, ImGuiDir_Down, 0.5f, None, &dockRightId);

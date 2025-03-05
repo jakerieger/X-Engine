@@ -42,7 +42,7 @@ namespace x {
     }
 
     Matrix TransformComponent::GetInverseTransformMatrix() const {
-        return XMMatrixInverse(None, mTransform);
+        return XMMatrixInverse(nullptr, mTransform);
     }
 
     void TransformComponent::Translate(const Float3& translation) {

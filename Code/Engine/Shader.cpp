@@ -17,7 +17,7 @@ namespace x {
     void IShader::InitFromFile(const str& filename, const char* entryPoint, const char* target) {
         ComPtr<ID3DBlob> errorBlob;
         auto hr = D3DCompileFromFile(AnsiToWide(filename).c_str(),
-                                     None,
+                                     nullptr,
                                      D3D_COMPILE_STANDARD_FILE_INCLUDE,
                                      entryPoint,
                                      target,
@@ -67,7 +67,7 @@ namespace x {
         InitFromFile(filename, entryPoint, kVertexShaderModel);
         const auto hr = mRenderer.GetDevice()->CreateVertexShader(mShaderBlob->GetBufferPointer(),
                                                                   mShaderBlob->GetBufferSize(),
-                                                                  None,
+                                                                  nullptr,
                                                                   RCAST<ID3D11VertexShader**>(mShader.GetAddressOf()));
         X_PANIC_ASSERT(SUCCEEDED(hr), "")
         CreateInputLayout();
@@ -77,7 +77,7 @@ namespace x {
         InitFromMemory(data, size);
         const auto hr = mRenderer.GetDevice()->CreateVertexShader(mShaderBlob->GetBufferPointer(),
                                                                   mShaderBlob->GetBufferSize(),
-                                                                  None,
+                                                                  nullptr,
                                                                   RCAST<ID3D11VertexShader**>(mShader.GetAddressOf()));
         X_PANIC_ASSERT(SUCCEEDED(hr), "")
         CreateInputLayout();
@@ -90,7 +90,7 @@ namespace x {
             return;
         }
         auto* context = mRenderer.GetDeviceContext();
-        context->VSSetShader(vs, None, 0);
+        context->VSSetShader(vs, nullptr, 0);
         context->IASetInputLayout(mInputLayout.Get());
     }
 
@@ -175,7 +175,7 @@ namespace x {
         InitFromFile(filename, entryPoint, kPixelShaderModel);
         const auto hr = mRenderer.GetDevice()->CreatePixelShader(mShaderBlob->GetBufferPointer(),
                                                                  mShaderBlob->GetBufferSize(),
-                                                                 None,
+                                                                 nullptr,
                                                                  RCAST<ID3D11PixelShader**>(mShader.GetAddressOf()));
         X_PANIC_ASSERT(SUCCEEDED(hr), "")
     }
@@ -184,7 +184,7 @@ namespace x {
         InitFromMemory(data, size);
         const auto hr = mRenderer.GetDevice()->CreatePixelShader(mShaderBlob->GetBufferPointer(),
                                                                  mShaderBlob->GetBufferSize(),
-                                                                 None,
+                                                                 nullptr,
                                                                  RCAST<ID3D11PixelShader**>(mShader.GetAddressOf()));
         X_PANIC_ASSERT(SUCCEEDED(hr), "")
     }
@@ -195,7 +195,7 @@ namespace x {
             printf("Pixel shader is null.\n");
             return;
         }
-        mRenderer.GetDeviceContext()->PSSetShader(pixelShader, None, 0);
+        mRenderer.GetDeviceContext()->PSSetShader(pixelShader, nullptr, 0);
     }
 #pragma endregion
 
@@ -205,7 +205,7 @@ namespace x {
         const auto hr =
           mRenderer.GetDevice()->CreateComputeShader(mShaderBlob->GetBufferPointer(),
                                                      mShaderBlob->GetBufferSize(),
-                                                     None,
+                                                     nullptr,
                                                      RCAST<ID3D11ComputeShader**>(mShader.GetAddressOf()));
         X_PANIC_ASSERT(SUCCEEDED(hr), "")
         ExtractThreadGroupSize();
@@ -216,14 +216,14 @@ namespace x {
         const auto hr =
           mRenderer.GetDevice()->CreateComputeShader(mShaderBlob->GetBufferPointer(),
                                                      mShaderBlob->GetBufferSize(),
-                                                     None,
+                                                     nullptr,
                                                      RCAST<ID3D11ComputeShader**>(mShader.GetAddressOf()));
         X_PANIC_ASSERT(SUCCEEDED(hr), "")
         ExtractThreadGroupSize();
     }
 
     void ComputeShader::Bind() const {
-        mRenderer.GetDeviceContext()->CSSetShader(CAST<ID3D11ComputeShader*>(mShader.Get()), None, 0);
+        mRenderer.GetDeviceContext()->CSSetShader(CAST<ID3D11ComputeShader*>(mShader.Get()), nullptr, 0);
     }
 
     void ComputeShader::Dispatch(const u32 groupSizeX, const u32 groupSizeY, const u32 groupSizeZ) const {

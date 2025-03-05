@@ -31,7 +31,7 @@ namespace x {
             ID3D11RenderTargetView* nullRTV = nullptr;
             ctx->OMSetRenderTargets(1, &nullRTV, nullptr);
             mContext.ResizeSwapchainBuffers(width, height);
-            hr = device->CreateRenderTargetView(mContext.GetBackBuffer(), None, &mRenderTargetView);
+            hr = device->CreateRenderTargetView(mContext.GetBackBuffer(), nullptr, &mRenderTargetView);
             if (FAILED(hr)) {
                 X_LOG_ERROR("Failed to create render target");
                 return false;
@@ -51,7 +51,7 @@ namespace x {
         depthStencilDesc.BindFlags            = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 
         ComPtr<ID3D11Texture2D> depthStencilTexture;
-        hr = device->CreateTexture2D(&depthStencilDesc, None, &depthStencilTexture);
+        hr = device->CreateTexture2D(&depthStencilDesc, nullptr, &depthStencilTexture);
         if (FAILED(hr)) {
             X_LOG_ERROR("Failed to create depth stencil texture");
             return false;
@@ -94,19 +94,19 @@ namespace x {
         sceneDesc.Usage            = D3D11_USAGE_DEFAULT;
         sceneDesc.BindFlags        = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
-        hr = device->CreateTexture2D(&sceneDesc, None, &mRenderTarget);
+        hr = device->CreateTexture2D(&sceneDesc, nullptr, &mRenderTarget);
         if (FAILED(hr)) {
             X_LOG_ERROR("Failed to create render target texture");
             return false;
         }
 
-        hr = device->CreateRenderTargetView(mRenderTarget.Get(), None, &mRenderTargetView);
+        hr = device->CreateRenderTargetView(mRenderTarget.Get(), nullptr, &mRenderTargetView);
         if (FAILED(hr)) {
             X_LOG_ERROR("Failed to create render target view");
             return false;
         }
 
-        hr = device->CreateShaderResourceView(mRenderTarget.Get(), None, &mShaderResourceView);
+        hr = device->CreateShaderResourceView(mRenderTarget.Get(), nullptr, &mShaderResourceView);
         if (FAILED(hr)) {
             X_LOG_ERROR("Failed to create shader resource view");
             return false;
@@ -120,7 +120,7 @@ namespace x {
     }
 
     void Viewport::DetachViewport() const {
-        mContext.GetDeviceContext()->RSSetViewports(1, None);
+        mContext.GetDeviceContext()->RSSetViewports(1, nullptr);
     }
 
     void Viewport::ClearRenderTargetView() const {

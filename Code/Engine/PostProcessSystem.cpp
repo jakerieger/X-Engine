@@ -96,13 +96,13 @@ namespace x {
 
             auto* device = mRenderer.GetDevice();
 
-            auto hr = device->CreateTexture2D(&desc, None, &target.texture);
+            auto hr = device->CreateTexture2D(&desc, nullptr, &target.texture);
             if (FAILED(hr)) { return false; }
 
-            hr = device->CreateUnorderedAccessView(target.texture.Get(), None, &target.uav);
+            hr = device->CreateUnorderedAccessView(target.texture.Get(), nullptr, &target.uav);
             if (FAILED(hr)) { return false; }
 
-            hr = device->CreateShaderResourceView(target.texture.Get(), None, &target.srv);
+            hr = device->CreateShaderResourceView(target.texture.Get(), nullptr, &target.srv);
             if (FAILED(hr)) { return false; }
         }
 
@@ -111,7 +111,7 @@ namespace x {
 
     void PostProcessSystem::RenderToScreen(ID3D11ShaderResourceView* input, ID3D11RenderTargetView* output) {
         auto* context = mRenderer.GetDeviceContext();
-        context->OMSetRenderTargets(1, &output, None);
+        context->OMSetRenderTargets(1, &output, nullptr);
 
         mFullscreenVS.Bind();
         mFullscreenPS.Bind();

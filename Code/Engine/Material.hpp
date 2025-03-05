@@ -43,7 +43,7 @@ namespace x {
             transformBufDesc.MiscFlags           = 0;
             transformBufDesc.StructureByteStride = 0;
 
-            auto hr = device->CreateBuffer(&transformBufDesc, None, &mTransforms);
+            auto hr = device->CreateBuffer(&transformBufDesc, nullptr, &mTransforms);
             X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create transforms constant buffer.")
 
             D3D11_BUFFER_DESC cameraBufDesc;
@@ -54,7 +54,7 @@ namespace x {
             cameraBufDesc.MiscFlags           = 0;
             cameraBufDesc.StructureByteStride = 0;
 
-            hr = device->CreateBuffer(&cameraBufDesc, None, &mCamera);
+            hr = device->CreateBuffer(&cameraBufDesc, nullptr, &mCamera);
             X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create camera constant buffer.")
 
             if (lit) {
@@ -66,7 +66,7 @@ namespace x {
                 lightsBufDesc.MiscFlags           = 0;
                 lightsBufDesc.StructureByteStride = 0;
 
-                hr = device->CreateBuffer(&lightsBufDesc, None, &mLights);
+                hr = device->CreateBuffer(&lightsBufDesc, nullptr, &mLights);
                 X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create lights constant buffer.")
             }
         }

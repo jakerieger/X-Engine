@@ -78,12 +78,12 @@ namespace x {
     }
 
     void RenderContext::QueryDeviceInfo() {
-        IDXGIFactory* factory = None;
+        IDXGIFactory* factory = nullptr;
         if (FAILED(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factory))) {
             throw std::runtime_error("Failed to create DXGI factory.");
         }
 
-        IDXGIAdapter* adapter = None;
+        IDXGIAdapter* adapter = nullptr;
         if (FAILED(factory->EnumAdapters(0, &adapter))) {
             factory->Release();
             throw std::runtime_error("Failed to get GPU adapter");
@@ -108,7 +108,7 @@ namespace x {
     void RenderContext::Present() {
         mContext->Flush();
         const auto hr = mSwapChain->Present(1, 0);
-        if (FAILED(hr)) { _i_ = fprintf(stderr, "Failed to present.\n"); }
+        if (FAILED(hr)) { std::ignore = fprintf(stderr, "Failed to present.\n"); }
     }
 
     void RenderContext::Draw(const u32 vertexCount) {
