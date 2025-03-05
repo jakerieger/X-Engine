@@ -8,9 +8,7 @@ namespace x {
     static void ParseEntities(const YAML::Node& entities, SceneDescriptor& descriptor);
     static Float3 ParseFloat3(const YAML::Node& node);
 
-    void SceneParser::Parse(const str& filename, SceneDescriptor& descriptor) {
-        YAML::Node scene = YAML::LoadFile(filename);
-
+    static void ParseFromNode(const YAML::Node& scene, SceneDescriptor& descriptor) {
         const auto name = scene["name"].as<str>();
         const auto desc = scene["description"].as<str>();
 
@@ -22,6 +20,17 @@ namespace x {
         if (const auto entities = scene["entities"]; entities.IsDefined() && entities.size() > 0) {
             ParseEntities(entities, descriptor);
         }
+    }
+
+    void SceneParser::Parse(const str& filename, SceneDescriptor& descriptor) {
+        const YAML::Node scene = YAML::LoadFile(filename);
+        ParseFromNode(scene, descriptor);
+    }
+
+    void SceneParser::Parse(std::span<const u8> data, SceneDescriptor& descriptor) {
+        const auto sceneContent = RCAST<const char*>(data.data());
+        const YAML::Node scene  = YAML::Load(sceneContent);
+        ParseFromNode(scene, descriptor);
     }
 
     void ParseWorld(const YAML::Node& world, SceneDescriptor& descriptor) {
@@ -64,8 +73,8 @@ namespace x {
             YAML::Node modelNode = componentsNode["model"];
             if (modelNode.IsDefined()) {
                 ModelDescriptor modelDescriptor {};
-                modelDescriptor.assetId        = modelNode["asset"].as<u64>();
-                modelDescriptor.material       = modelNode["material"].as<str>();
+                modelDescriptor.meshId         = modelNode["mesh"].as<u64>();
+                modelDescriptor.materialId     = modelNode["material"].as<u64>();
                 modelDescriptor.castsShadows   = modelNode["castsShadows"].as<bool>();
                 modelDescriptor.receiveShadows = modelNode["receiveShadows"].as<bool>();
 

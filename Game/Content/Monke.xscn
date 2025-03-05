@@ -27,8 +27,8 @@ entities:
         rotation: [ 0, 0, 0 ]
         scale: [ 1, 1, 1 ]
       model:
-        asset: 149289234444072869
-        material: C:\Users\conta\Code\SpaceGame\Game\Materials\Floor.xmat
+        mesh: 149289234444072869
+        material: 354234513418609546
         castsShadows: true
         receiveShadows: true
   - id: 1
@@ -39,8 +39,8 @@ entities:
         rotation: [ 0, 0, 0 ]
         scale: [ 1, 1, 1 ]
       model:
-        asset: 171166596565594018
-        material: C:\Users\conta\Code\SpaceGame\Game\Materials\Monke.xmat
+        mesh: 171166596565594018
+        material: 349217341258819725
         castsShadows: true
         receiveShadows: true
       behavior:

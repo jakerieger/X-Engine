@@ -1,5 +1,7 @@
 #pragma once
 
+#include <span>
+
 #include "Math.hpp"
 #include "Common/Types.hpp"
 
@@ -40,8 +42,8 @@ namespace x {
     };
 
     struct ModelDescriptor {
-        u64 assetId;
-        str material;
+        u64 meshId;
+        u64 materialId;
         bool castsShadows;
         bool receiveShadows;
     };
@@ -73,5 +75,6 @@ namespace x {
     class SceneParser {
     public:
         static void Parse(const str& filename, SceneDescriptor& descriptor);
+        static void Parse(std::span<const u8> data, SceneDescriptor& descriptor);
     };
 }  // namespace x

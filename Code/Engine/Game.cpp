@@ -177,6 +177,16 @@ namespace x {
         if (!ShaderManager::LoadShaders(mRenderContext)) { X_LOG_FATAL("Failed to load shaders!"); }
         if (!AssetManager::LoadAssets()) { X_LOG_FATAL("Failed to load assets"); }
 
+        // Find and load all of our scene descriptors
+        const auto sceneIds = AssetManager::GetScenes();
+        for (const auto& scene : sceneIds) {
+            auto sceneData = AssetManager::GetAssetData(scene);
+            if (!sceneData) { X_LOG_FATAL("Failed to load scene data!"); }
+            SceneDescriptor descriptor;
+            SceneParser::Parse(*sceneData, descriptor);
+            mScenes[descriptor.mName] = descriptor;
+        }
+
         mRenderSystem = make_unique<RenderSystem>(mRenderContext, viewport);
         mRenderSystem->Initialize();
         mRenderSystem->SetClearColor(0.392f, 0.584f, 0.929f, 1.f);  // Cornflower Blue
@@ -260,15 +270,15 @@ namespace x {
         X_LOG_DEBUG("Initialized engine")
     }
 
-    void Game::TransitionScene(const str& path) {
-        if (path.empty()) {
+    void Game::TransitionScene(const str& name) {
+        if (name.empty()) {
             X_LOG_WARN("Attempted to load blank scene")
             return;
         }
 
         mActiveScene.reset();
         mActiveScene = make_unique<Scene>(mRenderContext, mScriptEngine);
-        mActiveScene->Load(path);
+        mActiveScene->Load(mScenes[name]);
         mActiveScene->RegisterVolatiles(mVolatiles);
         mActiveScene->Update(0.0f);
     }

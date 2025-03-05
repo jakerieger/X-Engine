@@ -13,6 +13,7 @@
 #include "Volatile.hpp"
 #include "RenderSystem.hpp"
 #include "Scene.hpp"
+#include "SceneParser.hpp"
 #include "ScriptEngine.hpp"
 #include "Viewport.hpp"
 
@@ -28,7 +29,7 @@ namespace x {
         void Shutdown();
         void Update(bool paused = false);
         void RenderFrame();
-        void TransitionScene(const str& path);
+        void TransitionScene(const str& name);
         void Resize(u32 width, u32 height) const;
 
         X_NODISCARD Scene* GetActiveScene() const;
@@ -53,6 +54,7 @@ namespace x {
         Input mInput;
         Mouse mMouse;
         Window* mWindow;
+        unordered_map<str, SceneDescriptor> mScenes;
 
         void Pause();
         void Resume();

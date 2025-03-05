@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <span>
+
 #include "Common/Types.hpp"
 
 namespace x {
@@ -21,5 +23,6 @@ namespace x {
     class MaterialParser {
     public:
         static MaterialDescriptor Parse(const str& filename);
+        static MaterialDescriptor Parse(std::span<const u8> data);
     };
 }  // namespace x

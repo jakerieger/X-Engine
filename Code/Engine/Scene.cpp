@@ -13,12 +13,9 @@ namespace x {
         Unload();
     }
 
-    void Scene::Load(const str& path) {
+    void Scene::Load(const SceneDescriptor& descriptor) {
         mState.Reset();
         mInitialState.Reset();
-
-        SceneDescriptor descriptor {};
-        SceneParser::Parse(path, descriptor);
 
         auto& mainCamera = mState.MainCamera;
         auto& sun        = mState.Lights.Sun;
@@ -52,13 +49,15 @@ namespace x {
                 modelComponent.SetCastsShadows(model.castsShadows);
 
                 // Load model resource
-                if (!mResources.LoadResource<Model>(model.assetId)) { X_LOG_FATAL("Failed to load model"); }
-                auto modelHandle = mResources.FetchResource<Model>(model.assetId);
+                if (!mResources.LoadResource<Model>(model.meshId)) { X_LOG_FATAL("Failed to load model"); }
+                auto modelHandle = mResources.FetchResource<Model>(model.meshId);
                 if (!modelHandle.has_value()) { X_LOG_FATAL("Failed to fetch model resource"); }
                 modelComponent.SetModelHandle(*modelHandle);
 
                 // Load material
-                MaterialDescriptor matDesc = MaterialParser::Parse(model.material);
+                const auto materialBytes = AssetManager::GetAssetData(model.materialId);
+                if (!materialBytes.has_value()) { X_LOG_FATAL("Failed to load material resource"); }
+                MaterialDescriptor matDesc = MaterialParser::Parse(*materialBytes);
                 LoadMaterial(matDesc, modelComponent);
             }
 
@@ -78,7 +77,7 @@ namespace x {
         mInitialState = mState;  // Cache init state so scene can be reset
 
         Awake();
-        X_LOG_INFO("Loaded scene: '%s'", path.c_str())
+        X_LOG_INFO("Loaded scene: '%s'", descriptor.mName)
     }
 
     void Scene::Unload() {

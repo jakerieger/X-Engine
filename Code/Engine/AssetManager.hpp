@@ -29,6 +29,7 @@ namespace x {
     private:
         inline static bool mLoaded {false};
         static bool LoadAssets();
+        static vector<AssetId> GetScenes();
 
 #ifdef X_USE_PAK_FILE
         inline static AssetTable mAssets;

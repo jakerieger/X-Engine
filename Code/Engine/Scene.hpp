@@ -6,6 +6,7 @@
 #include "ModelLoader.hpp"
 #include "ScriptTypeRegistry.hpp"
 #include "MaterialParser.hpp"
+#include "SceneParser.hpp"
 
 namespace x {
     class Scene {
@@ -22,7 +23,7 @@ namespace x {
         explicit Scene(RenderContext& context, ScriptEngine& scriptEngine);
         ~Scene();
 
-        void Load(const str& path);
+        void Load(const SceneDescriptor &descriptor);
         void Unload();
 
         void Reset();

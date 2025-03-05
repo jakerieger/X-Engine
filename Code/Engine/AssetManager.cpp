@@ -71,4 +71,17 @@ namespace x {
         mLoaded = true;
         return true;
     }
+
+    vector<AssetId> AssetManager::GetScenes() {
+        if (!mLoaded) {
+            X_LOG_ERROR("AssetManager::GetScenes - Not Loaded");
+            return {};
+        }
+
+        vector<AssetId> scenes;
+        for (const auto& id : mAssets | std::views::keys) {
+            if (AssetDescriptor::GetTypeFromId(id) == kAssetType_Scene) { scenes.emplace_back(id); }
+        }
+        return scenes;
+    }
 }  // namespace x
