@@ -15,15 +15,14 @@ namespace x {
         }
 
 #ifdef X_USE_PAK_FILE
-        // if (auto it = mAssets.find(id); it != mAssets.end()) {
-        //     const auto& [id, assetFile] = *it;
-        //     const auto fullPath         = Path::Current() / "Content" / assetFile.Str();
-        //     if (!fullPath.Exists()) { X_LOG_ERROR("AssetManager::GetAssetData - Not Found"); }
-        //     return FileReader::ReadAllBytes(fullPath);
-        // } else {
-        //     X_LOG_ERROR("AssetManager::GetAssetData - Not Found");
-        //     return std::nullopt;
-        // }
+        if (auto it = mAssets.find(id); it != mAssets.end()) {
+            const auto& [id, asset] = *it;
+            auto assetData          = XPak::FetchAssetData(Path(X_PAK_FILE), asset);
+            return assetData;
+        } else {
+            X_LOG_ERROR("AssetManager::GetAssetData - Not Found");
+            return std::nullopt;
+        }
 #else
         if (auto it = mAssets.find(id); it != mAssets.end()) {
             const auto& [id, assetFile] = *it;
