@@ -39,6 +39,9 @@ function(build_luajit)
         IMPORTED_LOCATION "${luajit_SOURCE_DIR}/src/lua51.lib"
         INTERFACE_INCLUDE_DIRECTORIES "${luajit_SOURCE_DIR}/src"
     )
+
+    # make include dir available to calling scope
+    set(LUAJIT_INCLUDES "${luajit_SOURCE_DIR}/src" PARENT_SCOPE)
 endfunction()
 
 cmake_policy(POP)

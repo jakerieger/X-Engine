@@ -9,8 +9,58 @@
 #include <numeric>
 #include <brotli/encode.h>
 
+extern "C" {
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
+#include <luajit.h>
+}
+
 namespace x {
     using namespace Filesystem;
+
+#pragma region Lua Bytecode Generation
+    typedef struct {
+        vector<u8>* bytecode;
+    } BytecodeWriterState;
+
+    static int BytecodeWriter(lua_State* L, const void* p, size_t size, void* ud) {
+        BytecodeWriterState* state = CAST<BytecodeWriterState*>(ud);
+        const u8* data             = CAST<const u8*>(p);
+        state->bytecode->insert(state->bytecode->end(), data, data + size);
+        return 0;
+    }
+
+    vector<u8> CompileLuaToBytecode(const str& script, const str& chunkName) {
+        vector<u8> bytecode;
+
+        lua_State* L = luaL_newstate();
+        if (!L) {
+            std::cerr << "Failed to create Lua state" << std::endl;
+            return bytecode;
+        }
+
+        int loadResult = luaL_loadbuffer(L, script.c_str(), script.size(), chunkName.c_str());
+        if (loadResult != 0) {
+            std::cerr << "Failed to compile Lua script: " << lua_tostring(L, -1) << std::endl;
+            lua_close(L);
+            return bytecode;
+        }
+
+        BytecodeWriterState writerState;
+        writerState.bytecode = &bytecode;
+
+        int dumpResult = lua_dump(L, BytecodeWriter, &writerState);
+
+        if (dumpResult != 0) {
+            std::cerr << "Failed to dump Lua bytecode: " << dumpResult << std::endl;
+            bytecode.clear();
+        }
+
+        lua_close(L);
+        return bytecode;
+    }
+#pragma endregion
 
     static void ProcessAssetDirectory(const Filesystem::Path& directory,
                                       vector<XPakTableEntry>& tableEntries,
@@ -49,6 +99,21 @@ namespace x {
                         assetEntry.mCompressedData = assetData;
                         // Both textures and audio assets can be streamed, no decompression is required
                         tableEntry.mAssetFlags |= kAssetFlag_Streamable;
+
+                        tableEntry.mSize           = assetData.size();
+                        tableEntry.mCompressedSize = tableEntry.mSize;
+                    } else if (assetType == kAssetType_Script) {
+                        // Scripts can get compiled to bytecode
+                        const str scriptSource    = FileReader::ReadAllText(filename);
+                        vector<u8> scriptBytecode = CompileLuaToBytecode(scriptSource, filename.Str());
+                        if (scriptBytecode.size() == 0) {
+                            printf("Failed to compile lua bytecode for script '%s'\n", filename.CStr());
+                        }
+                        assetEntry.mCompressedData = scriptBytecode;
+                        tableEntry.mAssetFlags     = 0;
+
+                        tableEntry.mSize           = scriptBytecode.size();
+                        tableEntry.mCompressedSize = tableEntry.mSize;
                     } else {
                         // Everything else gets compressed with Brotli (for now)
                         assetEntry.mCompressedData = BrotliCompression::Compress(assetData);
@@ -59,11 +124,10 @@ namespace x {
                         }
 
                         tableEntry.mAssetFlags = flags;
-                    }
 
-                    // Update size members in ToC entry
-                    tableEntry.mSize           = assetData.size();
-                    tableEntry.mCompressedSize = assetEntry.mCompressedData.size();
+                        tableEntry.mSize           = assetData.size();
+                        tableEntry.mCompressedSize = assetEntry.mCompressedData.size();
+                    }
 
                     tableEntries.push_back(tableEntry);
                     assetEntries.push_back(assetEntry);
@@ -187,7 +251,15 @@ namespace x {
     }
 
     std::string XPakTableEntry::ToString() const {
-        return std::format("{}\n{}\n{}\n{}", mAssetFlags, mOffset, mCompressedSize, mSize);
+        const AssetType type = AssetDescriptor::GetTypeFromId(mAssetId);
+        const str fmt        = std::format(
+          "Asset:\n  ID: {}\n  Type: {}\n  Size: {} bytes\n  Compressed Size: {} bytes\n  Offset: {:#010x}\n",
+          mAssetId,
+          AssetDescriptor::GetTypeString(type),
+          mCompressedSize,
+          mSize,
+          mOffset);
+        return fmt;
     }
 
     bool XPakAssetEntry::FromBytes(std::span<const u8> data) {
@@ -346,15 +418,9 @@ namespace x {
         header.mVersion = kCurrentVersion;
 
         // Parse project directories to scan for assets
-        auto contentDir   = Path(project.mContentDirectory);
-        auto scriptsDir   = Path(project.mScriptsDirectory);
-        auto materialsDir = Path(project.mMaterialsDirectory);
-        auto scenesDir    = Path(project.mScenesDirectory);
-
+        // Directories are relative to the path of the project file
+        const auto contentDir = Path(project.mContentDirectory);
         ProcessAssetDirectory(contentDir, x.mTableOfContents, x.mAssets);
-        ProcessAssetDirectory(scriptsDir, x.mTableOfContents, x.mAssets);
-        ProcessAssetDirectory(materialsDir, x.mTableOfContents, x.mAssets);
-        ProcessAssetDirectory(scenesDir, x.mTableOfContents, x.mAssets);
 
         if (x.mAssets.size() != x.mTableOfContents.size()) {
             printf("Incorrect number of assets in table of contents\n");

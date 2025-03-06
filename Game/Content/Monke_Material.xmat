@@ -3,10 +3,10 @@ baseMaterial: PBR
 properties: []
 textures:
   - name: albedo
-    asset: 115108353668538089
+    asset: 85474778746270276
   - name: metallic
-    asset: 119645366826580079
+    asset: 138029654406012883
   - name: roughness
-    asset: 115400681995725697
+    asset: 76184580321921715
   - name: normal
-    asset: 120940817416006984
+    asset: 89743376497730009

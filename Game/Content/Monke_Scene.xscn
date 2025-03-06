@@ -27,8 +27,8 @@ entities:
         rotation: [ 0, 0, 0 ]
         scale: [ 1, 1, 1 ]
       model:
-        mesh: 149289234444072869
-        material: 354234513418609546
+        mesh: 194094626195428588
+        material: 322229182146693605
         castsShadows: true
         receiveShadows: true
   - id: 1
@@ -39,9 +39,9 @@ entities:
         rotation: [ 0, 0, 0 ]
         scale: [ 1, 1, 1 ]
       model:
-        mesh: 171166596565594018
-        material: 349217341258819725
+        mesh: 164196080210585860
+        material: 320707979892366973
         castsShadows: true
         receiveShadows: true
       behavior:
-        script: C:\Users\conta\Code\SpaceGame\Game\Scripts\SpinMonke.lua
+        script: 455682761983124279

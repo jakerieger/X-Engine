@@ -6,11 +6,10 @@
 
 #include "Common/Filesystem.hpp"
 #include "ProjectDescriptor.hpp"
-#include "XPak.hpp"
-
-#include <CLI/CLI.hpp>
-
 #include "AssetGenerator.hpp"
+#include "XPak.hpp"
+#include <ranges>
+#include <CLI/CLI.hpp>
 
 using namespace x;
 using namespace x::Filesystem;
@@ -30,6 +29,10 @@ struct GenAssetArgs {
     str mAssetType;
 };
 
+struct DumpArgs {
+    str mPakFile;
+};
+
 int main(int argc, char* argv[]) {
     CLI::App app {"XPak CLI"};
 
@@ -47,6 +50,10 @@ int main(int argc, char* argv[]) {
     GenAssetArgs genArgs;
     generate->add_option("asset_file", genArgs.mAssetFile, "Asset source file")->required(true);
     generate->add_option("-t,--type", genArgs.mAssetType, "Asset type (texture, mesh, material, etc.)")->required(true);
+
+    auto* dumpTable = app.add_subcommand("dump", "Dumppak file table contents");
+    DumpArgs dumpArgs;
+    dumpTable->add_option("pak_file", dumpArgs.mPakFile, "Pak file to dump")->required(true);
 
     app.require_subcommand(1);
 
@@ -86,11 +93,7 @@ int main(int argc, char* argv[]) {
             return EXIT_FAILURE;
         }
 
-        auto pakBytes = FileReader::ReadAllBytes(pakFile);
-        if (pakBytes.size() == 0) { std::cerr << "Read zero bytes from pak file" << std::endl; }
-
-        // TODO: Make a variation of this function that just takes the file path. This is annoying.
-        auto assetTable = XPak::ReadPakTable(pakBytes);
+        auto assetTable = XPak::ReadPakTable(pakFile);
         if (assetTable.size() == 0) {
             std::cerr << "Could not read pak file" << std::endl;
             return EXIT_FAILURE;
@@ -134,6 +137,8 @@ int main(int argc, char* argv[]) {
             assetType = kAssetType_Material;
         } else if (genArgs.mAssetType == "scene") {
             assetType = kAssetType_Scene;
+        } else if (genArgs.mAssetType == "script") {
+            assetType = kAssetType_Script;
         }
 
         if (assetType == kAssetType_Invalid) {
@@ -144,6 +149,24 @@ int main(int argc, char* argv[]) {
         if (!AssetGenerator::GenerateAsset(sourceFile, assetType)) {
             std::cerr << "Could not generate asset" << std::endl;
             return EXIT_FAILURE;
+        }
+    }
+
+    else if (dumpTable->parsed()) {
+        auto pakFile = Path(dumpArgs.mPakFile);
+        if (!pakFile.Exists()) {
+            std::cerr << "Could not open pak file" << std::endl;
+            return EXIT_FAILURE;
+        }
+
+        auto assetTable = XPak::ReadPakTable(pakFile);
+        if (assetTable.size() == 0) {
+            std::cerr << "Could not read pak file" << std::endl;
+            return EXIT_FAILURE;
+        }
+
+        for (const auto& asset : assetTable | std::views::values) {
+            std::cout << asset.ToString() << std::endl;
         }
     }
 }

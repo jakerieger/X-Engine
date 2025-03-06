@@ -17,6 +17,7 @@ namespace x {
     static constexpr AssetType kAssetType_Audio    = 3;
     static constexpr AssetType kAssetType_Material = 4;
     static constexpr AssetType kAssetType_Scene    = 5;
+    static constexpr AssetType kAssetType_Script   = 6;
 
     struct AssetDescriptor {
         u64 mId;
@@ -69,6 +70,8 @@ namespace x {
                     return "material";
                 case kAssetType_Scene:
                     return "scene";
+                case kAssetType_Script:
+                    return "script";
                 default:
                     return "invalid";
             }

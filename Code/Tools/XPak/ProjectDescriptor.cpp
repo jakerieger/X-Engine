@@ -4,4 +4,25 @@
 
 #include "ProjectDescriptor.hpp"
 
-namespace x {}  // namespace x
+namespace x {
+    bool ProjectDescriptor::FromFile(const str& filename) {
+        YAML::Node root         = YAML::LoadFile(filename);
+        const auto& projectNode = root["project"];
+        if (!projectNode.IsDefined()) { return false; }
+
+        mName          = projectNode["name"].as<str>();
+        mEngineVersion = projectNode["engineVersion"].as<f32>();
+
+        const auto projectDir = Filesystem::Path(filename).Parent();
+
+        // Get directories relative to the project directory
+        // .xproj file should sit at root of file structure
+        mContentDirectory = projectDir.Join(projectNode["contentDirectory"].as<str>()).Str();
+
+        return true;
+    }
+
+    std::string ProjectDescriptor::ToString() const {
+        return std::format("Name: {}\nEngine Version: {}\nContent: {}\n", mName, mEngineVersion, mContentDirectory);
+    }
+}  // namespace x
