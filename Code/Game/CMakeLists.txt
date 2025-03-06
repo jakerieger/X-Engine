@@ -21,7 +21,11 @@ if (USE_PAK_FILE)
     )
 
     target_compile_definitions(x PUBLIC ${PAK_DEFS})
+else ()
+    include(${CMAKE_CURRENT_SOURCE_DIR}/CopyGameContent.cmake)
 endif ()
+
+message("-- Using pak file: ${USE_PAK_FILE}")
 
 target_link_libraries(SpaceGame PRIVATE x)
 target_compile_definitions(SpaceGame PRIVATE ${WINDOWS_COMPILE_DEFS} LUA_JIT)
