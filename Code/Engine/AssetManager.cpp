@@ -61,8 +61,8 @@ namespace x {
 
         mAssets = XPak::ReadPakTable(pakFile);
 #else
-        auto rootDir    = Path::Current();
-        auto contentDir = rootDir / "Content";
+        const auto rootDir    = Path::Current();
+        const auto contentDir = rootDir / "Content";
         if (!contentDir.Exists()) {
             X_LOG_ERROR("AssetManager::LoadAssets - Content directory not Found");
             return false;
