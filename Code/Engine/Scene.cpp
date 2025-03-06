@@ -62,13 +62,13 @@ namespace x {
             }
 
             if (entity.behavior.has_value()) {
-                auto& behavior          = entity.behavior.value();
-                auto& behaviorComponent = mState.AddComponent<BehaviorComponent>(newEntity);
-                behaviorComponent.LoadFromFile(behavior.script);
+                auto& behavior            = entity.behavior.value();
+                auto& behaviorComponent   = mState.AddComponent<BehaviorComponent>(newEntity);
+                const auto scriptBytecode = AssetManager::GetAssetData(behavior.scriptId);
+                if (!scriptBytecode.has_value()) { X_LOG_FATAL("Failed to load script bytecode") }
 
-                const auto loadResult =
-                  mScriptEngine.LoadScript(behaviorComponent.GetSource(), behaviorComponent.GetId());
-                if (!loadResult) { X_LOG_FATAL("Failed to load behavior script"); }
+                behaviorComponent.Load(behavior.scriptId);
+                if (!mScriptEngine.LoadScript(*scriptBytecode, entity.name)) { X_LOG_FATAL("Failed to load script"); }
             }
 
             mEntities[entity.name] = newEntity;
@@ -105,7 +105,7 @@ namespace x {
             auto* transformComponent      = mState.GetComponentMutable<TransformComponent>(entityId);
             if (behaviorComponent) {
                 BehaviorEntity entity(name, transformComponent);
-                mScriptEngine.CallAwakeBehavior(behaviorComponent->GetId(), entity);
+                mScriptEngine.CallAwakeBehavior(name, entity);
             }
         }
     }
@@ -130,7 +130,7 @@ namespace x {
             auto* transformComponent      = mState.GetComponentMutable<TransformComponent>(entityId);
             if (behaviorComponent) {
                 BehaviorEntity entity(name, transformComponent);
-                mScriptEngine.CallUpdateBehavior(behaviorComponent->GetId(), deltaTime, entity);
+                mScriptEngine.CallUpdateBehavior(name, deltaTime, entity);
             }
 
             if (transformComponent) {
@@ -147,7 +147,7 @@ namespace x {
             auto* transformComponent      = mState.GetComponentMutable<TransformComponent>(entityId);
             if (behaviorComponent) {
                 BehaviorEntity entity(name, transformComponent);
-                mScriptEngine.CallDestroyedBehavior(behaviorComponent->GetId(), entity);
+                mScriptEngine.CallDestroyedBehavior(name, entity);
             }
         }
     }

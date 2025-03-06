@@ -78,7 +78,65 @@ namespace x {
                 }
 
                 return true;
-            } catch (const sol::error&) { return false; }
+            } catch (const sol::error&) {
+                X_LOG_ERROR("Failed to load script: %s", scriptId.c_str());
+                return false;
+            }
+        }
+
+        bool LoadScript(const vector<u8>& bytecode, const str& scriptId, const ScriptType type = ScriptType::Behavior) {
+            try {
+                auto env = sol::environment(mLua, sol::create, mLua.globals());
+
+                struct ReaderState {
+                    const vector<u8>* bytecode {nullptr};
+                    size_t position {0};
+                };
+
+                ReaderState state;
+                state.bytecode = &bytecode;
+
+                auto reader = [](lua_State* L, void* data, size_t* size) -> const char* {
+                    ReaderState* state = CAST<ReaderState*>(data);
+                    if (state->position >= state->bytecode->size()) {
+                        *size = 0;
+                        return nullptr;
+                    }
+
+                    *size              = state->bytecode->size() - state->position;
+                    const char* result = RCAST<const char*>(state->bytecode->data() + state->position);
+                    state->position    = state->bytecode->size();
+                    return result;
+                };
+
+                sol::load_result loadedChunk = mLua.load(reader, &state, scriptId.c_str(), sol::load_mode::binary);
+                if (!loadedChunk.valid()) {
+                    sol::error err = loadedChunk;
+                    return false;
+                }
+
+                auto result = loadedChunk(env);
+                if (!result.valid()) {
+                    sol::error err = result;
+                    return false;
+                }
+
+                if (type == ScriptType::Behavior) {
+                    sol::protected_function awakeFunc     = env["onAwake"];
+                    sol::protected_function updateFunc    = env["onUpdate"];
+                    sol::protected_function destroyedFunc = env["onDestroyed"];
+
+                    mBehaviorContexts[scriptId] = {std::move(env),
+                                                   std::move(awakeFunc),
+                                                   std::move(updateFunc),
+                                                   std::move(destroyedFunc)};
+                }
+
+                return true;
+            } catch (const sol::error&) {
+                X_LOG_ERROR("Failed to load script: %s", scriptId.c_str());
+                return false;
+            }
         }
 
         void CallAwakeBehavior(const str& scriptId, const BehaviorEntity& entity) {

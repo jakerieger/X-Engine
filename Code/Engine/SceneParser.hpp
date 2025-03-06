@@ -49,7 +49,7 @@ namespace x {
     };
 
     struct BehaviorDescriptor {
-        str script;
+        u64 scriptId;
     };
 
     struct EntityDescriptor {

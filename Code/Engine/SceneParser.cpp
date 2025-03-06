@@ -84,7 +84,7 @@ namespace x {
             YAML::Node behaviorNode = componentsNode["behavior"];
             if (behaviorNode.IsDefined()) {
                 BehaviorDescriptor behaviorDescriptor {};
-                behaviorDescriptor.script = behaviorNode["script"].as<str>();
+                behaviorDescriptor.scriptId = behaviorNode["script"].as<u64>();
 
                 entityDescriptor.behavior = behaviorDescriptor;
             }
