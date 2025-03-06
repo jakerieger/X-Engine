@@ -1,0 +1,9 @@
+name: Floor
+baseMaterial: PBR
+properties: []
+textures:
+  - name: albedo
+    asset: 109667591169339699
+  - name: normal
+    asset: 91695529966222393
+    

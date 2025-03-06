@@ -1,0 +1,12 @@
+name: Monke
+baseMaterial: PBR
+properties: []
+textures:
+  - name: albedo
+    asset: 103058959529101558
+  - name: metallic
+    asset: 88870917914738048
+  - name: roughness
+    asset: 104611178539181035
+  - name: normal
+    asset: 104198846860298202
