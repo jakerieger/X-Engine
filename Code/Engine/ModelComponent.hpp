@@ -4,13 +4,12 @@
 #include "Math.hpp"
 #include "Model.hpp"
 #include "Material.hpp"
-#include "PBRMaterial.hpp"
 #include "ResourceManager.hpp"
 
 namespace x {
     class ModelComponent {
         ResourceHandle<Model> mModelHandle;
-        shared_ptr<PBRMaterial> mMaterial;
+        shared_ptr<IMaterial> mMaterial;
         bool mCastsShadows = true;
 
     public:
@@ -21,7 +20,7 @@ namespace x {
             return *this;
         }
 
-        ModelComponent& SetMaterial(const shared_ptr<PBRMaterial>& material) {
+        ModelComponent& SetMaterial(const shared_ptr<IMaterial>& material) {
             mMaterial = material;
             return *this;
         }
