@@ -49,7 +49,7 @@ namespace x {
 #endif
     }
 
-    bool AssetManager::LoadAssets() {
+    bool AssetManager::LoadAssets(const Filesystem::Path& workingDir) {
         using namespace x::Filesystem;
 
 #ifdef X_USE_PAK_FILE
@@ -61,8 +61,7 @@ namespace x {
 
         mAssets = XPak::ReadPakTable(pakFile);
 #else
-        const auto rootDir    = Path::Current();
-        const auto contentDir = rootDir / "Content";
+        const auto contentDir = workingDir / "Content";
         if (!contentDir.Exists()) {
             X_LOG_ERROR("AssetManager::LoadAssets - Content directory not Found");
             return false;

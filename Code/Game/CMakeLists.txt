@@ -12,7 +12,7 @@ add_executable(SpaceGame
     ${GAME_DIR}/main.cpp
 )
 
-option(USE_PAK_FILE "Enable the use of pak files" ON)
+option(USE_PAK_FILE "Enable the use of pak files" OFF)
 
 if (USE_PAK_FILE)
     set(PAK_DEFS

@@ -34,62 +34,7 @@ namespace x::Editor {
         UpdateTransformProperties(selectedEntity, state);
     }
 
-    void PropertiesPanel::BehaviorProperties(EntityId selectedEntity, SceneState& state) {
-        auto* behaviorComponent = state.GetComponentMutable<BehaviorComponent>(selectedEntity);
-        if (behaviorComponent) {
-            ImGui::Text("Behavior");
-            ImGui::Text("Script: ");
-            ImGui::SameLine();
-            ImGui::Text("%s", behaviorComponent->GetId().substr(0, 16).c_str());
-            ImGui::Spacing();
-            if (ImGui::Button("Edit")) {
-                auto lang = TextEditor::LanguageDefinition::Lua();
-                mTextEditor.SetLanguageDefinition(lang);
-                mTextEditor.SetText(behaviorComponent->GetSource());
-                ImGui::OpenPopup("Script Editor");
-            }
-        }
-
-        bool isOpen = true;
-        ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_Once);
-        if (ImGui::BeginPopupModal("Script Editor",
-                                   &isOpen,
-                                   ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoCollapse |
-                                     ImGuiWindowFlags_NoSavedSettings)) {
-            if (ImGui::BeginMenuBar()) {
-                if (ImGui::BeginMenu("File")) {
-                    if (ImGui::MenuItem("Save")) {
-                        // Handle saving
-                    }
-                    if (ImGui::MenuItem("Close")) { ImGui::CloseCurrentPopup(); }
-                    ImGui::EndMenu();
-                }
-                ImGui::EndMenuBar();
-            }
-
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
-            ImGui::PushFont(mEditor.mFonts["mono"]);
-            mTextEditor.Render("LuaEditor",
-                               ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - 30),
-                               true);
-            ImGui::PopFont();
-            ImGui::PopStyleVar();
-
-            if (ImGui::Button("Save")) {
-                auto updatedSource = mTextEditor.GetText();
-                if (behaviorComponent && updatedSource != behaviorComponent->GetSource()) {
-                    behaviorComponent->UpdateSource(updatedSource);
-                    mEditor.mGame.GetScriptEngine().LoadScript(updatedSource, behaviorComponent->GetId());
-                }
-                ImGui::CloseCurrentPopup();
-            }
-
-            ImGui::SameLine();
-            if (ImGui::Button("Cancel")) { ImGui::CloseCurrentPopup(); }
-
-            ImGui::EndPopup();
-        }
-    }
+    void PropertiesPanel::BehaviorProperties(EntityId selectedEntity, SceneState& state) {}
 
     void PropertiesPanel::TransformProperties(EntityId selectedEntity, SceneState& state) {
         auto* transformComponent = state.GetComponentMutable<TransformComponent>(selectedEntity);

@@ -97,7 +97,7 @@ namespace x {
             return false;
         }
 
-        ::ShowWindow(mHwnd, SW_SHOWDEFAULT);
+        ::ShowWindow(mHwnd, mOpenMaximized ? SW_SHOWMAXIMIZED : SW_SHOWDEFAULT);
         ::UpdateWindow(mHwnd);
 
         // Initialize DirectX context and window viewport (final render output)

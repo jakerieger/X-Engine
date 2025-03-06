@@ -25,7 +25,9 @@ namespace x {
         explicit Game(RenderContext& context);
         ~Game();
 
-        void Initialize(Window* window, Viewport* viewport);
+        void Initialize(Window* window,
+                        Viewport* viewport,
+                        const Filesystem::Path& workingDir = Filesystem::Path::Current());
         void Shutdown();
         void Update(bool paused = false);
         void RenderFrame();

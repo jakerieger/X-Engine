@@ -28,7 +28,7 @@ namespace x {
 
     private:
         inline static bool mLoaded {false};
-        static bool LoadAssets();
+        static bool LoadAssets(const Filesystem::Path& workingDir = Filesystem::Path::Current());
         static vector<AssetId> GetScenes();
 
 #ifdef X_USE_PAK_FILE

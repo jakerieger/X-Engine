@@ -38,6 +38,10 @@ namespace x {
             return mHwnd;
         }
 
+        void SetOpenMaximized(bool maximized) {
+            mOpenMaximized = maximized;
+        }
+
     protected:
         HINSTANCE mInstance;
         HWND mHwnd;
@@ -49,7 +53,8 @@ namespace x {
         virtual LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam);
 
     private:
-        bool mFocused = false;
+        bool mFocused {false};
+        bool mOpenMaximized {false};
 
         bool Initialize();
         void Shutdown();

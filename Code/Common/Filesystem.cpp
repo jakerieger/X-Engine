@@ -359,7 +359,9 @@ namespace x::Filesystem {
     }
 
     str Path::Filename() const {
-        size_t pos = path.rfind(PATH_SEPARATOR);
+        size_t pos = path.rfind('\\');
+        if (pos != str::npos) { return path.substr(pos + 1); }
+        pos = path.rfind('/');
         if (pos != str::npos) { return path.substr(pos + 1); }
         return path;
     }

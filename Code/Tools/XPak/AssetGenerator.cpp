@@ -34,8 +34,15 @@ namespace x {
         out << YAML::Key << "source" << YAML::Value << assetFile.Filename();
         out << YAML::EndMap;
 
-        const auto writeResult =
-          Filesystem::FileWriter::WriteAllText(assetFile.ReplaceExtension("xasset"), out.c_str());
+        const auto descriptorFile = Filesystem::Path(assetFile.Str() + ".xasset");
+        const auto writeResult    = Filesystem::FileWriter::WriteAllText(descriptorFile, out.c_str());
+
+        if (writeResult) {
+            printf("Generated Asset:\n  ID: %llu\n  Source: %s\n\n", id, assetFile.Filename().c_str());
+        } else {
+            printf("Failed to generate Asset:\n  ID: %llu\n\n", id);
+        }
+
         return writeResult;
     }
 }  // namespace x

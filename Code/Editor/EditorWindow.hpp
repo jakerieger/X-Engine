@@ -9,19 +9,21 @@
 #include "Common/Types.hpp"
 #include "Engine/Game.hpp"
 #include "Engine/Window.hpp"
+#include "XPak/ProjectDescriptor.hpp"
 
 namespace x::Editor {
     struct EditorFiles {
         vector<Filesystem::Path> mAssets;
-        vector<Filesystem::Path> mMaterials;
-        vector<Filesystem::Path> mScripts;
+        unordered_map<AssetId, AssetDescriptor> mAssetDescriptors;
     };
 
     class EditorWindow final : public Window {
     public:
         EditorWindow()
-            : Window("XEditor", 1600, 900), mSceneViewport(mContext), mTextureManager(mContext), mGame(mContext),
-              mPropertiesPanel(*this) {}
+            : Window("XEditor", 1600, 900), mCurrentProject(), mSceneViewport(mContext), mTextureManager(mContext),
+              mGame(mContext), mPropertiesPanel(*this) {
+            SetOpenMaximized(true);
+        }
 
         bool LoadTextures();
         void OnInitialize() override;
@@ -44,6 +46,7 @@ namespace x::Editor {
 
     private:
         EditorFiles mEditorFiles;
+        ProjectDescriptor mCurrentProject;
 
         bool mLayoutSetup {false};
         Viewport mSceneViewport;

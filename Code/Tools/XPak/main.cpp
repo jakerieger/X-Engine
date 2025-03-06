@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
     auto* generate = app.add_subcommand("generate", "Generates asset descriptor file for given source asset");
     GenAssetArgs genArgs;
     generate->add_option("asset_file", genArgs.mAssetFile, "Asset source file")->required(true);
-    generate->add_option("-t,--type", genArgs.mAssetType, "Asset type (texture, mesh, material, etc.)")->required(true);
+    generate->add_option("-t,--type", genArgs.mAssetType, "Asset type (texture, mesh, material, etc.)");
 
     auto* dumpTable = app.add_subcommand("dump", "Dumppak file table contents");
     DumpArgs dumpArgs;
@@ -127,7 +127,16 @@ int main(int argc, char* argv[]) {
         }
 
         AssetType assetType = kAssetType_Invalid;
-        if (genArgs.mAssetType == "texture") {
+        if (genArgs.mAssetType.empty()) {
+            // Attempt to detect the type based on the extension
+            if (sourceFile.Extension() == "dds") assetType = kAssetType_Texture;
+            else if (sourceFile.Extension() == "glb") assetType = kAssetType_Mesh;
+            else if (sourceFile.Extension() == "lua") assetType = kAssetType_Script;
+            else if (sourceFile.Extension() == "material") assetType = kAssetType_Material;
+            else if (sourceFile.Extension() == "scene") assetType = kAssetType_Scene;
+            else if (sourceFile.Extension() == "wav") assetType = kAssetType_Audio;
+
+        } else if (genArgs.mAssetType == "texture") {
             assetType = kAssetType_Texture;
         } else if (genArgs.mAssetType == "mesh") {
             assetType = kAssetType_Mesh;
@@ -142,8 +151,8 @@ int main(int argc, char* argv[]) {
         }
 
         if (assetType == kAssetType_Invalid) {
-            std::cerr << "Could not generate asset type" << std::endl;
-            return EXIT_FAILURE;
+            // Just ignore this file
+            return 0;
         }
 
         if (!AssetGenerator::GenerateAsset(sourceFile, assetType)) {

@@ -15,6 +15,7 @@ namespace x {
         str mName;
         f32 mEngineVersion;
         str mContentDirectory;
+        bool mLoaded {false};
 
         bool FromFile(const str& filename);
         std::string ToString() const;

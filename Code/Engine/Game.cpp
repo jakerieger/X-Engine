@@ -170,12 +170,12 @@ namespace x {
         Shutdown();
     }
 
-    void Game::Initialize(Window* window, Viewport* viewport) {
+    void Game::Initialize(Window* window, Viewport* viewport, const Filesystem::Path& workingDir) {
         mWindow = window;
 
         // These need to be loaded first before the rest of the engine can use them!
         if (!ShaderManager::LoadShaders(mRenderContext)) { X_LOG_FATAL("Failed to load shaders!"); }
-        if (!AssetManager::LoadAssets()) { X_LOG_FATAL("Failed to load assets"); }
+        if (!AssetManager::LoadAssets(workingDir)) { X_LOG_FATAL("Failed to load assets"); }
 
         // Find and load all of our scene descriptors
         const auto sceneIds = AssetManager::GetScenes();
