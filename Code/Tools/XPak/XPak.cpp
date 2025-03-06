@@ -4,63 +4,14 @@
 
 #include "XPak.hpp"
 #include "Compression.hpp"
+#include "ScriptCompiler.hpp"
 
 #include <iostream>
 #include <numeric>
 #include <brotli/encode.h>
 
-extern "C" {
-#include <lua.h>
-#include <lualib.h>
-#include <lauxlib.h>
-#include <luajit.h>
-}
-
 namespace x {
     using namespace Filesystem;
-
-#pragma region Lua Bytecode Generation
-    typedef struct {
-        vector<u8>* bytecode;
-    } BytecodeWriterState;
-
-    static int BytecodeWriter(lua_State* L, const void* p, size_t size, void* ud) {
-        BytecodeWriterState* state = CAST<BytecodeWriterState*>(ud);
-        const u8* data             = CAST<const u8*>(p);
-        state->bytecode->insert(state->bytecode->end(), data, data + size);
-        return 0;
-    }
-
-    vector<u8> CompileLuaToBytecode(const str& script, const str& chunkName) {
-        vector<u8> bytecode;
-
-        lua_State* L = luaL_newstate();
-        if (!L) {
-            std::cerr << "Failed to create Lua state" << std::endl;
-            return bytecode;
-        }
-
-        int loadResult = luaL_loadbuffer(L, script.c_str(), script.size(), chunkName.c_str());
-        if (loadResult != 0) {
-            std::cerr << "Failed to compile Lua script: " << lua_tostring(L, -1) << std::endl;
-            lua_close(L);
-            return bytecode;
-        }
-
-        BytecodeWriterState writerState;
-        writerState.bytecode = &bytecode;
-
-        int dumpResult = lua_dump(L, BytecodeWriter, &writerState);
-
-        if (dumpResult != 0) {
-            std::cerr << "Failed to dump Lua bytecode: " << dumpResult << std::endl;
-            bytecode.clear();
-        }
-
-        lua_close(L);
-        return bytecode;
-    }
-#pragma endregion
 
     static void ProcessAssetDirectory(const Filesystem::Path& directory,
                                       vector<XPakTableEntry>& tableEntries,
@@ -105,7 +56,7 @@ namespace x {
                     } else if (assetType == kAssetType_Script) {
                         // Scripts can get compiled to bytecode
                         const str scriptSource    = FileReader::ReadAllText(filename);
-                        vector<u8> scriptBytecode = CompileLuaToBytecode(scriptSource, filename.Str());
+                        vector<u8> scriptBytecode = ScriptCompiler::Compile(scriptSource, filename.Str());
                         if (scriptBytecode.size() == 0) {
                             printf("Failed to compile lua bytecode for script '%s'\n", filename.CStr());
                         }

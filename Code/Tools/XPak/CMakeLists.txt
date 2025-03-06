@@ -15,6 +15,8 @@ add_library(xpak STATIC
     ${XPAK_DIR}/Compression.cpp
     ${XPAK_DIR}/AssetGenerator.hpp
     ${XPAK_DIR}/AssetGenerator.cpp
+    ${XPAK_DIR}/ScriptCompiler.hpp
+    ${XPAK_DIR}/ScriptCompiler.cpp
 )
 
 add_executable(xpakc

@@ -5,6 +5,10 @@
 #include "AssetManager.hpp"
 #include <ranges>
 
+#ifndef X_USE_PAK_FILE
+    #include "XPak/ScriptCompiler.hpp"
+#endif
+
 namespace x {
     optional<vector<u8>> AssetManager::GetAssetData(AssetId id) {
         using namespace x::Filesystem;
@@ -28,6 +32,15 @@ namespace x {
             const auto& [id, assetFile] = *it;
             const auto fullPath         = Path::Current() / "Content" / assetFile.Str();
             if (!fullPath.Exists()) { X_LOG_ERROR("AssetManager::GetAssetData - Not Found"); }
+
+            const auto type = AssetDescriptor::GetTypeFromId(id);
+            if (type == kAssetType_Script) {
+                // Compile bytecode and return that
+                const auto scriptSource = FileReader::ReadAllText(fullPath);
+                vector<u8> bytecode     = ScriptCompiler::Compile(scriptSource, fullPath.Str());
+                return bytecode;
+            }
+
             return FileReader::ReadAllBytes(fullPath);
         } else {
             X_LOG_ERROR("AssetManager::GetAssetData - Not Found");
