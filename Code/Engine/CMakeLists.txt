@@ -93,6 +93,8 @@ add_library(x STATIC
     ${ENGINE_DIR}/Viewport.cpp
     ${ENGINE_DIR}/Viewport.hpp
     ${ENGINE_DIR}/Volatile.hpp
+    ${ENGINE_DIR}/WaterMaterial.cpp
+    ${ENGINE_DIR}/WaterMaterial.hpp
     ${ENGINE_DIR}/Window.cpp
     ${ENGINE_DIR}/Window.hpp
 )

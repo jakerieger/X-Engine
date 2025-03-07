@@ -11,6 +11,8 @@
 #include <ScreenTexture_PS.h>
 #include <ShadowPass_VS.h>
 #include <ShadowPass_PS.h>
+#include <Water_VS.h>
+#include <Water_PS.h>
 #pragma endregion
 
 namespace x {
@@ -59,6 +61,7 @@ namespace x {
             X_LOG_ERROR("Failed to create OpaquePBR shader")
             return false;
         }
+        X_LOG_INFO("Loaded OpaquePBR shader");
 
         if (!CreateGraphicsShader(context,
                                   kScreenQuadShaderId,
@@ -67,6 +70,7 @@ namespace x {
             X_LOG_ERROR("Failed to create ScreenQuad shader")
             return false;
         }
+        X_LOG_INFO("Loaded ScreenQuad shader");
 
         if (!CreateGraphicsShader(context,
                                   kShadowMapShaderId,
@@ -75,7 +79,18 @@ namespace x {
             X_LOG_ERROR("Failed to create ShadowMap shader")
             return false;
         }
+        X_LOG_INFO("Loaded ShadowMap shader");
 
+        if (!CreateGraphicsShader(context,
+                                  kWaterShaderId,
+                                  X_ARRAY_W_SIZE(kWater_VSBytes),
+                                  X_ARRAY_W_SIZE(kWater_PSBytes))) {
+            X_LOG_ERROR("Failed to create Water shader")
+            return false;
+        }
+        X_LOG_INFO("Loaded Water shader");
+
+        X_LOG_INFO("All shaders loaded");
         return true;
     }
 }  // namespace x

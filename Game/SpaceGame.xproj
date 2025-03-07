@@ -2,3 +2,4 @@ project:
   name: SpaceGame
   engineVersion: 1.0
   contentDirectory: Content
+  startupScene: Water

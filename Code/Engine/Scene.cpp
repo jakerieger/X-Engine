@@ -4,6 +4,8 @@
 #include "SceneParser.hpp"
 #include <optional>
 
+#include "WaterMaterial.hpp"
+
 namespace x {
     Scene::Scene(RenderContext& context, ScriptEngine& scriptEngine)
         : mResources(context, Memory::BYTES_128MB), mState(), mInitialState(), mContext(context),
@@ -77,7 +79,7 @@ namespace x {
         mInitialState = mState;  // Cache init state so scene can be reset
 
         Awake();
-        X_LOG_INFO("Loaded scene: '%s'", descriptor.mName)
+        X_LOG_INFO("Loaded scene: '%s'", descriptor.mName.c_str())
     }
 
     void Scene::Unload() {
@@ -200,6 +202,13 @@ namespace x {
                 if (texture.name == "roughness") { mat->SetRoughnessMap(*resource); }
                 if (texture.name == "normal") { mat->SetNormalMap(*resource); }
             }
+        }
+
+        else if (material.baseMaterial == "Water") {
+            const auto mat = make_shared<WaterMaterial>(mContext);
+            modelComponent.SetMaterial(mat);
+
+            // Process material properties
         }
     }
 }  // namespace x

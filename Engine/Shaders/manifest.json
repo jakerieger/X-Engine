@@ -23,6 +23,10 @@
             {
                 "name": "Outline",
                 "source": "ViewportOutline.hlsl"
+            },
+            {
+                "name": "Water",
+                "source": "Water.hlsl"
             }
         ],
         "compute": [

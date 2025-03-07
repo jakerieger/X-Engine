@@ -76,11 +76,13 @@ namespace x {
                     return false;
                 }
                 mAssets[descriptor.mId] = Path(descriptor.mFilename);
+                X_LOG_INFO("Loaded asset '%s'", descriptor.mFilename.c_str());
             }
         }
 #endif
 
         mLoaded = true;
+        X_LOG_INFO("AssetManager::LoadAssets - Loaded");
         return true;
     }
 
