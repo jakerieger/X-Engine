@@ -175,7 +175,7 @@ namespace x::Editor {
                 ImGui::Separator();
                 if (ImGui::MenuItem("New Scene", "Ctrl+N")) { NewScene(); }
                 if (ImGui::MenuItem("Open Scene", "Ctrl+O")) {
-                    const char* filter = "Scene (*.xscn)|*.xscn|";
+                    const char* filter = "Scene (*.scene)|*.scene|";
                     char filename[MAX_PATH];
                     if (OpenFileDialog(mHwnd, nullptr, filter, "Open Scene File", filename, MAX_PATH)) {
                         OpenScene(filename);
