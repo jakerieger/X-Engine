@@ -209,3 +209,6 @@ inline Logger& GetLogger() {
 
 /// @brief Fatal log level will also abort program after logging entry (with `std::abort`)!
 #define X_LOG_FATAL(fmt, ...) GetLogger().Log(X_LOG_SEVERITY_FATAL, fmt, ##__VA_ARGS__);
+
+// Stupid hack I really need to work around
+inline static float gGameTime {0};

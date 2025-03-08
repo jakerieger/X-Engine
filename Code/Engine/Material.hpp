@@ -131,7 +131,6 @@ namespace x {
         virtual void Bind(const TransformMatrices& transforms, const LightState& lights, const Float3 eyePos) const {}
         virtual void Bind(const TransformMatrices& transforms, const Float3 eyePos) const {}
         virtual void Bind() const {}
-
         virtual void Unbind() const {}
 
     protected:

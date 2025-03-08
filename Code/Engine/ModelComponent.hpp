@@ -30,6 +30,15 @@ namespace x {
             return *this;
         }
 
+        template<typename T>
+        T* GetMaterialAs() {
+            return DCAST<T*>(mMaterial.get());
+        }
+
+        shared_ptr<IMaterial> GetMaterial() {
+            return mMaterial;
+        }
+
         void Draw(RenderContext& context,
                   const TransformMatrices& transforms,
                   const LightState& lights,

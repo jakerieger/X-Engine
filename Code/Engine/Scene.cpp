@@ -113,6 +113,9 @@ namespace x {
     }
 
     void Scene::Update(f32 deltaTime) {
+        static f32 sceneTime {0.f};
+        sceneTime += deltaTime;
+
         const auto& camera    = mState.GetMainCamera();
         const auto clipPlanes = camera.GetClipPlanes();
 
@@ -130,6 +133,8 @@ namespace x {
         for (const auto& [name, entityId] : mEntities) {
             const auto* behaviorComponent = mState.GetComponentMutable<BehaviorComponent>(entityId);
             auto* transformComponent      = mState.GetComponentMutable<TransformComponent>(entityId);
+            auto* modelComponent          = mState.GetComponentMutable<ModelComponent>(entityId);
+
             if (behaviorComponent) {
                 BehaviorEntity entity(name, transformComponent);
                 mScriptEngine.CallUpdateBehavior(name, deltaTime, entity);
@@ -139,6 +144,12 @@ namespace x {
                 // Instead of re-calculating matrices every frame, the Transform component uses lazy updating.
                 // This does nothing if no transform values have changed between frames.
                 transformComponent->Update();
+            }
+
+            if (modelComponent) {
+                // TODO: Figure out a way to like, not have to do this
+                auto* waterMaterial = modelComponent->GetMaterialAs<WaterMaterial>();
+                if (waterMaterial) { waterMaterial->SetWaveTime(sceneTime); }
             }
         }
     }

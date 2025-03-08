@@ -43,6 +43,7 @@ namespace x {
         ComPtr<ID3D11ShaderResourceView> mOutputSRV;
         ComPtr<ID3D11Texture2D> mSceneTexture;
         ComPtr<ID3D11SamplerState> mDepthSamplerState;
+        ComPtr<ID3D11BlendState> mBlendState;
 
     public:
         explicit LightPass(RenderContext& context) : mRenderContext(context) {}

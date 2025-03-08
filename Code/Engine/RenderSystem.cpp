@@ -168,6 +168,8 @@ namespace x {
 
 #pragma region LightingPass
     void LightPass::Initialize(u32 width, u32 height) {
+        auto* device = mRenderContext.GetDevice();
+
         D3D11_SAMPLER_DESC comparisonSamplerDesc {};
         comparisonSamplerDesc.Filter         = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
         comparisonSamplerDesc.AddressU       = D3D11_TEXTURE_ADDRESS_BORDER;
@@ -179,8 +181,24 @@ namespace x {
         comparisonSamplerDesc.BorderColor[3] = 1.0f;
         comparisonSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS;  // Key setting!
 
-        auto hr = mRenderContext.GetDevice()->CreateSamplerState(&comparisonSamplerDesc, &mDepthSamplerState);
+        auto hr = device->CreateSamplerState(&comparisonSamplerDesc, &mDepthSamplerState);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create sampler state for shadow pass");
+
+        D3D11_BLEND_DESC blendDesc       = {};
+        blendDesc.AlphaToCoverageEnable  = FALSE;
+        blendDesc.IndependentBlendEnable = FALSE;
+
+        blendDesc.RenderTarget[0].BlendEnable           = TRUE;
+        blendDesc.RenderTarget[0].SrcBlend              = D3D11_BLEND_SRC_ALPHA;
+        blendDesc.RenderTarget[0].DestBlend             = D3D11_BLEND_INV_SRC_ALPHA;
+        blendDesc.RenderTarget[0].BlendOp               = D3D11_BLEND_OP_ADD;
+        blendDesc.RenderTarget[0].SrcBlendAlpha         = D3D11_BLEND_ONE;
+        blendDesc.RenderTarget[0].DestBlendAlpha        = D3D11_BLEND_ZERO;
+        blendDesc.RenderTarget[0].BlendOpAlpha          = D3D11_BLEND_OP_ADD;
+        blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+        hr = device->CreateBlendState(&blendDesc, &mBlendState);
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create blend state for light pass");
 
         Resize(width, height);
     }
@@ -190,6 +208,7 @@ namespace x {
                                                               mRenderTargetView.GetAddressOf(),
                                                               mDepthStencilView.Get());
         mRenderContext.GetDeviceContext()->OMSetDepthStencilState(mDepthStencilState.Get(), 0);
+        mRenderContext.GetDeviceContext()->OMSetBlendState(mBlendState.Get(), nullptr, 0xFFFFFFFF);
 
         mRenderContext.GetDeviceContext()->ClearRenderTargetView(mRenderTargetView.Get(), clearColor);
         mRenderContext.GetDeviceContext()->ClearDepthStencilView(mDepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
@@ -209,6 +228,8 @@ namespace x {
         mOutputSRV.Reset();
         mSceneTexture.Reset();
 
+        auto* device = mRenderContext.GetDevice();
+
         D3D11_TEXTURE2D_DESC depthStencilDesc = {};
         depthStencilDesc.Width                = width;
         depthStencilDesc.Height               = height;
@@ -221,7 +242,7 @@ namespace x {
         depthStencilDesc.BindFlags            = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 
         ComPtr<ID3D11Texture2D> depthStencilTexture;
-        auto hr = mRenderContext.GetDevice()->CreateTexture2D(&depthStencilDesc, nullptr, &depthStencilTexture);
+        auto hr = device->CreateTexture2D(&depthStencilDesc, nullptr, &depthStencilTexture);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil Texture")
 
         // Create depth stencil view
@@ -230,19 +251,17 @@ namespace x {
         depthStencilViewDesc.ViewDimension                 = D3D11_DSV_DIMENSION_TEXTURE2D;
         depthStencilViewDesc.Texture2D.MipSlice            = 0;
 
-        hr = mRenderContext.GetDevice()->CreateDepthStencilView(depthStencilTexture.Get(),
-                                                                &depthStencilViewDesc,
-                                                                &mDepthStencilView);
+        hr = device->CreateDepthStencilView(depthStencilTexture.Get(), &depthStencilViewDesc, &mDepthStencilView);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil View")
 
         // Create depth stencil state
         D3D11_DEPTH_STENCIL_DESC depthStencilStateDesc = {};
         depthStencilStateDesc.DepthEnable              = TRUE;
-        depthStencilStateDesc.DepthWriteMask           = D3D11_DEPTH_WRITE_MASK_ALL;
-        depthStencilStateDesc.DepthFunc                = D3D11_COMPARISON_LESS;
-        depthStencilStateDesc.StencilEnable            = FALSE;
+        depthStencilStateDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;  // TODO: Change to ALL for opaque pass
+        depthStencilStateDesc.DepthFunc      = D3D11_COMPARISON_LESS;
+        depthStencilStateDesc.StencilEnable  = FALSE;
 
-        hr = mRenderContext.GetDevice()->CreateDepthStencilState(&depthStencilStateDesc, &mDepthStencilState);
+        hr = device->CreateDepthStencilState(&depthStencilStateDesc, &mDepthStencilState);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil State")
         // ==================================================================================================================//
         // ==================================================================================================================//
@@ -256,13 +275,13 @@ namespace x {
         sceneDesc.Usage            = D3D11_USAGE_DEFAULT;
         sceneDesc.BindFlags        = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
-        hr = mRenderContext.GetDevice()->CreateTexture2D(&sceneDesc, nullptr, &mSceneTexture);
+        hr = device->CreateTexture2D(&sceneDesc, nullptr, &mSceneTexture);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create scene texture")
 
-        hr = mRenderContext.GetDevice()->CreateRenderTargetView(mSceneTexture.Get(), nullptr, &mRenderTargetView);
+        hr = device->CreateRenderTargetView(mSceneTexture.Get(), nullptr, &mRenderTargetView);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create render target view.");
 
-        hr = mRenderContext.GetDevice()->CreateShaderResourceView(mSceneTexture.Get(), nullptr, &mOutputSRV);
+        hr = device->CreateShaderResourceView(mSceneTexture.Get(), nullptr, &mOutputSRV);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create shader resource view")
     }
 #pragma endregion
