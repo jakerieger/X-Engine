@@ -36,7 +36,7 @@ namespace x {
 
         X_NODISCARD Scene* GetActiveScene() const;
         X_NODISCARD bool SceneValid() const;
-        X_NODISCARD PostProcessSystem* GetPostProcess() const;
+        X_NODISCARD PostProcessPass* GetPostProcess() const;
         X_NODISCARD ScriptEngine& GetScriptEngine();
         X_NODISCARD RenderSystem* GetRenderSystem() const;
 

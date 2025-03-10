@@ -3,7 +3,6 @@
 #include "ComputeEffect.hpp"
 #include "D3D.hpp"
 #include "Common/Types.hpp"
-#include "Volatile.hpp"
 
 namespace x {
     class RenderContext;
@@ -12,7 +11,7 @@ namespace x {
         ComPtr<ID3D11Texture2D> texture;
         ComPtr<ID3D11UnorderedAccessView> uav;
         ComPtr<ID3D11ShaderResourceView> srv;
-
+    
         void Reset() {
             texture.Reset();
             uav.Reset();
@@ -20,7 +19,7 @@ namespace x {
         }
     };
 
-    class PostProcessSystem final {
+    class PostProcessPass {
         RenderContext& mRenderer;
         VertexShader mFullscreenVS;
         PixelShader mFullscreenPS;
@@ -33,7 +32,7 @@ namespace x {
         void RenderToScreen(ID3D11ShaderResourceView* input, ID3D11RenderTargetView* output);
 
     public:
-        explicit PostProcessSystem(RenderContext& renderer)
+        explicit PostProcessPass(RenderContext& renderer)
             : mRenderer(renderer), mFullscreenVS(renderer), mFullscreenPS(renderer) {}
 
         bool Initialize(u32 width, u32 height);

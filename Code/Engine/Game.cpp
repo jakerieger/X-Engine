@@ -49,8 +49,7 @@ namespace x {
             Matrix world                  = XMMatrixIdentity();
             const auto transformComponent = state.GetComponent<TransformComponent>(entity);
             if (transformComponent) { world = transformComponent->GetTransformMatrix(); }
-            mRenderSystem->UpdateShadowPassParameters(state.GetLightState().Sun.lightViewProj,
-                                                      XMMatrixTranspose(world));
+            mRenderSystem->UpdateShadowParams(state.GetLightState().Sun.lightViewProj, XMMatrixTranspose(world));
 
             model.Draw(mRenderContext);
         }
@@ -91,22 +90,25 @@ namespace x {
         const auto& state = mActiveScene->GetState();
 
         {
+            if (mActiveScene->GetNumEntities() == 0) return;
+
+            ID3D11ShaderResourceView* shadowPassResult = nullptr;
+            ID3D11ShaderResourceView* lightPassResult  = nullptr;
+
             // Do our depth-only shadow pass first
             mRenderSystem->BeginShadowPass();
             RenderDepthOnly(state);
-            ID3D11ShaderResourceView* depthSRV = mRenderSystem->EndShadowPass();
+            mRenderSystem->EndShadowPass(shadowPassResult);
 
             // Do our fully lit pass using our previous depth-only pass as input for our shadow mapping shader
-            mRenderSystem->BeginLightPass(depthSRV);
-            if (mActiveScene->GetNumEntities() > 0) {
-                mActiveScene->DrawOpaque();
-                mActiveScene->DrawTransparent();
-            }
-            ID3D11ShaderResourceView* sceneSRV = mRenderSystem->EndLightPass();
+            mRenderSystem->BeginLightPass(lightPassResult);
+            mActiveScene->DrawOpaque();
+            mActiveScene->DrawTransparent();
+            mRenderSystem->EndLightPass(lightPassResult);
 
             // We can now pass our fully lit scene texture to the post processing pipeline to be processed and displayed
             // on screen
-            mRenderSystem->PostProcessPass(sceneSRV);
+            mRenderSystem->ExecutePostProcessPass(lightPassResult);
 
             // Draw debug UI last (on top of everything else)
             if (mDebugUIEnabled) {
@@ -302,7 +304,7 @@ namespace x {
         return true;
     }
 
-    PostProcessSystem* Game::GetPostProcess() const {
+    PostProcessPass* Game::GetPostProcess() const {
         return mRenderSystem->GetPostProcess();
     }
 

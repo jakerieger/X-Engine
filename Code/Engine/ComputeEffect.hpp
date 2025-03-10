@@ -7,7 +7,7 @@
 
 namespace x {
     class IComputeEffect {
-        friend class PostProcessSystem;
+        friend class PostProcessPass;
 
     public:
         explicit IComputeEffect(RenderContext& renderer) : mRenderer(renderer), mComputeShader(renderer) {}

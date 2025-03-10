@@ -1,4 +1,4 @@
-#include "PostProcessSystem.hpp"
+#include "PostProcessPass.hpp"
 #include "RenderContext.hpp"
 #include <algorithm>
 
@@ -6,7 +6,7 @@
 #include "ScreenTexture_PS.h"
 
 namespace x {
-    bool PostProcessSystem::Initialize(u32 width, u32 height) {
+    bool PostProcessPass::Initialize(u32 width, u32 height) {
         mWidth  = width;
         mHeight = height;
 
@@ -16,7 +16,7 @@ namespace x {
         return CreateIntermediateTargets();
     }
 
-    void PostProcessSystem::Resize(const u32 width, const u32 height) {
+    void PostProcessPass::Resize(const u32 width, const u32 height) {
         mWidth  = width;
         mHeight = height;
 
@@ -31,7 +31,7 @@ namespace x {
         }
     }
 
-    void PostProcessSystem::Execute(ID3D11ShaderResourceView* sceneInput, ID3D11RenderTargetView* finalOutput) {
+    void PostProcessPass::Execute(ID3D11ShaderResourceView* sceneInput, ID3D11RenderTargetView* finalOutput) {
         if (mEffects.empty()) {
             RenderToScreen(sceneInput, finalOutput);
             return;
@@ -75,7 +75,7 @@ namespace x {
         RenderToScreen(currentInput, finalOutput);
     }
 
-    bool PostProcessSystem::CreateIntermediateTargets() {
+    bool PostProcessPass::CreateIntermediateTargets() {
         if (mEffects.empty()) { return true; }
 
         mIntermediateTargets.resize(mEffects.size());
@@ -109,7 +109,7 @@ namespace x {
         return true;
     }
 
-    void PostProcessSystem::RenderToScreen(ID3D11ShaderResourceView* input, ID3D11RenderTargetView* output) {
+    void PostProcessPass::RenderToScreen(ID3D11ShaderResourceView* input, ID3D11RenderTargetView* output) {
         auto* context = mRenderer.GetDeviceContext();
         context->OMSetRenderTargets(1, &output, nullptr);
 

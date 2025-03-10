@@ -7,10 +7,10 @@ add_library(x STATIC
     ${STB_SOURCES}
     ${COMMON_SOURCES}
     # Engine sources
-    ${ENGINE_DIR}/AssetManager.cpp
-    ${ENGINE_DIR}/AssetManager.hpp
     ${ENGINE_DIR}/ArenaAllocator.cpp
     ${ENGINE_DIR}/ArenaAllocator.hpp
+    ${ENGINE_DIR}/AssetManager.cpp
+    ${ENGINE_DIR}/AssetManager.hpp
     ${ENGINE_DIR}/BehaviorComponent.cpp
     ${ENGINE_DIR}/BehaviorComponent.hpp
     ${ENGINE_DIR}/BloomEffect.cpp
@@ -38,6 +38,8 @@ add_library(x STATIC
     ${ENGINE_DIR}/Input.hpp
     ${ENGINE_DIR}/InputCodes.hpp
     ${ENGINE_DIR}/InputLayouts.hpp
+    ${ENGINE_DIR}/LightPass.cpp
+    ${ENGINE_DIR}/LightPass.hpp
     ${ENGINE_DIR}/Lights.hpp
     ${ENGINE_DIR}/Material.hpp
     ${ENGINE_DIR}/MaterialParser.cpp
@@ -52,13 +54,13 @@ add_library(x STATIC
     ${ENGINE_DIR}/ModelLoader.hpp
     ${ENGINE_DIR}/Mouse.cpp
     ${ENGINE_DIR}/Mouse.hpp
+    ${ENGINE_DIR}/PBRMaterial.cpp
+    ${ENGINE_DIR}/PBRMaterial.hpp
     ${ENGINE_DIR}/Platform.hpp
     ${ENGINE_DIR}/PoolAllocator.cpp
     ${ENGINE_DIR}/PoolAllocator.hpp
-    ${ENGINE_DIR}/PostProcessSystem.cpp
-    ${ENGINE_DIR}/PostProcessSystem.hpp
-    ${ENGINE_DIR}/PBRMaterial.hpp
-    ${ENGINE_DIR}/PBRMaterial.cpp
+    ${ENGINE_DIR}/PostProcessPass.cpp
+    ${ENGINE_DIR}/PostProcessPass.hpp
     ${ENGINE_DIR}/RasterizerState.cpp
     ${ENGINE_DIR}/RasterizerState.hpp
     ${ENGINE_DIR}/RenderContext.cpp
@@ -79,6 +81,8 @@ add_library(x STATIC
     ${ENGINE_DIR}/Shader.hpp
     ${ENGINE_DIR}/ShaderManager.cpp
     ${ENGINE_DIR}/ShaderManager.hpp
+    ${ENGINE_DIR}/ShadowPass.cpp
+    ${ENGINE_DIR}/ShadowPass.hpp
     ${ENGINE_DIR}/StaticResources.cpp
     ${ENGINE_DIR}/StaticResources.hpp
     ${ENGINE_DIR}/Texture.cpp
