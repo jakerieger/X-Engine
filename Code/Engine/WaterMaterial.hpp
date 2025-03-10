@@ -29,7 +29,7 @@ namespace x {
 
     class WaterMaterial final : public IMaterial {
     public:
-        explicit WaterMaterial(RenderContext& context);
+        explicit WaterMaterial(RenderContext& context, bool transparent = false);
 
         void Bind(const TransformMatrices& transforms, const LightState& lights, const Float3 eyePos) const override;
         void Unbind() const override;

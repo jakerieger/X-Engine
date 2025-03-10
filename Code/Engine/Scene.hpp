@@ -6,6 +6,7 @@
 #include "ModelLoader.hpp"
 #include "ScriptTypeRegistry.hpp"
 #include "MaterialParser.hpp"
+#include "RenderQueue.hpp"
 #include "SceneParser.hpp"
 
 namespace x {
@@ -18,12 +19,13 @@ namespace x {
         str mName;
         str mDescription;
         unordered_map<str, EntityId> mEntities;
+        vector<std::pair<ModelComponent*, TransformComponent*>> mOpaqueModels;
+        vector<std::pair<ModelComponent*, TransformComponent*>> mTransparentModels
 
-    public:
-        explicit Scene(RenderContext& context, ScriptEngine& scriptEngine);
+          public : explicit Scene(RenderContext& context, ScriptEngine& scriptEngine);
         ~Scene();
 
-        void Load(const SceneDescriptor &descriptor);
+        void Load(const SceneDescriptor& descriptor);
         void Unload();
 
         void Reset();
@@ -32,6 +34,9 @@ namespace x {
         void Awake();
         void Update(f32 deltaTime);
         void Destroyed();
+
+        void DrawOpaque();
+        void DrawTransparent();
 
         SceneState& GetState();
         unordered_map<str, EntityId>& GetEntities();

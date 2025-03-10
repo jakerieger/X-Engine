@@ -6,7 +6,7 @@
 #include "ShaderManager.hpp"
 
 namespace x {
-    PBRMaterial::PBRMaterial(RenderContext& context) : IMaterial(context) {
+    PBRMaterial::PBRMaterial(RenderContext& context, bool transparent) : IMaterial(context, transparent) {
         mShader = ShaderManager::GetGraphicsShader(kOpaquePBRShaderId);
         CreateBuffers();
     }

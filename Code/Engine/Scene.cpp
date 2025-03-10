@@ -18,6 +18,8 @@ namespace x {
     void Scene::Load(const SceneDescriptor& descriptor) {
         mState.Reset();
         mInitialState.Reset();
+        mOpaqueModels.clear();
+        mTransparentModels.clear();
 
         auto& mainCamera = mState.MainCamera;
         auto& sun        = mState.Lights.Sun;
@@ -61,6 +63,12 @@ namespace x {
                 if (!materialBytes.has_value()) { X_LOG_FATAL("Failed to load material resource"); }
                 MaterialDescriptor matDesc = MaterialParser::Parse(*materialBytes);
                 LoadMaterial(matDesc, modelComponent);
+
+                if (matDesc.mTransparent) {
+                    mTransparentModels.push_back(std::make_pair(&modelComponent, &transformComponent));
+                } else {
+                    mOpaqueModels.push_back(std::make_pair(&modelComponent, &transformComponent));
+                }
             }
 
             if (entity.behavior.has_value()) {
@@ -165,6 +173,30 @@ namespace x {
         }
     }
 
+    void Scene::DrawOpaque() {
+        for (const auto [model, transform] : mOpaqueModels) {
+            Matrix world    = transform->GetTransformMatrix();
+            auto view       = mState.GetMainCamera().GetViewMatrix();
+            auto projection = mState.GetMainCamera().GetProjectionMatrix();
+            model->Draw(mContext,
+                        {world, view, projection},
+                        mState.GetLightState(),
+                        mState.GetMainCamera().GetPosition());
+        }
+    }
+
+    void Scene::DrawTransparent() {
+        for (const auto [model, transform] : mTransparentModels) {
+            Matrix world    = transform->GetTransformMatrix();
+            auto view       = mState.GetMainCamera().GetViewMatrix();
+            auto projection = mState.GetMainCamera().GetProjectionMatrix();
+            model->Draw(mContext,
+                        {world, view, projection},
+                        mState.GetLightState(),
+                        mState.GetMainCamera().GetPosition());
+        }
+    }
+
     SceneState& Scene::GetState() {
         return mState;
     }
@@ -190,33 +222,33 @@ namespace x {
     }
 
     void Scene::LoadMaterial(const MaterialDescriptor& material, ModelComponent& modelComponent) {
-        if (material.baseMaterial == "PBR") {
+        if (material.mBaseMaterial == "PBR") {
             // TODO: Move the base materials to somewhere in static memory so they aren't being created for every single
             // material instance.
-            const auto mat = make_shared<PBRMaterial>(mContext);
+            const auto mat = make_shared<PBRMaterial>(mContext, material.mTransparent);
             modelComponent.SetMaterial(mat);
 
-            for (const auto& texture : material.textures) {
+            for (const auto& texture : material.mTextures) {
                 // Load texture resource
-                if (!mResources.LoadResource<Texture2D>(texture.assetId)) {
-                    X_LOG_FATAL("Failed to to load texture resource: '%llu'", texture.assetId)
+                if (!mResources.LoadResource<Texture2D>(texture.mAssetId)) {
+                    X_LOG_FATAL("Failed to to load texture resource: '%llu'", texture.mAssetId)
                 }
 
                 std::optional<ResourceHandle<Texture2D>> resource =
-                  mResources.FetchResource<Texture2D>(texture.assetId);
+                  mResources.FetchResource<Texture2D>(texture.mAssetId);
 
-                if (!resource.has_value()) { X_LOG_FATAL("Failed to fetch texture resource: '%llu'", texture.assetId) }
-                if (!resource->Valid()) { X_LOG_FATAL("Resource invalid: '%llu'", texture.assetId) }
+                if (!resource.has_value()) { X_LOG_FATAL("Failed to fetch texture resource: '%llu'", texture.mAssetId) }
+                if (!resource->Valid()) { X_LOG_FATAL("Resource invalid: '%llu'", texture.mAssetId) }
 
-                if (texture.name == "albedo") { mat->SetAlbedoMap(*resource); }
-                if (texture.name == "metallic") { mat->SetMetallicMap(*resource); }
-                if (texture.name == "roughness") { mat->SetRoughnessMap(*resource); }
-                if (texture.name == "normal") { mat->SetNormalMap(*resource); }
+                if (texture.mName == "albedo") { mat->SetAlbedoMap(*resource); }
+                if (texture.mName == "metallic") { mat->SetMetallicMap(*resource); }
+                if (texture.mName == "roughness") { mat->SetRoughnessMap(*resource); }
+                if (texture.mName == "normal") { mat->SetNormalMap(*resource); }
             }
         }
 
-        else if (material.baseMaterial == "Water") {
-            const auto mat = make_shared<WaterMaterial>(mContext);
+        else if (material.mBaseMaterial == "Water") {
+            const auto mat = make_shared<WaterMaterial>(mContext, material.mTransparent);
             modelComponent.SetMaterial(mat);
 
             // Process material properties

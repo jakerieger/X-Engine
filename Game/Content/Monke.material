@@ -1,5 +1,6 @@
 name: Monke
 baseMaterial: PBR
+transparent: false
 properties: []
 textures:
   - name: albedo

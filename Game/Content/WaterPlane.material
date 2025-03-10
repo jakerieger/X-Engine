@@ -1,4 +1,5 @@
 name: WaterPlane
 baseMaterial: Water
+transparent: true
 properties: []
 textures: []

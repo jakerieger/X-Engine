@@ -6,7 +6,7 @@
 #include "ShaderManager.hpp"
 
 namespace x {
-    WaterMaterial::WaterMaterial(RenderContext& context) : IMaterial(context) {
+    WaterMaterial::WaterMaterial(RenderContext& context, bool transparent) : IMaterial(context, transparent) {
         mShader = ShaderManager::GetGraphicsShader(kWaterShaderId);
         CreateBuffers();
     }

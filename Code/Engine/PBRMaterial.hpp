@@ -50,7 +50,7 @@ namespace x {
 
     class PBRMaterial final : public IMaterial {
     public:
-        explicit PBRMaterial(RenderContext& context);
+        explicit PBRMaterial(RenderContext& context, bool transparent = false);
 
         void Bind(const TransformMatrices& transforms, const LightState& lights, const Float3 eyePos) const override;
         void Unbind() const override;

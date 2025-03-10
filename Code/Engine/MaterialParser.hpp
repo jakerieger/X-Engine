@@ -10,14 +10,15 @@
 
 namespace x {
     struct TextureDescriptor {
-        str name;
-        u64 assetId;
+        str mName;
+        u64 mAssetId;
     };
 
     struct MaterialDescriptor {
-        str name;
-        str baseMaterial;
-        vector<TextureDescriptor> textures;
+        str mName;
+        str mBaseMaterial;
+        bool mTransparent {false};
+        vector<TextureDescriptor> mTextures;
     };
 
     class MaterialParser {

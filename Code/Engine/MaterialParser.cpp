@@ -8,12 +8,14 @@
 namespace x {
     static MaterialDescriptor ParseFromNode(const YAML::Node& node) {
         MaterialDescriptor material;
-        material.name         = node["name"].as<str>();
-        material.baseMaterial = node["baseMaterial"].as<str>();
+        material.mName         = node["name"].as<str>();
+        material.mBaseMaterial = node["baseMaterial"].as<str>();
+        material.mTransparent  = node["transparent"].as<bool>();
+
         if (const auto& textures = node["textures"]; textures.IsDefined() && textures.size() > 0) {
             for (const auto& texture : textures) {
                 TextureDescriptor textureDescriptor;
-                textureDescriptor.name = texture["name"].as<str>();
+                textureDescriptor.mName = texture["name"].as<str>();
 
                 // yaml-cpp was having trouble parsing some IDs as uint64's
                 // Turns out this was because I was forgetting to add a newline to the yaml file
@@ -21,8 +23,8 @@ namespace x {
                 auto idStr       = texture["asset"].as<str>();
                 const auto idVal = std::stoull(idStr, nullptr, 10);
 
-                textureDescriptor.assetId = idVal;
-                material.textures.push_back(textureDescriptor);
+                textureDescriptor.mAssetId = idVal;
+                material.mTextures.push_back(textureDescriptor);
             }
         }
 

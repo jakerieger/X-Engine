@@ -123,7 +123,8 @@ namespace x {
 
     class IMaterial {
     public:
-        explicit IMaterial(RenderContext& context) : mContext(context) {}
+        explicit IMaterial(RenderContext& context, bool transparent = false)
+            : mContext(context), mTransparent(transparent) {}
         virtual ~IMaterial() = default;
 
         X_CAST_DYNAMIC_AS
@@ -133,9 +134,14 @@ namespace x {
         virtual void Bind() const {}
         virtual void Unbind() const {}
 
+        bool Transparent() const {
+            return mTransparent;
+        }
+
     protected:
         RenderContext& mContext;
         shared_ptr<GraphicsShader> mShader;
+        bool mTransparent;
 
         virtual void CreateBuffers()     = 0;
         virtual void BindBuffers() const = 0;

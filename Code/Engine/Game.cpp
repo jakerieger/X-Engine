@@ -59,16 +59,18 @@ namespace x {
     // This should never modify game state (always iterate as const)
     void Game::RenderScene(const SceneState& state) const {
         if (mActiveScene->GetNumEntities() == 0) return;
-
-        for (const auto& [entity, model] : state.GetComponents<ModelComponent>()) {
-            Matrix world = XMMatrixIdentity();
-            auto view    = state.GetMainCamera().GetViewMatrix();
-            auto proj    = state.GetMainCamera().GetProjectionMatrix();
-
-            const auto transformComponent = state.GetComponent<TransformComponent>(entity);
-            if (transformComponent) { world = transformComponent->GetTransformMatrix(); }
-            model.Draw(mRenderContext, {world, view, proj}, state.GetLightState(), state.GetMainCamera().GetPosition());
-        }
+        // for (const auto& [entity, model] : state.GetComponents<ModelComponent>()) {
+        //     if (model.GetMaterial()->Transparent()) { continue; }
+        //
+        //     Matrix world = XMMatrixIdentity();
+        //     auto view    = state.GetMainCamera().GetViewMatrix();
+        //     auto proj    = state.GetMainCamera().GetProjectionMatrix();
+        //
+        //     const auto transformComponent = state.GetComponent<TransformComponent>(entity);
+        //     if (transformComponent) { world = transformComponent->GetTransformMatrix(); }
+        //     model.Draw(mRenderContext, {world, view, proj}, state.GetLightState(),
+        //     state.GetMainCamera().GetPosition());
+        // }
     }
 
     void Game::RegisterEventHandlers() {
@@ -96,7 +98,10 @@ namespace x {
 
             // Do our fully lit pass using our previous depth-only pass as input for our shadow mapping shader
             mRenderSystem->BeginLightPass(depthSRV);
-            RenderScene(state);
+            if (mActiveScene->GetNumEntities() > 0) {
+                mActiveScene->DrawOpaque();
+                mActiveScene->DrawTransparent();
+            }
             ID3D11ShaderResourceView* sceneSRV = mRenderSystem->EndLightPass();
 
             // We can now pass our fully lit scene texture to the post processing pipeline to be processed and displayed

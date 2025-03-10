@@ -35,7 +35,7 @@ namespace x {
             return DCAST<T*>(mMaterial.get());
         }
 
-        shared_ptr<IMaterial> GetMaterial() {
+        shared_ptr<IMaterial> GetMaterial() const {
             return mMaterial;
         }
 
