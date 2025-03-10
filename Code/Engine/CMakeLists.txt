@@ -63,7 +63,6 @@ add_library(x STATIC
     ${ENGINE_DIR}/RasterizerState.hpp
     ${ENGINE_DIR}/RenderContext.cpp
     ${ENGINE_DIR}/RenderContext.hpp
-    ${ENGINE_DIR}/RenderQueue.hpp
     ${ENGINE_DIR}/RenderSystem.cpp
     ${ENGINE_DIR}/RenderSystem.hpp
     ${ENGINE_DIR}/Resource.hpp

@@ -55,7 +55,7 @@ namespace x {
         void Resize(u32 width, u32 height);
     };
 
-    class RenderSystem : public Volatile {
+    class RenderSystem final : public Volatile {
     public:
         RenderSystem(RenderContext& context, Viewport* viewport);
 
@@ -71,7 +71,7 @@ namespace x {
             return &mPostProcess;
         }
 
-        void OnResize(u32 width, u32 height);
+        void OnResize(u32 width, u32 height) override;
 
         void SetClearColor(f32 r, f32 g, f32 b, f32 a);
 

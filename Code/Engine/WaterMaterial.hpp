@@ -11,7 +11,7 @@
 namespace x {
     X_ALIGNED_STRUCT WaterParameters {
         f32 mTime {0};
-        f32 mWaterDepth {5.0f};
+        f32 mWaterDepth {1.0f};
         f32 mTransparency {0.8f};
         Float2 mWindDirection {0.7f, 0.7f};
         f32 mWindStrength {0.4f};
