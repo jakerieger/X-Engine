@@ -20,6 +20,7 @@
 namespace x {
     class Game : public EventListener {
         X_CLASS_PREVENT_MOVES_COPIES(Game)
+        using SceneMap = unordered_map<str, SceneDescriptor>;
 
     public:
         explicit Game(RenderContext& context);
@@ -30,6 +31,7 @@ namespace x {
         void Update(bool paused = false);
         void RenderFrame();
         void TransitionScene(const str& name);
+        void TransitionScene(const SceneDescriptor& scene);
         void Resize(u32 width, u32 height) const;
 
         X_NODISCARD Scene* GetActiveScene() const;
@@ -38,6 +40,7 @@ namespace x {
         X_NODISCARD ScriptEngine& GetScriptEngine();
         X_NODISCARD RenderSystem* GetRenderSystem() const;
         X_NODISCARD bool IsInitialized() const;
+        X_NODISCARD SceneMap& GetSceneMap();
 
     private:
         bool mDebugUIEnabled {false};
@@ -56,7 +59,7 @@ namespace x {
         Input mInput;
         Mouse mMouse;
         Window* mWindow;
-        unordered_map<str, SceneDescriptor> mScenes;
+        SceneMap mScenes;
 
         void Pause();
         void Resume();

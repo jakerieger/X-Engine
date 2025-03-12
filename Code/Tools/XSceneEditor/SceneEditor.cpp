@@ -128,39 +128,35 @@ namespace x {
                     }
                 }
                 ImGui::Separator();
-                if (ImGui::MenuItem("New Scene", "Ctrl+N")) {
-                    // Do new scene action
+                // if (ImGui::MenuItem("New Scene", "Ctrl+N")) {
+                //     // Do new scene action
+                // }
+                if (ImGui::MenuItem("Open Scene", "Ctrl+Shift+O", false, mLoadedProject.mLoaded)) {
+                    mSceneSelectorOpen = true;
                 }
-                if (ImGui::MenuItem("Open Scene", "Ctrl+O")) {
-                    const char* filter = "Scene (*.scene)|*.scene|";
-                    char filename[MAX_PATH];
-                    if (Platform::OpenFileDialog(mHwnd, nullptr, filter, "Open Scene File", filename, MAX_PATH)) {
-                        LoadScene(filename);
-                    }
-                }
-                if (ImGui::MenuItem("Save Scene", "Ctrl+S")) {
-                    if (Platform::ShowAlert(mHwnd,
-                                            "Save Scene",
-                                            "You are about to overwrite the current scene. Do you wish to continue?",
-                                            Platform::AlertSeverity::Question) == IDYES &&
-                        !mLoadedScenePath.Exists()) {
-                        SaveScene();
-                    }
-                }
-                if (ImGui::MenuItem("Save Scene As", "Ctrl+Shift+S")) {
-                    const char* filter = "Scene (*.scene)|*.scene|";
-                    char filename[MAX_PATH];
-                    if (Platform::SaveFileDialog(mHwnd,
-                                                 mLoadedScenePath.Parent().CStr(),
-                                                 filter,
-                                                 "Save Scene File",
-                                                 "scene",
-                                                 filename,
-                                                 MAX_PATH)) {
-                        SaveSceneAs(filename);
-                        LoadScene(filename);
-                    }
-                }
+                // if (ImGui::MenuItem("Save Scene", "Ctrl+S")) {
+                //     if (Platform::ShowAlert(mHwnd,
+                //                             "Save Scene",
+                //                             "You are about to overwrite the current scene. Do you wish to continue?",
+                //                             Platform::AlertSeverity::Question) == IDYES &&
+                //         !mLoadedScenePath.Exists()) {
+                //         SaveScene();
+                //     }
+                // }
+                // if (ImGui::MenuItem("Save Scene As", "Ctrl+Shift+S")) {
+                //     const char* filter = "Scene (*.scene)|*.scene|";
+                //     char filename[MAX_PATH];
+                //     if (Platform::SaveFileDialog(mHwnd,
+                //                                  mLoadedScenePath.Parent().CStr(),
+                //                                  filter,
+                //                                  "Save Scene File",
+                //                                  "scene",
+                //                                  filename,
+                //                                  MAX_PATH)) {
+                //         SaveSceneAs(filename);
+                //         LoadScene(filename);
+                //     }
+                // }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Exit", "Alt+F4")) { this->Quit(); }
                 ImGui::EndMenu();
@@ -180,92 +176,128 @@ namespace x {
             ImGui::EndMainMenuBar();
         }
         ImGui::PopStyleVar();
+
+        // Select Scene dialog
+        {
+            if (mSceneSelectorOpen) { ImGui::OpenPopup("Select Scene"); }
+
+            ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+            if (ImGui::BeginPopupModal("Select Scene", &mSceneSelectorOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
+                static str selectedScene;
+
+                for (const auto& [name, desc] : mGame.GetSceneMap()) {
+                    if (ImGui::Selectable(name.c_str(), selectedScene == name, true, ImVec2(300, 36))) {
+                        selectedScene = name;
+                    }
+                }
+
+                // Buttons
+                if (ImGui::Button("OK", ImVec2(150, 0))) {
+                    if (!selectedScene.empty()) {
+                        mLoadedScene = mGame.GetSceneMap().at(selectedScene);
+                        mGame.TransitionScene(selectedScene);
+                    }
+
+                    mSceneSelectorOpen = false;
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::SetItemDefaultFocus();
+                ImGui::SameLine();
+                if (ImGui::Button("Cancel", ImVec2(150, 0))) {
+                    mSceneSelectorOpen = false;
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::EndPopup();
+            }
+        }
     }
 
     void SceneEditor::SceneSettingsView() {
         ImGui::Begin("Scene");
-        {
-            if (mLoadedScene.IsValid()) {
-                const f32 width = ImGui::GetContentRegionAvail().x;
-                ImGui::Text("Name: ");
-                ImGui::SameLine(kLabelWidth);
-                ImGui::SetNextItemWidth(width - kLabelWidth);
-                ImGui::InputText("##scene_name", mSceneSettings.mName, sizeof(mSceneSettings.mName));
-
-                ImGui::Text("Description: ");
-                ImGui::SameLine(kLabelWidth);
-                ImGui::SetNextItemWidth(width - kLabelWidth);
-                ImGui::InputText("##scene_desc", mSceneSettings.mDesc, sizeof(mSceneSettings.mDesc));
-
-                ImGui::Spacing();
-
-                if (ImGui::CollapsingHeader("World", ImGuiTreeNodeFlags_DefaultOpen)) {
-                    ImGui::Text("Camera");
-                    ImGui::Spacing();
-                    ImGui::Text("Position:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::DragFloat3("##camera_pos", (f32*)&mLoadedScene.mWorld.mCamera.mPosition, 0.01f);
-
-                    ImGui::Text("Eye:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::DragFloat3("##camera_eye", (f32*)&mLoadedScene.mWorld.mCamera.mEye, 0.01f);
-
-                    ImGui::Text("FOV Y:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::SliderFloat("##camera_fov", &mLoadedScene.mWorld.mCamera.mFovY, 1.0f, 120.0f, "%.1f");
-
-                    ImGui::Text("Near Z:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::InputFloat("##camera_nearz", &mLoadedScene.mWorld.mCamera.mNearZ, 0.1f, 100.0f, "%.1f");
-
-                    ImGui::Text("Far Z:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::InputFloat("##camera_farz", &mLoadedScene.mWorld.mCamera.mFarZ, 0.1f, 100.0f, "%.1f");
-
-                    ImGui::Spacing();
-                    ImGui::Spacing();
-
-                    // Sun
-                    auto& sun = mLoadedScene.mWorld.mLights.mSun;
-                    ImGui::Text("Sun");
-                    ImGui::Spacing();
-
-                    ImGui::Text("Enabled:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::Checkbox("##sun_enabled", &sun.mEnabled);
-
-                    ImGui::Text("Intensity:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::InputFloat("##sun_intensity", &sun.mIntensity, 0.1f, 1.0f, "%.1f");
-
-                    ImGui::Text("Color:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::ColorEdit3("##sun_color", (f32*)&sun.mColor);
-
-                    ImGui::Text("Direction:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::DragFloat3("##sun_direction", (f32*)&sun.mDirection, 0.01f);
-
-                    ImGui::Text("Casts Shadows:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::Checkbox("##sun_casts_shadows", &sun.mCastsShadows);
-                }
-
-                mLoadedScene.mName        = mSceneSettings.mName;
-                mLoadedScene.mDescription = mSceneSettings.mDesc;
-            } else {
-                ImGui::Text("No scene loaded. Go to \"File->Open Scene\" to load a scene.");
-            }
-        }
+        // TODO: This resets the current loaded scene for some reason
+        // {
+        //     if (mLoadedScene.IsValid()) {
+        //         const f32 width = ImGui::GetContentRegionAvail().x;
+        //         ImGui::Text("Name: ");
+        //         ImGui::SameLine(kLabelWidth);
+        //         ImGui::SetNextItemWidth(width - kLabelWidth);
+        //         ImGui::InputText("##scene_name", mSceneSettings.mName, sizeof(mSceneSettings.mName));
+        //
+        //         ImGui::Text("Description: ");
+        //         ImGui::SameLine(kLabelWidth);
+        //         ImGui::SetNextItemWidth(width - kLabelWidth);
+        //         ImGui::InputText("##scene_desc", mSceneSettings.mDesc, sizeof(mSceneSettings.mDesc));
+        //
+        //         ImGui::Spacing();
+        //
+        //         if (ImGui::CollapsingHeader("World", ImGuiTreeNodeFlags_DefaultOpen)) {
+        //             ImGui::Text("Camera");
+        //             ImGui::Spacing();
+        //             ImGui::Text("Position:");
+        //             ImGui::SameLine(kLabelWidth);
+        //             ImGui::SetNextItemWidth(width - kLabelWidth);
+        //             ImGui::DragFloat3("##camera_pos", (f32*)&mLoadedScene.mWorld.mCamera.mPosition, 0.01f);
+        //
+        //             ImGui::Text("Eye:");
+        //             ImGui::SameLine(kLabelWidth);
+        //             ImGui::SetNextItemWidth(width - kLabelWidth);
+        //             ImGui::DragFloat3("##camera_eye", (f32*)&mLoadedScene.mWorld.mCamera.mEye, 0.01f);
+        //
+        //             ImGui::Text("FOV Y:");
+        //             ImGui::SameLine(kLabelWidth);
+        //             ImGui::SetNextItemWidth(width - kLabelWidth);
+        //             ImGui::SliderFloat("##camera_fov", &mLoadedScene.mWorld.mCamera.mFovY, 1.0f, 120.0f, "%.1f");
+        //
+        //             ImGui::Text("Near Z:");
+        //             ImGui::SameLine(kLabelWidth);
+        //             ImGui::SetNextItemWidth(width - kLabelWidth);
+        //             ImGui::InputFloat("##camera_nearz", &mLoadedScene.mWorld.mCamera.mNearZ, 0.1f, 100.0f, "%.1f");
+        //
+        //             ImGui::Text("Far Z:");
+        //             ImGui::SameLine(kLabelWidth);
+        //             ImGui::SetNextItemWidth(width - kLabelWidth);
+        //             ImGui::InputFloat("##camera_farz", &mLoadedScene.mWorld.mCamera.mFarZ, 0.1f, 100.0f, "%.1f");
+        //
+        //             ImGui::Spacing();
+        //             ImGui::Spacing();
+        //
+        //             // Sun
+        //             auto& sun = mLoadedScene.mWorld.mLights.mSun;
+        //             ImGui::Text("Sun");
+        //             ImGui::Spacing();
+        //
+        //             ImGui::Text("Enabled:");
+        //             ImGui::SameLine(kLabelWidth);
+        //             ImGui::Checkbox("##sun_enabled", &sun.mEnabled);
+        //
+        //             ImGui::Text("Intensity:");
+        //             ImGui::SameLine(kLabelWidth);
+        //             ImGui::SetNextItemWidth(width - kLabelWidth);
+        //             ImGui::InputFloat("##sun_intensity", &sun.mIntensity, 0.1f, 1.0f, "%.1f");
+        //
+        //             ImGui::Text("Color:");
+        //             ImGui::SameLine(kLabelWidth);
+        //             ImGui::SetNextItemWidth(width - kLabelWidth);
+        //             ImGui::ColorEdit3("##sun_color", (f32*)&sun.mColor);
+        //
+        //             ImGui::Text("Direction:");
+        //             ImGui::SameLine(kLabelWidth);
+        //             ImGui::SetNextItemWidth(width - kLabelWidth);
+        //             ImGui::DragFloat3("##sun_direction", (f32*)&sun.mDirection, 0.01f);
+        //
+        //             ImGui::Text("Casts Shadows:");
+        //             ImGui::SameLine(kLabelWidth);
+        //             ImGui::SetNextItemWidth(width - kLabelWidth);
+        //             ImGui::Checkbox("##sun_casts_shadows", &sun.mCastsShadows);
+        //         }
+        //
+        //         mLoadedScene.mName        = mSceneSettings.mName;
+        //         mLoadedScene.mDescription = mSceneSettings.mDesc;
+        //     } else {
+        //         ImGui::Text("No scene loaded. Go to \"File->Open Scene\" to load a scene.");
+        //     }
+        // }
         ImGui::End();
     }
 
@@ -459,6 +491,7 @@ namespace x {
         }
 
         mProjectRoot = Path(filename).Parent();
+        mGame.Initialize(this, &mSceneViewport, mProjectRoot);
     }
 
     void SceneEditor::LoadScene(const str& filename) {
@@ -472,6 +505,7 @@ namespace x {
             // Update UI input values
             std::strcpy(mSceneSettings.mName, mLoadedScene.mName.c_str());
             std::strcpy(mSceneSettings.mDesc, mLoadedScene.mDescription.c_str());
+            mGame.TransitionScene(mLoadedScene);
         } else {
             Platform::ShowAlert(mHwnd,
                                 "Error loading scene",

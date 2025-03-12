@@ -174,7 +174,7 @@ namespace x {
         if (!ShaderManager::LoadShaders(mRenderContext)) { X_LOG_FATAL("Failed to load shaders!"); }
         if (!AssetManager::LoadAssets(workingDir)) { X_LOG_FATAL("Failed to load assets"); }
 
-        // Find and load all of our scene descriptors
+        // Find and load all of our scene descriptor
         const auto sceneIds = AssetManager::GetScenes();
         for (const auto& scene : sceneIds) {
             auto sceneData = AssetManager::GetAssetData(scene);
@@ -282,6 +282,19 @@ namespace x {
         mActiveScene->Update(0.0f);
     }
 
+    void Game::TransitionScene(const SceneDescriptor& scene) {
+        if (!scene.IsValid()) {
+            X_LOG_WARN("Attempted to load blank scene")
+            return;
+        }
+
+        mActiveScene.reset();
+        mActiveScene = make_unique<Scene>(mRenderContext, mScriptEngine);
+        mActiveScene->Load(scene);
+        mActiveScene->RegisterVolatiles(mVolatiles);
+        mActiveScene->Update(0.0f);
+    }
+
     void Game::Resize(u32 width, u32 height) const {
         OnResize(width, height);
     }
@@ -310,5 +323,9 @@ namespace x {
 
     bool Game::IsInitialized() const {
         return mIsInitialized;
+    }
+
+    Game::SceneMap& Game::GetSceneMap() {
+        return mScenes;
     }
 }  // namespace x

@@ -39,6 +39,8 @@ namespace x {
         Path mProjectRoot {};
         bool mDockspaceSetup {false};
 
+        // ImGui settings variables.
+        // These are used to store editable data that is then used to update the current scene
         struct SceneSettings {
             char mName[128] {0};
             char mDesc[512] {0};
@@ -48,6 +50,7 @@ namespace x {
             char mName[256] {0};
         } mEntityProperties;
 
+        // Main views/tabs
         void MainMenu();
         void SceneSettingsView();
         void EntitiesView();
@@ -55,11 +58,16 @@ namespace x {
         void ViewportView();
         void AssetsView();
 
+        // Popups
+        bool mSceneSelectorOpen {false};
+
+        // Editor file menu functions
         void LoadProject(const str& filename);
         void LoadScene(const str& filename);
         void SaveScene() const;
         void SaveSceneAs(const str& filename) const;
 
+        // ImGui-specific functions
         void SetupDockspace(const f32 yOffset);
         void ApplyTheme();
     };
