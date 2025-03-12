@@ -37,12 +37,14 @@ namespace x {
         X_NODISCARD PostProcessPass* GetPostProcess() const;
         X_NODISCARD ScriptEngine& GetScriptEngine();
         X_NODISCARD RenderSystem* GetRenderSystem() const;
+        X_NODISCARD bool IsInitialized() const;
 
     private:
         bool mDebugUIEnabled {false};
         bool mIsRunning {false};
         bool mIsPaused {false};
         bool mIsFocused {true};
+        bool mIsInitialized {false};
         Clock mClock;
         unique_ptr<RenderSystem> mRenderSystem;
         unique_ptr<Scene> mActiveScene;

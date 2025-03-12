@@ -9,11 +9,14 @@
 #include "Engine/SceneParser.hpp"
 #include <imgui.h>
 
+#include "Engine/Game.hpp"
+#include "XPak/ProjectDescriptor.hpp"
+
 namespace x {
     class SceneEditor final : public Window {
     public:
-        SceneEditor() : Window("XSceneEditor", 1440, 800) {
-            // this->SetOpenMaximized(true);
+        SceneEditor() : Window("XSceneEditor", 1440, 800), mSceneViewport(mContext), mGame(mContext) {
+            this->SetOpenMaximized(true);
         }
 
         void OnInitialize() override;
@@ -26,11 +29,14 @@ namespace x {
         LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) override;
 
     private:
+        Viewport mSceneViewport;
+        Game mGame;
+        ProjectDescriptor mLoadedProject {};
         ImFont* mDefaultFont {nullptr};
         unordered_map<str, ImFont*> mFonts;
         SceneDescriptor mLoadedScene {};
         Path mLoadedScenePath {};
-        Path mContentRootPath {};
+        Path mProjectRoot {};
         bool mDockspaceSetup {false};
 
         struct SceneSettings {
@@ -38,11 +44,18 @@ namespace x {
             char mDesc[512] {0};
         } mSceneSettings;
 
+        struct EntityProperties {
+            char mName[256] {0};
+        } mEntityProperties;
+
         void MainMenu();
         void SceneSettingsView();
         void EntitiesView();
         void EntitiesPropertiesView();
+        void ViewportView();
+        void AssetsView();
 
+        void LoadProject(const str& filename);
         void LoadScene(const str& filename);
         void SaveScene() const;
         void SaveSceneAs(const str& filename) const;

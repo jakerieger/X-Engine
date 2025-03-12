@@ -191,6 +191,8 @@ namespace x {
         RegisterVolatile(mRenderSystem.get());
         InitializeEngine();
 
+        mIsInitialized = true;
+
         mActiveScene = make_unique<Scene>(mRenderContext, mScriptEngine);
         X_LOG_INFO("Initialization complete")
     }
@@ -304,5 +306,9 @@ namespace x {
 
     RenderSystem* Game::GetRenderSystem() const {
         return mRenderSystem.get();
+    }
+
+    bool Game::IsInitialized() const {
+        return mIsInitialized;
     }
 }  // namespace x
