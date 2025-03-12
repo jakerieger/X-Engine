@@ -13,7 +13,7 @@ namespace x {
         mName          = projectNode["name"].as<str>();
         mEngineVersion = projectNode["engineVersion"].as<f32>();
 
-        const auto projectDir = Filesystem::Path(filename).Parent();
+        const auto projectDir = Path(filename).Parent();
 
         // Get directories relative to the project directory
         // .xproj file should sit at root of file structure

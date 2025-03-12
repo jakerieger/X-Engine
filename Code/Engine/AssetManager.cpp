@@ -11,8 +11,6 @@
 
 namespace x {
     optional<vector<u8>> AssetManager::GetAssetData(AssetId id) {
-        using namespace x::Filesystem;
-
         if (!mLoaded) {
             X_LOG_ERROR("AssetManager::GetAssetData - Not Loaded");
             return std::nullopt;
@@ -49,9 +47,7 @@ namespace x {
 #endif
     }
 
-    bool AssetManager::LoadAssets(const Filesystem::Path& workingDir) {
-        using namespace x::Filesystem;
-
+    bool AssetManager::LoadAssets(const Path& workingDir) {
 #ifdef X_USE_PAK_FILE
         const auto pakFile = Path(X_PAK_FILE);
         if (!pakFile.Exists()) {

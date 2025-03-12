@@ -46,6 +46,8 @@ namespace x {
         if (mActiveScene->GetNumEntities() == 0) return;
 
         for (const auto& [entity, model] : state.GetComponents<ModelComponent>()) {
+            if (!model.GetCastsShadows()) continue;
+
             Matrix world                  = XMMatrixIdentity();
             const auto transformComponent = state.GetComponent<TransformComponent>(entity);
             if (transformComponent) { world = transformComponent->GetTransformMatrix(); }
@@ -101,9 +103,14 @@ namespace x {
             mRenderSystem->EndShadowPass(shadowPassResult);
 
             // Do our fully lit pass using our previous depth-only pass as input for our shadow mapping shader
-            mRenderSystem->BeginLightPass(lightPassResult);
-            mActiveScene->DrawOpaque();
-            mActiveScene->DrawTransparent();
+            mRenderSystem->BeginLightPass(shadowPassResult);
+            {
+                mRenderSystem->BlendStateOpaque();
+                mActiveScene->DrawOpaque();
+
+                mRenderSystem->BlendStateTransparent();
+                mActiveScene->DrawTransparent();
+            }
             mRenderSystem->EndLightPass(lightPassResult);
 
             // We can now pass our fully lit scene texture to the post processing pipeline to be processed and displayed
@@ -177,7 +184,7 @@ namespace x {
         Shutdown();
     }
 
-    void Game::Initialize(Window* window, Viewport* viewport, const Filesystem::Path& workingDir) {
+    void Game::Initialize(Window* window, Viewport* viewport, const Path& workingDir) {
         mWindow = window;
 
         // These need to be loaded first before the rest of the engine can use them!

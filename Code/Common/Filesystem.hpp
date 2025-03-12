@@ -29,212 +29,210 @@
 #endif
 
 namespace x {
-    namespace Filesystem {
-        class Path;
+    class Path;
 
-        class FileReader {
-        public:
-            static std::vector<u8> ReadAllBytes(const Path& path);
-            static str ReadAllText(const Path& path);
-            static std::vector<str> ReadAllLines(const Path& path);
-            static std::vector<u8> ReadBlock(const Path& path, size_t size, u64 offset = 0);
-            static size_t QueryFileSize(const Path& path);
-        };
+    class FileReader {
+    public:
+        static std::vector<u8> ReadAllBytes(const Path& path);
+        static str ReadAllText(const Path& path);
+        static std::vector<str> ReadAllLines(const Path& path);
+        static std::vector<u8> ReadBlock(const Path& path, size_t size, u64 offset = 0);
+        static size_t QueryFileSize(const Path& path);
+    };
 
-        class FileWriter {
-        public:
-            static bool WriteAllBytes(const Path& path, const std::vector<u8>& data);
-            static bool WriteAllText(const Path& path, const str& text);
-            static bool WriteAllLines(const Path& path, const std::vector<str>& lines);
-            static bool WriteBlock(const Path& path, const std::vector<u8>& data, u64 offset = 0);
-        };
+    class FileWriter {
+    public:
+        static bool WriteAllBytes(const Path& path, const std::vector<u8>& data);
+        static bool WriteAllText(const Path& path, const str& text);
+        static bool WriteAllLines(const Path& path, const std::vector<str>& lines);
+        static bool WriteBlock(const Path& path, const std::vector<u8>& data, u64 offset = 0);
+    };
 
-        class AsyncFileReader {
-        public:
-            static std::future<std::vector<u8>> ReadAllBytes(const Path& path);
-            static std::future<str> ReadAllText(const Path& path);
-            static std::future<std::vector<str>> ReadAllLines(const Path& path);
-            static std::future<std::vector<u8>> ReadBlock(const Path& path, size_t size, u64 offset = 0);
+    class AsyncFileReader {
+    public:
+        static std::future<std::vector<u8>> ReadAllBytes(const Path& path);
+        static std::future<str> ReadAllText(const Path& path);
+        static std::future<std::vector<str>> ReadAllLines(const Path& path);
+        static std::future<std::vector<u8>> ReadBlock(const Path& path, size_t size, u64 offset = 0);
 
-        private:
-            template<typename Func>
-            static auto runAsync(Func&& func) -> std::future<decltype(func())> {
-                using ReturnType = decltype(func());
-                auto task        = std::make_shared<std::packaged_task<ReturnType()>>(std::forward<Func>(func));
-                std::future<ReturnType> future = task->get_future();
-                std::thread([task]() { (*task)(); }).detach();
-                return future;
-            }
-        };
+    private:
+        template<typename Func>
+        static auto runAsync(Func&& func) -> std::future<decltype(func())> {
+            using ReturnType = decltype(func());
+            auto task        = std::make_shared<std::packaged_task<ReturnType()>>(std::forward<Func>(func));
+            std::future<ReturnType> future = task->get_future();
+            std::thread([task]() { (*task)(); }).detach();
+            return future;
+        }
+    };
 
-        class AsyncFileWriter {
-        public:
-            static std::future<bool> WriteAllBytes(const Path& path, const std::vector<u8>& data);
-            static std::future<bool> WriteAllText(const Path& path, const str& text);
-            static std::future<bool> WriteAllLines(const Path& path, const std::vector<str>& lines);
-            static std::future<bool> WriteBlock(const Path& path, const std::vector<u8>& data, u64 offset = 0);
+    class AsyncFileWriter {
+    public:
+        static std::future<bool> WriteAllBytes(const Path& path, const std::vector<u8>& data);
+        static std::future<bool> WriteAllText(const Path& path, const str& text);
+        static std::future<bool> WriteAllLines(const Path& path, const std::vector<str>& lines);
+        static std::future<bool> WriteBlock(const Path& path, const std::vector<u8>& data, u64 offset = 0);
 
-        private:
-            template<typename Func>
-            static auto runAsync(Func&& func) -> std::future<decltype(func())> {
-                using ReturnType = decltype(func());
-                auto task        = std::make_shared<std::packaged_task<ReturnType()>>(std::forward<Func>(func));
-                std::future<ReturnType> future = task->get_future();
-                std::thread([task]() { (*task)(); }).detach();
-                return future;
-            }
-        };
+    private:
+        template<typename Func>
+        static auto runAsync(Func&& func) -> std::future<decltype(func())> {
+            using ReturnType = decltype(func());
+            auto task        = std::make_shared<std::packaged_task<ReturnType()>>(std::forward<Func>(func));
+            std::future<ReturnType> future = task->get_future();
+            std::thread([task]() { (*task)(); }).detach();
+            return future;
+        }
+    };
 
-        class StreamReader {
-        public:
-            explicit StreamReader(const Path& path);
-            ~StreamReader();
+    class StreamReader {
+    public:
+        explicit StreamReader(const Path& path);
+        ~StreamReader();
 
-            StreamReader(const StreamReader&)            = delete;
-            StreamReader& operator=(const StreamReader&) = delete;
+        StreamReader(const StreamReader&)            = delete;
+        StreamReader& operator=(const StreamReader&) = delete;
 
-            StreamReader(StreamReader&&) noexcept;
-            StreamReader& operator=(StreamReader&&) noexcept;
+        StreamReader(StreamReader&&) noexcept;
+        StreamReader& operator=(StreamReader&&) noexcept;
 
-            bool Read(vector<u8>& data, size_t size);
-            bool ReadAll(vector<u8>& data);
-            bool ReadLine(str& line);
+        bool Read(vector<u8>& data, size_t size);
+        bool ReadAll(vector<u8>& data);
+        bool ReadLine(str& line);
 
-            bool IsOpen() const;
-            bool Seek(u64 offset);
-            u64 Position();
-            u64 Size() const;
-            void Close();
+        bool IsOpen() const;
+        bool Seek(u64 offset);
+        u64 Position();
+        u64 Size() const;
+        void Close();
 
-        private:
-            std::ifstream _stream;
-            u64 _size = 0;
-        };
+    private:
+        std::ifstream _stream;
+        u64 _size = 0;
+    };
 
-        class StreamWriter {
-        public:
-            explicit StreamWriter(const Path& path, bool append = false);
-            ~StreamWriter();
+    class StreamWriter {
+    public:
+        explicit StreamWriter(const Path& path, bool append = false);
+        ~StreamWriter();
 
-            StreamWriter(const StreamWriter&)            = delete;
-            StreamWriter& operator=(const StreamWriter&) = delete;
+        StreamWriter(const StreamWriter&)            = delete;
+        StreamWriter& operator=(const StreamWriter&) = delete;
 
-            StreamWriter(StreamWriter&&) noexcept;
-            StreamWriter& operator=(StreamWriter&&) noexcept;
+        StreamWriter(StreamWriter&&) noexcept;
+        StreamWriter& operator=(StreamWriter&&) noexcept;
 
-            bool Write(const vector<u8>& buffer);
-            bool Write(const vector<u8>& buffer, size_t size);
-            bool WriteLine(const str& line);
-            bool Flush();
+        bool Write(const vector<u8>& buffer);
+        bool Write(const vector<u8>& buffer, size_t size);
+        bool WriteLine(const str& line);
+        bool Flush();
 
-            bool IsOpen() const;
-            bool Seek(u64 offset);
-            u64 Position();
-            void Close();
+        bool IsOpen() const;
+        bool Seek(u64 offset);
+        u64 Position();
+        void Close();
 
-        private:
-            std::ofstream _stream;
-        };
+    private:
+        std::ofstream _stream;
+    };
 
-        class DirectoryIterator;
-        class DirectoryEntries;
+    class DirectoryIterator;
+    class DirectoryEntries;
 
-        class Path {
-        public:
-            Path() = default;
-            explicit Path(const str& path) : path(Normalize(path)) {}
-            static Path Current();
+    class Path {
+    public:
+        Path() = default;
+        explicit Path(const str& path) : path(Normalize(path)) {}
+        static Path Current();
 
-            [[nodiscard]] Path Parent() const;
-            [[nodiscard]] bool Exists() const;
-            [[nodiscard]] bool IsFile() const;
-            [[nodiscard]] bool IsDirectory() const;
-            [[nodiscard]] bool HasExtension() const;
+        [[nodiscard]] Path Parent() const;
+        [[nodiscard]] bool Exists() const;
+        [[nodiscard]] bool IsFile() const;
+        [[nodiscard]] bool IsDirectory() const;
+        [[nodiscard]] bool HasExtension() const;
 
-            /// @brief Returns the file extension without the period '.'
-            ///
-            /// i.e. 'txt' or 'jpeg'
-            [[nodiscard]] str Extension() const;
-            [[nodiscard]] Path ReplaceExtension(const str& ext) const;
-            [[nodiscard]] Path Join(const str& subPath) const;
-            [[nodiscard]] Path operator/(const str& subPath) const;
-            [[nodiscard]] str Str() const;
-            [[nodiscard]] const char* CStr() const;
-            [[nodiscard]] str Filename() const;
+        /// @brief Returns the file extension without the period '.'
+        ///
+        /// i.e. 'txt' or 'jpeg'
+        [[nodiscard]] str Extension() const;
+        [[nodiscard]] Path ReplaceExtension(const str& ext) const;
+        [[nodiscard]] Path Join(const str& subPath) const;
+        [[nodiscard]] Path operator/(const str& subPath) const;
+        [[nodiscard]] str Str() const;
+        [[nodiscard]] const char* CStr() const;
+        [[nodiscard]] str Filename() const;
 
-            [[nodiscard]] bool operator==(const Path& other) const;
+        [[nodiscard]] bool operator==(const Path& other) const;
 
-            [[nodiscard]] bool Create() const;
-            [[nodiscard]] bool CreateAll() const;
+        [[nodiscard]] bool Create() const;
+        [[nodiscard]] bool CreateAll() const;
 
-            [[nodiscard]] DirectoryEntries Entries() const;
+        [[nodiscard]] DirectoryEntries Entries() const;
 
-        private:
-            str path;
-            static str Join(const str& lhs, const str& rhs);
-            static str Normalize(const str& rawPath);
-        };
+    private:
+        str path;
+        static str Join(const str& lhs, const str& rhs);
+        static str Normalize(const str& rawPath);
+    };
 
-        class FindHandleWrapper {
-        public:
-            FindHandleWrapper();
+    class FindHandleWrapper {
+    public:
+        FindHandleWrapper();
 
-            explicit FindHandleWrapper(HANDLE handle);
+        explicit FindHandleWrapper(HANDLE handle);
 
-            ~FindHandleWrapper();
+        ~FindHandleWrapper();
 
-            FindHandleWrapper(const FindHandleWrapper&)            = delete;
-            FindHandleWrapper& operator=(const FindHandleWrapper&) = delete;
+        FindHandleWrapper(const FindHandleWrapper&)            = delete;
+        FindHandleWrapper& operator=(const FindHandleWrapper&) = delete;
 
-            FindHandleWrapper(FindHandleWrapper&& other) noexcept;
-            FindHandleWrapper& operator=(FindHandleWrapper&& other) noexcept;
+        FindHandleWrapper(FindHandleWrapper&& other) noexcept;
+        FindHandleWrapper& operator=(FindHandleWrapper&& other) noexcept;
 
-            HANDLE Get() const;
-            bool IsValid() const;
+        HANDLE Get() const;
+        bool IsValid() const;
 
-        private:
-            HANDLE mHandle;
-        };
+    private:
+        HANDLE mHandle;
+    };
 
-        class DirectoryEntries {
-        public:
-            explicit DirectoryEntries(const Path& path);
+    class DirectoryEntries {
+    public:
+        explicit DirectoryEntries(const Path& path);
 
-            DirectoryIterator begin();
-            DirectoryIterator end();
+        DirectoryIterator begin();
+        DirectoryIterator end();
 
-        private:
-            Path mPath;
-        };
+    private:
+        Path mPath;
+    };
 
-        class DirectoryIterator {
-        public:
-            using iterator_category = std::input_iterator_tag;
-            using value_type        = Path;
-            using difference_type   = std::ptrdiff_t;
-            using pointer           = const Path*;
-            using reference         = const Path&;
+    class DirectoryIterator {
+    public:
+        using iterator_category = std::input_iterator_tag;
+        using value_type        = Path;
+        using difference_type   = std::ptrdiff_t;
+        using pointer           = const Path*;
+        using reference         = const Path&;
 
-            DirectoryIterator();
-            explicit DirectoryIterator(const Path& path);
+        DirectoryIterator();
+        explicit DirectoryIterator(const Path& path);
 
-            reference operator*() const;
-            pointer operator->() const;
-            DirectoryIterator& operator++();
+        reference operator*() const;
+        pointer operator->() const;
+        DirectoryIterator& operator++();
 
-            // Disallow post-increment operator
-            DirectoryIterator& operator++(int) = delete;
+        // Disallow post-increment operator
+        DirectoryIterator& operator++(int) = delete;
 
-            bool operator==(const DirectoryIterator& other) const;
-            bool operator!=(const DirectoryIterator& other) const;
+        bool operator==(const DirectoryIterator& other) const;
+        bool operator!=(const DirectoryIterator& other) const;
 
-        private:
-            bool mIsEnd;
-            Path mRoot;
-            Path mCurrent;
-            FindHandleWrapper mFindHandle;
+    private:
+        bool mIsEnd;
+        Path mRoot;
+        Path mCurrent;
+        FindHandleWrapper mFindHandle;
 
-            void ProcessCurrentEntry(const WIN32_FIND_DATAA& findData);
-        };
-    }  // namespace Filesystem
+        void ProcessCurrentEntry(const WIN32_FIND_DATAA& findData);
+    };
 }  // namespace x

@@ -100,9 +100,9 @@ namespace x {
         bool FromBytes(std::span<const u8> data);
         std::vector<u8> ToBytes() const;
 
-        static AssetTable ReadPakTable(const Filesystem::Path& pakFile);
+        static AssetTable ReadPakTable(const Path& pakFile);
         static AssetTable ReadPakTable(std::span<const u8> data);
-        static vector<u8> FetchAssetData(const Filesystem::Path& pakFile, const XPakTableEntry& entry);
+        static vector<u8> FetchAssetData(const Path& pakFile, const XPakTableEntry& entry);
         static std::optional<XPak> Create(const ProjectDescriptor& project);
 
     private:

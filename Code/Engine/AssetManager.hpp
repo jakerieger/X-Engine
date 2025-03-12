@@ -28,13 +28,13 @@ namespace x {
 
     private:
         inline static bool mLoaded {false};
-        static bool LoadAssets(const Filesystem::Path& workingDir = Filesystem::Path::Current());
+        static bool LoadAssets(const Path& workingDir = Path::Current());
         static vector<AssetId> GetScenes();
 
 #ifdef X_USE_PAK_FILE
         inline static AssetTable mAssets;
 #else
-        inline static unordered_map<AssetId, Filesystem::Path> mAssets;
+        inline static unordered_map<AssetId, Path> mAssets;
 #endif
     };
 }  // namespace x

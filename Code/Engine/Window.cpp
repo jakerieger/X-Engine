@@ -203,6 +203,10 @@ namespace x {
         return ::DefWindowProcA(mHwnd, msg, wParam, lParam);
     }
 
+    void Window::SetWindowTitle(const str& title) const {
+        ::SetWindowTextA(mHwnd, title.c_str());
+    }
+
     LRESULT Window::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         Window* self = nullptr;
 

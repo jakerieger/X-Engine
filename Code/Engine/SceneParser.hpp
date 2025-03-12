@@ -53,6 +53,7 @@ namespace x {
     };
 
     struct EntityDescriptor {
+        u64 id;
         str name;
         TransformDescriptor transform;
         std::optional<ModelDescriptor> model       = {};
@@ -70,11 +71,17 @@ namespace x {
 
         vector<EntityDescriptor> mEntities;
         vector<u64> mAssetIds;
+
+        bool IsValid() const {
+            return (!mName.empty()) && (!mDescription.empty()) && (mEntities.size() > 0);
+        }
     };
 
     class SceneParser {
     public:
         static void Parse(const str& filename, SceneDescriptor& descriptor);
         static void Parse(std::span<const u8> data, SceneDescriptor& descriptor);
+
+        static void WriteToFile(const SceneDescriptor& descriptor, const str& filename);
     };
 }  // namespace x

@@ -18,8 +18,8 @@ namespace x {
         str mName;
         str mDescription;
         unordered_map<str, EntityId> mEntities;
-        vector<std::pair<ModelComponent*, TransformComponent*>> mOpaqueModels;
-        vector<std::pair<ModelComponent*, TransformComponent*>> mTransparentModels;
+        vector<std::pair<const ModelComponent*, const TransformComponent*>> mOpaqueObjects;
+        vector<std::pair<const ModelComponent*, const TransformComponent*>> mTransparentObjects;
 
     public:
         explicit Scene(RenderContext& context, ScriptEngine& scriptEngine);

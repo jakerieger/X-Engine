@@ -24,21 +24,37 @@ namespace x {
         auto hr = device->CreateSamplerState(&comparisonSamplerDesc, &mDepthSamplerState);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create sampler state for shadow pass");
 
-        // D3D11_BLEND_DESC blendDesc       = {};
-        // blendDesc.AlphaToCoverageEnable  = FALSE;
-        // blendDesc.IndependentBlendEnable = FALSE;
-        //
-        // blendDesc.RenderTarget[0].BlendEnable           = TRUE;
-        // blendDesc.RenderTarget[0].SrcBlend              = D3D11_BLEND_SRC_ALPHA;
-        // blendDesc.RenderTarget[0].DestBlend             = D3D11_BLEND_INV_SRC_ALPHA;
-        // blendDesc.RenderTarget[0].BlendOp               = D3D11_BLEND_OP_ADD;
-        // blendDesc.RenderTarget[0].SrcBlendAlpha         = D3D11_BLEND_ONE;
-        // blendDesc.RenderTarget[0].DestBlendAlpha        = D3D11_BLEND_ZERO;
-        // blendDesc.RenderTarget[0].BlendOpAlpha          = D3D11_BLEND_OP_ADD;
-        // blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-        //
-        // hr = device->CreateBlendState(&blendDesc, &mBlendStateTransparent);
-        // X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create blend state for light pass");
+        // Opaque blend state
+        D3D11_BLEND_DESC opaqueDesc                      = {};
+        opaqueDesc.AlphaToCoverageEnable                 = FALSE;
+        opaqueDesc.IndependentBlendEnable                = FALSE;
+        opaqueDesc.RenderTarget[0].BlendEnable           = FALSE;
+        opaqueDesc.RenderTarget[0].SrcBlend              = D3D11_BLEND_ONE;
+        opaqueDesc.RenderTarget[0].DestBlend             = D3D11_BLEND_ZERO;
+        opaqueDesc.RenderTarget[0].BlendOp               = D3D11_BLEND_OP_ADD;
+        opaqueDesc.RenderTarget[0].SrcBlendAlpha         = D3D11_BLEND_ONE;
+        opaqueDesc.RenderTarget[0].DestBlendAlpha        = D3D11_BLEND_ZERO;
+        opaqueDesc.RenderTarget[0].BlendOpAlpha          = D3D11_BLEND_OP_ADD;
+        opaqueDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+        hr = device->CreateBlendState(&opaqueDesc, &mBlendStateOpaque);
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create opaque blend state for light pass");
+
+        // Transparent blend state
+        D3D11_BLEND_DESC transparentDesc                      = {};
+        transparentDesc.AlphaToCoverageEnable                 = FALSE;
+        transparentDesc.IndependentBlendEnable                = FALSE;
+        transparentDesc.RenderTarget[0].BlendEnable           = TRUE;
+        transparentDesc.RenderTarget[0].SrcBlend              = D3D11_BLEND_SRC_ALPHA;
+        transparentDesc.RenderTarget[0].DestBlend             = D3D11_BLEND_INV_SRC_ALPHA;
+        transparentDesc.RenderTarget[0].BlendOp               = D3D11_BLEND_OP_ADD;
+        transparentDesc.RenderTarget[0].SrcBlendAlpha         = D3D11_BLEND_ONE;
+        transparentDesc.RenderTarget[0].DestBlendAlpha        = D3D11_BLEND_ZERO;
+        transparentDesc.RenderTarget[0].BlendOpAlpha          = D3D11_BLEND_OP_ADD;
+        transparentDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+        hr = device->CreateBlendState(&transparentDesc, &mBlendStateTransparent);
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create transparent blend state for light pass");
 
         Resize(width, height);
     }
@@ -47,7 +63,6 @@ namespace x {
         auto* context = mContext.GetDeviceContext();
         context->OMSetRenderTargets(1, mRenderTargetView.GetAddressOf(), mDepthStencilView.Get());
         context->OMSetDepthStencilState(mDepthStencilState.Get(), 0);
-        // context->OMSetBlendState(mBlendStateOpaque.Get(), nullptr, 0xFFFFFFFF);
         context->ClearRenderTargetView(mRenderTargetView.Get(), clearColor);
         context->ClearDepthStencilView(mDepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
         context->PSSetShaderResources(5, 1, &depthMap);
@@ -56,6 +71,14 @@ namespace x {
 
     void LightPass::EndPass(ID3D11ShaderResourceView*& result) const {
         result = mShaderResourceView.Get();
+    }
+
+    void LightPass::SetOpaqueState() const {
+        mContext.GetDeviceContext()->OMSetBlendState(mBlendStateOpaque.Get(), nullptr, 0xFFFFFFFF);
+    }
+
+    void LightPass::SetTransparentState() const {
+        mContext.GetDeviceContext()->OMSetBlendState(mBlendStateTransparent.Get(), nullptr, 0xFFFFFFFF);
     }
 
     void LightPass::Resize(u32 width, u32 height) {

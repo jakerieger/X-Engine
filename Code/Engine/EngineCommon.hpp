@@ -175,7 +175,7 @@ private:
     }
 
     X_NODISCARD static std::string GetLogFileName() {
-        using namespace x::Filesystem;
+        using namespace x;
         static Path logDirectory = Path::Current() / "Logs";
         if (!logDirectory.Exists()) {
             if (!logDirectory.Create()) { X_PANIC("Failed to create log file directory"); }

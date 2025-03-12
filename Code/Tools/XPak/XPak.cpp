@@ -11,9 +11,7 @@
 #include <brotli/encode.h>
 
 namespace x {
-    using namespace Filesystem;
-
-    static void ProcessAssetDirectory(const Filesystem::Path& directory,
+    static void ProcessAssetDirectory(const Path& directory,
                                       vector<XPakTableEntry>& tableEntries,
                                       vector<XPakAssetEntry>& assetEntries) {
         for (auto& file : directory.Entries()) {
@@ -302,7 +300,7 @@ namespace x {
         return pak;
     }
 
-    AssetTable XPak::ReadPakTable(const Filesystem::Path& pakFile) {
+    AssetTable XPak::ReadPakTable(const Path& pakFile) {
         auto pakBytes = FileReader::ReadAllBytes(pakFile);
         return ReadPakTable(pakBytes);
     }
@@ -330,7 +328,7 @@ namespace x {
         return assetTable;
     }
 
-    vector<u8> XPak::FetchAssetData(const Filesystem::Path& pakFile, const XPakTableEntry& entry) {
+    vector<u8> XPak::FetchAssetData(const Path& pakFile, const XPakTableEntry& entry) {
         if (!pakFile.Exists()) {
             std::cerr << "File not found: " << pakFile.Str() << std::endl;
             return {};

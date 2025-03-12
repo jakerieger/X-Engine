@@ -19,6 +19,9 @@ namespace x {
         void BeginPass(ID3D11ShaderResourceView* depthMap, f32 clearColor[4]);
         void EndPass(ID3D11ShaderResourceView*& result) const;
 
+        void SetOpaqueState() const;
+        void SetTransparentState() const;
+
         void Resize(u32 width, u32 height);
 
     private:

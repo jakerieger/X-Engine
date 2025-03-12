@@ -10,7 +10,8 @@ namespace x {
     class ModelComponent {
         ResourceHandle<Model> mModelHandle;
         shared_ptr<IMaterial> mMaterial;
-        bool mCastsShadows = true;
+        bool mCastsShadows   = true;
+        bool mReceiveShadows = true;
 
     public:
         ModelComponent() = default;
@@ -30,6 +31,11 @@ namespace x {
             return *this;
         }
 
+        ModelComponent& SetReceiveShadows(const bool receivesShadows) {
+            mReceiveShadows = receivesShadows;
+            return *this;
+        }
+
         template<typename T>
         T* GetMaterialAs() {
             return DCAST<T*>(mMaterial.get());
@@ -37,6 +43,14 @@ namespace x {
 
         shared_ptr<IMaterial> GetMaterial() const {
             return mMaterial;
+        }
+
+        bool GetCastsShadows() const {
+            return mCastsShadows;
+        }
+
+        bool GetReceiveShadows() const {
+            return mReceiveShadows;
         }
 
         void Draw(RenderContext& context,

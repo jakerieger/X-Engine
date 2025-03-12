@@ -24,7 +24,7 @@
     #include <sys/stat.h>
 #endif
 
-namespace x::Filesystem {
+namespace x {
 #pragma region FileReader
     std::vector<u8> FileReader::ReadAllBytes(const Path& path) {
         std::ifstream file(path.Str(), std::ios::binary | std::ios::ate);
@@ -89,7 +89,11 @@ namespace x::Filesystem {
     bool FileWriter::WriteAllText(const Path& path, const str& text) {
         std::ofstream file(path.Str(), std::ios::out | std::ios::trunc);
         if (!file) return false;
-        file << text;
+        str outText = text;
+        if (outText.empty()) { return false; }
+        // Enforce newline for final text value
+        if (outText.back() != '\n') { outText += '\n'; }
+        file << outText;
         return file.good();
     }
 
@@ -536,4 +540,4 @@ namespace x::Filesystem {
         return DirectoryIterator();
     }
 #pragma endregion
-}  // namespace x::Filesystem
+}  // namespace x

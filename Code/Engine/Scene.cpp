@@ -18,8 +18,8 @@ namespace x {
     void Scene::Load(const SceneDescriptor& descriptor) {
         mState.Reset();
         mInitialState.Reset();
-        mOpaqueModels.clear();
-        mTransparentModels.clear();
+        mOpaqueObjects.clear();
+        mTransparentObjects.clear();
 
         auto& mainCamera = mState.MainCamera;
         auto& sun        = mState.Lights.Sun;
@@ -50,25 +50,21 @@ namespace x {
             if (entity.model.has_value()) {
                 auto& model          = entity.model.value();
                 auto& modelComponent = mState.AddComponent<ModelComponent>(newEntity);
-                modelComponent.SetCastsShadows(model.castsShadows);
 
                 // Load model resource
                 if (!mResources.LoadResource<Model>(model.meshId)) { X_LOG_FATAL("Failed to load model"); }
                 auto modelHandle = mResources.FetchResource<Model>(model.meshId);
                 if (!modelHandle.has_value()) { X_LOG_FATAL("Failed to fetch model resource"); }
-                modelComponent.SetModelHandle(*modelHandle);
+
+                modelComponent.SetModelHandle(*modelHandle)
+                  .SetCastsShadows(model.castsShadows)
+                  .SetReceiveShadows(model.receiveShadows);
 
                 // Load material
                 const auto materialBytes = AssetManager::GetAssetData(model.materialId);
                 if (!materialBytes.has_value()) { X_LOG_FATAL("Failed to load material resource"); }
                 MaterialDescriptor matDesc = MaterialParser::Parse(*materialBytes);
                 LoadMaterial(matDesc, modelComponent);
-
-                if (matDesc.mTransparent) {
-                    mTransparentModels.push_back(std::make_pair(&modelComponent, &transformComponent));
-                } else {
-                    mOpaqueModels.push_back(std::make_pair(&modelComponent, &transformComponent));
-                }
             }
 
             if (entity.behavior.has_value()) {
@@ -138,6 +134,8 @@ namespace x {
         mState.GetLightState().Sun.lightViewProj = XMMatrixTranspose(lvp);
 
         // Update scene entities
+        mTransparentObjects.clear();
+        mOpaqueObjects.clear();
         for (const auto& [name, entityId] : mEntities) {
             const auto* behaviorComponent = mState.GetComponentMutable<BehaviorComponent>(entityId);
             auto* transformComponent      = mState.GetComponentMutable<TransformComponent>(entityId);
@@ -148,18 +146,24 @@ namespace x {
                 mScriptEngine.CallUpdateBehavior(name, deltaTime, entity);
             }
 
-            if (transformComponent) {
-                // Instead of re-calculating matrices every frame, the Transform component uses lazy updating.
-                // This does nothing if no transform values have changed between frames.
-                transformComponent->Update();
-            }
+            // Update transform matrix AFTER the behavior script has run, which may modify the transform
+            transformComponent->Update();
 
             if (modelComponent) {
-                // TODO: Figure out a way to like, not have to do this
-                auto* waterMaterial = modelComponent->GetMaterialAs<WaterMaterial>();
+                const shared_ptr<IMaterial> material = modelComponent->GetMaterial();
+                if (material) {
+                    if (material->Transparent()) {
+                        mTransparentObjects.push_back({modelComponent, transformComponent});
+                    } else {
+                        mOpaqueObjects.push_back({modelComponent, transformComponent});
+                    }
+                }
+                auto* waterMaterial = material->As<WaterMaterial>();
                 if (waterMaterial) { waterMaterial->SetWaveTime(sceneTime); }
             }
         }
+
+        // Sort transparent objects by distance from camera
     }
 
     void Scene::Destroyed() {
@@ -174,7 +178,7 @@ namespace x {
     }
 
     void Scene::DrawOpaque() {
-        for (const auto [model, transform] : mOpaqueModels) {
+        for (const auto [model, transform] : mOpaqueObjects) {
             Matrix world    = transform->GetTransformMatrix();
             auto view       = mState.GetMainCamera().GetViewMatrix();
             auto projection = mState.GetMainCamera().GetProjectionMatrix();
@@ -186,7 +190,7 @@ namespace x {
     }
 
     void Scene::DrawTransparent() {
-        for (const auto [model, transform] : mTransparentModels) {
+        for (const auto [model, transform] : mTransparentObjects) {
             Matrix world    = transform->GetTransformMatrix();
             auto view       = mState.GetMainCamera().GetViewMatrix();
             auto projection = mState.GetMainCamera().GetProjectionMatrix();

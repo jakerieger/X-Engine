@@ -51,6 +51,7 @@ namespace x {
         unique_ptr<Viewport> mWindowViewport;
 
         virtual LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam);
+        void SetWindowTitle(const str& title) const;
 
     private:
         bool mFocused {false};

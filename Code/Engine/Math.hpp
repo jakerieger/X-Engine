@@ -1,6 +1,5 @@
 #pragma once
 
-#include <bit>
 #include "DirectXMath.h"
 
 namespace x {
@@ -37,5 +36,12 @@ namespace x {
     inline float Abs(const float x) {
         if (x < 0.0f) return -x;
         return x;
+    }
+
+    inline float DistanceSquared(const Float3& v1, const Float3& v2) {
+        const float xSqr = (v2.x - v1.x) * (v2.x - v1.x);
+        const float ySqr = (v2.y - v1.y) * (v2.y - v1.y);
+        const float zSqr = (v2.z - v1.z) * (v2.z - v1.z);
+        return xSqr + ySqr + zSqr;
     }
 }  // namespace x

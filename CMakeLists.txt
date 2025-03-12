@@ -16,6 +16,7 @@ set(CODE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Code)
 
 include(${CODE_DIR}/Common.cmake)
 include(${CODE_DIR}/Vendor.cmake)
+include(${CODE_DIR}/Tools/Shared.cmake)
 
 include_directories(
     ${IMGUI_INCLUDE}
@@ -33,11 +34,12 @@ if (WIN32)
     )
 
     add_subdirectory(${CODE_DIR}/Engine)
-    add_subdirectory(${CODE_DIR}/Editor)
+    #    add_subdirectory(${CODE_DIR}/Editor)
     add_subdirectory(${CODE_DIR}/Game)
 
     # Tools
     add_subdirectory(${CODE_DIR}/Tools/XPak)
+    add_subdirectory(${CODE_DIR}/Tools/XSceneEditor)
 else ()
     message(FATAL_ERROR "Project only supports Windows 10 and 11.")
 endif ()
