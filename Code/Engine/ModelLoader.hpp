@@ -54,25 +54,25 @@ namespace x {
             for (u32 i = 0; i < mesh->mNumVertices; ++i) {
                 VSInputPBR vertex;
 
-                vertex.position.x = mesh->mVertices[i].x;
-                vertex.position.y = mesh->mVertices[i].y;
-                vertex.position.z = mesh->mVertices[i].z;
+                vertex.mPosition.x = mesh->mVertices[i].x;
+                vertex.mPosition.y = mesh->mVertices[i].y;
+                vertex.mPosition.z = mesh->mVertices[i].z;
 
                 if (mesh->mTextureCoords[0]) {
-                    vertex.texCoord.x = mesh->mTextureCoords[0][i].x;
-                    vertex.texCoord.y = mesh->mTextureCoords[0][i].y;
+                    vertex.mTexCoord.x = mesh->mTextureCoords[0][i].x;
+                    vertex.mTexCoord.y = mesh->mTextureCoords[0][i].y;
                 }
 
                 if (mesh->HasNormals()) {
-                    vertex.normal.x = mesh->mNormals[i].x;
-                    vertex.normal.y = mesh->mNormals[i].y;
-                    vertex.normal.z = mesh->mNormals[i].z;
+                    vertex.mNormal.x = mesh->mNormals[i].x;
+                    vertex.mNormal.y = mesh->mNormals[i].y;
+                    vertex.mNormal.z = mesh->mNormals[i].z;
                 }
 
                 if (mesh->HasTangentsAndBitangents()) {
-                    vertex.tangent.x = mesh->mTangents[i].x;
-                    vertex.tangent.y = mesh->mTangents[i].y;
-                    vertex.tangent.z = mesh->mTangents[i].z;
+                    vertex.mTangent.x = mesh->mTangents[i].x;
+                    vertex.mTangent.y = mesh->mTangents[i].y;
+                    vertex.mTangent.z = mesh->mTangents[i].z;
                 }
 
                 vertices.push_back(vertex);

@@ -6,10 +6,10 @@
 namespace x {
     class ColorGradeEffect : public IComputeEffect {
         struct alignas(16) ColorGradeParams {
-            f32 saturation;
-            f32 contrast;
-            f32 temperature;
-            f32 exposureAdjustment;
+            f32 mSaturation;
+            f32 mContrast;
+            f32 mTemperature;
+            f32 mExposureAdjustment;
         };
 
         f32 mSaturation         = 1.0f;

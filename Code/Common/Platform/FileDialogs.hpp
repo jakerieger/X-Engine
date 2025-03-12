@@ -6,7 +6,8 @@
 
 #include "Engine/Platform.hpp"
 
-namespace x {
+/// @brief Namespace containing all platform-specific code (Windows API, etc.)
+namespace Platform {
     bool OpenFileDialog(
       HWND owner, const char* initialDir, const char* filter, const char* title, char* outPath, size_t outPathSize);
 
@@ -26,4 +27,4 @@ namespace x {
     };
 
     int ShowAlert(HWND owner, const char* title, const char* message, AlertSeverity severity);
-}  // namespace x
+}  // namespace Platform

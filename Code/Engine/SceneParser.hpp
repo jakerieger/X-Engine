@@ -7,19 +7,19 @@
 
 namespace x {
     struct CameraDescriptor {
-        Float3 position;
-        Float3 eye;
-        f32 fovY;
-        f32 nearZ;
-        f32 farZ;
+        Float3 mPosition;
+        Float3 mEye;
+        f32 mFovY;
+        f32 mNearZ;
+        f32 mFarZ;
     };
 
     struct SunDescriptor {
-        bool enabled;
-        f32 intensity;
-        Float3 color;
-        Float3 direction;
-        bool castsShadows;
+        bool mEnabled;
+        f32 mIntensity;
+        Float3 mColor;
+        Float3 mDirection;
+        bool mCastsShadows;
     };
 
     struct PointLightDescriptor {};
@@ -29,35 +29,35 @@ namespace x {
     struct SpotLightDescriptor {};
 
     struct LightDescriptor {
-        SunDescriptor sun;
-        vector<PointLightDescriptor> pointLights;
-        vector<AreaLightDescriptor> areaLights;
-        vector<SpotLightDescriptor> spotLights;
+        SunDescriptor mSun;
+        vector<PointLightDescriptor> mPointLights;
+        vector<AreaLightDescriptor> mAreaLights;
+        vector<SpotLightDescriptor> mSpotLights;
     };
 
     struct TransformDescriptor {
-        Float3 position;
-        Float3 rotation;
-        Float3 scale;
+        Float3 mPosition;
+        Float3 mRotation;
+        Float3 mScale;
     };
 
     struct ModelDescriptor {
-        u64 meshId;
-        u64 materialId;
-        bool castsShadows;
-        bool receiveShadows;
+        u64 mMeshId;
+        u64 mMaterialId;
+        bool mCastsShadows;
+        bool mReceiveShadows;
     };
 
     struct BehaviorDescriptor {
-        u64 scriptId;
+        u64 mScriptId;
     };
 
     struct EntityDescriptor {
-        u64 id;
-        str name;
-        TransformDescriptor transform;
-        std::optional<ModelDescriptor> model       = {};
-        std::optional<BehaviorDescriptor> behavior = {};
+        u64 mId;
+        str mName;
+        TransformDescriptor mTransform;
+        std::optional<ModelDescriptor> mModel {};
+        std::optional<BehaviorDescriptor> mBehavior {};
     };
 
     struct SceneDescriptor {

@@ -16,7 +16,6 @@ set(CODE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Code)
 
 include(${CODE_DIR}/Common.cmake)
 include(${CODE_DIR}/Vendor.cmake)
-include(${CODE_DIR}/Tools/Shared.cmake)
 
 include_directories(
     ${IMGUI_INCLUDE}

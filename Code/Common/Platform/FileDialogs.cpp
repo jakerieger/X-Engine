@@ -4,7 +4,7 @@
 
 #include "FileDialogs.hpp"
 
-namespace x {
+namespace Platform {
     static void PrepareFilterString(char* filter, size_t length) {
         bool lastWasNull = false;
         for (size_t i = 0; i < length; i++) {
@@ -94,4 +94,4 @@ namespace x {
 
         return ::MessageBoxA(owner, message, title, type);
     }
-}  // namespace x
+}  // namespace Platform

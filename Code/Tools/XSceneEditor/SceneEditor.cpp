@@ -3,7 +3,7 @@
 //
 
 #include "SceneEditor.hpp"
-#include "Shared/FileDialogs.hpp"
+#include "Common/Platform/FileDialogs.hpp"
 #include <Inter.h>
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
@@ -112,15 +112,15 @@ namespace x {
                 if (ImGui::MenuItem("Open Scene", "Ctrl+O")) {
                     const char* filter = "Scene (*.scene)|*.scene|";
                     char filename[MAX_PATH];
-                    if (OpenFileDialog(mHwnd, nullptr, filter, "Open Scene File", filename, MAX_PATH)) {
+                    if (Platform::OpenFileDialog(mHwnd, nullptr, filter, "Open Scene File", filename, MAX_PATH)) {
                         LoadScene(filename);
                     }
                 }
                 if (ImGui::MenuItem("Save Scene", "Ctrl+S")) {
-                    if (ShowAlert(mHwnd,
-                                  "Save Scene",
-                                  "You are about to overwrite the current scene. Do you wish to continue?",
-                                  AlertSeverity::Question) == IDYES &&
+                    if (Platform::ShowAlert(mHwnd,
+                                            "Save Scene",
+                                            "You are about to overwrite the current scene. Do you wish to continue?",
+                                            Platform::AlertSeverity::Question) == IDYES &&
                         !mLoadedScenePath.Exists()) {
                         SaveScene();
                     }
@@ -128,13 +128,13 @@ namespace x {
                 if (ImGui::MenuItem("Save Scene As", "Ctrl+Shift+S")) {
                     const char* filter = "Scene (*.scene)|*.scene|";
                     char filename[MAX_PATH];
-                    if (SaveFileDialog(mHwnd,
-                                       mLoadedScenePath.Parent().CStr(),
-                                       filter,
-                                       "Save Scene File",
-                                       "scene",
-                                       filename,
-                                       MAX_PATH)) {
+                    if (Platform::SaveFileDialog(mHwnd,
+                                                 mLoadedScenePath.Parent().CStr(),
+                                                 filter,
+                                                 "Save Scene File",
+                                                 "scene",
+                                                 filename,
+                                                 MAX_PATH)) {
                         SaveSceneAs(filename);
                         LoadScene(filename);
                     }
@@ -198,10 +198,10 @@ namespace x {
             std::strcpy(mSceneSettings.mName, mLoadedScene.mName.c_str());
             std::strcpy(mSceneSettings.mDesc, mLoadedScene.mDescription.c_str());
         } else {
-            ShowAlert(mHwnd,
-                      "Error loading scene",
-                      "An unknown error occurred when loading the selected scene",
-                      AlertSeverity::Error);
+            Platform::ShowAlert(mHwnd,
+                                "Error loading scene",
+                                "An unknown error occurred when loading the selected scene",
+                                Platform::AlertSeverity::Error);
             mLoadedScene = oldDescriptor;
         }
 

@@ -34,10 +34,10 @@ namespace x {
               mRenderer.GetDeviceContext()->Map(mConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped))) {
             auto* params = CAST<ColorGradeParams*>(mapped.pData);
 
-            params->saturation         = mSaturation;
-            params->contrast           = mContrast;
-            params->temperature        = mTemperature;
-            params->exposureAdjustment = mExposureAdjustment;
+            params->mSaturation         = mSaturation;
+            params->mContrast           = mContrast;
+            params->mTemperature        = mTemperature;
+            params->mExposureAdjustment = mExposureAdjustment;
 
             mRenderer.GetDeviceContext()->Unmap(mConstantBuffer.Get(), 0);
         }

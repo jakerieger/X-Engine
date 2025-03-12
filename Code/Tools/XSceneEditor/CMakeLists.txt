@@ -6,7 +6,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/XSceneEdito
 add_executable(XSceneEditor
     ${IMGUI_SOURCES}
     ${COMMON_SOURCES}
-    ${TOOLS_SHARED_SOURCES}
+    ${PLATFORM_SOURCES}
     ${SCENE_EDITOR_DIR}/SceneEditor.hpp
     ${SCENE_EDITOR_DIR}/SceneEditor.cpp
     ${SCENE_EDITOR_DIR}/main.cpp

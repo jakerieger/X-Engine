@@ -22,62 +22,62 @@ namespace x {
         mTransparentObjects.clear();
 
         auto& mainCamera = mState.MainCamera;
-        auto& sun        = mState.Lights.Sun;
+        auto& sun        = mState.Lights.mSun;
 
         const auto& cameraDescriptor = descriptor.mWorld.mCamera;
-        mainCamera.SetPosition(Float3ToVectorSet(cameraDescriptor.position));
-        mainCamera.SetFOV(cameraDescriptor.fovY);
-        mainCamera.SetClipPlanes(cameraDescriptor.nearZ, cameraDescriptor.farZ);
+        mainCamera.SetPosition(Float3ToVectorSet(cameraDescriptor.mPosition));
+        mainCamera.SetFOV(cameraDescriptor.mFovY);
+        mainCamera.SetClipPlanes(cameraDescriptor.mNearZ, cameraDescriptor.mFarZ);
 
-        const auto& sunDescriptor = descriptor.mWorld.mLights.sun;
-        sun.enabled               = sunDescriptor.enabled;
-        sun.intensity             = sunDescriptor.intensity;
-        sun.color                 = {sunDescriptor.color.x, sunDescriptor.color.y, sunDescriptor.color.z, 1.0f};
-        sun.direction    = {sunDescriptor.direction.x, sunDescriptor.direction.y, sunDescriptor.direction.z, 0.0f};
-        sun.castsShadows = sunDescriptor.castsShadows;
+        const auto& sunDescriptor = descriptor.mWorld.mLights.mSun;
+        sun.mEnabled               = sunDescriptor.mEnabled;
+        sun.mIntensity             = sunDescriptor.mIntensity;
+        sun.mColor                 = {sunDescriptor.mColor.x, sunDescriptor.mColor.y, sunDescriptor.mColor.z, 1.0f};
+        sun.mDirection    = {sunDescriptor.mDirection.x, sunDescriptor.mDirection.y, sunDescriptor.mDirection.z, 0.0f};
+        sun.mCastsShadows = sunDescriptor.mCastsShadows;
 
         for (auto& entity : descriptor.mEntities) {
             const EntityId newEntity = mState.CreateEntity();
 
             // Create and attach components
-            auto transformDescriptor = entity.transform;
+            auto transformDescriptor = entity.mTransform;
             auto& transformComponent = mState.AddComponent<TransformComponent>(newEntity);
-            transformComponent.SetPosition(transformDescriptor.position);
-            transformComponent.SetRotation(transformDescriptor.rotation);
-            transformComponent.SetScale(transformDescriptor.scale);
+            transformComponent.SetPosition(transformDescriptor.mPosition);
+            transformComponent.SetRotation(transformDescriptor.mRotation);
+            transformComponent.SetScale(transformDescriptor.mScale);
             transformComponent.Update();
 
-            if (entity.model.has_value()) {
-                auto& model          = entity.model.value();
+            if (entity.mModel.has_value()) {
+                auto& model          = entity.mModel.value();
                 auto& modelComponent = mState.AddComponent<ModelComponent>(newEntity);
 
                 // Load model resource
-                if (!mResources.LoadResource<Model>(model.meshId)) { X_LOG_FATAL("Failed to load model"); }
-                auto modelHandle = mResources.FetchResource<Model>(model.meshId);
+                if (!mResources.LoadResource<Model>(model.mMeshId)) { X_LOG_FATAL("Failed to load model"); }
+                auto modelHandle = mResources.FetchResource<Model>(model.mMeshId);
                 if (!modelHandle.has_value()) { X_LOG_FATAL("Failed to fetch model resource"); }
 
                 modelComponent.SetModelHandle(*modelHandle)
-                  .SetCastsShadows(model.castsShadows)
-                  .SetReceiveShadows(model.receiveShadows);
+                  .SetCastsShadows(model.mCastsShadows)
+                  .SetReceiveShadows(model.mReceiveShadows);
 
                 // Load material
-                const auto materialBytes = AssetManager::GetAssetData(model.materialId);
+                const auto materialBytes = AssetManager::GetAssetData(model.mMaterialId);
                 if (!materialBytes.has_value()) { X_LOG_FATAL("Failed to load material resource"); }
                 MaterialDescriptor matDesc = MaterialParser::Parse(*materialBytes);
                 LoadMaterial(matDesc, modelComponent);
             }
 
-            if (entity.behavior.has_value()) {
-                auto& behavior            = entity.behavior.value();
+            if (entity.mBehavior.has_value()) {
+                auto& behavior            = entity.mBehavior.value();
                 auto& behaviorComponent   = mState.AddComponent<BehaviorComponent>(newEntity);
-                const auto scriptBytecode = AssetManager::GetAssetData(behavior.scriptId);
+                const auto scriptBytecode = AssetManager::GetAssetData(behavior.mScriptId);
                 if (!scriptBytecode.has_value()) { X_LOG_FATAL("Failed to load script bytecode") }
 
-                behaviorComponent.Load(behavior.scriptId);
-                if (!mScriptEngine.LoadScript(*scriptBytecode, entity.name)) { X_LOG_FATAL("Failed to load script"); }
+                behaviorComponent.Load(behavior.mScriptId);
+                if (!mScriptEngine.LoadScript(*scriptBytecode, entity.mName)) { X_LOG_FATAL("Failed to load script"); }
             }
 
-            mEntities[entity.name] = newEntity;
+            mEntities[entity.mName] = newEntity;
         }
 
         mInitialState = mState;  // Cache init state so scene can be reset
@@ -126,12 +126,12 @@ namespace x {
         // Calculate LVP
         // TODO: I only need to update this if either the light direction or the screen size changes; this can be
         // optimized!
-        const auto lvp                           = CalculateLightViewProjection(mState.GetLightState().Sun,
+        const auto lvp                           = CalculateLightViewProjection(mState.GetLightState().mSun,
                                                       5.0f,  // TODO: this needs tweaking depending on the light height
                                                       camera.GetAspectRatio(),
                                                       clipPlanes.first,
                                                       clipPlanes.second);
-        mState.GetLightState().Sun.lightViewProj = XMMatrixTranspose(lvp);
+        mState.GetLightState().mSun.mLightViewProj = XMMatrixTranspose(lvp);
 
         // Update scene entities
         mTransparentObjects.clear();

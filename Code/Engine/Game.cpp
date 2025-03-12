@@ -51,7 +51,7 @@ namespace x {
             Matrix world                  = XMMatrixIdentity();
             const auto transformComponent = state.GetComponent<TransformComponent>(entity);
             if (transformComponent) { world = transformComponent->GetTransformMatrix(); }
-            mRenderSystem->UpdateShadowParams(state.GetLightState().Sun.lightViewProj, XMMatrixTranspose(world));
+            mRenderSystem->UpdateShadowParams(state.GetLightState().mSun.mLightViewProj, XMMatrixTranspose(world));
 
             model.Draw(mRenderContext);
         }

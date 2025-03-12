@@ -50,42 +50,42 @@ namespace x {
                 auto& camera = descriptor.mWorld.mCamera;
                 out << YAML::Key << "camera" << YAML::BeginMap;
                 out << YAML::Key << "position" << YAML::Value << YAML::Flow;
-                EmitFloat3(out, camera.position);
+                EmitFloat3(out, camera.mPosition);
                 out << YAML::Key << "eye" << YAML::Value << YAML::Flow;
-                EmitFloat3(out, camera.eye);
-                out << YAML::Key << "fovY" << YAML::Value << camera.fovY;
-                out << YAML::Key << "nearZ" << YAML::Value << camera.nearZ;
-                out << YAML::Key << "farZ" << YAML::Value << camera.farZ;
+                EmitFloat3(out, camera.mEye);
+                out << YAML::Key << "fovY" << YAML::Value << camera.mFovY;
+                out << YAML::Key << "nearZ" << YAML::Value << camera.mNearZ;
+                out << YAML::Key << "farZ" << YAML::Value << camera.mFarZ;
                 out << YAML::EndMap;
                 // ====================================================================//
 
                 // ============================== Lights ==============================//
-                auto& sun = descriptor.mWorld.mLights.sun;
+                auto& sun = descriptor.mWorld.mLights.mSun;
                 out << YAML::Key << "lights" << YAML::BeginMap;
 
                 // Sun
                 out << YAML::Key << "sun" << YAML::BeginMap;
-                out << YAML::Key << "enabled" << YAML::Value << sun.enabled;
-                out << YAML::Key << "intensity" << YAML::Value << sun.intensity;
+                out << YAML::Key << "enabled" << YAML::Value << sun.mEnabled;
+                out << YAML::Key << "intensity" << YAML::Value << sun.mIntensity;
                 out << YAML::Key << "color" << YAML::Value << YAML::Flow;
-                EmitFloat3(out, sun.color);
+                EmitFloat3(out, sun.mColor);
                 out << YAML::Key << "direction" << YAML::Value << YAML::Flow;
-                EmitFloat3(out, sun.direction);
-                out << YAML::Key << "castsShadows" << YAML::Value << sun.castsShadows;
+                EmitFloat3(out, sun.mDirection);
+                out << YAML::Key << "castsShadows" << YAML::Value << sun.mCastsShadows;
                 out << YAML::EndMap;
 
                 // Point lights
-                auto& pointLights = descriptor.mWorld.mLights.pointLights;
+                auto& pointLights = descriptor.mWorld.mLights.mPointLights;
                 out << YAML::Key << "pointLights" << YAML::BeginSeq;
                 out << YAML::EndSeq;
 
                 // Area lights
-                auto& areaLights = descriptor.mWorld.mLights.areaLights;
+                auto& areaLights = descriptor.mWorld.mLights.mAreaLights;
                 out << YAML::Key << "areaLights" << YAML::BeginSeq;
                 out << YAML::EndSeq;
 
                 // Spotlights
-                auto& spotLights = descriptor.mWorld.mLights.spotLights;
+                auto& spotLights = descriptor.mWorld.mLights.mSpotLights;
                 out << YAML::Key << "spotLights" << YAML::BeginSeq;
                 out << YAML::EndSeq;
 
@@ -101,8 +101,8 @@ namespace x {
 
                 for (auto& entity : descriptor.mEntities) {
                     out << YAML::BeginMap;
-                    out << YAML::Key << "id" << YAML::Value << entity.id;
-                    out << YAML::Key << "name" << YAML::Value << entity.name;
+                    out << YAML::Key << "id" << YAML::Value << entity.mId;
+                    out << YAML::Key << "name" << YAML::Value << entity.mName;
 
                     // Components
                     out << YAML::Key << "components";
@@ -111,35 +111,35 @@ namespace x {
                     // Transform
                     out << YAML::Key << "transform" << YAML::Value << YAML::BeginMap;
                     {
-                        auto& transform = entity.transform;
+                        auto& transform = entity.mTransform;
                         out << YAML::Key << "position" << YAML::Flow;
-                        EmitFloat3(out, transform.position);
+                        EmitFloat3(out, transform.mPosition);
                         out << YAML::Key << "rotation" << YAML::Flow;
-                        EmitFloat3(out, transform.rotation);
+                        EmitFloat3(out, transform.mRotation);
                         out << YAML::Key << "scale" << YAML::Flow;
-                        EmitFloat3(out, transform.scale);
+                        EmitFloat3(out, transform.mScale);
                     }
                     out << YAML::EndMap;
 
                     // Model
                     {
-                        if (entity.model.has_value()) {
-                            auto& model = entity.model.value();
+                        if (entity.mModel.has_value()) {
+                            auto& model = entity.mModel.value();
                             out << YAML::Key << "model" << YAML::Value << YAML::BeginMap;
-                            out << YAML::Key << "mesh" << YAML::Value << model.meshId;
-                            out << YAML::Key << "material" << YAML::Value << model.materialId;
-                            out << YAML::Key << "castsShadows" << YAML::Value << model.castsShadows;
-                            out << YAML::Key << "receiveShadows" << YAML::Value << model.receiveShadows;
+                            out << YAML::Key << "mesh" << YAML::Value << model.mMeshId;
+                            out << YAML::Key << "material" << YAML::Value << model.mMaterialId;
+                            out << YAML::Key << "castsShadows" << YAML::Value << model.mCastsShadows;
+                            out << YAML::Key << "receiveShadows" << YAML::Value << model.mReceiveShadows;
                             out << YAML::EndMap;
                         }
                     }
 
                     // Behavior
                     {
-                        if (entity.behavior.has_value()) {
-                            auto& behavior = entity.behavior.value();
+                        if (entity.mBehavior.has_value()) {
+                            auto& behavior = entity.mBehavior.value();
                             out << YAML::Key << "behavior" << YAML::Value << YAML::BeginMap;
-                            out << YAML::Key << "script" << YAML::Value << behavior.scriptId;
+                            out << YAML::Key << "script" << YAML::Value << behavior.mScriptId;
                             out << YAML::EndMap;
                         }
                     }
@@ -160,20 +160,20 @@ namespace x {
     void ParseWorld(const YAML::Node& world, SceneDescriptor& descriptor) {
         YAML::Node cameraNode = world["camera"];
 
-        descriptor.mWorld.mCamera.position = ParseFloat3(cameraNode["position"]);
-        descriptor.mWorld.mCamera.eye      = ParseFloat3(cameraNode["eye"]);
-        descriptor.mWorld.mCamera.fovY     = cameraNode["fovY"].as<f32>();
-        descriptor.mWorld.mCamera.nearZ    = cameraNode["nearZ"].as<f32>();
-        descriptor.mWorld.mCamera.farZ     = cameraNode["farZ"].as<f32>();
+        descriptor.mWorld.mCamera.mPosition = ParseFloat3(cameraNode["position"]);
+        descriptor.mWorld.mCamera.mEye      = ParseFloat3(cameraNode["eye"]);
+        descriptor.mWorld.mCamera.mFovY     = cameraNode["fovY"].as<f32>();
+        descriptor.mWorld.mCamera.mNearZ    = cameraNode["nearZ"].as<f32>();
+        descriptor.mWorld.mCamera.mFarZ     = cameraNode["farZ"].as<f32>();
 
         YAML::Node lightNode = world["lights"];
         YAML::Node sunNode   = lightNode["sun"];
 
-        descriptor.mWorld.mLights.sun.enabled      = sunNode["enabled"].as<bool>();
-        descriptor.mWorld.mLights.sun.intensity    = sunNode["intensity"].as<f32>();
-        descriptor.mWorld.mLights.sun.color        = ParseFloat3(sunNode["color"]);
-        descriptor.mWorld.mLights.sun.direction    = ParseFloat3(sunNode["direction"]);
-        descriptor.mWorld.mLights.sun.castsShadows = sunNode["castsShadows"].as<bool>();
+        descriptor.mWorld.mLights.mSun.mEnabled      = sunNode["enabled"].as<bool>();
+        descriptor.mWorld.mLights.mSun.mIntensity    = sunNode["intensity"].as<f32>();
+        descriptor.mWorld.mLights.mSun.mColor        = ParseFloat3(sunNode["color"]);
+        descriptor.mWorld.mLights.mSun.mDirection    = ParseFloat3(sunNode["direction"]);
+        descriptor.mWorld.mLights.mSun.mCastsShadows = sunNode["castsShadows"].as<bool>();
     }
 
     void ParseEntities(const YAML::Node& entities, SceneDescriptor& descriptor) {
@@ -181,42 +181,42 @@ namespace x {
 
         for (const auto& entity : entities) {
             EntityDescriptor entityDescriptor {};
-            entityDescriptor.id   = entity["id"].as<u64>();
-            const auto name       = entity["name"].as<str>();
-            entityDescriptor.name = name;
+            entityDescriptor.mId   = entity["id"].as<u64>();
+            const auto name        = entity["name"].as<str>();
+            entityDescriptor.mName = name;
 
             YAML::Node componentsNode = entity["components"];
 
             YAML::Node transformNode = componentsNode["transform"];
             TransformDescriptor transformDescriptor {};
-            transformDescriptor.position = ParseFloat3(transformNode["position"]);
-            transformDescriptor.rotation = ParseFloat3(transformNode["rotation"]);
-            transformDescriptor.scale    = ParseFloat3(transformNode["scale"]);
+            transformDescriptor.mPosition = ParseFloat3(transformNode["position"]);
+            transformDescriptor.mRotation = ParseFloat3(transformNode["rotation"]);
+            transformDescriptor.mScale    = ParseFloat3(transformNode["scale"]);
 
-            entityDescriptor.transform = transformDescriptor;
+            entityDescriptor.mTransform = transformDescriptor;
 
             YAML::Node modelNode = componentsNode["model"];
             if (modelNode.IsDefined()) {
                 ModelDescriptor modelDescriptor {};
-                modelDescriptor.meshId         = modelNode["mesh"].as<u64>();
-                modelDescriptor.materialId     = modelNode["material"].as<u64>();
-                modelDescriptor.castsShadows   = modelNode["castsShadows"].as<bool>();
-                modelDescriptor.receiveShadows = modelNode["receiveShadows"].as<bool>();
+                modelDescriptor.mMeshId         = modelNode["mesh"].as<u64>();
+                modelDescriptor.mMaterialId     = modelNode["material"].as<u64>();
+                modelDescriptor.mCastsShadows   = modelNode["castsShadows"].as<bool>();
+                modelDescriptor.mReceiveShadows = modelNode["receiveShadows"].as<bool>();
 
-                descriptor.mAssetIds.push_back(modelDescriptor.meshId);
-                descriptor.mAssetIds.push_back(modelDescriptor.materialId);
+                descriptor.mAssetIds.push_back(modelDescriptor.mMeshId);
+                descriptor.mAssetIds.push_back(modelDescriptor.mMaterialId);
 
-                entityDescriptor.model = modelDescriptor;
+                entityDescriptor.mModel = modelDescriptor;
             }
 
             YAML::Node behaviorNode = componentsNode["behavior"];
             if (behaviorNode.IsDefined()) {
                 BehaviorDescriptor behaviorDescriptor {};
-                behaviorDescriptor.scriptId = behaviorNode["script"].as<u64>();
+                behaviorDescriptor.mScriptId = behaviorNode["script"].as<u64>();
 
-                descriptor.mAssetIds.push_back(behaviorDescriptor.scriptId);
+                descriptor.mAssetIds.push_back(behaviorDescriptor.mScriptId);
 
-                entityDescriptor.behavior = behaviorDescriptor;
+                entityDescriptor.mBehavior = behaviorDescriptor;
             }
 
             entitiesArray.push_back(entityDescriptor);
