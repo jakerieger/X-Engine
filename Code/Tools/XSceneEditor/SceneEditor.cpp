@@ -161,11 +161,86 @@ namespace x {
     }
 
     void SceneEditor::SceneSettingsView() {
+        static constexpr f32 kLabelWidth = 140.0f;
         ImGui::Begin("Scene");
         {
             if (mLoadedScene.IsValid()) {
+                const f32 width = ImGui::GetContentRegionAvail().x;
+                ImGui::Text("Name: ");
+                ImGui::SameLine(kLabelWidth);
+                ImGui::SetNextItemWidth(width - kLabelWidth);
                 ImGui::InputText("##scene_name", mSceneSettings.mName, sizeof(mSceneSettings.mName));
+
+                ImGui::Text("Description: ");
+                ImGui::SameLine(kLabelWidth);
+                ImGui::SetNextItemWidth(width - kLabelWidth);
                 ImGui::InputText("##scene_desc", mSceneSettings.mDesc, sizeof(mSceneSettings.mDesc));
+
+                ImGui::Spacing();
+
+                if (ImGui::CollapsingHeader("World", ImGuiTreeNodeFlags_DefaultOpen)) {
+                    ImGui::Text("Camera");
+                    ImGui::Spacing();
+                    ImGui::Text("Position:");
+                    ImGui::SameLine(kLabelWidth);
+                    ImGui::SetNextItemWidth(width - kLabelWidth);
+                    ImGui::DragFloat3("##camera_pos", (f32*)&mLoadedScene.mWorld.mCamera.mPosition, 0.01f);
+
+                    ImGui::Text("Eye:");
+                    ImGui::SameLine(kLabelWidth);
+                    ImGui::SetNextItemWidth(width - kLabelWidth);
+                    ImGui::DragFloat3("##camera_eye", (f32*)&mLoadedScene.mWorld.mCamera.mEye, 0.01f);
+
+                    ImGui::Text("FOV Y:");
+                    ImGui::SameLine(kLabelWidth);
+                    ImGui::SetNextItemWidth(width - kLabelWidth);
+                    ImGui::SliderFloat("##camera_fov", &mLoadedScene.mWorld.mCamera.mFovY, 1.0f, 120.0f, "%.1f");
+
+                    ImGui::Text("Near Z:");
+                    ImGui::SameLine(kLabelWidth);
+                    ImGui::SetNextItemWidth(width - kLabelWidth);
+                    ImGui::InputFloat("##camera_nearz", &mLoadedScene.mWorld.mCamera.mNearZ, 0.1f, 100.0f, "%.1f");
+
+                    ImGui::Text("Far Z:");
+                    ImGui::SameLine(kLabelWidth);
+                    ImGui::SetNextItemWidth(width - kLabelWidth);
+                    ImGui::InputFloat("##camera_farz", &mLoadedScene.mWorld.mCamera.mFarZ, 0.1f, 100.0f, "%.1f");
+
+                    ImGui::Spacing();
+                    ImGui::Spacing();
+
+                    // Sun
+                    auto& sun = mLoadedScene.mWorld.mLights.mSun;
+                    ImGui::Text("Sun");
+                    ImGui::Spacing();
+
+                    ImGui::Text("Enabled:");
+                    ImGui::SameLine(kLabelWidth);
+                    ImGui::Checkbox("##sun_enabled", &sun.mEnabled);
+
+                    ImGui::Text("Intensity:");
+                    ImGui::SameLine(kLabelWidth);
+                    ImGui::SetNextItemWidth(width - kLabelWidth);
+                    ImGui::InputFloat("##sun_intensity", &sun.mIntensity, 0.1f, 1.0f, "%.1f");
+
+                    ImGui::Text("Color:");
+                    ImGui::SameLine(kLabelWidth);
+                    ImGui::SetNextItemWidth(width - kLabelWidth);
+                    ImGui::ColorEdit3("##sun_color", (f32*)&sun.mColor);
+
+                    ImGui::Text("Direction:");
+                    ImGui::SameLine(kLabelWidth);
+                    ImGui::SetNextItemWidth(width - kLabelWidth);
+                    ImGui::DragFloat3("##sun_direction", (f32*)&sun.mDirection, 0.01f);
+
+                    ImGui::Text("Casts Shadows:");
+                    ImGui::SameLine(kLabelWidth);
+                    ImGui::SetNextItemWidth(width - kLabelWidth);
+                    ImGui::Checkbox("##sun_casts_shadows", &sun.mCastsShadows);
+                }
+
+                mLoadedScene.mName        = mSceneSettings.mName;
+                mLoadedScene.mDescription = mSceneSettings.mDesc;
             } else {
                 ImGui::Text("No scene loaded. Go to \"File->Open Scene\" to load a scene.");
             }
