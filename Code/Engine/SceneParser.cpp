@@ -36,8 +36,6 @@ namespace x {
 
     void SceneParser::WriteToFile(const SceneDescriptor& descriptor, const str& filename) {
         YAML::Emitter out;
-
-        // TODO: Parse descriptor back to scene descriptor yaml
         out << YAML::BeginMap;
         {
             out << YAML::Key << "version" << YAML::Value << "1.0";
