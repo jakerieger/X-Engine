@@ -31,3 +31,17 @@ entities:
         material: 330415442194544845
         castsShadows: false
         receiveShadows: true
+  - id: 1
+    name: monke
+    components:
+      transform:
+        position: [ 0, 0, 0 ]
+        rotation: [ 0, 0, 0 ]
+        scale: [ 1, 1, 1 ]
+      model:
+        mesh: 149647991954226505
+        material: 343790720738094327
+        castsShadows: true
+        receiveShadows: true
+      behavior:
+        script: 455646657286743680

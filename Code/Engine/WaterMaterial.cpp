@@ -71,6 +71,6 @@ namespace x {
         hr = ctx->Map(mWaveParamsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
         if (FAILED(hr)) { throw std::runtime_error("Failed to map wave parameter buffer"); }
         memcpy(mapped.pData, &mWaveParameters, sizeof(WaveParameters));
-        ctx->Unmap(mWaterParamsBuffer.Get(), 0);
+        ctx->Unmap(mWaveParamsBuffer.Get(), 0);
     }
 }  // namespace x

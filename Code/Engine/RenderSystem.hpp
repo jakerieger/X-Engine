@@ -24,8 +24,8 @@ namespace x {
         void EndLightPass(ID3D11ShaderResourceView*& result) const;
         void ExecutePostProcessPass(ID3D11ShaderResourceView* input);
 
-        void BlendStateOpaque() const;
-        void BlendStateTransparent() const;
+        void OpaqueState() const;
+        void TransparentState() const;
 
         PostProcessPass* GetPostProcess() {
             return &mPostProcessPass;

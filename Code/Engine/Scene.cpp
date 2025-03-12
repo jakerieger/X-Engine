@@ -30,9 +30,9 @@ namespace x {
         mainCamera.SetClipPlanes(cameraDescriptor.mNearZ, cameraDescriptor.mFarZ);
 
         const auto& sunDescriptor = descriptor.mWorld.mLights.mSun;
-        sun.mEnabled               = sunDescriptor.mEnabled;
-        sun.mIntensity             = sunDescriptor.mIntensity;
-        sun.mColor                 = {sunDescriptor.mColor.x, sunDescriptor.mColor.y, sunDescriptor.mColor.z, 1.0f};
+        sun.mEnabled              = sunDescriptor.mEnabled;
+        sun.mIntensity            = sunDescriptor.mIntensity;
+        sun.mColor                = {sunDescriptor.mColor.x, sunDescriptor.mColor.y, sunDescriptor.mColor.z, 1.0f};
         sun.mDirection    = {sunDescriptor.mDirection.x, sunDescriptor.mDirection.y, sunDescriptor.mDirection.z, 0.0f};
         sun.mCastsShadows = sunDescriptor.mCastsShadows;
 
@@ -126,7 +126,7 @@ namespace x {
         // Calculate LVP
         // TODO: I only need to update this if either the light direction or the screen size changes; this can be
         // optimized!
-        const auto lvp                           = CalculateLightViewProjection(mState.GetLightState().mSun,
+        const auto lvp                             = CalculateLightViewProjection(mState.GetLightState().mSun,
                                                       5.0f,  // TODO: this needs tweaking depending on the light height
                                                       camera.GetAspectRatio(),
                                                       clipPlanes.first,
@@ -164,6 +164,17 @@ namespace x {
         }
 
         // Sort transparent objects by distance from camera
+        if (mTransparentObjects.size() > 1) {
+            const auto cameraPos = mState.GetMainCamera().GetPosition();
+            std::ranges::sort(mTransparentObjects,
+                              [cameraPos](const ModelTransformPair& lhs, const ModelTransformPair& rhs) {
+                                  const auto& lhsTransform = lhs.second;
+                                  const auto& rhsTransform = rhs.second;
+                                  const f32 lhsDist        = DistanceSquared(cameraPos, lhsTransform->GetPosition());
+                                  const f32 rhsDist        = DistanceSquared(cameraPos, rhsTransform->GetPosition());
+                                  return lhsDist > rhsDist;
+                              });
+        }
     }
 
     void Scene::Destroyed() {

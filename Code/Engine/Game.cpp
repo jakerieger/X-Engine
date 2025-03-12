@@ -57,23 +57,6 @@ namespace x {
         }
     }
 
-    // This should never modify game state (always iterate as const)
-    void Game::RenderScene(const SceneState& state) const {
-        if (mActiveScene->GetNumEntities() == 0) return;
-        // for (const auto& [entity, model] : state.GetComponents<ModelComponent>()) {
-        //     if (model.GetMaterial()->Transparent()) { continue; }
-        //
-        //     Matrix world = XMMatrixIdentity();
-        //     auto view    = state.GetMainCamera().GetViewMatrix();
-        //     auto proj    = state.GetMainCamera().GetProjectionMatrix();
-        //
-        //     const auto transformComponent = state.GetComponent<TransformComponent>(entity);
-        //     if (transformComponent) { world = transformComponent->GetTransformMatrix(); }
-        //     model.Draw(mRenderContext, {world, view, proj}, state.GetLightState(),
-        //     state.GetMainCamera().GetPosition());
-        // }
-    }
-
     void Game::RegisterEventHandlers() {
         RegisterHandler<WindowResizeEvent>(
           [this](const WindowResizeEvent& e) { OnResize(e.GetWidth(), e.GetHeight()); });
@@ -105,10 +88,10 @@ namespace x {
             // Do our fully lit pass using our previous depth-only pass as input for our shadow mapping shader
             mRenderSystem->BeginLightPass(shadowPassResult);
             {
-                mRenderSystem->BlendStateOpaque();
+                mRenderSystem->OpaqueState();
                 mActiveScene->DrawOpaque();
 
-                mRenderSystem->BlendStateTransparent();
+                mRenderSystem->TransparentState();
                 mActiveScene->DrawTransparent();
             }
             mRenderSystem->EndLightPass(lightPassResult);
@@ -118,12 +101,12 @@ namespace x {
             mRenderSystem->ExecutePostProcessPass(lightPassResult);
 
             // Draw debug UI last (on top of everything else)
-            if (mDebugUIEnabled) {
-                mDebugUI->BeginFrame();  // begin ImGui frame
-                mDebugUI->Draw(mRenderContext, mClock);
-                mDevConsole.Draw();
-                mDebugUI->EndFrame();  // end imgui frame
-            }
+            // if (mDebugUIEnabled) {
+            //     mDebugUI->BeginFrame();  // begin ImGui frame
+            //     mDebugUI->Draw(mRenderContext, mClock);
+            //     mDevConsole.Draw();
+            //     mDebugUI->EndFrame();  // end imgui frame
+            // }
         }
     }
 

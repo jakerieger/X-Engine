@@ -146,6 +146,8 @@ VSOuputWater VS_Main(VSInputPBR input) {
     output.Position = mul(worldPosition, mul(Transforms.view, Transforms.projection));
     output.TexCoord = input.texCoord0;
 
+    output.Position.z += 0.00001 * output.Position.w;
+
     return output;
 }
 
@@ -186,5 +188,5 @@ float4 PS_Main(VSOuputWater input) : SV_Target {
     // Add blue-sky reflection at glancing angles using fresnel
     finalColor = lerp(finalColor, float3(0.3, 0.5, 0.9), fresnel * 0.7);
     
-    return float4(finalColor, 0.67);
+    return float4(finalColor, 0.8f);
 }

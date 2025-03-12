@@ -19,8 +19,8 @@ namespace x {
         void BeginPass(ID3D11ShaderResourceView* depthMap, f32 clearColor[4]);
         void EndPass(ID3D11ShaderResourceView*& result) const;
 
-        void SetOpaqueState() const;
-        void SetTransparentState() const;
+        void OpaqueState() const;
+        void TransparentState() const;
 
         void Resize(u32 width, u32 height);
 
@@ -28,10 +28,11 @@ namespace x {
         RenderContext& mContext;
         ComPtr<ID3D11RenderTargetView> mRenderTargetView;
         ComPtr<ID3D11DepthStencilView> mDepthStencilView;
-        ComPtr<ID3D11DepthStencilState> mDepthStencilState;
+        ComPtr<ID3D11DepthStencilState> mDepthStencilStateOpaque;
+        ComPtr<ID3D11DepthStencilState> mDepthStencilStateTransparent;
         ComPtr<ID3D11ShaderResourceView> mShaderResourceView;
         ComPtr<ID3D11Texture2D> mSceneTexture;
-        ComPtr<ID3D11SamplerState> mDepthSamplerState;
+        ComPtr<ID3D11SamplerState> mShadowMapSamplerState;
         ComPtr<ID3D11BlendState> mBlendStateOpaque;
         ComPtr<ID3D11BlendState> mBlendStateTransparent;
     };

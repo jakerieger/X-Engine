@@ -21,7 +21,7 @@ namespace x {
         comparisonSamplerDesc.BorderColor[3] = 1.0f;
         comparisonSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS;  // Key setting!
 
-        auto hr = device->CreateSamplerState(&comparisonSamplerDesc, &mDepthSamplerState);
+        auto hr = device->CreateSamplerState(&comparisonSamplerDesc, &mShadowMapSamplerState);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create sampler state for shadow pass");
 
         // Opaque blend state
@@ -56,35 +56,86 @@ namespace x {
         hr = device->CreateBlendState(&transparentDesc, &mBlendStateTransparent);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create transparent blend state for light pass");
 
+        // Create depth stencil state
+        D3D11_DEPTH_STENCIL_DESC opaqueDepthStencilDesc = {};
+        opaqueDepthStencilDesc.DepthEnable              = TRUE;              // Enable depth testing
+        opaqueDepthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;  // Write to the entire depth buffer
+        opaqueDepthStencilDesc.DepthFunc      = D3D11_COMPARISON_LESS;  // Standard depth test (smaller Z is closer)
+
+        // Stencil settings - often not used for basic opaque pass
+        opaqueDepthStencilDesc.StencilEnable    = FALSE;  // Disable stencil testing
+        opaqueDepthStencilDesc.StencilReadMask  = D3D11_DEFAULT_STENCIL_READ_MASK;
+        opaqueDepthStencilDesc.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;
+
+        // Front face stencil operations
+        opaqueDepthStencilDesc.FrontFace.StencilFailOp      = D3D11_STENCIL_OP_KEEP;
+        opaqueDepthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+        opaqueDepthStencilDesc.FrontFace.StencilPassOp      = D3D11_STENCIL_OP_KEEP;
+        opaqueDepthStencilDesc.FrontFace.StencilFunc        = D3D11_COMPARISON_ALWAYS;
+
+        // Back face stencil operations (same as front face in this case)
+        opaqueDepthStencilDesc.BackFace.StencilFailOp      = D3D11_STENCIL_OP_KEEP;
+        opaqueDepthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+        opaqueDepthStencilDesc.BackFace.StencilPassOp      = D3D11_STENCIL_OP_KEEP;
+        opaqueDepthStencilDesc.BackFace.StencilFunc        = D3D11_COMPARISON_ALWAYS;
+
+        hr = device->CreateDepthStencilState(&opaqueDepthStencilDesc, &mDepthStencilStateOpaque);
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create opaque Depth Stencil State")
+
+        D3D11_DEPTH_STENCIL_DESC transparentDepthStencilDesc = {};
+        transparentDepthStencilDesc.DepthEnable              = TRUE;               // Enable depth testing
+        transparentDepthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;  // Don't write to depth buffer
+        transparentDepthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;  // Less-equal allows rendering on same Z
+
+        // Stencil settings (typically not used for basic transparency)
+        transparentDepthStencilDesc.StencilEnable    = FALSE;  // Disable stencil testing
+        transparentDepthStencilDesc.StencilReadMask  = D3D11_DEFAULT_STENCIL_READ_MASK;
+        transparentDepthStencilDesc.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;
+
+        // Front face stencil operations
+        transparentDepthStencilDesc.FrontFace.StencilFailOp      = D3D11_STENCIL_OP_KEEP;
+        transparentDepthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+        transparentDepthStencilDesc.FrontFace.StencilPassOp      = D3D11_STENCIL_OP_KEEP;
+        transparentDepthStencilDesc.FrontFace.StencilFunc        = D3D11_COMPARISON_ALWAYS;
+
+        // Back face stencil operations (same as front face in this case)
+        transparentDepthStencilDesc.BackFace.StencilFailOp      = D3D11_STENCIL_OP_KEEP;
+        transparentDepthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+        transparentDepthStencilDesc.BackFace.StencilPassOp      = D3D11_STENCIL_OP_KEEP;
+        transparentDepthStencilDesc.BackFace.StencilFunc        = D3D11_COMPARISON_ALWAYS;
+
+        hr = device->CreateDepthStencilState(&transparentDepthStencilDesc, &mDepthStencilStateTransparent);
+        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create transparent Depth Stencil State")
+
         Resize(width, height);
     }
 
     void LightPass::BeginPass(ID3D11ShaderResourceView* depthMap, f32 clearColor[4]) {
         auto* context = mContext.GetDeviceContext();
         context->OMSetRenderTargets(1, mRenderTargetView.GetAddressOf(), mDepthStencilView.Get());
-        context->OMSetDepthStencilState(mDepthStencilState.Get(), 0);
         context->ClearRenderTargetView(mRenderTargetView.Get(), clearColor);
         context->ClearDepthStencilView(mDepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
         context->PSSetShaderResources(5, 1, &depthMap);
-        context->PSSetSamplers(5, 1, mDepthSamplerState.GetAddressOf());
+        context->PSSetSamplers(5, 1, mShadowMapSamplerState.GetAddressOf());
     }
 
     void LightPass::EndPass(ID3D11ShaderResourceView*& result) const {
         result = mShaderResourceView.Get();
     }
 
-    void LightPass::SetOpaqueState() const {
+    void LightPass::OpaqueState() const {
+        mContext.GetDeviceContext()->OMSetDepthStencilState(mDepthStencilStateOpaque.Get(), 0);
         mContext.GetDeviceContext()->OMSetBlendState(mBlendStateOpaque.Get(), nullptr, 0xFFFFFFFF);
     }
 
-    void LightPass::SetTransparentState() const {
+    void LightPass::TransparentState() const {
+        mContext.GetDeviceContext()->OMSetDepthStencilState(mDepthStencilStateTransparent.Get(), 0);
         mContext.GetDeviceContext()->OMSetBlendState(mBlendStateTransparent.Get(), nullptr, 0xFFFFFFFF);
     }
 
     void LightPass::Resize(u32 width, u32 height) {
         mRenderTargetView.Reset();
         mDepthStencilView.Reset();
-        mDepthStencilState.Reset();
         mShaderResourceView.Reset();
         mSceneTexture.Reset();
 
@@ -113,16 +164,6 @@ namespace x {
 
         hr = device->CreateDepthStencilView(depthStencilTexture.Get(), &depthStencilViewDesc, &mDepthStencilView);
         X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil View")
-
-        // Create depth stencil state
-        D3D11_DEPTH_STENCIL_DESC depthStencilStateDesc = {};
-        depthStencilStateDesc.DepthEnable              = TRUE;
-        depthStencilStateDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;  // TODO: Change to ALL for opaque pass
-        depthStencilStateDesc.DepthFunc      = D3D11_COMPARISON_LESS;
-        depthStencilStateDesc.StencilEnable  = FALSE;
-
-        hr = device->CreateDepthStencilState(&depthStencilStateDesc, &mDepthStencilState);
-        X_PANIC_ASSERT(SUCCEEDED(hr), "Failed to create Depth Stencil State")
 
         D3D11_TEXTURE2D_DESC sceneDesc {};
         sceneDesc.Width            = width;

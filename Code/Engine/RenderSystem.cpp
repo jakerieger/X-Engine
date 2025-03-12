@@ -57,12 +57,12 @@ namespace x {
         mPostProcessPass.Execute(input, rtv.Get());
     }
 
-    void RenderSystem::BlendStateOpaque() const {
-        mLightPass.SetOpaqueState();
+    void RenderSystem::OpaqueState() const {
+        mLightPass.OpaqueState();
     }
 
-    void RenderSystem::BlendStateTransparent() const {
-        mLightPass.SetTransparentState();
+    void RenderSystem::TransparentState() const {
+        mLightPass.TransparentState();
     }
 
     void RenderSystem::UpdateShadowParams(const Matrix& lightViewProj, const Matrix& world) const {
