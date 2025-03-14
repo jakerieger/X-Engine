@@ -47,6 +47,18 @@ namespace x {
 #endif
     }
 
+    vector<AssetDescriptor> AssetManager::GetAssetDescriptors() {
+        vector<AssetDescriptor> assetDescriptors;
+#ifdef X_USE_PAK_FILE
+        throw std::exception("AssetManager::GetAssetDescriptors - Not available when using pak files");
+#else
+        for (const auto& [id, filename] : mAssets) {
+            assetDescriptors.emplace_back(AssetDescriptor {.mId = id, .mFilename = filename.Str()});
+        }
+#endif
+        return assetDescriptors;
+    }
+
     bool AssetManager::LoadAssets(const Path& workingDir) {
 #ifdef X_USE_PAK_FILE
         const auto pakFile = Path(X_PAK_FILE);

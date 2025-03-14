@@ -25,6 +25,7 @@ namespace x {
 
     public:
         static optional<vector<u8>> GetAssetData(AssetId id);
+        static vector<AssetDescriptor> GetAssetDescriptors();
 
     private:
         inline static bool mLoaded {false};

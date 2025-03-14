@@ -539,7 +539,75 @@ namespace x {
     void XEditor::AssetsView() {
         ImGui::Begin("Assets");
         {
-            if (mLoadedProject.mLoaded && mProjectRoot.Exists()) {}
+            // Assets don't get loaded until the game is initialized (which happens when the project is loaded, but not
+            // right away)
+            if (mLoadedProject.mLoaded && mProjectRoot.Exists() && mGame.IsInitialized()) {
+                f32 windowWidth  = ImGui::GetContentRegionAvail().x;
+                u32 columnsCount = 8;
+                f32 itemWidth  = (windowWidth - (ImGui::GetStyle().ItemSpacing.x * (columnsCount - 1))) / columnsCount;
+                f32 itemHeight = itemWidth;  // square for now, will probably change
+
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, HexToImVec4("17171a"));
+                if (ImGui::BeginChild("#assets_scrollview",
+                                      ImVec2(0, 0),
+                                      false,
+                                      ImGuiWindowFlags_HorizontalScrollbar)) {
+                    int itemIndex                        = 0;
+                    const vector<AssetDescriptor> assets = AssetManager::GetAssetDescriptors();
+                    for (const auto& asset : assets) {
+                        if (itemIndex % columnsCount != 0) { ImGui::SameLine(); }
+
+                        ImGui::BeginGroup();
+                        {
+                            ImGui::PushID(itemIndex);
+
+                            static u64 selectedAsset {0};
+                            if (ImGui::Selectable("##asset_item",
+                                                  asset.mId == selectedAsset,
+                                                  0,
+                                                  ImVec2(itemWidth, itemHeight))) {
+                                selectedAsset = asset.mId;
+                            }
+
+                            ImGui::SetItemAllowOverlap();
+                            ImGui::SetCursorPosX(ImGui::GetCursorPosX() - itemWidth);
+                            ImGui::SetCursorPosY(ImGui::GetCursorPosY() - itemHeight);
+
+                            // Draw thumbnail image (centered within the item area)
+                            float paddingX = 4.0f;
+                            float paddingY = 4.0f;
+                            ImVec2 imageSize(itemWidth - 2 * paddingX,
+                                             itemHeight - 2 * paddingY - 20);  // Leave space for text
+                            ImVec2 imagePos(ImGui::GetCursorPosX() + paddingX, ImGui::GetCursorPosY() + paddingY);
+
+                            ImGui::SetCursorPos(imagePos);
+                            ImGui::Image(SrvAsTextureId(mSceneViewport.GetShaderResourceView().Get()), imageSize);
+
+                            // Add item name below the image
+                            // ImVec2 textPos(ImGui::GetCursorPosX() +
+                            //                  (itemWidth - ImGui::CalcTextSize(asset.mFilename.c_str()).x) * 0.5f,
+                            //                ImGui::GetCursorPosY() + imageSize.y + paddingY);
+                            //
+                            // ImGui::SetCursorPos(textPos);
+                            // ImGui::TextUnformatted(asset.mFilename.c_str());
+
+                            // Add hover effect (optional)
+                            if (ImGui::IsItemHovered()) {
+                                ImGui::BeginTooltip();
+                                ImGui::Text("%s", asset.mFilename.c_str());
+                                ImGui::EndTooltip();
+                            }
+                        }
+                        ImGui::PopID();
+                        ImGui::EndGroup();
+
+                        itemIndex++;
+                    }
+
+                    ImGui::EndChild();
+                }
+                ImGui::PopStyleColor();
+            }
         }
         ImGui::End();
     }
