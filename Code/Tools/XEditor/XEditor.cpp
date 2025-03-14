@@ -15,8 +15,7 @@
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace x {
-    static constexpr f32 kLabelWidth    = 140.0f;
-    static constexpr i64 kInvalidEntity = -1;
+    static constexpr f32 kLabelWidth = 140.0f;
     static EntityId sSelectedEntity {};
 
     // TODO: Consider making this a class
@@ -142,6 +141,9 @@ namespace x {
                                      filename,
                                      MAX_PATH)) {
             LoadProject(filename);
+            // Load default scene
+            auto scenes = mGame.GetSceneMap();
+            OnLoadScene(scenes.begin()->first);
         }
     }
 
@@ -158,6 +160,8 @@ namespace x {
         std::strcpy(mSceneSettings.mName, selectedScene.c_str());
 
         SetWindowTitle(std::format("XEditor | {}", selectedScene));
+
+        sSelectedEntity = mGame.GetActiveScene()->GetState().GetEntities().begin()->first;
     }
 
     void XEditor::MainMenu() {
@@ -602,8 +606,9 @@ namespace x {
                             float imageStartX = ImGui::GetItemRectMin().x + padding;
                             float imageStartY = ImGui::GetItemRectMin().y + 2;  // Small top margin
 
-                            // Draw the thumbnail image
-                            str itemName = Path(asset.mFilename).Filename().substr(0, 8) + "...";
+                            // Truncate asset thumbnail text if necessary
+                            str itemName = Path(asset.mFilename).Filename();
+                            if (itemName.length() > 8) { itemName = itemName.substr(0, 8) + "..."; }
 
                             ImGui::GetWindowDrawList()->AddImage(
                               SrvAsTextureId(mSceneViewport.GetShaderResourceView().Get()),
