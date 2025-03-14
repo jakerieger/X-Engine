@@ -56,7 +56,6 @@ add_library(x STATIC
     ${ENGINE_DIR}/Mouse.hpp
     ${ENGINE_DIR}/PBRMaterial.cpp
     ${ENGINE_DIR}/PBRMaterial.hpp
-    ${ENGINE_DIR}/Platform.hpp
     ${ENGINE_DIR}/PoolAllocator.cpp
     ${ENGINE_DIR}/PoolAllocator.hpp
     ${ENGINE_DIR}/PostProcessPass.cpp

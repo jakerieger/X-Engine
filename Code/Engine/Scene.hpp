@@ -10,19 +10,6 @@
 
 namespace x {
     class Scene {
-        ResourceManager mResources;
-        SceneState mState;
-        SceneState mInitialState;
-        RenderContext& mContext;
-        ScriptEngine& mScriptEngine;
-        str mName;
-        str mDescription;
-        unordered_map<str, EntityId> mEntities;
-
-        using ModelTransformPair = std::pair<const ModelComponent*, const TransformComponent*>;
-        vector<ModelTransformPair> mOpaqueObjects;
-        vector<ModelTransformPair> mTransparentObjects;
-
     public:
         explicit Scene(RenderContext& context, ScriptEngine& scriptEngine);
         ~Scene();
@@ -45,10 +32,24 @@ namespace x {
         X_NODISCARD const SceneState& GetState() const;
         X_NODISCARD u32 GetNumEntities() const;
         X_NODISCARD ResourceManager& GetResourceManager();
+        X_NODISCARD const str& GetName() const;
 
         void RegisterVolatiles(vector<Volatile*>& volatiles);
 
     private:
+        ResourceManager mResources;
+        SceneState mState;
+        SceneState mInitialState;
+        RenderContext& mContext;
+        ScriptEngine& mScriptEngine;
+        str mName;
+        str mDescription;
+        unordered_map<str, EntityId> mEntities;
+
+        using ModelTransformPair = std::pair<const ModelComponent*, const TransformComponent*>;
+        vector<ModelTransformPair> mOpaqueObjects;
+        vector<ModelTransformPair> mTransparentObjects;
+
         void LoadMaterial(const MaterialDescriptor& material, ModelComponent& modelComponent);
     };
 }  // namespace x

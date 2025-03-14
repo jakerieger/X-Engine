@@ -4,9 +4,10 @@
 
 #pragma once
 
-#include "Engine/Platform.hpp"
+#include "Platform.hpp"
 
-namespace x::Editor {
+/// @brief Namespace containing all platform-specific code (Windows API, etc.)
+namespace Platform {
     bool OpenFileDialog(
       HWND owner, const char* initialDir, const char* filter, const char* title, char* outPath, size_t outPathSize);
 
@@ -17,4 +18,13 @@ namespace x::Editor {
                         const char* defaultExt,
                         char* outPath,
                         size_t outPathSize);
-}  // namespace x::Editor
+
+    enum class AlertSeverity {
+        Info,
+        Warning,
+        Error,
+        Question,
+    };
+
+    int ShowAlert(HWND owner, const char* title, const char* message, AlertSeverity severity);
+}  // namespace Platform

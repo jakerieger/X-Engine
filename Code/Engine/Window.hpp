@@ -19,12 +19,12 @@ namespace x {
         int Run();
         LRESULT Quit();
 
+        // Lifecycle callbacks
         virtual void OnInitialize() {};
         virtual void OnShutdown() {};
         virtual void OnResize(u32 width, u32 height) {};
-
-        virtual void Update() {}
-        virtual void Render() {}
+        virtual void OnUpdate() {};
+        virtual void OnRender() {};
 
         X_NODISCARD u32 GetWidth() const {
             return mCurrentWidth;

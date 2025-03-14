@@ -38,8 +38,8 @@ namespace x {
                 continue;
             }
 
-            Update();
-            Render();
+            OnUpdate();
+            OnRender();
             mContext.Present();
         }
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EngineCommon.hpp"
-#include "Platform.hpp"
+#include "Common/Platform.hpp"
 #include "Input.hpp"
 
 namespace x {

@@ -9,7 +9,7 @@
 #include "Mouse.hpp"
 #include "SceneState.hpp"
 #include "Common/Types.hpp"
-#include "Platform.hpp"
+#include "Common/Platform.hpp"
 #include "Volatile.hpp"
 #include "RenderSystem.hpp"
 #include "Scene.hpp"

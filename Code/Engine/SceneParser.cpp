@@ -34,6 +34,8 @@ namespace x {
         ParseFromNode(scene, descriptor);
     }
 
+    void SceneParser::StateToDescriptor(const SceneState& state, SceneDescriptor& descriptor, const str& sceneName) {}
+
     void SceneParser::WriteToFile(const SceneDescriptor& descriptor, const str& filename) {
         YAML::Emitter out;
         out << YAML::BeginMap;

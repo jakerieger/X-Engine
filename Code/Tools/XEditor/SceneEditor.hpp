@@ -22,22 +22,23 @@ namespace x {
         void OnInitialize() override;
         void OnResize(u32 width, u32 height) override;
         void OnShutdown() override;
-
-        void Update() override;
-        void Render() override;
+        void OnUpdate() override;
+        void OnRender() override;
 
         LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) override;
 
     private:
-        Viewport mSceneViewport;
-        Game mGame;
-        ProjectDescriptor mLoadedProject {};
+        // UI / ImGui
         ImFont* mDefaultFont {nullptr};
         unordered_map<str, ImFont*> mFonts;
-        SceneDescriptor mLoadedScene {};
         Path mLoadedScenePath {};
         Path mProjectRoot {};
         bool mDockspaceSetup {false};
+
+        // Engine API
+        Viewport mSceneViewport;
+        Game mGame;
+        ProjectDescriptor mLoadedProject {};
 
         // ImGui settings variables.
         // These are used to store editable data that is then used to update the current scene
@@ -50,7 +51,7 @@ namespace x {
             char mName[256] {0};
         } mEntityProperties;
 
-        // Main views/tabs
+        // Views/Tabs
         void MainMenu();
         void SceneSettingsView();
         void EntitiesView();
@@ -61,11 +62,13 @@ namespace x {
         // Popups
         bool mSceneSelectorOpen {false};
 
-        // Editor file menu functions
+        // Button/menu actions
+        void OnOpenProject();
+        void OnLoadScene(const str& selectedScene);
+
+        // I/O
         void LoadProject(const str& filename);
-        void LoadScene(const str& filename);
-        void SaveScene() const;
-        void SaveSceneAs(const str& filename) const;
+        void SaveScene(const char* filename = nullptr) const;
 
         // ImGui-specific functions
         void SetupDockspace(const f32 yOffset);

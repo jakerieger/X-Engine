@@ -24,11 +24,11 @@ public:
         mGame.TransitionScene(mInitialScene);
     }
 
-    void Update() override {
+    void OnUpdate() override {
         mGame.Update();
     }
 
-    void Render() override {
+    void OnRender() override {
         mWindowViewport->AttachViewport();
         mWindowViewport->ClearAll();
         mGame.RenderFrame();

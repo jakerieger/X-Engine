@@ -3,12 +3,14 @@
 //
 
 #include "SceneEditor.hpp"
-#include "Common/Platform/FileDialogs.hpp"
+#include "../../Common/FileDialogs.hpp"
 #include <Inter.h>
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
 #include <imgui_internal.h>
 #include <yaml-cpp/yaml.h>
+
+#include "Common/WindowsHelpers.hpp"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -59,7 +61,7 @@ namespace x {
         ApplyTheme();
 
         mWindowViewport->SetClearColor(0.05f, 0.05f, 0.05f, 1.0f);
-        mSceneViewport.SetClearColor(0.7f, 0.7f, 0.7f, 1.0f);
+        mSceneViewport.SetClearColor(Colors::Gray);
         mSceneViewport.Resize(1, 1);
 
         ImGui_ImplWin32_Init(mHwnd);
@@ -78,11 +80,9 @@ namespace x {
         ImGui::DestroyContext();
     }
 
-    void SceneEditor::Update() {
-        Window::Update();
-    }
+    void SceneEditor::OnUpdate() {}
 
-    void SceneEditor::Render() {
+    void SceneEditor::OnRender() {
         mWindowViewport->ClearAll();
 
         ImGui_ImplDX11_NewFrame();
@@ -116,17 +116,28 @@ namespace x {
         return Window::MessageHandler(msg, wParam, lParam);
     }
 
+    void SceneEditor::OnOpenProject() {
+        const auto filter = "Project (*.xproj)|*.xproj|";
+        char filename[MAX_PATH];
+        if (Platform::OpenFileDialog(mHwnd,
+                                     Platform::GetPlatformDirectory(Platform::kDocuments).CStr(),
+                                     filter,
+                                     "Open Project File",
+                                     filename,
+                                     MAX_PATH)) {
+            LoadProject(filename);
+        }
+    }
+
+    void SceneEditor::OnLoadScene(const str& selectedScene) {
+        mGame.TransitionScene(selectedScene);
+    }
+
     void SceneEditor::MainMenu() {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
-                if (ImGui::MenuItem("Open Project", "Ctrl+O")) {
-                    const char* filter = "Project (*.xproj)|*.xproj|";
-                    char filename[MAX_PATH];
-                    if (Platform::OpenFileDialog(mHwnd, nullptr, filter, "Open Project File", filename, MAX_PATH)) {
-                        LoadProject(filename);
-                    }
-                }
+                if (ImGui::MenuItem("Open Project", "Ctrl+O")) { OnOpenProject(); }
                 ImGui::Separator();
                 // if (ImGui::MenuItem("New Scene", "Ctrl+N")) {
                 //     // Do new scene action
@@ -194,10 +205,7 @@ namespace x {
 
                 // Buttons
                 if (ImGui::Button("OK", ImVec2(150, 0))) {
-                    if (!selectedScene.empty()) {
-                        mLoadedScene = mGame.GetSceneMap().at(selectedScene);
-                        mGame.TransitionScene(selectedScene);
-                    }
+                    if (!selectedScene.empty()) { OnLoadScene(selectedScene); }
 
                     mSceneSelectorOpen = false;
                     ImGui::CloseCurrentPopup();
@@ -219,86 +227,86 @@ namespace x {
         // TODO: Change mLoadedScene to a ptr that points directly into the scene map of the game
         // instead of copying it into its own member var separate from the scene actually being used by the engine.
         {
-            if (mLoadedScene.IsValid()) {
-                const f32 width = ImGui::GetContentRegionAvail().x;
-                ImGui::Text("Name: ");
-                ImGui::SameLine(kLabelWidth);
-                ImGui::SetNextItemWidth(width - kLabelWidth);
-                ImGui::InputText("##scene_name", mSceneSettings.mName, sizeof(mSceneSettings.mName));
+            // if (mLoadedScene.IsValid()) {
+            // const f32 width = ImGui::GetContentRegionAvail().x;
+            // ImGui::Text("Name: ");
+            // ImGui::SameLine(kLabelWidth);
+            // ImGui::SetNextItemWidth(width - kLabelWidth);
+            // ImGui::InputText("##scene_name", mSceneSettings.mName, sizeof(mSceneSettings.mName));
+            //
+            // ImGui::Text("Description: ");
+            // ImGui::SameLine(kLabelWidth);
+            // ImGui::SetNextItemWidth(width - kLabelWidth);
+            // ImGui::InputText("##scene_desc", mSceneSettings.mDesc, sizeof(mSceneSettings.mDesc));
+            //
+            // ImGui::Spacing();
+            //
+            // if (ImGui::CollapsingHeader("World", ImGuiTreeNodeFlags_DefaultOpen)) {
+            //     ImGui::Text("Camera");
+            //     ImGui::Spacing();
+            //     ImGui::Text("Position:");
+            //     ImGui::SameLine(kLabelWidth);
+            //     ImGui::SetNextItemWidth(width - kLabelWidth);
+            //     ImGui::DragFloat3("##camera_pos", (f32*)&mLoadedScene.mWorld.mCamera.mPosition, 0.01f);
+            //
+            //     ImGui::Text("Eye:");
+            //     ImGui::SameLine(kLabelWidth);
+            //     ImGui::SetNextItemWidth(width - kLabelWidth);
+            //     ImGui::DragFloat3("##camera_eye", (f32*)&mLoadedScene.mWorld.mCamera.mEye, 0.01f);
+            //
+            //     ImGui::Text("FOV Y:");
+            //     ImGui::SameLine(kLabelWidth);
+            //     ImGui::SetNextItemWidth(width - kLabelWidth);
+            //     ImGui::SliderFloat("##camera_fov", &mLoadedScene.mWorld.mCamera.mFovY, 1.0f, 120.0f, "%.1f");
+            //
+            //     ImGui::Text("Near Z:");
+            //     ImGui::SameLine(kLabelWidth);
+            //     ImGui::SetNextItemWidth(width - kLabelWidth);
+            //     ImGui::InputFloat("##camera_nearz", &mLoadedScene.mWorld.mCamera.mNearZ, 0.1f, 100.0f, "%.1f");
+            //
+            //     ImGui::Text("Far Z:");
+            //     ImGui::SameLine(kLabelWidth);
+            //     ImGui::SetNextItemWidth(width - kLabelWidth);
+            //     ImGui::InputFloat("##camera_farz", &mLoadedScene.mWorld.mCamera.mFarZ, 0.1f, 100.0f, "%.1f");
+            //
+            //     ImGui::Spacing();
+            //     ImGui::Spacing();
+            //
+            //     // Sun
+            //     auto& sun = mLoadedScene.mWorld.mLights.mSun;
+            //     ImGui::Text("Sun");
+            //     ImGui::Spacing();
+            //
+            //     ImGui::Text("Enabled:");
+            //     ImGui::SameLine(kLabelWidth);
+            //     ImGui::Checkbox("##sun_enabled", &sun.mEnabled);
+            //
+            //     ImGui::Text("Intensity:");
+            //     ImGui::SameLine(kLabelWidth);
+            //     ImGui::SetNextItemWidth(width - kLabelWidth);
+            //     ImGui::InputFloat("##sun_intensity", &sun.mIntensity, 0.1f, 1.0f, "%.1f");
+            //
+            //     ImGui::Text("Color:");
+            //     ImGui::SameLine(kLabelWidth);
+            //     ImGui::SetNextItemWidth(width - kLabelWidth);
+            //     ImGui::ColorEdit3("##sun_color", (f32*)&sun.mColor);
+            //
+            //     ImGui::Text("Direction:");
+            //     ImGui::SameLine(kLabelWidth);
+            //     ImGui::SetNextItemWidth(width - kLabelWidth);
+            //     ImGui::DragFloat3("##sun_direction", (f32*)&sun.mDirection, 0.01f);
+            //
+            //     ImGui::Text("Casts Shadows:");
+            //     ImGui::SameLine(kLabelWidth);
+            //     ImGui::SetNextItemWidth(width - kLabelWidth);
+            //     ImGui::Checkbox("##sun_casts_shadows", &sun.mCastsShadows);
+            // }
 
-                ImGui::Text("Description: ");
-                ImGui::SameLine(kLabelWidth);
-                ImGui::SetNextItemWidth(width - kLabelWidth);
-                ImGui::InputText("##scene_desc", mSceneSettings.mDesc, sizeof(mSceneSettings.mDesc));
-
-                ImGui::Spacing();
-
-                if (ImGui::CollapsingHeader("World", ImGuiTreeNodeFlags_DefaultOpen)) {
-                    ImGui::Text("Camera");
-                    ImGui::Spacing();
-                    ImGui::Text("Position:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::DragFloat3("##camera_pos", (f32*)&mLoadedScene.mWorld.mCamera.mPosition, 0.01f);
-
-                    ImGui::Text("Eye:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::DragFloat3("##camera_eye", (f32*)&mLoadedScene.mWorld.mCamera.mEye, 0.01f);
-
-                    ImGui::Text("FOV Y:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::SliderFloat("##camera_fov", &mLoadedScene.mWorld.mCamera.mFovY, 1.0f, 120.0f, "%.1f");
-
-                    ImGui::Text("Near Z:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::InputFloat("##camera_nearz", &mLoadedScene.mWorld.mCamera.mNearZ, 0.1f, 100.0f, "%.1f");
-
-                    ImGui::Text("Far Z:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::InputFloat("##camera_farz", &mLoadedScene.mWorld.mCamera.mFarZ, 0.1f, 100.0f, "%.1f");
-
-                    ImGui::Spacing();
-                    ImGui::Spacing();
-
-                    // Sun
-                    auto& sun = mLoadedScene.mWorld.mLights.mSun;
-                    ImGui::Text("Sun");
-                    ImGui::Spacing();
-
-                    ImGui::Text("Enabled:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::Checkbox("##sun_enabled", &sun.mEnabled);
-
-                    ImGui::Text("Intensity:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::InputFloat("##sun_intensity", &sun.mIntensity, 0.1f, 1.0f, "%.1f");
-
-                    ImGui::Text("Color:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::ColorEdit3("##sun_color", (f32*)&sun.mColor);
-
-                    ImGui::Text("Direction:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::DragFloat3("##sun_direction", (f32*)&sun.mDirection, 0.01f);
-
-                    ImGui::Text("Casts Shadows:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::Checkbox("##sun_casts_shadows", &sun.mCastsShadows);
-                }
-
-                // mLoadedScene.mName        = mSceneSettings.mName;
-                // mLoadedScene.mDescription = mSceneSettings.mDesc;
-            } else {
-                ImGui::Text("No scene loaded. Go to \"File->Open Scene\" to load a scene.");
-            }
+            // mLoadedScene.mName        = mSceneSettings.mName;
+            // mLoadedScene.mDescription = mSceneSettings.mDesc;
+            // } else {
+            //     ImGui::Text("No scene loaded. Go to \"File->Open Scene\" to load a scene.");
+            // }
         }
         ImGui::End();
     }
@@ -318,13 +326,13 @@ namespace x {
         ImGui::PushStyleColor(ImGuiCol_ChildBg, HexToImVec4("17171a"));
         ImGui::BeginChild("##entities_scroll_list", ImVec2(windowSize.x, listHeight), true);
         {
-            if (mLoadedScene.IsValid()) {
-                for (auto& entity : mLoadedScene.mEntities) {
-                    if (ImGui::Selectable(entity.mName.c_str(), entity.mId == sSelectedEntity)) {
-                        sSelectedEntity = entity.mId;
-                        std::strcpy(mEntityProperties.mName, entity.mName.c_str());
-                    }
-                }
+            if (mLoadedProject.mLoaded && mGame.IsInitialized()) {
+                // for (auto& entity : mLoadedScene->GetEntities()) {
+                //     if (ImGui::Selectable(entity.mName.c_str(), entity.mId == sSelectedEntity)) {
+                //         sSelectedEntity = entity.mId;
+                //         std::strcpy(mEntityProperties.mName, entity.mName.c_str());
+                //     }
+                // }
             }
         }
         ImGui::EndChild();
@@ -356,14 +364,7 @@ namespace x {
             ImGui::PopItemWidth();
             ImGui::Separator();
             if (ImGui::Button("Confirm", ImVec2(150, 0)) || enterPressed) {
-                if (strlen(entityNameBuffer) > 0) {
-                    EntityDescriptor descriptor {};
-                    descriptor.mId   = mLoadedScene.mEntities.size();
-                    descriptor.mName = entityNameBuffer;
-                    mLoadedScene.mEntities.push_back(descriptor);
-
-                    ImGui::CloseCurrentPopup();
-                }
+                if (strlen(entityNameBuffer) > 0) { ImGui::CloseCurrentPopup(); }
             }
 
             ImGui::SameLine();
@@ -381,70 +382,70 @@ namespace x {
         ImGui::Begin("Properties");
         const ImVec2 size = ImGui::GetContentRegionAvail();
         {
-            if (sSelectedEntity != kInvalidEntity) {
-                auto& entity = mLoadedScene.mEntities[sSelectedEntity];
-
-                if (ImGui::CollapsingHeader("General##properties", ImGuiTreeNodeFlags_DefaultOpen)) {
-                    ImGui::Text("Name:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(size.x - kLabelWidth);
-                    const bool enterPressed = ImGui::InputText("##entity_name_input",
-                                                               mEntityProperties.mName,
-                                                               sizeof(mEntityProperties.mName),
-                                                               ImGuiInputTextFlags_EnterReturnsTrue);
-                    if (enterPressed) { entity.mName = mEntityProperties.mName; }
-                }
-
-                if (ImGui::CollapsingHeader("Transform##properties", ImGuiTreeNodeFlags_DefaultOpen)) {
-                    ImGui::Text("Position:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(size.x - kLabelWidth);
-                    ImGui::DragFloat3("##entity_transform_position", (f32*)&entity.mTransform.mPosition);
-
-                    ImGui::Text("Rotation:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(size.x - kLabelWidth);
-                    ImGui::DragFloat3("##entity_transform_rotation", (f32*)&entity.mTransform.mRotation);
-
-                    ImGui::Text("Scale:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(size.x - kLabelWidth);
-                    ImGui::DragFloat3("##entity_transform_scale", (f32*)&entity.mTransform.mScale);
-                }
-
-                if (entity.mModel.has_value()) {
-                    auto& model = *entity.mModel;
-                    if (ImGui::CollapsingHeader("Model##properties", ImGuiTreeNodeFlags_DefaultOpen)) {
-                        ImGui::Text("Mesh (Asset):");
-                        ImGui::SameLine(kLabelWidth);
-                        ImGui::Button(std::to_string(model.mMeshId).c_str(), ImVec2(size.x - kLabelWidth, 0));
-
-                        ImGui::Text("Material (Asset):");
-                        ImGui::SameLine(kLabelWidth);
-                        ImGui::Button(std::to_string(model.mMaterialId).c_str(), ImVec2(size.x - kLabelWidth, 0));
-
-                        ImGui::Text("Casts Shadows:");
-                        ImGui::SameLine(kLabelWidth);
-                        ImGui::SetNextItemWidth(size.x - kLabelWidth);
-                        ImGui::Checkbox("##entity_model_casts_shadows", &model.mCastsShadows);
-
-                        ImGui::Text("Receives Shadows:");
-                        ImGui::SameLine(kLabelWidth);
-                        ImGui::SetNextItemWidth(size.x - kLabelWidth);
-                        ImGui::Checkbox("##entity_model_receives_shadows", &model.mReceiveShadows);
-                    }
-                }
-
-                if (entity.mBehavior.has_value()) {
-                    auto& behavior = *entity.mBehavior;
-                    if (ImGui::CollapsingHeader("Behavior##properties", ImGuiTreeNodeFlags_DefaultOpen)) {
-                        ImGui::Text("Script (Asset):");
-                        ImGui::SameLine(kLabelWidth);
-                        ImGui::SetNextItemWidth(size.x - kLabelWidth);
-                        ImGui::Button(std::to_string(behavior.mScriptId).c_str(), ImVec2(size.x - kLabelWidth, 0));
-                    }
-                }
-            }
+            // if (sSelectedEntity != kInvalidEntity) {
+            //     auto& entity = mLoadedScene->GetEntities();
+            //
+            //     if (ImGui::CollapsingHeader("General##properties", ImGuiTreeNodeFlags_DefaultOpen)) {
+            //         ImGui::Text("Name:");
+            //         ImGui::SameLine(kLabelWidth);
+            //         ImGui::SetNextItemWidth(size.x - kLabelWidth);
+            //         const bool enterPressed = ImGui::InputText("##entity_name_input",
+            //                                                    mEntityProperties.mName,
+            //                                                    sizeof(mEntityProperties.mName),
+            //                                                    ImGuiInputTextFlags_EnterReturnsTrue);
+            //         if (enterPressed) { entity.mName = mEntityProperties.mName; }
+            //     }
+            //
+            //     if (ImGui::CollapsingHeader("Transform##properties", ImGuiTreeNodeFlags_DefaultOpen)) {
+            //         ImGui::Text("Position:");
+            //         ImGui::SameLine(kLabelWidth);
+            //         ImGui::SetNextItemWidth(size.x - kLabelWidth);
+            //         ImGui::DragFloat3("##entity_transform_position", (f32*)&entity.mTransform.mPosition);
+            //
+            //         ImGui::Text("Rotation:");
+            //         ImGui::SameLine(kLabelWidth);
+            //         ImGui::SetNextItemWidth(size.x - kLabelWidth);
+            //         ImGui::DragFloat3("##entity_transform_rotation", (f32*)&entity.mTransform.mRotation);
+            //
+            //         ImGui::Text("Scale:");
+            //         ImGui::SameLine(kLabelWidth);
+            //         ImGui::SetNextItemWidth(size.x - kLabelWidth);
+            //         ImGui::DragFloat3("##entity_transform_scale", (f32*)&entity.mTransform.mScale);
+            //     }
+            //
+            //     if (entity.mModel.has_value()) {
+            //         auto& model = *entity.mModel;
+            //         if (ImGui::CollapsingHeader("Model##properties", ImGuiTreeNodeFlags_DefaultOpen)) {
+            //             ImGui::Text("Mesh (Asset):");
+            //             ImGui::SameLine(kLabelWidth);
+            //             ImGui::Button(std::to_string(model.mMeshId).c_str(), ImVec2(size.x - kLabelWidth, 0));
+            //
+            //             ImGui::Text("Material (Asset):");
+            //             ImGui::SameLine(kLabelWidth);
+            //             ImGui::Button(std::to_string(model.mMaterialId).c_str(), ImVec2(size.x - kLabelWidth, 0));
+            //
+            //             ImGui::Text("Casts Shadows:");
+            //             ImGui::SameLine(kLabelWidth);
+            //             ImGui::SetNextItemWidth(size.x - kLabelWidth);
+            //             ImGui::Checkbox("##entity_model_casts_shadows", &model.mCastsShadows);
+            //
+            //             ImGui::Text("Receives Shadows:");
+            //             ImGui::SameLine(kLabelWidth);
+            //             ImGui::SetNextItemWidth(size.x - kLabelWidth);
+            //             ImGui::Checkbox("##entity_model_receives_shadows", &model.mReceiveShadows);
+            //         }
+            //     }
+            //
+            //     if (entity.mBehavior.has_value()) {
+            //         auto& behavior = *entity.mBehavior;
+            //         if (ImGui::CollapsingHeader("Behavior##properties", ImGuiTreeNodeFlags_DefaultOpen)) {
+            //             ImGui::Text("Script (Asset):");
+            //             ImGui::SameLine(kLabelWidth);
+            //             ImGui::SetNextItemWidth(size.x - kLabelWidth);
+            //             ImGui::Button(std::to_string(behavior.mScriptId).c_str(), ImVec2(size.x - kLabelWidth, 0));
+            //         }
+            //     }
+            // }
         }
         ImGui::End();
     }
@@ -463,7 +464,7 @@ namespace x {
             mSceneViewport.AttachViewport();
 
             // Render current scene
-            if (mLoadedScene.IsValid() && mLoadedProject.mLoaded && mGame.IsInitialized()) {
+            if (mLoadedProject.mLoaded && mGame.IsInitialized()) {
                 mGame.Resize(contentWidth, contentHeight);
                 mGame.RenderFrame();
             }
@@ -496,35 +497,11 @@ namespace x {
         mGame.Initialize(this, &mSceneViewport, mProjectRoot);
     }
 
-    void SceneEditor::LoadScene(const str& filename) {
-        const auto currentScene = mLoadedScene;
-        mLoadedScene            = SceneDescriptor {};
-        SceneParser::Parse(filename, mLoadedScene);
-
-        if (mLoadedScene.IsValid()) {
-            mLoadedScenePath = Path(filename);
-
-            // Update UI input values
-            std::strcpy(mSceneSettings.mName, mLoadedScene.mName.c_str());
-            std::strcpy(mSceneSettings.mDesc, mLoadedScene.mDescription.c_str());
-            mGame.TransitionScene(mLoadedScene);
-        } else {
-            Platform::ShowAlert(mHwnd,
-                                "Error loading scene",
-                                "An unknown error occurred when loading the selected scene",
-                                Platform::AlertSeverity::Error);
-            mLoadedScene = currentScene;
-        }
-
-        SetWindowTitle(std::format("XSceneEditor | {}", mLoadedScenePath.Str()));
-    }
-
-    void SceneEditor::SaveScene() const {
-        SceneParser::WriteToFile(mLoadedScene, mLoadedScenePath.Str());
-    }
-
-    void SceneEditor::SaveSceneAs(const str& filename) const {
-        SceneParser::WriteToFile(mLoadedScene, filename);
+    void SceneEditor::SaveScene(const char* filename) const {
+        const auto* scene = mGame.GetActiveScene();
+        SceneDescriptor descriptor;
+        SceneParser::StateToDescriptor(scene->GetState(), descriptor, scene->GetName());
+        SceneParser::WriteToFile(descriptor, filename == nullptr ? mLoadedScenePath.Str() : filename);
     }
 
     void SceneEditor::SetupDockspace(const f32 yOffset) {

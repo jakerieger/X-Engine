@@ -4,6 +4,7 @@
 
 #include "Math.hpp"
 #include "Common/Types.hpp"
+#include "SceneState.hpp"
 
 namespace x {
     struct CameraDescriptor {
@@ -81,7 +82,7 @@ namespace x {
     public:
         static void Parse(const str& filename, SceneDescriptor& descriptor);
         static void Parse(std::span<const u8> data, SceneDescriptor& descriptor);
-
+        static void StateToDescriptor(const SceneState& state, SceneDescriptor& descriptor, const str& sceneName);
         static void WriteToFile(const SceneDescriptor& descriptor, const str& filename);
     };
 }  // namespace x

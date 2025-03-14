@@ -81,6 +81,7 @@ namespace x {
         }
 
         mInitialState = mState;  // Cache init state so scene can be reset
+        mName         = descriptor.mName;
 
         Awake();
         X_LOG_INFO("Loaded scene: '%s'", descriptor.mName.c_str())
@@ -230,6 +231,10 @@ namespace x {
 
     ResourceManager& Scene::GetResourceManager() {
         return mResources;
+    }
+
+    const str& Scene::GetName() const {
+        return mName;
     }
 
     void Scene::RegisterVolatiles(vector<Volatile*>& volatiles) {
