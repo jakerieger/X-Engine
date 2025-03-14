@@ -537,79 +537,109 @@ namespace x {
     }
 
     void XEditor::AssetsView() {
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
         ImGui::Begin("Assets");
         {
             // Assets don't get loaded until the game is initialized (which happens when the project is loaded, but not
             // right away)
             if (mLoadedProject.mLoaded && mProjectRoot.Exists() && mGame.IsInitialized()) {
-                f32 windowWidth  = ImGui::GetContentRegionAvail().x;
-                u32 columnsCount = 8;
-                f32 itemWidth  = (windowWidth - (ImGui::GetStyle().ItemSpacing.x * (columnsCount - 1))) / columnsCount;
-                f32 itemHeight = itemWidth;  // square for now, will probably change
+                // Setup for grid layout
+                auto assets = AssetManager::GetAssetDescriptors();
+
+                constexpr f32 fullWidth             = 1920.0f;
+                constexpr u32 desiredRowsAtFullSize = 8;
+                const auto currentWidth = GetWidth();  // Get current client window width, TODO: Change this to the max
+                                                       // available width of the assets panel itself
+                const float columnsCount = std::floorf((desiredRowsAtFullSize * currentWidth) / fullWidth);
+                // I could calculate this as the floor of the result of the proportion MAX_WIDTH/8  = CURR_WIDTH/x
+
+                float windowWidth    = ImGui::GetContentRegionAvail().x;
+                float scrollbarWidth = ImGui::GetStyle().ScrollbarSize;
+                float availableWidth = windowWidth - scrollbarWidth - ImGui::GetStyle().CellPadding.x -
+                                       ImGui::GetStyle().FramePadding.x - ImGui::GetStyle().WindowPadding.x;
+                float cellWidth =
+                  (availableWidth - ImGui::GetStyle().ItemSpacing.x * (columnsCount - 1)) / columnsCount;
+                float thumbnailSize = cellWidth * 0.9f;                    // 90% of cell width for the image
+                float padding       = (cellWidth - thumbnailSize) / 2.0f;  // Equal padding on both sides
 
                 ImGui::PushStyleColor(ImGuiCol_ChildBg, HexToImVec4("17171a"));
-                if (ImGui::BeginChild("#assets_scrollview",
-                                      ImVec2(0, 0),
-                                      false,
-                                      ImGuiWindowFlags_HorizontalScrollbar)) {
-                    int itemIndex                        = 0;
-                    const vector<AssetDescriptor> assets = AssetManager::GetAssetDescriptors();
-                    for (const auto& asset : assets) {
-                        if (itemIndex % columnsCount != 0) { ImGui::SameLine(); }
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4.0f, 4.0f));
+                if (ImGui::BeginChild("##GridScrollRegion", ImVec2(0, 0), false)) {
+                    // Calculate number of rows needed
+                    int itemCount = assets.size();
+                    int rowCount  = (itemCount + columnsCount - 1) / columnsCount;  // Ceiling division
 
+                    // For each row
+                    for (int row = 0; row < rowCount; row++) {
+                        // Row container
                         ImGui::BeginGroup();
-                        {
+
+                        // For each column in the row
+                        for (int col = 0; col < columnsCount; col++) {
+                            int itemIndex = row * columnsCount + col;
+
+                            // Break if we've displayed all items
+                            if (itemIndex >= itemCount) break;
+
+                            // Start new item (except for first item in row)
+                            if (col > 0) ImGui::SameLine();
+
+                            const AssetDescriptor& asset = assets[itemIndex];
                             ImGui::PushID(itemIndex);
 
-                            static u64 selectedAsset {0};
-                            if (ImGui::Selectable("##asset_item",
-                                                  asset.mId == selectedAsset,
-                                                  0,
-                                                  ImVec2(itemWidth, itemHeight))) {
-                                selectedAsset = asset.mId;
+                            // Begin a group for this cell
+                            ImGui::BeginGroup();
+
+                            // Create a selectable that fits the cell size
+                            bool selected = false;
+                            ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
+                            if (ImGui::Selectable("##cell", &selected, 0, ImVec2(cellWidth, thumbnailSize + 25))) {
+                                // Handle selection
                             }
+                            ImGui::PopStyleVar();
 
-                            ImGui::SetItemAllowOverlap();
-                            ImGui::SetCursorPosX(ImGui::GetCursorPosX() - itemWidth);
-                            ImGui::SetCursorPosY(ImGui::GetCursorPosY() - itemHeight);
+                            // Calculate image position (centered in the cell)
+                            float imageStartX = ImGui::GetItemRectMin().x + padding;
+                            float imageStartY = ImGui::GetItemRectMin().y + 2;  // Small top margin
 
-                            // Draw thumbnail image (centered within the item area)
-                            float paddingX = 4.0f;
-                            float paddingY = 4.0f;
-                            ImVec2 imageSize(itemWidth - 2 * paddingX,
-                                             itemHeight - 2 * paddingY - 20);  // Leave space for text
-                            ImVec2 imagePos(ImGui::GetCursorPosX() + paddingX, ImGui::GetCursorPosY() + paddingY);
+                            // Draw the thumbnail image
+                            str itemName = Path(asset.mFilename).Filename().substr(0, 8) + "...";
 
-                            ImGui::SetCursorPos(imagePos);
-                            ImGui::Image(SrvAsTextureId(mSceneViewport.GetShaderResourceView().Get()), imageSize);
+                            ImGui::GetWindowDrawList()->AddImage(
+                              SrvAsTextureId(mSceneViewport.GetShaderResourceView().Get()),
+                              ImVec2(imageStartX, imageStartY),
+                              ImVec2(imageStartX + thumbnailSize, imageStartY + thumbnailSize));
 
-                            // Add item name below the image
-                            // ImVec2 textPos(ImGui::GetCursorPosX() +
-                            //                  (itemWidth - ImGui::CalcTextSize(asset.mFilename.c_str()).x) * 0.5f,
-                            //                ImGui::GetCursorPosY() + imageSize.y + paddingY);
-                            //
-                            // ImGui::SetCursorPos(textPos);
-                            // ImGui::TextUnformatted(asset.mFilename.c_str());
+                            // Add text below the image (centered)
+                            float textWidth  = ImGui::CalcTextSize(itemName.c_str()).x;
+                            float textStartX = imageStartX + (thumbnailSize - textWidth) * 0.5f;
+                            float textStartY = imageStartY + thumbnailSize + 4;  // 4 pixels below the image
 
-                            // Add hover effect (optional)
+                            ImGui::GetWindowDrawList()->AddText(ImVec2(textStartX, textStartY),
+                                                                ImGui::GetColorU32(ImGuiCol_Text),
+                                                                itemName.c_str());
+
+                            // Add hover effect
                             if (ImGui::IsItemHovered()) {
                                 ImGui::BeginTooltip();
                                 ImGui::Text("%s", asset.mFilename.c_str());
                                 ImGui::EndTooltip();
                             }
+
+                            ImGui::EndGroup();
+                            ImGui::PopID();
                         }
-                        ImGui::PopID();
+
                         ImGui::EndGroup();
-
-                        itemIndex++;
                     }
-
-                    ImGui::EndChild();
                 }
+                ImGui::EndChild();
+                ImGui::PopStyleVar();
                 ImGui::PopStyleColor();
             }
         }
         ImGui::End();
+        ImGui::PopStyleVar();
     }
 
     void XEditor::LoadProject(const str& filename) {
