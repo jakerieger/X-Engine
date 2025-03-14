@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <map>
+
 #include "Common/Types.hpp"
 #include "EntityId.hpp"
 #include "ComponentManager.hpp"
@@ -23,19 +25,33 @@ namespace x {
     public:
         SceneState() = default;
 
-        EntityId CreateEntity() {
-            const auto newId = ++mNextId;
-            return EntityId(newId);
+        EntityId CreateEntity(const str& name) {
+            const auto newId  = ++mNextId;
+            const auto entity = EntityId {newId};
+            mEntities[entity] = name;
+            return entity;
         }
 
         void DestroyEntity(EntityId entity) {
             mTransforms.RemoveComponent(entity);
+            mModels.RemoveComponent(entity);
+            mBehaviors.RemoveComponent(entity);
+            mEntities.erase(entity);
+        }
+
+        const std::map<EntityId, str>& GetEntities() const {
+            return mEntities;
+        }
+
+        void RenameEntity(const EntityId entity, const str& name) {
+            mEntities[entity] = name;
         }
 
         [[nodiscard]] SceneState Clone() const {
             SceneState newState;
 
-            newState.mNextId = mNextId;
+            newState.mNextId   = mNextId;
+            newState.mEntities = mEntities;
 
             newState.Lights     = Lights;
             newState.MainCamera = MainCamera;
@@ -114,6 +130,7 @@ namespace x {
         }
 
         void Reset() {
+            mEntities.clear();
             mNextId     = 0;
             Lights      = {};
             MainCamera  = {};
@@ -128,6 +145,7 @@ namespace x {
 
     private:
         u64 mNextId = 0;
+        std::map<EntityId, std::string> mEntities;
 
         // Component managers
         ComponentManager<TransformComponent> mTransforms;

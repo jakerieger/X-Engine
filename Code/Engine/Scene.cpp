@@ -37,7 +37,7 @@ namespace x {
         sun.mCastsShadows = sunDescriptor.mCastsShadows;
 
         for (auto& entity : descriptor.mEntities) {
-            const EntityId newEntity = mState.CreateEntity();
+            const EntityId newEntity = mState.CreateEntity(entity.mName);
 
             // Create and attach components
             auto transformDescriptor = entity.mTransform;
@@ -58,7 +58,9 @@ namespace x {
 
                 modelComponent.SetModelHandle(*modelHandle)
                   .SetCastsShadows(model.mCastsShadows)
-                  .SetReceiveShadows(model.mReceiveShadows);
+                  .SetReceiveShadows(model.mReceiveShadows)
+                  .SetModelId(model.mMeshId)
+                  .SetMaterialId(model.mMaterialId);
 
                 // Load material
                 const auto materialBytes = AssetManager::GetAssetData(model.mMaterialId);
@@ -76,12 +78,11 @@ namespace x {
                 behaviorComponent.Load(behavior.mScriptId);
                 if (!mScriptEngine.LoadScript(*scriptBytecode, entity.mName)) { X_LOG_FATAL("Failed to load script"); }
             }
-
-            mEntities[entity.mName] = newEntity;
         }
 
         mInitialState = mState;  // Cache init state so scene can be reset
         mName         = descriptor.mName;
+        mLoaded       = true;
 
         Awake();
         X_LOG_INFO("Loaded scene: '%s'", descriptor.mName.c_str())
@@ -89,15 +90,13 @@ namespace x {
 
     void Scene::Unload() {
         Destroyed();
-
         mState.Reset();
-        mEntities.clear();
         mResources.Clear();
+        mLoaded = false;
     }
 
     void Scene::Reset() {
         mState.Reset();
-        mEntities.clear();
         mResources.Clear();
     }
 
@@ -107,7 +106,7 @@ namespace x {
     }
 
     void Scene::Awake() {
-        for (const auto& [name, entityId] : mEntities) {
+        for (const auto& [entityId, name] : mState.GetEntities()) {
             const auto* behaviorComponent = mState.GetComponent<BehaviorComponent>(entityId);
             auto* transformComponent      = mState.GetComponentMutable<TransformComponent>(entityId);
             if (behaviorComponent) {
@@ -137,7 +136,7 @@ namespace x {
         // Update scene entities
         mTransparentObjects.clear();
         mOpaqueObjects.clear();
-        for (const auto& [name, entityId] : mEntities) {
+        for (const auto& [entityId, name] : mState.GetEntities()) {
             const auto* behaviorComponent = mState.GetComponentMutable<BehaviorComponent>(entityId);
             auto* transformComponent      = mState.GetComponentMutable<TransformComponent>(entityId);
             auto* modelComponent          = mState.GetComponentMutable<ModelComponent>(entityId);
@@ -179,7 +178,7 @@ namespace x {
     }
 
     void Scene::Destroyed() {
-        for (const auto& [name, entityId] : mEntities) {
+        for (const auto& [entityId, name] : mState.GetEntities()) {
             const auto* behaviorComponent = mState.GetComponent<BehaviorComponent>(entityId);
             auto* transformComponent      = mState.GetComponentMutable<TransformComponent>(entityId);
             if (behaviorComponent) {
@@ -217,16 +216,8 @@ namespace x {
         return mState;
     }
 
-    unordered_map<str, EntityId>& Scene::GetEntities() {
-        return mEntities;
-    }
-
     const SceneState& Scene::GetState() const {
         return mState;
-    }
-
-    u32 Scene::GetNumEntities() const {
-        return mEntities.size();
     }
 
     ResourceManager& Scene::GetResourceManager() {
@@ -235,6 +226,10 @@ namespace x {
 
     const str& Scene::GetName() const {
         return mName;
+    }
+
+    bool Scene::Loaded() const {
+        return mLoaded;
     }
 
     void Scene::RegisterVolatiles(vector<Volatile*>& volatiles) {

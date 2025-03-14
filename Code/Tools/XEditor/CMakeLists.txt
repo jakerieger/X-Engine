@@ -6,8 +6,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/XEditor)
 add_executable(XEditor WIN32
     ${IMGUI_SOURCES}
     ${COMMON_SOURCES}
-    ${SCENE_EDITOR_DIR}/SceneEditor.hpp
-    ${SCENE_EDITOR_DIR}/SceneEditor.cpp
+    ${SCENE_EDITOR_DIR}/XEditor.hpp
+    ${SCENE_EDITOR_DIR}/XEditor.cpp
     ${SCENE_EDITOR_DIR}/main.cpp
 )
 

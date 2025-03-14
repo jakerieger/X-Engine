@@ -13,6 +13,10 @@ namespace x {
             mId = id;
         }
 
+        u64 GetScriptId() const {
+            return mId;
+        }
+
     private:
         u64 mId {0};
     };

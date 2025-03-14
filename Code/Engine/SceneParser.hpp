@@ -57,8 +57,8 @@ namespace x {
         u64 mId;
         str mName;
         TransformDescriptor mTransform;
-        std::optional<ModelDescriptor> mModel {};
-        std::optional<BehaviorDescriptor> mBehavior {};
+        std::optional<ModelDescriptor> mModel {std::nullopt};
+        std::optional<BehaviorDescriptor> mBehavior {std::nullopt};
     };
 
     struct SceneDescriptor {

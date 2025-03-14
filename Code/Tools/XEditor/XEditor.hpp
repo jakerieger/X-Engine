@@ -13,9 +13,9 @@
 #include "XPak/ProjectDescriptor.hpp"
 
 namespace x {
-    class SceneEditor final : public Window {
+    class XEditor final : public Window {
     public:
-        SceneEditor() : Window("XSceneEditor", 1440, 800), mSceneViewport(mContext), mGame(mContext) {
+        XEditor() : Window("XEditor", 1440, 800), mSceneViewport(mContext), mGame(mContext) {
             this->SetOpenMaximized(true);
         }
 

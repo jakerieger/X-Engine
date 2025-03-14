@@ -1,5 +1,6 @@
 #pragma once
 
+#include "EngineCommon.hpp"
 #include "Common/Types.hpp"
 #include "Math.hpp"
 #include "Volatile.hpp"
@@ -35,9 +36,10 @@ namespace x {
         void SetFOV(f32 fovY);
         void SetAspectRatio(f32 ratio);
         void SetClipPlanes(f32 nearZ, f32 farZ);
+        void SetEye(const VectorSet& eye);
 
         f32 GetFovY() const {
-            return mFovY;
+            return XMConvertToDegrees(mFovY);
         }
 
         f32 GetAspectRatio() const {
@@ -48,10 +50,11 @@ namespace x {
             return std::make_pair(mNearZ, mFarZ);
         }
 
-        [[nodiscard]] Matrix GetViewMatrix() const;
-        [[nodiscard]] Matrix GetProjectionMatrix() const;
-        [[nodiscard]] Matrix GetViewProjectionMatrix() const;
-        [[nodiscard]] Float3 GetPosition() const;
+        X_NODISCARD Matrix GetViewMatrix() const;
+        X_NODISCARD Matrix GetProjectionMatrix() const;
+        X_NODISCARD Matrix GetViewProjectionMatrix() const;
+        X_NODISCARD Float3 GetPosition() const;
+        X_NODISCARD Float3 GetEye() const;
 
     private:
         void UpdateViewMatrix();

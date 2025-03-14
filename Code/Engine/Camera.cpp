@@ -75,6 +75,11 @@ namespace x {
         UpdateProjectionMatrix();
     }
 
+    void Camera::SetEye(const VectorSet& eye) {
+        mAt = eye;
+        UpdateViewMatrix();
+    }
+
     Matrix Camera::GetViewMatrix() const {
         return mViewMatrix;
     }
@@ -91,6 +96,12 @@ namespace x {
         Float3 pos;
         XMStoreFloat3(&pos, mPosition);
         return pos;
+    }
+
+    Float3 Camera::GetEye() const {
+        Float3 eye;
+        XMStoreFloat3(&eye, mAt);
+        return eye;
     }
 
     void Camera::UpdateViewMatrix() {

@@ -27,12 +27,11 @@ namespace x {
         void DrawOpaque();
         void DrawTransparent();
 
-        SceneState& GetState();
-        unordered_map<str, EntityId>& GetEntities();
+        X_NODISCARD SceneState& GetState();
         X_NODISCARD const SceneState& GetState() const;
-        X_NODISCARD u32 GetNumEntities() const;
         X_NODISCARD ResourceManager& GetResourceManager();
         X_NODISCARD const str& GetName() const;
+        X_NODISCARD bool Loaded() const;
 
         void RegisterVolatiles(vector<Volatile*>& volatiles);
 
@@ -44,7 +43,7 @@ namespace x {
         ScriptEngine& mScriptEngine;
         str mName;
         str mDescription;
-        unordered_map<str, EntityId> mEntities;
+        bool mLoaded {false};
 
         using ModelTransformPair = std::pair<const ModelComponent*, const TransformComponent*>;
         vector<ModelTransformPair> mOpaqueObjects;

@@ -43,7 +43,7 @@ namespace x {
     }
 
     void Game::RenderDepthOnly(const SceneState& state) const {
-        if (mActiveScene->GetNumEntities() == 0) return;
+        if (mActiveScene->GetState().GetEntities().size() == 0) return;
 
         for (const auto& [entity, model] : state.GetComponents<ModelComponent>()) {
             if (!model.GetCastsShadows()) continue;
@@ -69,13 +69,13 @@ namespace x {
         RegisterHandler<MouseMoveEvent>([this](const MouseMoveEvent& e) { OnMouseMove(e.GetX(), e.GetY()); });
     }
 
-    void Game::RenderFrame() {
+    void Game::RenderFrame() const {
         if (!mIsFocused) return;
 
         const auto& state = mActiveScene->GetState();
 
         {
-            if (mActiveScene->GetNumEntities() == 0) return;
+            if (state.GetEntities().size() == 0) return;
 
             ID3D11ShaderResourceView* shadowPassResult = nullptr;
             ID3D11ShaderResourceView* lightPassResult  = nullptr;

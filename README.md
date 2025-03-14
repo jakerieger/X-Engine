@@ -22,7 +22,7 @@ If you'd like to know how the actual "engine" part of this code-base works, you 
 the [Engine Architecture](Docs/Engine-Architecture.md) doc.
 
 ![](Docs/image/EditorScreen01.png)
-> [XSceneEditor](Code/Tools/XSceneEditor), the main editing tool for the engine.
+> [XEditor](Code/Tools/XEditor) - the main editing tool for the engine.
 
 ## Building
 

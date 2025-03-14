@@ -2,7 +2,7 @@
 // Created: 3/11/2025.
 //
 
-#include "SceneEditor.hpp"
+#include "XEditor.hpp"
 
 #undef X_MAIN
 #undef X_MODULE_HANDLE
@@ -10,6 +10,6 @@
 #define X_MODULE_HANDLE hInstance
 
 X_MAIN {
-    x::SceneEditor sceneEditor;
+    x::XEditor sceneEditor;
     return sceneEditor.Run();
 }

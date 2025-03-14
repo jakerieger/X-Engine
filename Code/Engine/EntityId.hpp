@@ -14,7 +14,7 @@ namespace x {
         constexpr EntityId() : mValue(kInvalidEntityId) {}
         explicit constexpr EntityId(u64 value) : mValue(value) {}
 
-        constexpr u64 value() const {
+        constexpr u64 Value() const {
             return mValue;
         }
 
@@ -46,7 +46,7 @@ namespace x {
             return mValue;
         }
 
-        constexpr bool valid() const {
+        constexpr bool Valid() const {
             return mValue != kInvalidEntityId;
         }
 
@@ -67,7 +67,7 @@ namespace x {
 template<>
 struct std::hash<x::EntityId> {
     std::size_t operator()(const x::EntityId& id) const noexcept {
-        return std::hash<x::u64> {}(id.value());
+        return std::hash<x::u64> {}(id.Value());
     }
 };  // namespace std
 #endif

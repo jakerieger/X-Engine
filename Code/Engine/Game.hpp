@@ -29,7 +29,7 @@ namespace x {
         void Initialize(Window* window, Viewport* viewport, const Path& workingDir = Path::Current());
         void Shutdown();
         void Update(bool paused = false);
-        void RenderFrame();
+        void RenderFrame() const;
         void TransitionScene(const str& name);
         void TransitionScene(const SceneDescriptor& scene);
         void Resize(u32 width, u32 height) const;

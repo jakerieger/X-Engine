@@ -34,7 +34,62 @@ namespace x {
         ParseFromNode(scene, descriptor);
     }
 
-    void SceneParser::StateToDescriptor(const SceneState& state, SceneDescriptor& descriptor, const str& sceneName) {}
+    void SceneParser::StateToDescriptor(const SceneState& state, SceneDescriptor& descriptor, const str& sceneName) {
+        descriptor.mName = sceneName;
+
+        const auto& camera = state.GetMainCamera();
+        CameraDescriptor cameraDescriptor;
+        cameraDescriptor.mEye      = camera.GetEye();
+        cameraDescriptor.mPosition = camera.GetPosition();
+        cameraDescriptor.mFovY     = camera.GetFovY();
+        cameraDescriptor.mNearZ    = camera.GetClipPlanes().first;
+        cameraDescriptor.mFarZ     = camera.GetClipPlanes().second;
+        descriptor.mWorld.mCamera  = cameraDescriptor;
+
+        const auto& sun = state.GetLightState().mSun;
+        SunDescriptor sunDescriptor;
+        sunDescriptor.mColor           = Float3(sun.mColor.x, sun.mColor.y, sun.mColor.z);
+        sunDescriptor.mDirection       = Float3(sun.mDirection.x, sun.mDirection.y, sun.mDirection.z);
+        sunDescriptor.mEnabled         = sun.mEnabled;
+        sunDescriptor.mIntensity       = sun.mIntensity;
+        sunDescriptor.mCastsShadows    = sun.mCastsShadows;
+        descriptor.mWorld.mLights.mSun = sunDescriptor;
+
+        const auto& entities = state.GetEntities();
+        for (const auto& [id, name] : entities) {
+            EntityDescriptor entityDescriptor;
+            entityDescriptor.mId   = id.Value();
+            entityDescriptor.mName = name;
+
+            const TransformComponent* transform = state.GetComponent<TransformComponent>(id);
+            const ModelComponent* model         = state.GetComponent<ModelComponent>(id);
+            const BehaviorComponent* behavior   = state.GetComponent<BehaviorComponent>(id);
+
+            if (transform) {
+                auto& transformDescriptor     = entityDescriptor.mTransform;
+                transformDescriptor.mPosition = transform->GetPosition();
+                transformDescriptor.mRotation = transform->GetRotation();
+                transformDescriptor.mScale    = transform->GetScale();
+            }
+
+            if (model) {
+                ModelDescriptor modelDescriptor;
+                modelDescriptor.mMeshId         = model->GetModelId();
+                modelDescriptor.mMaterialId     = model->GetMaterialId();
+                modelDescriptor.mCastsShadows   = model->GetCastsShadows();
+                modelDescriptor.mReceiveShadows = model->GetReceiveShadows();
+                entityDescriptor.mModel         = modelDescriptor;
+            }
+
+            if (behavior) {
+                BehaviorDescriptor behaviorDescriptor;
+                behaviorDescriptor.mScriptId = behavior->GetScriptId();
+                entityDescriptor.mBehavior   = behaviorDescriptor;
+            }
+
+            descriptor.mEntities.push_back(entityDescriptor);
+        }
+    }
 
     void SceneParser::WriteToFile(const SceneDescriptor& descriptor, const str& filename) {
         YAML::Emitter out;
