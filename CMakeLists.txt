@@ -39,6 +39,7 @@ if (WIN32)
     # Tools
     add_subdirectory(${CODE_DIR}/Tools/XPak)
     add_subdirectory(${CODE_DIR}/Tools/XEditor)
+    add_subdirectory(${CODE_DIR}/Tools/Img2C)
 else ()
     message(FATAL_ERROR "Project only supports Windows 10 and 11.")
 endif ()

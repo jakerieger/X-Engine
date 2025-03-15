@@ -9,13 +9,14 @@
 #include "Engine/SceneParser.hpp"
 #include <imgui.h>
 
+#include "TextureManager.hpp"
 #include "Engine/Game.hpp"
 #include "XPak/ProjectDescriptor.hpp"
 
 namespace x {
     class XEditor final : public Window {
     public:
-        XEditor() : Window("XEditor", 1440, 800), mSceneViewport(mContext), mGame(mContext) {
+        XEditor() : Window("XEditor", 1440, 800), mTextureManager(mContext), mSceneViewport(mContext), mGame(mContext) {
             this->SetOpenMaximized(true);
         }
 
@@ -34,11 +35,13 @@ namespace x {
         Path mLoadedScenePath {};
         Path mProjectRoot {};
         bool mDockspaceSetup {false};
+        TextureManager mTextureManager;
 
         // Engine API
         Viewport mSceneViewport;
         Game mGame;
         ProjectDescriptor mLoadedProject {};
+        vector<AssetDescriptor> mAssetDescriptors;
 
         // ImGui settings variables.
         // These are used to store editable data that is then used to update the current scene
@@ -50,6 +53,8 @@ namespace x {
         struct EntityProperties {
             char mName[256] {0};
         } mEntityProperties;
+
+        void UpdateAssetDescriptors();
 
         // Views/Tabs
         void MainMenu();
@@ -73,5 +78,7 @@ namespace x {
         // ImGui-specific functions
         void SetupDockspace(const f32 yOffset);
         void ApplyTheme();
+        void LoadEditorIcons();
+        void GenerateAssetThumbnails();
     };
 }  // namespace x

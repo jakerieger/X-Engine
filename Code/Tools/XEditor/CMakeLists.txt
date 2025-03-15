@@ -6,8 +6,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/XEditor)
 add_executable(XEditor WIN32
     ${IMGUI_SOURCES}
     ${COMMON_SOURCES}
+    ${SCENE_EDITOR_DIR}/AssetTypeIcons.h
+    ${SCENE_EDITOR_DIR}/EditorIcons.h
     ${SCENE_EDITOR_DIR}/XEditor.hpp
     ${SCENE_EDITOR_DIR}/XEditor.cpp
+    ${SCENE_EDITOR_DIR}/TextureManager.cpp
+    ${SCENE_EDITOR_DIR}/TextureManager.hpp
     ${SCENE_EDITOR_DIR}/main.cpp
 )
 

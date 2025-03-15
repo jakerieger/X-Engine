@@ -10,6 +10,7 @@
 #include <imgui_internal.h>
 #include <yaml-cpp/yaml.h>
 
+#include "EditorIcons.h"
 #include "Common/WindowsHelpers.hpp"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -75,14 +76,15 @@ namespace x {
 
         ApplyTheme();
 
+        ImGui_ImplWin32_Init(mHwnd);
+        ImGui_ImplDX11_Init(mContext.GetDevice(), mContext.GetDeviceContext());
+
         mWindowViewport->SetClearColor(0.05f, 0.05f, 0.05f, 1.0f);
         mSceneViewport.SetClearColor(Colors::Gray);
         mSceneViewport.Resize(1, 1);
 
-        ImGui_ImplWin32_Init(mHwnd);
-        ImGui_ImplDX11_Init(mContext.GetDevice(), mContext.GetDeviceContext());
-
         SetWindowTitle("XEditor | Untitled");
+        LoadEditorIcons();
     }
 
     void XEditor::OnResize(u32 width, u32 height) {
@@ -142,7 +144,7 @@ namespace x {
                                      MAX_PATH)) {
             LoadProject(filename);
             // Load default scene
-            auto scenes = mGame.GetSceneMap();
+            const auto scenes = mGame.GetSceneMap();
             OnLoadScene(scenes.begin()->first);
         }
     }
@@ -162,6 +164,13 @@ namespace x {
         SetWindowTitle(std::format("XEditor | {}", selectedScene));
 
         sSelectedEntity = mGame.GetActiveScene()->GetState().GetEntities().begin()->first;
+    }
+
+    void XEditor::UpdateAssetDescriptors() {
+        if (mLoadedProject.mLoaded && mGame.IsInitialized()) {
+            mAssetDescriptors.clear();
+            mAssetDescriptors = AssetManager::GetAssetDescriptors();
+        }
     }
 
     void XEditor::MainMenu() {
@@ -206,6 +215,11 @@ namespace x {
             if (ImGui::BeginMenu("Edit")) {
                 if (ImGui::MenuItem("Undo", "Ctrl+Z")) {}
                 if (ImGui::MenuItem("Redo", "Ctrl+Y")) {}
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Assets")) {
+                if (ImGui::MenuItem("Import Asset...")) {}
+                if (ImGui::MenuItem("Generate Pak File")) {}
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("View")) {
@@ -548,23 +562,26 @@ namespace x {
             // right away)
             if (mLoadedProject.mLoaded && mProjectRoot.Exists() && mGame.IsInitialized()) {
                 // Setup for grid layout
-                auto assets = AssetManager::GetAssetDescriptors();
+                const auto& assets = mAssetDescriptors;
 
                 constexpr f32 fullWidth             = 1920.0f;
-                constexpr u32 desiredRowsAtFullSize = 8;
+                constexpr u32 desiredRowsAtFullSize = 9;
                 const auto currentWidth = GetWidth();  // Get current client window width, TODO: Change this to the max
                                                        // available width of the assets panel itself
                 const float columnsCount = std::floorf((desiredRowsAtFullSize * currentWidth) / fullWidth);
                 // I could calculate this as the floor of the result of the proportion MAX_WIDTH/8  = CURR_WIDTH/x
 
+                auto& style          = ImGui::GetStyle();
                 float windowWidth    = ImGui::GetContentRegionAvail().x;
-                float scrollbarWidth = ImGui::GetStyle().ScrollbarSize;
-                float availableWidth = windowWidth - scrollbarWidth - ImGui::GetStyle().CellPadding.x -
-                                       ImGui::GetStyle().FramePadding.x - ImGui::GetStyle().WindowPadding.x;
+                float scrollbarWidth = style.ScrollbarSize;
+                float availableWidth = windowWidth - scrollbarWidth - style.CellPadding.x - style.FramePadding.x -
+                                       style.WindowPadding.x - 28.f;
                 float cellWidth =
                   (availableWidth - ImGui::GetStyle().ItemSpacing.x * (columnsCount - 1)) / columnsCount;
                 float thumbnailSize = cellWidth * 0.9f;                    // 90% of cell width for the image
                 float padding       = (cellWidth - thumbnailSize) / 2.0f;  // Equal padding on both sides
+
+                ImGui::Dummy(ImVec2(0, padding * 2));
 
                 ImGui::PushStyleColor(ImGuiCol_ChildBg, HexToImVec4("17171a"));
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4.0f, 4.0f));
@@ -597,23 +614,69 @@ namespace x {
                             // Create a selectable that fits the cell size
                             bool selected = false;
                             ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
+                            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
                             if (ImGui::Selectable("##cell", &selected, 0, ImVec2(cellWidth, thumbnailSize + 25))) {
                                 // Handle selection
                             }
-                            ImGui::PopStyleVar();
+                            ImGui::PopStyleVar(2);
 
                             // Calculate image position (centered in the cell)
-                            float imageStartX = ImGui::GetItemRectMin().x + padding;
+                            float imageStartX = ImGui::GetItemRectMin().x + (padding * 1.5f);
                             float imageStartY = ImGui::GetItemRectMin().y + 2;  // Small top margin
 
                             // Truncate asset thumbnail text if necessary
                             str itemName = Path(asset.mFilename).Filename();
-                            if (itemName.length() > 8) { itemName = itemName.substr(0, 8) + "..."; }
+                            if (itemName.length() > 8) { itemName = itemName.substr(0, 10) + "..."; }
 
-                            ImGui::GetWindowDrawList()->AddImage(
-                              SrvAsTextureId(mSceneViewport.GetShaderResourceView().Get()),
-                              ImVec2(imageStartX, imageStartY),
-                              ImVec2(imageStartX + thumbnailSize, imageStartY + thumbnailSize));
+                            if (asset.GetTypeFromId() == kAssetType_Texture) {
+                                auto thumbnail = mTextureManager.GetTexture(std::to_string(asset.mId));
+                                assert(thumbnail.has_value());
+
+                                ImGui::GetWindowDrawList()->AddImage(
+                                  SrvAsTextureId(thumbnail->mShaderResourceView.Get()),
+                                  ImVec2(imageStartX, imageStartY),
+                                  ImVec2(imageStartX + thumbnailSize, imageStartY + thumbnailSize));
+                            } else {
+                                // ID3D11ShaderResourceView* iconSrv {nullptr};
+
+                                // switch (asset.GetTypeFromId()) {
+                                //     case kAssetType_Audio: {
+                                //         auto icon = mTextureManager.GetTexture("AudioAsset");
+                                //         assert(icon.has_value());
+                                //         iconSrv = icon->mShaderResourceView.Get();
+                                //     } break;
+                                //     case kAssetType_Material: {
+                                //         auto icon = mTextureManager.GetTexture("MaterialAsset");
+                                //         assert(icon.has_value());
+                                //         iconSrv = icon->mShaderResourceView.Get();
+                                //     } break;
+                                //     case kAssetType_Mesh: {
+                                //         auto icon = mTextureManager.GetTexture("MeshAsset");
+                                //         assert(icon.has_value());
+                                //         iconSrv = icon->mShaderResourceView.Get();
+                                //     } break;
+                                //     case kAssetType_Scene: {
+                                //         auto icon = mTextureManager.GetTexture("SceneAsset");
+                                //         assert(icon.has_value());
+                                //         iconSrv = icon->mShaderResourceView.Get();
+                                //     } break;
+                                //     case kAssetType_Script: {
+                                //         auto icon = mTextureManager.GetTexture("ScriptAsset");
+                                //         assert(icon.has_value());
+                                //         iconSrv = icon->mShaderResourceView.Get();
+                                //     } break;
+                                //     default:
+                                //         break;
+                                // }
+
+                                auto icon = mTextureManager.GetTexture("MoveIcon");
+                                if (!icon.has_value() || icon->mShaderResourceView.Get() == nullptr) { std::abort(); }
+
+                                ImGui::GetWindowDrawList()->AddImage(
+                                  SrvAsTextureId(mSceneViewport.GetShaderResourceView().Get()),
+                                  ImVec2(imageStartX, imageStartY),
+                                  ImVec2(imageStartX + thumbnailSize, imageStartY + thumbnailSize));
+                            }
 
                             // Add text below the image (centered)
                             float textWidth  = ImGui::CalcTextSize(itemName.c_str()).x;
@@ -647,6 +710,41 @@ namespace x {
         ImGui::PopStyleVar();
     }
 
+    void XEditor::GenerateAssetThumbnails() {
+        const auto& assets = mAssetDescriptors;
+        for (const auto& asset : assets) {
+            const auto type = asset.GetTypeFromId();
+            switch (type) {
+                // Texture thumbnails
+                case kAssetType_Texture: {
+                    auto textureFile      = Path(mLoadedProject.mContentDirectory) / asset.mFilename;
+                    const auto loadResult = mTextureManager.LoadFromDDSFile(textureFile, std::to_string(asset.mId));
+                    if (!loadResult) {
+                        Platform::ShowAlert(
+                          mHwnd,
+                          "Error loading texture",
+                          ("Failed to load texture asset with id " + std::to_string(asset.mId)).c_str(),
+                          Platform::AlertSeverity::Error);
+                    }
+                } break;
+                // Descriptors just use icon files
+                // TODO: Generate thumbnails for the rest of these
+                // case kAssetType_Scene: {
+                // } break;
+                // case kAssetType_Material: {
+                // } break;
+                // case kAssetType_Script: {
+                // } break;
+                // case kAssetType_Mesh: {
+                // } break;
+                // case kAssetType_Audio: {
+                // } break;
+                default:
+                    break;
+            }
+        }
+    }
+
     void XEditor::LoadProject(const str& filename) {
         if (!mLoadedProject.FromFile(filename)) {
             Platform::ShowAlert(mHwnd,
@@ -658,6 +756,10 @@ namespace x {
 
         mProjectRoot = Path(filename).Parent();
         mGame.Initialize(this, &mSceneViewport, mProjectRoot);
+        UpdateAssetDescriptors();
+
+        // TODO: Do this asynchronously
+        GenerateAssetThumbnails();
     }
 
     void XEditor::SaveScene(const char* filename) const {
@@ -843,5 +945,23 @@ namespace x {
         colors[ImGuiCol_NavWindowingDimBg]     = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
         colors[ImGuiCol_ModalWindowDimBg]      = ImVec4(0.00f, 0.00f, 0.00f, 0.0f);
         colors[ImGuiCol_DockingPreview]        = primary;
+    }
+
+#include "AssetTypeIcons.h"
+
+    void XEditor::LoadEditorIcons() {
+        // auto result = mTextureManager.LoadFromMemory(AUDIO_BYTES, 128, 128, 4, "AudioAsset");
+        // if (!result) { throw std::runtime_error("Failed to load Audio icon"); }
+        // result = mTextureManager.LoadFromMemory(MATERIAL_BYTES, 128, 128, 4, "MaterialAsset");
+        // if (!result) { throw std::runtime_error("Failed to load Material icon"); }
+        // result = mTextureManager.LoadFromMemory(MESH_BYTES, 128, 128, 4, "MeshAsset");
+        // if (!result) { throw std::runtime_error("Failed to load Mesh icon"); }
+        // result = mTextureManager.LoadFromMemory(SCENE_BYTES, 128, 128, 4, "SceneAsset");
+        // if (!result) { throw std::runtime_error("Failed to load Scene icon"); }
+        // result = mTextureManager.LoadFromMemory(SCRIPT_BYTES, 128, 128, 4, "ScriptAsset");
+        // if (!result) { throw std::runtime_error("Failed to load Script icon"); }
+        if (!mTextureManager.LoadFromMemory(MOVE_BYTES, 24, 24, 4, "MoveIcon")) {
+            throw std::runtime_error("Failed to load MoveIcon");
+        }
     }
 }  // namespace x
