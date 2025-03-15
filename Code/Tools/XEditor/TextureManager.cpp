@@ -28,7 +28,7 @@ namespace x {
 
         ComPtr<ID3D11Texture2D> texture2D;
         auto* device = mContext.GetDevice();
-        if (SUCCEEDED(device->CreateTexture2D(&desc, nullptr, &texture2D))) {
+        if (SUCCEEDED(device->CreateTexture2D(&desc, &subresource, &texture2D))) {
             D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc {};
             srvDesc.Format                    = desc.Format;
             srvDesc.ViewDimension             = D3D11_SRV_DIMENSION_TEXTURE2D;

@@ -683,43 +683,40 @@ namespace x {
                                   ImVec2(imageStartX, imageStartY),
                                   ImVec2(imageStartX + thumbnailSize, imageStartY + thumbnailSize));
                             } else {
-                                // ID3D11ShaderResourceView* iconSrv {nullptr};
+                                ID3D11ShaderResourceView* iconSrv {nullptr};
 
-                                // switch (asset.GetTypeFromId()) {
-                                //     case kAssetType_Audio: {
-                                //         auto icon = mTextureManager.GetTexture("AudioAsset");
-                                //         assert(icon.has_value());
-                                //         iconSrv = icon->mShaderResourceView.Get();
-                                //     } break;
-                                //     case kAssetType_Material: {
-                                //         auto icon = mTextureManager.GetTexture("MaterialAsset");
-                                //         assert(icon.has_value());
-                                //         iconSrv = icon->mShaderResourceView.Get();
-                                //     } break;
-                                //     case kAssetType_Mesh: {
-                                //         auto icon = mTextureManager.GetTexture("MeshAsset");
-                                //         assert(icon.has_value());
-                                //         iconSrv = icon->mShaderResourceView.Get();
-                                //     } break;
-                                //     case kAssetType_Scene: {
-                                //         auto icon = mTextureManager.GetTexture("SceneAsset");
-                                //         assert(icon.has_value());
-                                //         iconSrv = icon->mShaderResourceView.Get();
-                                //     } break;
-                                //     case kAssetType_Script: {
-                                //         auto icon = mTextureManager.GetTexture("ScriptAsset");
-                                //         assert(icon.has_value());
-                                //         iconSrv = icon->mShaderResourceView.Get();
-                                //     } break;
-                                //     default:
-                                //         break;
-                                // }
-
-                                auto icon = mTextureManager.GetTexture("MoveIcon");
-                                if (!icon.has_value() || icon->mShaderResourceView.Get() == nullptr) { std::abort(); }
+                                switch (asset.GetTypeFromId()) {
+                                    case kAssetType_Audio: {
+                                        auto icon = mTextureManager.GetTexture("AudioAsset");
+                                        assert(icon.has_value());
+                                        iconSrv = icon->mShaderResourceView.Get();
+                                    } break;
+                                    case kAssetType_Material: {
+                                        auto icon = mTextureManager.GetTexture("MaterialAsset");
+                                        assert(icon.has_value());
+                                        iconSrv = icon->mShaderResourceView.Get();
+                                    } break;
+                                    case kAssetType_Mesh: {
+                                        auto icon = mTextureManager.GetTexture("MeshAsset");
+                                        assert(icon.has_value());
+                                        iconSrv = icon->mShaderResourceView.Get();
+                                    } break;
+                                    case kAssetType_Scene: {
+                                        auto icon = mTextureManager.GetTexture("SceneAsset");
+                                        assert(icon.has_value());
+                                        iconSrv = icon->mShaderResourceView.Get();
+                                    } break;
+                                    case kAssetType_Script: {
+                                        auto icon = mTextureManager.GetTexture("ScriptAsset");
+                                        assert(icon.has_value());
+                                        iconSrv = icon->mShaderResourceView.Get();
+                                    } break;
+                                    default:
+                                        break;
+                                }
 
                                 ImGui::GetWindowDrawList()->AddImage(
-                                  SrvAsTextureId(mSceneViewport.GetShaderResourceView().Get()),
+                                  SrvAsTextureId(iconSrv),
                                   ImVec2(imageStartX, imageStartY),
                                   ImVec2(imageStartX + thumbnailSize, imageStartY + thumbnailSize));
                             }
@@ -1001,18 +998,15 @@ namespace x {
 #include "AssetTypeIcons.h"
 
     void XEditor::LoadEditorIcons() {
-        // auto result = mTextureManager.LoadFromMemory(AUDIO_BYTES, 128, 128, 4, "AudioAsset");
-        // if (!result) { throw std::runtime_error("Failed to load Audio icon"); }
-        // result = mTextureManager.LoadFromMemory(MATERIAL_BYTES, 128, 128, 4, "MaterialAsset");
-        // if (!result) { throw std::runtime_error("Failed to load Material icon"); }
-        // result = mTextureManager.LoadFromMemory(MESH_BYTES, 128, 128, 4, "MeshAsset");
-        // if (!result) { throw std::runtime_error("Failed to load Mesh icon"); }
-        // result = mTextureManager.LoadFromMemory(SCENE_BYTES, 128, 128, 4, "SceneAsset");
-        // if (!result) { throw std::runtime_error("Failed to load Scene icon"); }
-        // result = mTextureManager.LoadFromMemory(SCRIPT_BYTES, 128, 128, 4, "ScriptAsset");
-        // if (!result) { throw std::runtime_error("Failed to load Script icon"); }
-        if (!mTextureManager.LoadFromMemory(MOVE_BYTES, 24, 24, 4, "MoveIcon")) {
-            throw std::runtime_error("Failed to load MoveIcon");
-        }
+        auto result = mTextureManager.LoadFromMemory(AUDIO_BYTES, 128, 128, 4, "AudioAsset");
+        if (!result) { throw std::runtime_error("Failed to load Audio icon"); }
+        result = mTextureManager.LoadFromMemory(MATERIAL_BYTES, 128, 128, 4, "MaterialAsset");
+        if (!result) { throw std::runtime_error("Failed to load Material icon"); }
+        result = mTextureManager.LoadFromMemory(MESH_BYTES, 128, 128, 4, "MeshAsset");
+        if (!result) { throw std::runtime_error("Failed to load Mesh icon"); }
+        result = mTextureManager.LoadFromMemory(SCENE_BYTES, 128, 128, 4, "SceneAsset");
+        if (!result) { throw std::runtime_error("Failed to load Scene icon"); }
+        result = mTextureManager.LoadFromMemory(SCRIPT_BYTES, 128, 128, 4, "ScriptAsset");
+        if (!result) { throw std::runtime_error("Failed to load Script icon"); }
     }
 }  // namespace x
