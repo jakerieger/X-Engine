@@ -28,7 +28,7 @@ namespace x {
 #else
         if (auto it = mAssets.find(id); it != mAssets.end()) {
             const auto& [id, assetFile] = *it;
-            const auto fullPath         = Path::Current() / "Content" / assetFile.Str();
+            const auto fullPath         = mWorkingDirectory / "Content" / assetFile.Str();
             if (!fullPath.Exists()) { X_LOG_ERROR("AssetManager::GetAssetData - Not Found"); }
 
             const auto type = AssetDescriptor::GetTypeFromId(id);
@@ -60,6 +60,7 @@ namespace x {
     }
 
     bool AssetManager::LoadAssets(const Path& workingDir) {
+        mWorkingDirectory = workingDir;
 #ifdef X_USE_PAK_FILE
         const auto pakFile = Path(X_PAK_FILE);
         if (!pakFile.Exists()) {

@@ -48,9 +48,9 @@ namespace x {
         const char green[3] = {hex[2], hex[3], '\0'};
         const char blue[3]  = {hex[4], hex[5], '\0'};
 
-        const int r = strtol(red, nullptr, 16);
-        const int g = strtol(green, nullptr, 16);
-        const int b = strtol(blue, nullptr, 16);
+        const i32 r = strtol(red, nullptr, 16);
+        const i32 g = strtol(green, nullptr, 16);
+        const i32 b = strtol(blue, nullptr, 16);
 
         color.x = (f32)r / 255.0f;
         color.y = (f32)g / 255.0f;
@@ -85,6 +85,20 @@ namespace x {
 
         SetWindowTitle("XEditor | Untitled");
         LoadEditorIcons();
+
+        // Check if our session file exists
+        const Path sessionFile = Path::Current() / ".session";
+        if (sessionFile.Exists()) {
+            const YAML::Node root = YAML::LoadFile(sessionFile.Str());
+            if (root.IsDefined()) {
+                // Most recent project
+                const str lastProject = root["last_project"].as<str>();
+                if (!lastProject.empty()) {
+                    // Load last project
+                    LoadProject(Path(lastProject).Str());
+                }
+            }
+        }
     }
 
     void XEditor::OnResize(u32 width, u32 height) {
@@ -97,7 +111,9 @@ namespace x {
         ImGui::DestroyContext();
     }
 
-    void XEditor::OnUpdate() {}
+    void XEditor::OnUpdate() {
+        // mGame.Update(false);
+    }
 
     void XEditor::OnRender() {
         mWindowViewport->ClearAll();
@@ -143,9 +159,6 @@ namespace x {
                                      filename,
                                      MAX_PATH)) {
             LoadProject(filename);
-            // Load default scene
-            const auto scenes = mGame.GetSceneMap();
-            OnLoadScene(scenes.begin()->first);
         }
     }
 
@@ -422,6 +435,9 @@ namespace x {
     }
 
     void XEditor::EntitiesPropertiesView() {
+        static bool selectAssetOpen {false};
+        static AssetDescriptor selectedAsset {};
+
         ImGui::Begin("Properties");
         const ImVec2 size = ImGui::GetContentRegionAvail();
         {
@@ -495,11 +511,28 @@ namespace x {
                     if (ImGui::CollapsingHeader("Model##properties", ImGuiTreeNodeFlags_DefaultOpen)) {
                         ImGui::Text("Mesh (Asset):");
                         ImGui::SameLine(kLabelWidth);
-                        ImGui::Button(std::to_string(model->GetModelId()).c_str(), ImVec2(size.x - kLabelWidth, 0));
+
+                        const auto& modelAsset =
+                          *std::ranges::find_if(mAssetDescriptors, [&model](const AssetDescriptor& asset) {
+                              return asset.mId == model->GetModelId();
+                          });
+                        const str modelText = std::format("{} (Change)", Path(modelAsset.mFilename).Filename());
+                        if (ImGui::Button(modelText.c_str(), ImVec2(size.x - kLabelWidth, 0))) {
+                            selectAssetOpen = true;
+                            // TODO: Do something with selectedAsset
+                            if (selectedAsset.mId != 0) model->SetModelId(selectedAsset.mId);
+                            // TODO: Handle actually switching the asset on the component
+                        }
 
                         ImGui::Text("Material (Asset):");
                         ImGui::SameLine(kLabelWidth);
-                        ImGui::Button(std::to_string(model->GetMaterialId()).c_str(), ImVec2(size.x - kLabelWidth, 0));
+
+                        const auto& materialAsset =
+                          *std::ranges::find_if(mAssetDescriptors, [&model](const AssetDescriptor& asset) {
+                              return asset.mId == model->GetMaterialId();
+                          });
+                        const str materialText = std::format("{} (Change)", Path(materialAsset.mFilename).Filename());
+                        ImGui::Button(materialText.c_str(), ImVec2(size.x - kLabelWidth, 0));
 
                         ImGui::Text("Casts Shadows:");
                         ImGui::SameLine(kLabelWidth);
@@ -520,12 +553,25 @@ namespace x {
                         ImGui::Text("Script (Asset):");
                         ImGui::SameLine(kLabelWidth);
                         ImGui::SetNextItemWidth(size.x - kLabelWidth);
-                        ImGui::Button(std::to_string(behavior->GetScriptId()).c_str(), ImVec2(size.x - kLabelWidth, 0));
+
+                        const auto& scriptAsset =
+                          *std::ranges::find_if(mAssetDescriptors, [&behavior](const AssetDescriptor& asset) {
+                              return asset.mId == behavior->GetScriptId();
+                          });
+                        const str scriptText = std::format("{} (Change)", Path(scriptAsset.mFilename).Filename());
+                        ImGui::Button(scriptText.c_str(), ImVec2(size.x - kLabelWidth, 0));
                     }
                 }
             }
         }
         ImGui::End();
+
+        if (selectAssetOpen) { ImGui::OpenPopup("Select Asset"); }
+
+        if (ImGui::BeginPopupModal("Select Asset", &selectAssetOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::Dummy(ImVec2(380, 500));
+            ImGui::EndPopup();
+        }
     }
 
     void XEditor::ViewportView() {
@@ -568,18 +614,18 @@ namespace x {
                 constexpr u32 desiredRowsAtFullSize = 9;
                 const auto currentWidth = GetWidth();  // Get current client window width, TODO: Change this to the max
                                                        // available width of the assets panel itself
-                const float columnsCount = std::floorf((desiredRowsAtFullSize * currentWidth) / fullWidth);
+                const f32 columnsCount = std::floorf((desiredRowsAtFullSize * currentWidth) / fullWidth);
                 // I could calculate this as the floor of the result of the proportion MAX_WIDTH/8  = CURR_WIDTH/x
 
-                auto& style          = ImGui::GetStyle();
-                float windowWidth    = ImGui::GetContentRegionAvail().x;
-                float scrollbarWidth = style.ScrollbarSize;
-                float availableWidth = windowWidth - scrollbarWidth - style.CellPadding.x - style.FramePadding.x -
-                                       style.WindowPadding.x - 28.f;
-                float cellWidth =
+                const auto& style        = ImGui::GetStyle();
+                const f32 windowWidth    = ImGui::GetContentRegionAvail().x;
+                const f32 scrollbarWidth = style.ScrollbarSize;
+                const f32 availableWidth = windowWidth - scrollbarWidth - style.CellPadding.x - style.FramePadding.x -
+                                           style.WindowPadding.x - 28.f;
+                const f32 cellWidth =
                   (availableWidth - ImGui::GetStyle().ItemSpacing.x * (columnsCount - 1)) / columnsCount;
-                float thumbnailSize = cellWidth * 0.9f;                    // 90% of cell width for the image
-                float padding       = (cellWidth - thumbnailSize) / 2.0f;  // Equal padding on both sides
+                const f32 thumbnailSize = cellWidth * 0.9f;                    // 90% of cell width for the image
+                const f32 padding       = (cellWidth - thumbnailSize) / 2.0f;  // Equal padding on both sides
 
                 ImGui::Dummy(ImVec2(0, padding * 2));
 
@@ -587,17 +633,17 @@ namespace x {
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4.0f, 4.0f));
                 if (ImGui::BeginChild("##GridScrollRegion", ImVec2(0, 0), false)) {
                     // Calculate number of rows needed
-                    int itemCount = assets.size();
-                    int rowCount  = (itemCount + columnsCount - 1) / columnsCount;  // Ceiling division
+                    i32 itemCount = assets.size();
+                    i32 rowCount  = (itemCount + columnsCount - 1) / columnsCount;  // Ceiling division
 
                     // For each row
-                    for (int row = 0; row < rowCount; row++) {
+                    for (i32 row = 0; row < rowCount; row++) {
                         // Row container
                         ImGui::BeginGroup();
 
                         // For each column in the row
-                        for (int col = 0; col < columnsCount; col++) {
-                            int itemIndex = row * columnsCount + col;
+                        for (i32 col = 0; col < columnsCount; col++) {
+                            i32 itemIndex = row * columnsCount + col;
 
                             // Break if we've displayed all items
                             if (itemIndex >= itemCount) break;
@@ -621,8 +667,8 @@ namespace x {
                             ImGui::PopStyleVar(2);
 
                             // Calculate image position (centered in the cell)
-                            float imageStartX = ImGui::GetItemRectMin().x + (padding * 1.5f);
-                            float imageStartY = ImGui::GetItemRectMin().y + 2;  // Small top margin
+                            f32 imageStartX = ImGui::GetItemRectMin().x + (padding * 1.5f);
+                            f32 imageStartY = ImGui::GetItemRectMin().y + (padding);  // Small top margin
 
                             // Truncate asset thumbnail text if necessary
                             str itemName = Path(asset.mFilename).Filename();
@@ -679,9 +725,9 @@ namespace x {
                             }
 
                             // Add text below the image (centered)
-                            float textWidth  = ImGui::CalcTextSize(itemName.c_str()).x;
-                            float textStartX = imageStartX + (thumbnailSize - textWidth) * 0.5f;
-                            float textStartY = imageStartY + thumbnailSize + 4;  // 4 pixels below the image
+                            f32 textWidth  = ImGui::CalcTextSize(itemName.c_str()).x;
+                            f32 textStartX = imageStartX + (thumbnailSize - textWidth) * 0.5f;
+                            f32 textStartY = imageStartY + thumbnailSize + 4;  // 4 pixels below the image
 
                             ImGui::GetWindowDrawList()->AddText(ImVec2(textStartX, textStartY),
                                                                 ImGui::GetColorU32(ImGuiCol_Text),
@@ -760,6 +806,11 @@ namespace x {
 
         // TODO: Do this asynchronously
         GenerateAssetThumbnails();
+
+        // Load first available scene
+        // TODO: Add a startup scene to the project descriptor
+        const auto scenes = mGame.GetSceneMap();
+        OnLoadScene(scenes.begin()->first);
     }
 
     void XEditor::SaveScene(const char* filename) const {

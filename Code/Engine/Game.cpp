@@ -178,7 +178,7 @@ namespace x {
         const auto sceneIds = AssetManager::GetScenes();
         for (const auto& scene : sceneIds) {
             auto sceneData = AssetManager::GetAssetData(scene);
-            if (!sceneData) { X_LOG_FATAL("Failed to load scene data!"); }
+            if (!sceneData || sceneData->size() == 0) { X_LOG_FATAL("Failed to load scene data!"); }
             SceneDescriptor descriptor;
             SceneParser::Parse(*sceneData, descriptor);
             mScenes[descriptor.mName] = descriptor;

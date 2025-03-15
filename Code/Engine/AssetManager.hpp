@@ -32,6 +32,8 @@ namespace x {
         static bool LoadAssets(const Path& workingDir = Path::Current());
         static vector<AssetId> GetScenes();
 
+        inline static Path mWorkingDirectory;
+
 #ifdef X_USE_PAK_FILE
         inline static AssetTable mAssets;
 #else
