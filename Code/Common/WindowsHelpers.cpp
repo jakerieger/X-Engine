@@ -29,21 +29,21 @@ namespace Platform {
 
     x::Path GetPlatformDirectory(const PlatformDirectoryId id) {
         switch (id) {
-            case kProgramFiles:
+            case kPlatformDir_ProgramFiles:
                 return x::Path(GetKnownFolderPath(FOLDERID_ProgramFiles));
-            case kProgramFileX86:
+            case kPlatformDir_ProgramFileX86:
                 return x::Path(GetKnownFolderPath(FOLDERID_ProgramFilesX86));
-            case kUserHome:
+            case kPlatformDir_UserHome:
                 return x::Path(GetKnownFolderPath(FOLDERID_UserProfiles));
-            case kDocuments:
+            case kPlatformDir_Documents:
                 return x::Path(GetKnownFolderPath(FOLDERID_Documents));
-            case kDesktop:
+            case kPlatformDir_Desktop:
                 return x::Path(GetKnownFolderPath(FOLDERID_Desktop));
-            case kDownloads:
+            case kPlatformDir_Downloads:
                 return x::Path(GetKnownFolderPath(FOLDERID_Downloads));
-            case kAppDataLocal:
+            case kPlatformDir_AppDataLocal:
                 return x::Path(GetKnownFolderPath(FOLDERID_LocalAppData));
-            case kAppDataRoaming:
+            case kPlatformDir_AppDataRoaming:
                 return x::Path(GetKnownFolderPath(FOLDERID_RoamingAppData));
             default:
                 return x::Path::Current();

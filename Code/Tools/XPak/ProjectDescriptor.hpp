@@ -15,6 +15,7 @@ namespace x {
         str mName;
         f32 mEngineVersion;
         str mContentDirectory;
+        str mStartupScene;
         bool mLoaded {false};
 
         bool FromFile(const str& filename);

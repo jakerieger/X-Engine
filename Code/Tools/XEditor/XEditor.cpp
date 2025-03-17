@@ -18,6 +18,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 namespace x {
     static constexpr f32 kLabelWidth = 140.0f;
     static EntityId sSelectedEntity {};
+    static constexpr i32 kNoSelection = -1;
 
     // TODO: Consider making this a class
     namespace EditorState {
@@ -39,8 +40,8 @@ namespace x {
         return RCAST<ImTextureID>(RCAST<void*>(srv));
     }
 
-    static ImVec4 HexToImVec4(const str& hex,
-                              const f32 alpha = 1.0f) {  // Ensure the string is the correct length
+    static ImVec4 HexToImVec4(const str& hex, const f32 alpha = 1.0f) {
+        // Ensure the string is the correct length
         if (hex.length() != 6) { throw std::invalid_argument("Hex color should be in the format 'RRGGBB'"); }
 
         ImVec4 color;
@@ -153,7 +154,7 @@ namespace x {
         const auto filter = "Project (*.xproj)|*.xproj|";
         char filename[MAX_PATH];
         if (Platform::OpenFileDialog(mHwnd,
-                                     Platform::GetPlatformDirectory(Platform::kDocuments).CStr(),
+                                     GetInitialDirectory().CStr(),
                                      filter,
                                      "Open Project File",
                                      filename,
@@ -177,6 +178,37 @@ namespace x {
         SetWindowTitle(std::format("XEditor | {}", selectedScene));
 
         sSelectedEntity = mGame.GetActiveScene()->GetState().GetEntities().begin()->first;
+    }
+
+    void XEditor::OnImportAsset() {
+        const auto filter = "Texture Files (*.dds)|*.dds|Mesh Files (*.glb;*.obj;*.fbx)|*.glb;*.obj;*.fbx|Script Files "
+                            "(*.lua)|*.lua|Material Files (*.material)|*.material|Scene Files (*.scene)|*.scene|Audio "
+                            "Files (*.wav)|*.wav|All Supported Asset Files "
+                            "(*.dds;*.glb;*.obj;*.fbx;*.lua;*.material;*.scene;*.wav)|*.dds;*.glb;*.obj;*.fbx;*.lua;*."
+                            "material;*.scene;*.wav|";
+        char filename[MAX_PATH];
+        Path initialDir = GetInitialDirectory();
+        if (Platform::OpenFileDialog(mHwnd, GetInitialDirectory().CStr(), filter, "Import Asset", filename, MAX_PATH)) {
+            const AssetType assetType = GetAssetTypeFromFile(Path(filename));
+            switch (assetType) {
+                case kAssetType_Audio:
+                    break;
+                case kAssetType_Material:
+                    break;
+                case kAssetType_Mesh:
+                    break;
+                case kAssetType_Scene:
+                    break;
+                case kAssetType_Script:
+                    break;
+                case kAssetType_Texture:
+                    break;
+                case kAssetType_Invalid:
+                default:
+                    X_LOG_ERROR("Invalid asset type for file '%s'", filename);
+                    return;
+            }
+        }
     }
 
     void XEditor::UpdateAssetDescriptors() {
@@ -228,11 +260,14 @@ namespace x {
             if (ImGui::BeginMenu("Edit")) {
                 if (ImGui::MenuItem("Undo", "Ctrl+Z")) {}
                 if (ImGui::MenuItem("Redo", "Ctrl+Y")) {}
+                ImGui::Separator();
+                if (ImGui::MenuItem("Project Settings", "Shift+Alt+S")) {}
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Assets")) {
-                if (ImGui::MenuItem("Import Asset...")) {}
+                if (ImGui::MenuItem("Import Asset...")) { OnImportAsset(); }
                 if (ImGui::MenuItem("Generate Pak File")) {}
+
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("View")) {
@@ -313,7 +348,7 @@ namespace x {
                     ImGui::Text("FOV Y:");
                     ImGui::SameLine(kLabelWidth);
                     ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::SliderFloat("##camera_fov", &EditorState::CameraFovY, 1.0f, 120.0f, "%.1f");
+                    ImGui::InputFloat("##camera_fov", &EditorState::CameraFovY, 0.1f, 1.0f, "%.1f");
                     camera.SetFOV(EditorState::CameraFovY);
 
                     ImGui::Text("Near Z:");
@@ -321,10 +356,10 @@ namespace x {
                     ImGui::SetNextItemWidth(width - kLabelWidth);
                     ImGui::InputFloat("##camera_nearz", &EditorState::CameraNearZ, 0.1f, 100.0f, "%.1f");
 
+                    ImGui::Text("Far Z:");
                     ImGui::SameLine(kLabelWidth);
                     ImGui::SetNextItemWidth(width - kLabelWidth);
                     ImGui::InputFloat("##camera_farz", &EditorState::CameraFarZ, 0.1f, 100.0f, "%.1f");
-                    ImGui::Text("Far Z:");
 
                     camera.SetClipPlanes(EditorState::CameraNearZ, EditorState::CameraFarZ);
 
@@ -601,6 +636,8 @@ namespace x {
     }
 
     void XEditor::AssetsView() {
+        static i32 selectedAsset {kNoSelection};
+
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
         ImGui::Begin("Assets");
         {
@@ -613,7 +650,7 @@ namespace x {
                 constexpr f32 fullWidth             = 1920.0f;
                 constexpr u32 desiredRowsAtFullSize = 9;
                 const auto currentWidth = GetWidth();  // Get current client window width, TODO: Change this to the max
-                                                       // available width of the assets panel itself
+                // available width of the assets panel itself
                 const f32 columnsCount = std::floorf((desiredRowsAtFullSize * currentWidth) / fullWidth);
                 // I could calculate this as the floor of the result of the proportion MAX_WIDTH/8  = CURR_WIDTH/x
 
@@ -633,8 +670,8 @@ namespace x {
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4.0f, 4.0f));
                 if (ImGui::BeginChild("##GridScrollRegion", ImVec2(0, 0), false)) {
                     // Calculate number of rows needed
-                    i32 itemCount = assets.size();
-                    i32 rowCount  = (itemCount + columnsCount - 1) / columnsCount;  // Ceiling division
+                    i32 itemCount = CAST<i32>(assets.size());
+                    i32 rowCount  = CAST<i32>((itemCount + columnsCount - 1) / columnsCount);  // Ceiling division
 
                     // For each row
                     for (i32 row = 0; row < rowCount; row++) {
@@ -643,7 +680,7 @@ namespace x {
 
                         // For each column in the row
                         for (i32 col = 0; col < columnsCount; col++) {
-                            i32 itemIndex = row * columnsCount + col;
+                            i32 itemIndex = CAST<i32>(row * columnsCount + col);
 
                             // Break if we've displayed all items
                             if (itemIndex >= itemCount) break;
@@ -658,11 +695,14 @@ namespace x {
                             ImGui::BeginGroup();
 
                             // Create a selectable that fits the cell size
-                            bool selected = false;
                             ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
                             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
-                            if (ImGui::Selectable("##cell", &selected, 0, ImVec2(cellWidth, thumbnailSize + 25))) {
+                            if (ImGui::Selectable("##cell",
+                                                  selectedAsset == itemIndex,
+                                                  0,
+                                                  ImVec2(cellWidth, thumbnailSize + 25))) {
                                 // Handle selection
+                                selectedAsset = itemIndex;
                             }
                             ImGui::PopStyleVar(2);
 
@@ -687,27 +727,27 @@ namespace x {
 
                                 switch (asset.GetTypeFromId()) {
                                     case kAssetType_Audio: {
-                                        auto icon = mTextureManager.GetTexture("AudioAsset");
+                                        auto icon = mTextureManager.GetTexture("AudioIcon");
                                         assert(icon.has_value());
                                         iconSrv = icon->mShaderResourceView.Get();
                                     } break;
                                     case kAssetType_Material: {
-                                        auto icon = mTextureManager.GetTexture("MaterialAsset");
+                                        auto icon = mTextureManager.GetTexture("MaterialIcon");
                                         assert(icon.has_value());
                                         iconSrv = icon->mShaderResourceView.Get();
                                     } break;
                                     case kAssetType_Mesh: {
-                                        auto icon = mTextureManager.GetTexture("MeshAsset");
+                                        auto icon = mTextureManager.GetTexture("MeshIcon");
                                         assert(icon.has_value());
                                         iconSrv = icon->mShaderResourceView.Get();
                                     } break;
                                     case kAssetType_Scene: {
-                                        auto icon = mTextureManager.GetTexture("SceneAsset");
+                                        auto icon = mTextureManager.GetTexture("SceneIcon");
                                         assert(icon.has_value());
                                         iconSrv = icon->mShaderResourceView.Get();
                                     } break;
                                     case kAssetType_Script: {
-                                        auto icon = mTextureManager.GetTexture("ScriptAsset");
+                                        auto icon = mTextureManager.GetTexture("ScriptIcon");
                                         assert(icon.has_value());
                                         iconSrv = icon->mShaderResourceView.Get();
                                     } break;
@@ -804,10 +844,8 @@ namespace x {
         // TODO: Do this asynchronously
         GenerateAssetThumbnails();
 
-        // Load first available scene
-        // TODO: Add a startup scene to the project descriptor
-        const auto scenes = mGame.GetSceneMap();
-        OnLoadScene(scenes.begin()->first);
+        // Load startup scene
+        OnLoadScene(mLoadedProject.mStartupScene);
     }
 
     void XEditor::SaveScene(const char* filename) const {
@@ -825,6 +863,34 @@ namespace x {
                                 "Unable to parse scene state to descriptor.",
                                 Platform::AlertSeverity::Error);
         }
+    }
+
+    Path XEditor::GetInitialDirectory() const {
+        if (mLoadedProject.mLoaded) {
+            return Path(mLoadedProject.mContentDirectory).Parent();
+        } else {
+            return Platform::GetPlatformDirectory(Platform::kPlatformDir_Documents);
+        }
+    }
+
+    AssetType XEditor::GetAssetTypeFromFile(const Path& path) {
+        const auto ext = path.Extension();
+
+        if (ext == "dds") {
+            return kAssetType_Texture;
+        } else if (ext == "glb" || ext == "obj" || ext == "fbx") {
+            return kAssetType_Mesh;
+        } else if (ext == "lua") {
+            return kAssetType_Script;
+        } else if (ext == "material") {
+            return kAssetType_Material;
+        } else if (ext == "scene") {
+            return kAssetType_Scene;
+        } else if (ext == "wav") {
+            return kAssetType_Audio;
+        }
+
+        return kAssetType_Invalid;
     }
 
     void XEditor::SetupDockspace(const f32 yOffset) {
@@ -995,18 +1061,52 @@ namespace x {
         colors[ImGuiCol_DockingPreview]        = primary;
     }
 
-#include "AssetTypeIcons.h"
+#pragma region Embedded Icon Includes
+#include "AssetBrowserIcons.h"
+#include "EditorIcons.h"
+#pragma endregion
 
     void XEditor::LoadEditorIcons() {
-        auto result = mTextureManager.LoadFromMemory(AUDIO_BYTES, 128, 128, 4, "AudioAsset");
+        // Asset Browser Icons
+        auto result = mTextureManager.LoadFromMemory(AUDIOICON_BYTES, 128, 128, 4, "AudioIcon");
         if (!result) { throw std::runtime_error("Failed to load Audio icon"); }
-        result = mTextureManager.LoadFromMemory(MATERIAL_BYTES, 128, 128, 4, "MaterialAsset");
+        result = mTextureManager.LoadFromMemory(MATERIALICON_BYTES, 128, 128, 4, "MaterialIcon");
         if (!result) { throw std::runtime_error("Failed to load Material icon"); }
-        result = mTextureManager.LoadFromMemory(MESH_BYTES, 128, 128, 4, "MeshAsset");
+        result = mTextureManager.LoadFromMemory(MESHICON_BYTES, 128, 128, 4, "MeshIcon");
         if (!result) { throw std::runtime_error("Failed to load Mesh icon"); }
-        result = mTextureManager.LoadFromMemory(SCENE_BYTES, 128, 128, 4, "SceneAsset");
+        result = mTextureManager.LoadFromMemory(SCENEICON_BYTES, 128, 128, 4, "SceneIcon");
         if (!result) { throw std::runtime_error("Failed to load Scene icon"); }
-        result = mTextureManager.LoadFromMemory(SCRIPT_BYTES, 128, 128, 4, "ScriptAsset");
+        result = mTextureManager.LoadFromMemory(SCRIPTICON_BYTES, 128, 128, 4, "ScriptIcon");
         if (!result) { throw std::runtime_error("Failed to load Script icon"); }
+        result = mTextureManager.LoadFromMemory(FOLDERICON_BYTES, 128, 128, 4, "FolderIcon");
+        if (!result) { throw std::runtime_error("Failed to load Folder icon"); }
+        result = mTextureManager.LoadFromMemory(FOLDERICONEMPTY_BYTES, 128, 128, 4, "FolderEmptyIcon");
+        if (!result) { throw std::runtime_error("Failed to load Folder icon"); }
+
+        // Toolbar / Editor Icons
+        result = mTextureManager.LoadFromMemory(MOVEICON_BYTES, 24, 24, 4, "MoveIcon");
+        if (!result) { throw std::runtime_error("Failed to load Move icon"); }
+        result = mTextureManager.LoadFromMemory(PAUSEICON_BYTES, 24, 24, 4, "PauseIcon");
+        if (!result) { throw std::runtime_error("Failed to load Pause icon"); }
+        result = mTextureManager.LoadFromMemory(PLAYICON_BYTES, 24, 24, 4, "PlayIcon");
+        if (!result) { throw std::runtime_error("Failed to load Play icon"); }
+        result = mTextureManager.LoadFromMemory(REDOICON_BYTES, 24, 24, 4, "RedoIcon");
+        if (!result) { throw std::runtime_error("Failed to load Redo icon"); }
+        result = mTextureManager.LoadFromMemory(UNDOICON_BYTES, 24, 24, 4, "UndoIcon");
+        if (!result) { throw std::runtime_error("Failed to load Undo icon"); }
+        result = mTextureManager.LoadFromMemory(ROTATEICON_BYTES, 24, 24, 4, "RotateIcon");
+        if (!result) { throw std::runtime_error("Failed to load Rotate icon"); }
+        result = mTextureManager.LoadFromMemory(SCALEICON_BYTES, 24, 24, 4, "ScaleIcon");
+        if (!result) { throw std::runtime_error("Failed to load Scale icon"); }
+        result = mTextureManager.LoadFromMemory(SELECTICON_BYTES, 24, 24, 4, "SelectIcon");
+        if (!result) { throw std::runtime_error("Failed to load Select icon"); }
+        result = mTextureManager.LoadFromMemory(SEPARATORICON_BYTES, 24, 24, 4, "SeparatorIcon");
+        if (!result) { throw std::runtime_error("Failed to load Separator icon"); }
+        result = mTextureManager.LoadFromMemory(SETTINGSICON_BYTES, 24, 24, 4, "SettingsIcon");
+        if (!result) { throw std::runtime_error("Failed to load Settings icon"); }
+        result = mTextureManager.LoadFromMemory(SNAP_TO_GRIDICON_BYTES, 24, 24, 4, "SnapToGridIcon");
+        if (!result) { throw std::runtime_error("Failed to load SnapToGrid icon"); }
+        result = mTextureManager.LoadFromMemory(STOPICON_BYTES, 24, 24, 4, "StopIcon");
+        if (!result) { throw std::runtime_error("Failed to load Stop icon"); }
     }
 }  // namespace x

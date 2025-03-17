@@ -19,6 +19,8 @@ namespace x {
         // .xproj file should sit at root of file structure
         mContentDirectory = projectDir.Join(projectNode["contentDirectory"].as<str>()).Str();
 
+        mStartupScene = projectNode["startupScene"].as<str>();
+
         mLoaded = true;
         return true;
     }

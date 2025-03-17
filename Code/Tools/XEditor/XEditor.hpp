@@ -71,9 +71,16 @@ namespace x {
         void OnOpenProject();
         void OnLoadScene(const str& selectedScene);
 
+        void OnImportAsset();
+
         // I/O
         void LoadProject(const str& filename);
+        /// @brief Saves the current scene state to a descriptor file on disk (.scene)
         void SaveScene(const char* filename = nullptr) const;
+        /// @brief Returns the initial directory for file dialogs when opening/saving files
+        Path GetInitialDirectory() const;
+        /// @brief Returns the AssetType based on the given filename/extension
+        static AssetType GetAssetTypeFromFile(const Path& path);
 
         // ImGui-specific functions
         void SetupDockspace(const f32 yOffset);
