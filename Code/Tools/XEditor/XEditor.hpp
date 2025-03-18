@@ -6,14 +6,21 @@
 
 #include "Common/Types.hpp"
 #include "Engine/Window.hpp"
-#include "Engine/SceneParser.hpp"
-#include <imgui.h>
-
 #include "TextureManager.hpp"
 #include "Engine/Game.hpp"
 #include "XPak/ProjectDescriptor.hpp"
+#include "Res/resource.h"
+
+#include <imgui.h>
 
 namespace x {
+    struct EditorSession {
+        Path mLastProjectPath;
+
+        bool LoadSession();
+        void SaveSession() const;
+    };
+
     class XEditor final : public Window {
     public:
         XEditor() : Window("XEditor", 1440, 800), mTextureManager(mContext), mSceneViewport(mContext), mGame(mContext) {
@@ -24,6 +31,7 @@ namespace x {
         void OnResize(u32 width, u32 height) override;
         void OnShutdown() override;
         void OnUpdate() override;
+
         void OnRender() override;
 
         LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) override;
@@ -42,6 +50,8 @@ namespace x {
         Game mGame;
         ProjectDescriptor mLoadedProject {};
         vector<AssetDescriptor> mAssetDescriptors;
+
+        EditorSession mSession;
 
         // ImGui settings variables.
         // These are used to store editable data that is then used to update the current scene
@@ -63,6 +73,7 @@ namespace x {
         void EntitiesPropertiesView();
         void ViewportView();
         void AssetsView();
+        void AssetPreviewView();
 
         // Popups
         bool mSceneSelectorOpen {false};

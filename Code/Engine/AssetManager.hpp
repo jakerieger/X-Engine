@@ -20,6 +20,8 @@
 namespace x {
     class AssetManager {
         friend class Game;
+        friend class XEditor;
+
         X_CLASS_PREVENT_MOVES_COPIES(AssetManager)
         AssetManager() = default;
 

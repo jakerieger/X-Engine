@@ -3,15 +3,16 @@
 //
 
 #include "XEditor.hpp"
-#include "../../Common/FileDialogs.hpp"
+#include "Common/FileDialogs.hpp"
+#include "Common/WindowsHelpers.hpp"
+#include "XPak/AssetGenerator.hpp"
+#include "Engine/SceneParser.hpp"
 #include <Inter.h>
+#include <JetBrainsMono.h>
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
 #include <imgui_internal.h>
 #include <yaml-cpp/yaml.h>
-
-#include "EditorIcons.h"
-#include "Common/WindowsHelpers.hpp"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -19,6 +20,7 @@ namespace x {
     static constexpr f32 kLabelWidth = 140.0f;
     static EntityId sSelectedEntity {};
     static constexpr i32 kNoSelection = -1;
+    static i32 sSelectedAsset {kNoSelection};
 
     // TODO: Consider making this a class
     namespace EditorState {
@@ -61,7 +63,31 @@ namespace x {
         return color;
     }
 
+    bool EditorSession::LoadSession() {
+        const auto sessionFile = Path(".session");
+        if (sessionFile.Exists()) {
+            YAML::Node session = YAML::LoadFile(sessionFile.Str());
+            if (session["last_project"].IsDefined()) {
+                mLastProjectPath = Path(session["last_project"].as<str>());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void EditorSession::SaveSession() const {
+        const auto sessionFile = Path(".session");
+        YAML::Emitter out;
+        out << YAML::BeginMap;
+        out << YAML::Key << "last_project";
+        out << YAML::Value << mLastProjectPath.Str();
+        out << YAML::EndMap;
+        if (!FileWriter::WriteAllText(sessionFile, out.c_str())) { X_LOG_ERROR("Failed to save editor session"); }
+    }
+
     void XEditor::OnInitialize() {
+        this->SetWindowIcon(APPICON);
+
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
@@ -87,19 +113,7 @@ namespace x {
         SetWindowTitle("XEditor | Untitled");
         LoadEditorIcons();
 
-        // Check if our session file exists
-        const Path sessionFile = Path::Current() / ".session";
-        if (sessionFile.Exists()) {
-            const YAML::Node root = YAML::LoadFile(sessionFile.Str());
-            if (root.IsDefined()) {
-                // Most recent project
-                const str lastProject = root["last_project"].as<str>();
-                if (!lastProject.empty()) {
-                    // Load last project
-                    LoadProject(Path(lastProject).Str());
-                }
-            }
-        }
+        if (mSession.LoadSession()) { LoadProject(mSession.mLastProjectPath.Str()); }
     }
 
     void XEditor::OnResize(u32 width, u32 height) {
@@ -135,6 +149,7 @@ namespace x {
         EntitiesView();
         EntitiesPropertiesView();
         AssetsView();
+        AssetPreviewView();
 
         ImGui::PopFont();
 
@@ -181,33 +196,61 @@ namespace x {
     }
 
     void XEditor::OnImportAsset() {
-        const auto filter = "Texture Files (*.dds)|*.dds|Mesh Files (*.glb;*.obj;*.fbx)|*.glb;*.obj;*.fbx|Script Files "
-                            "(*.lua)|*.lua|Material Files (*.material)|*.material|Scene Files (*.scene)|*.scene|Audio "
-                            "Files (*.wav)|*.wav|All Supported Asset Files "
+        const auto filter = "All Supported Asset Files "
                             "(*.dds;*.glb;*.obj;*.fbx;*.lua;*.material;*.scene;*.wav)|*.dds;*.glb;*.obj;*.fbx;*.lua;*."
-                            "material;*.scene;*.wav|";
+                            "material;*.scene;*.wav|Texture Files (*.dds)|*.dds|Mesh Files "
+                            "(*.glb;*.obj;*.fbx)|*.glb;*.obj;*.fbx|Script Files "
+                            "(*.lua)|*.lua|Material Files (*.material)|*.material|Scene Files (*.scene)|*.scene|Audio "
+                            "Files (*.wav)|*.wav|";
         char filename[MAX_PATH];
         Path initialDir = GetInitialDirectory();
         if (Platform::OpenFileDialog(mHwnd, GetInitialDirectory().CStr(), filter, "Import Asset", filename, MAX_PATH)) {
-            const AssetType assetType = GetAssetTypeFromFile(Path(filename));
+            auto assetFile            = Path(filename);
+            const AssetType assetType = GetAssetTypeFromFile(assetFile);
+            const auto rootContentDir = Path(mLoadedProject.mContentDirectory);
+            Path contentDir;
             switch (assetType) {
                 case kAssetType_Audio:
+                    contentDir = rootContentDir / "Audio";
                     break;
                 case kAssetType_Material:
+                    contentDir = rootContentDir / "Materials";
                     break;
                 case kAssetType_Mesh:
+                    contentDir = rootContentDir / "Models";
                     break;
                 case kAssetType_Scene:
+                    contentDir = rootContentDir / "Scenes";
                     break;
                 case kAssetType_Script:
+                    contentDir = rootContentDir / "Scripts";
                     break;
                 case kAssetType_Texture:
+                    contentDir = rootContentDir / "Textures";
                     break;
                 case kAssetType_Invalid:
                 default:
                     X_LOG_ERROR("Invalid asset type for file '%s'", filename);
                     return;
             }
+
+            if (!contentDir.Exists()) {
+                if (!contentDir.Create()) {
+                    X_LOG_ERROR("Failed to create directory '%s'", filename);
+                    return;
+                }
+            }
+
+            const auto copiedAssetFile = assetFile.Copy(contentDir);
+            assert(copiedAssetFile.Exists());
+
+            if (!AssetGenerator::GenerateAsset(copiedAssetFile, assetType, rootContentDir)) {
+                X_LOG_ERROR("Failed to generate asset '%s'", filename);
+                return;
+            }
+
+            AssetManager::LoadAssets(rootContentDir.Parent());
+            UpdateAssetDescriptors();
         }
     }
 
@@ -636,8 +679,6 @@ namespace x {
     }
 
     void XEditor::AssetsView() {
-        static i32 selectedAsset {kNoSelection};
-
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
         ImGui::Begin("Assets");
         {
@@ -698,11 +739,11 @@ namespace x {
                             ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
                             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
                             if (ImGui::Selectable("##cell",
-                                                  selectedAsset == itemIndex,
+                                                  sSelectedAsset == itemIndex,
                                                   0,
                                                   ImVec2(cellWidth, thumbnailSize + 25))) {
                                 // Handle selection
-                                selectedAsset = itemIndex;
+                                sSelectedAsset = itemIndex;
                             }
                             ImGui::PopStyleVar(2);
 
@@ -793,6 +834,47 @@ namespace x {
         ImGui::PopStyleVar();
     }
 
+    void XEditor::AssetPreviewView() {
+        ImGui::Begin("Asset Preview");
+        {
+            if (sSelectedAsset != kNoSelection) {
+                const auto& asset = mAssetDescriptors.at(sSelectedAsset);
+                auto assetTypeStr = asset.GetTypeString();
+                assetTypeStr[0]   = std::toupper(assetTypeStr[0]);
+
+                ImGui::Text("Source: %s", asset.mFilename.c_str());
+                ImGui::Text("ID: %llu", asset.mId);
+                ImGui::Text("Type: %s", assetTypeStr.c_str());
+                ImGui::Separator();
+                ImGui::Separator();
+
+                ImTextureID previewTexture {0};
+                switch (asset.GetTypeFromId()) {
+                    case kAssetType_Texture:
+                        previewTexture = SrvAsTextureId(
+                          mTextureManager.GetTexture(std::to_string(asset.mId))->mShaderResourceView.Get());
+                        break;
+                    case kAssetType_Mesh:
+                        break;
+                    case kAssetType_Audio:
+                        break;
+                    case kAssetType_Material:
+                        break;
+                    case kAssetType_Scene:
+                        break;
+                    case kAssetType_Script:
+                        break;
+                    default:
+                        break;
+                }
+
+                const ImVec2 imageSize = ImGui::GetContentRegionAvail();
+                ImGui::Image(previewTexture, imageSize);
+            }
+        }
+        ImGui::End();
+    }
+
     void XEditor::GenerateAssetThumbnails() {
         const auto& assets = mAssetDescriptors;
         for (const auto& asset : assets) {
@@ -837,7 +919,9 @@ namespace x {
             return;
         }
 
-        mProjectRoot = Path(filename).Parent();
+        mProjectRoot              = Path(filename).Parent();
+        mSession.mLastProjectPath = Path(filename);
+        mSession.SaveSession();
         mGame.Initialize(this, &mSceneViewport, mProjectRoot);
         UpdateAssetDescriptors();
 
@@ -930,12 +1014,15 @@ namespace x {
                   ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Down, 0.35f, nullptr, &dockMainId);
                 ImGuiID dockLeftBottomId =
                   ImGui::DockBuilderSplitNode(dockLeftId, ImGuiDir_Down, 0.5f, nullptr, &dockLeftId);
+                ImGuiID dockRightBottomId =
+                  ImGui::DockBuilderSplitNode(dockRightId, ImGuiDir_Down, 0.36f, nullptr, &dockRightId);
 
                 ImGui::DockBuilderDockWindow("Scene", dockLeftId);
                 ImGui::DockBuilderDockWindow("Entities", dockLeftBottomId);
                 ImGui::DockBuilderDockWindow("Properties", dockRightId);
                 ImGui::DockBuilderDockWindow("Viewport", dockMainId);
                 ImGui::DockBuilderDockWindow("Assets", dockBottomId);
+                ImGui::DockBuilderDockWindow("Asset Preview", dockRightBottomId);
 
                 ImGui::DockBuilderFinish(imguiViewport->ID);
             }

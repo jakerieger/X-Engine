@@ -160,11 +160,19 @@ namespace x {
         [[nodiscard]] str Str() const;
         [[nodiscard]] const char* CStr() const;
         [[nodiscard]] str Filename() const;
+        [[nodiscard]] Path RelativeTo(const Path& basePath) const;
 
         [[nodiscard]] bool operator==(const Path& other) const;
 
         [[nodiscard]] bool Create() const;
         [[nodiscard]] bool CreateAll() const;
+        [[nodiscard]] Path Copy(const Path& dest) const;
+        [[nodiscard]] Path CopyDirectory(const Path& dest);
+
+        // TODO: Implement
+        static Path Copy(const Path& src, const Path& dest) {}
+        static Path CopyDirectory(const Path& src, const Path& dest) {}
+        static Path Move(const Path& src, const Path& dest) {}
 
         [[nodiscard]] DirectoryEntries Entries() const;
 

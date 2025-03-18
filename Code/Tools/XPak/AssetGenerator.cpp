@@ -23,7 +23,7 @@ namespace x {
     }
 
     // TODO: Add flags to the asset file, for example streamable or compressed
-    bool AssetGenerator::GenerateAsset(const Path& assetFile, AssetType type) {
+    bool AssetGenerator::GenerateAsset(const Path& assetFile, AssetType type, const Path& outputDir) {
         const auto id = GenerateId(type);
 
         YAML::Emitter out;
@@ -31,10 +31,10 @@ namespace x {
         out << YAML::Key << "asset";
         out << YAML::Value << YAML::BeginMap;
         out << YAML::Key << "id" << YAML::Value << id;
-        out << YAML::Key << "source" << YAML::Value << assetFile.Filename();
+        out << YAML::Key << "source" << YAML::Value << assetFile.RelativeTo(outputDir).Str();
         out << YAML::EndMap;
 
-        const auto descriptorFile = Path(assetFile.Str() + ".xasset");
+        const auto descriptorFile = outputDir / (assetFile.Filename() + ".xasset");
         const auto writeResult    = FileWriter::WriteAllText(descriptorFile, out.c_str());
 
         if (writeResult) {

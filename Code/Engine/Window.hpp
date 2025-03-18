@@ -13,7 +13,7 @@
 namespace x {
     class Window : public EventEmitter {
     public:
-        Window(const str& title, int width, int height);
+        Window(const str& title, int width, int height, WORD windowIcon = 0);
         virtual ~Window();
 
         int Run();
@@ -52,10 +52,12 @@ namespace x {
 
         virtual LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam);
         void SetWindowTitle(const str& title) const;
+        void SetWindowIcon(WORD resourceId) const;
 
     private:
         bool mFocused {false};
         bool mOpenMaximized {false};
+        int mWindowIcon;
 
         bool Initialize();
         void Shutdown();

@@ -4,6 +4,7 @@
 
 #include "Filesystem.hpp"
 
+#include <assert.h>
 #include <sstream>
 
 #ifdef _WIN32
@@ -370,6 +371,20 @@ namespace x {
         return path;
     }
 
+    Path Path::RelativeTo(const Path& basePath) const {
+        const str thisStr = Str();
+        str baseStr       = basePath.Str();
+
+        if (!baseStr.empty() && baseStr.back() == PATH_SEPARATOR) { baseStr += PATH_SEPARATOR; }
+        if (thisStr.substr(0, baseStr.length()) != baseStr) { return *this; }
+
+        const str relativePath = thisStr.substr(baseStr.length());
+
+        if (relativePath.empty()) { return Path("."); }
+
+        return Path(relativePath);
+    }
+
     bool Path::operator==(const Path& other) const {
         return path == other.path;
     }
@@ -401,6 +416,27 @@ namespace x {
         }
 
         return Create();
+    }
+
+    Path Path::Copy(const Path& dest) const {
+        assert(IsFile());
+
+        if (dest == *this || dest / Filename() == *this) { return dest; }
+
+        const auto fileContents = FileReader::ReadAllBytes(*this);
+        if (dest.HasExtension()) {
+            FileWriter::WriteAllBytes(dest, fileContents);
+            return dest;
+        } else {
+            Path out = dest / Filename();
+            FileWriter::WriteAllBytes(out, fileContents);
+            return out;
+        }
+    }
+
+    Path Path::CopyDirectory(const Path& dest) {
+        assert(IsDirectory());
+        return {};
     }
 
     DirectoryEntries Path::Entries() const {

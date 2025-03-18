@@ -1,5 +1,9 @@
 // File: 'Inter_18pt-Regular.ttf' (342680 bytes)
 // Exported using binary_to_compressed_c.exe -u8 "Inter_18pt-Regular.ttf" Inter
+
+#pragma once
+
+// clang-format off
 static const unsigned int Inter_compressed_size = 220332;
 static const unsigned char Inter_compressed_data[220332] =
 {
@@ -3812,4 +3816,4 @@ static const unsigned char Inter_compressed_data[220332] =
     2,5,2,141,160,1,43,159,130,50,38,0,2,13,2,231,4,117,136,25,38,231,2,13,187,1,173,188,130,25,38,65,2,161,2,133,3,116,66,215,5,78,13,19,33,1,230,110,226,22,33,2,161,110,208,16,42,158,
     4,201,1,144,6,116,0,10,0,0,75,1,10,52,158,44,61,27,110,39,45,4,201,129,67,113,89,29,75,61,104,67,120,0,0,5,250,140,177,237,40,
 };
-
+// clang-format on

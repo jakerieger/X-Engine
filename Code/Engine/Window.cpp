@@ -9,12 +9,13 @@
 #include <windowsx.h>
 
 namespace x {
-    Window::Window(const str& title, const int width, const int height) : mContext() {
+    Window::Window(const str& title, const int width, const int height, WORD windowIcon) : mContext() {
         mInstance      = nullptr;
         mHwnd          = nullptr;
         mCurrentWidth  = width;
         mCurrentHeight = height;
         mTitle         = title;
+        mWindowIcon    = windowIcon;
     }
 
     Window::~Window() {
@@ -67,6 +68,12 @@ namespace x {
         wc.lpfnWndProc   = WndProc;
         wc.hInstance     = mInstance;
         wc.lpszClassName = "XEditorWindowClass";
+
+        if (mWindowIcon != 0) {
+            const HICON icon = ::LoadIcon(mInstance, MAKEINTRESOURCE(mWindowIcon));
+            wc.hIcon         = icon;
+            wc.hIconSm       = icon;
+        }
 
         if (!::RegisterClassExA(&wc)) {
             X_LOG_ERROR("Failed to register window class");
@@ -205,6 +212,12 @@ namespace x {
 
     void Window::SetWindowTitle(const str& title) const {
         ::SetWindowTextA(mHwnd, title.c_str());
+    }
+
+    void Window::SetWindowIcon(WORD resourceId) const {
+        HICON icon = ::LoadIconA(::GetModuleHandleA(NULL), MAKEINTRESOURCE(resourceId));
+        ::SendMessageA(mHwnd, WM_SETICON, ICON_SMALL, (LPARAM)icon);
+        ::SendMessageA(mHwnd, WM_SETICON, ICON_BIG, (LPARAM)icon);
     }
 
     LRESULT Window::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {

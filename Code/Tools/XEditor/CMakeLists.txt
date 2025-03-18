@@ -1,18 +1,24 @@
 project(SpaceGame)
 
-set(SCENE_EDITOR_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(EDITOR_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/XEditor)
 
+set(APP_RES
+    ${EDITOR_DIR}/Res/resource.h
+    ${EDITOR_DIR}/Res/app.rc
+)
+
 add_executable(XEditor WIN32
+    ${APP_RES}
     ${IMGUI_SOURCES}
     ${COMMON_SOURCES}
-    ${SCENE_EDITOR_DIR}/AssetTypeIcons.h
-    ${SCENE_EDITOR_DIR}/EditorIcons.h
-    ${SCENE_EDITOR_DIR}/XEditor.hpp
-    ${SCENE_EDITOR_DIR}/XEditor.cpp
-    ${SCENE_EDITOR_DIR}/TextureManager.cpp
-    ${SCENE_EDITOR_DIR}/TextureManager.hpp
-    ${SCENE_EDITOR_DIR}/main.cpp
+    ${EDITOR_DIR}/AssetBrowserIcons.h
+    ${EDITOR_DIR}/EditorIcons.h
+    ${EDITOR_DIR}/XEditor.hpp
+    ${EDITOR_DIR}/XEditor.cpp
+    ${EDITOR_DIR}/TextureManager.cpp
+    ${EDITOR_DIR}/TextureManager.hpp
+    ${EDITOR_DIR}/main.cpp
 )
 
 target_link_libraries(XEditor

@@ -15,6 +15,6 @@ namespace x {
     public:
         static u64 GenerateBaseId();
         static AssetId GenerateId(AssetType type);
-        static bool GenerateAsset(const Path& assetFile, AssetType type);
+        static bool GenerateAsset(const Path& assetFile, AssetType type, const Path& outputDir);
     };
 }  // namespace x

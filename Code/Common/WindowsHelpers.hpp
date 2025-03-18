@@ -6,7 +6,6 @@
 
 #include <string>
 #include "Filesystem.hpp"
-#include "Platform.hpp"
 
 namespace Platform {
     using PlatformDirectoryId                                        = uint8_t;
