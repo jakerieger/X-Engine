@@ -17,6 +17,7 @@
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace x {
+    static constexpr ImVec2 kViewportSize {1024, 576};
     static constexpr f32 kLabelWidth = 140.0f;
     static EntityId sSelectedEntity {};
     static constexpr i32 kNoSelection = -1;
@@ -86,7 +87,9 @@ namespace x {
     }
 
     void XEditor::OnInitialize() {
+        SetWindowTitle("XEditor | Untitled");
         this->SetWindowIcon(APPICON);
+        LoadEditorIcons();
 
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -106,12 +109,10 @@ namespace x {
         ImGui_ImplWin32_Init(mHwnd);
         ImGui_ImplDX11_Init(mContext.GetDevice(), mContext.GetDeviceContext());
 
-        mWindowViewport->SetClearColor(0.05f, 0.05f, 0.05f, 1.0f);
-        mSceneViewport.SetClearColor(Colors::Gray);
+        mWindowViewport->SetClearColor(0.05f, 0.05f, 0.05f, 1.0f);  // Editor background nearly black by default
+        mSceneViewport.SetClearColor(Colors::Gray);                 // Viewport background grey by default
+        // Resize to 1x1 initially so D3D creation code doesn't fail (0x0 invalid resource size)
         mSceneViewport.Resize(1, 1);
-
-        SetWindowTitle("XEditor | Untitled");
-        LoadEditorIcons();
 
         if (mSession.LoadSession()) { LoadProject(mSession.mLastProjectPath.Str()); }
     }
@@ -744,6 +745,24 @@ namespace x {
                                                   ImVec2(cellWidth, thumbnailSize + 25))) {
                                 // Handle selection
                                 sSelectedAsset = itemIndex;
+                                if (auto descriptor = mAssetDescriptors.at(sSelectedAsset);
+                                    descriptor.GetTypeFromId() == kAssetType_Mesh) {
+                                    // Update mesh previewer
+                                    if (mEditorResources.LoadResource<Model>(descriptor.mId)) {
+                                        std::optional<ResourceHandle<Model>> modelResource =
+                                          mEditorResources.FetchResource<Model>(descriptor.mId);
+                                        if (modelResource.has_value()) {
+                                            // TODO: Create material
+                                            auto model = make_unique<ModelComponent>();
+                                            model->SetModelHandle(*modelResource)
+                                              .SetReceiveShadows(false)
+                                              .SetCastsShadows(false);
+                                            mMeshPreviewer.SetModel(std::move(model));
+                                        }
+                                    } else {
+                                        X_LOG_ERROR("Failed to load mesh asset");
+                                    }
+                                }
                             }
                             ImGui::PopStyleVar(2);
 
@@ -835,7 +854,7 @@ namespace x {
     }
 
     void XEditor::AssetPreviewView() {
-        ImGui::Begin("Asset Preview");
+        ImGui::Begin("Asset Preview", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
         {
             if (sSelectedAsset != kNoSelection) {
                 const auto& asset = mAssetDescriptors.at(sSelectedAsset);
@@ -848,28 +867,23 @@ namespace x {
                 ImGui::Separator();
                 ImGui::Separator();
 
-                ImTextureID previewTexture {0};
-                switch (asset.GetTypeFromId()) {
-                    case kAssetType_Texture:
-                        previewTexture = SrvAsTextureId(
-                          mTextureManager.GetTexture(std::to_string(asset.mId))->mShaderResourceView.Get());
-                        break;
-                    case kAssetType_Mesh:
-                        break;
-                    case kAssetType_Audio:
-                        break;
-                    case kAssetType_Material:
-                        break;
-                    case kAssetType_Scene:
-                        break;
-                    case kAssetType_Script:
-                        break;
-                    default:
-                        break;
+                const AssetType assetType = asset.GetTypeFromId();
+                if (assetType == kAssetType_Texture) {
+                    const auto preview =
+                      SrvAsTextureId(mTextureManager.GetTexture(std::to_string(asset.mId))->mShaderResourceView.Get());
+                    ImVec2 regionSize = ImGui::GetContentRegionAvail();
+                    regionSize.y      = regionSize.x;
+                    ImGui::Image(preview, regionSize);
+                } else if (assetType == kAssetType_Material) {
+                } else if (assetType == kAssetType_Scene) {
+                    ImGui::Text("No preview available.");
+                } else if (assetType == kAssetType_Mesh) {
+                    ImVec2 regionSize = ImGui::GetContentRegionAvail();
+                    regionSize.y      = regionSize.x;
+                    auto* srv         = mMeshPreviewer.Render(regionSize);
+                    ImGui::Image(SrvAsTextureId(srv), regionSize);
+                } else if (assetType == kAssetType_Script) {
                 }
-
-                const ImVec2 imageSize = ImGui::GetContentRegionAvail();
-                ImGui::Image(previewTexture, imageSize);
             }
         }
         ImGui::End();
@@ -919,6 +933,7 @@ namespace x {
             return;
         }
 
+        mEditorResources.Clear();
         mProjectRoot              = Path(filename).Parent();
         mSession.mLastProjectPath = Path(filename);
         mSession.SaveSession();
@@ -1015,7 +1030,7 @@ namespace x {
                 ImGuiID dockLeftBottomId =
                   ImGui::DockBuilderSplitNode(dockLeftId, ImGuiDir_Down, 0.5f, nullptr, &dockLeftId);
                 ImGuiID dockRightBottomId =
-                  ImGui::DockBuilderSplitNode(dockRightId, ImGuiDir_Down, 0.36f, nullptr, &dockRightId);
+                  ImGui::DockBuilderSplitNode(dockRightId, ImGuiDir_Down, 0.5f, nullptr, &dockRightId);
 
                 ImGui::DockBuilderDockWindow("Scene", dockLeftId);
                 ImGui::DockBuilderDockWindow("Entities", dockLeftBottomId);

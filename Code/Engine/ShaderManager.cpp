@@ -13,6 +13,8 @@
 #include <ShadowPass_PS.h>
 #include <Water_VS.h>
 #include <Water_PS.h>
+#include <BasicLit_VS.h>
+#include <BasicLit_PS.h>
 #pragma endregion
 
 namespace x {
@@ -89,6 +91,15 @@ namespace x {
             return false;
         }
         X_LOG_INFO("Loaded Water shader");
+
+        if (!CreateGraphicsShader(context,
+                                  kBasicLitShaderId,
+                                  X_ARRAY_W_SIZE(kBasicLit_VSBytes),
+                                  X_ARRAY_W_SIZE(kBasicLit_PSBytes))) {
+            X_LOG_ERROR("Failed to create BasicLit shader")
+            return false;
+        }
+        X_LOG_INFO("Loaded BasicLit shader");
 
         X_LOG_INFO("All shaders loaded");
         return true;

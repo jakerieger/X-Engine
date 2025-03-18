@@ -18,6 +18,8 @@ add_executable(XEditor WIN32
     ${EDITOR_DIR}/XEditor.cpp
     ${EDITOR_DIR}/TextureManager.cpp
     ${EDITOR_DIR}/TextureManager.hpp
+    ${EDITOR_DIR}/MeshPreviewer.cpp
+    ${EDITOR_DIR}/MeshPreviewer.hpp
     ${EDITOR_DIR}/main.cpp
 )
 

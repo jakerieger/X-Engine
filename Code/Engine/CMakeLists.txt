@@ -11,6 +11,8 @@ add_library(x STATIC
     ${ENGINE_DIR}/ArenaAllocator.hpp
     ${ENGINE_DIR}/AssetManager.cpp
     ${ENGINE_DIR}/AssetManager.hpp
+    ${ENGINE_DIR}/BasicLitMaterial.cpp
+    ${ENGINE_DIR}/BasicLitMaterial.hpp
     ${ENGINE_DIR}/BehaviorComponent.cpp
     ${ENGINE_DIR}/BehaviorComponent.hpp
     ${ENGINE_DIR}/BloomEffect.cpp

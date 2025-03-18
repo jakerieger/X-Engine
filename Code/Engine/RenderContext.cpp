@@ -119,5 +119,6 @@ namespace x {
         mContext->DrawIndexed(indexCount, 0, 0);
     }
 
+    /// @deprecated
     void RenderContext::AddTriangleCountToFrame(u32 count) {}
 }  // namespace x

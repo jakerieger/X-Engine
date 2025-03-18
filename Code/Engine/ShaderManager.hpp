@@ -13,6 +13,7 @@ namespace x {
     static constexpr u32 kScreenQuadShaderId     = 2;
     static constexpr u32 kShadowMapShaderId      = 3;
     static constexpr u32 kWaterShaderId          = 4;
+    static constexpr u32 kBasicLitShaderId       = 5;
 
     class ShaderManager {
         friend class Game;

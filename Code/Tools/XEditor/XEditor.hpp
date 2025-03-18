@@ -13,6 +13,8 @@
 
 #include <imgui.h>
 
+#include "MeshPreviewer.hpp"
+
 namespace x {
     struct EditorSession {
         Path mLastProjectPath;
@@ -23,7 +25,13 @@ namespace x {
 
     class XEditor final : public Window {
     public:
-        XEditor() : Window("XEditor", 1440, 800), mTextureManager(mContext), mSceneViewport(mContext), mGame(mContext) {
+        // Using `this->` to denote members of parent Window class
+        // Window will initialize `mContext` and since its constructor gets called before our subclass initializes its
+        // members, we can use `mContext` as inputs to our Editor member variable constructors.
+        XEditor()
+            : Window("XEditor", 1440, 800), mTextureManager(this->mContext), mMeshPreviewer(this->mContext),
+              mSceneViewport(this->mContext), mGame(this->mContext),
+              mEditorResources(this->mContext, Memory::BYTES_2GB) {
             this->SetOpenMaximized(true);
         }
 
@@ -44,12 +52,14 @@ namespace x {
         Path mProjectRoot {};
         bool mDockspaceSetup {false};
         TextureManager mTextureManager;
+        MeshPreviewer mMeshPreviewer;
 
         // Engine API
         Viewport mSceneViewport;
         Game mGame;
         ProjectDescriptor mLoadedProject {};
         vector<AssetDescriptor> mAssetDescriptors;
+        ResourceManager mEditorResources;
 
         EditorSession mSession;
 

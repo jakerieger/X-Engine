@@ -27,6 +27,10 @@
             {
                 "name": "Water",
                 "source": "Water.hlsl"
+            },
+            {
+                "name": "BasicLit",
+                "source": "BasicLit.hlsl"
             }
         ],
         "compute": [
