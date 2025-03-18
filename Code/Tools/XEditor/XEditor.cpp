@@ -7,6 +7,8 @@
 #include "Common/WindowsHelpers.hpp"
 #include "XPak/AssetGenerator.hpp"
 #include "Engine/SceneParser.hpp"
+#include "Res/resource.h"
+#include "Controls.hpp"
 #include <Inter.h>
 #include <JetBrainsMono.h>
 #include <imgui_impl_win32.h>
@@ -17,7 +19,7 @@
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace x {
-    static constexpr ImVec2 kViewportSize {1024, 576};
+    static constexpr ImVec2 kViewportSize {1024, 576};  // Default viewport size
     static constexpr f32 kLabelWidth = 140.0f;
     static EntityId sSelectedEntity {};
     static constexpr i32 kNoSelection = -1;
@@ -262,6 +264,46 @@ namespace x {
         }
     }
 
+    void XEditor::SelectSceneModal() {
+        const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        if (ImGui::BeginPopupModal("Select Scene", &mSceneSelectorOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
+            static str selectedScene;
+
+            u32 index {0};
+            for (const auto& [name, desc] : mGame.GetSceneMap()) {
+                str id          = "##" + std::to_string(index) + "scene_select";  // ex. ##0_select_scene
+                str description = desc.mDescription;
+                if (description.length() > 50) { description = description.substr(0, 50) + "..."; }
+                if (SelectableWithHeaders(id.c_str(),
+                                          name.c_str(),
+                                          description.c_str(),
+                                          selectedScene == name,
+                                          ImGuiSelectableFlags_None,
+                                          ImVec2(0, 48))) {
+                    selectedScene = name;
+                }
+                index++;
+                ImGui::Dummy(ImVec2(0, 2.f));
+            }
+
+            // Buttons
+            if (ImGui::Button("OK", ImVec2(200, 0))) {
+                if (!selectedScene.empty()) { OnLoadScene(selectedScene); }
+
+                mSceneSelectorOpen = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SetItemDefaultFocus();
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(200, 0))) {
+                mSceneSelectorOpen = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+    }
+
     void XEditor::MainMenu() {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         if (ImGui::BeginMainMenuBar()) {
@@ -328,33 +370,7 @@ namespace x {
         // Select Scene dialog
         {
             if (mSceneSelectorOpen) { ImGui::OpenPopup("Select Scene"); }
-
-            ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-            if (ImGui::BeginPopupModal("Select Scene", &mSceneSelectorOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
-                static str selectedScene;
-
-                for (const auto& [name, desc] : mGame.GetSceneMap()) {
-                    if (ImGui::Selectable(name.c_str(), selectedScene == name, true, ImVec2(300, 36))) {
-                        selectedScene = name;
-                    }
-                }
-
-                // Buttons
-                if (ImGui::Button("OK", ImVec2(150, 0))) {
-                    if (!selectedScene.empty()) { OnLoadScene(selectedScene); }
-
-                    mSceneSelectorOpen = false;
-                    ImGui::CloseCurrentPopup();
-                }
-                ImGui::SetItemDefaultFocus();
-                ImGui::SameLine();
-                if (ImGui::Button("Cancel", ImVec2(150, 0))) {
-                    mSceneSelectorOpen = false;
-                    ImGui::CloseCurrentPopup();
-                }
-                ImGui::EndPopup();
-            }
+            SelectSceneModal();
         }
     }
 
@@ -679,6 +695,20 @@ namespace x {
         ImGui::PopStyleVar();
     }
 
+    void XEditor::OnSelectedMeshAsset(const AssetDescriptor& descriptor) {
+        if (mEditorResources.LoadResource<Model>(descriptor.mId)) {
+            const std::optional<ResourceHandle<Model>> modelResource =
+              mEditorResources.FetchResource<Model>(descriptor.mId);
+            if (modelResource.has_value()) {
+                auto model = make_unique<ModelComponent>();
+                model->SetModelHandle(*modelResource).SetReceiveShadows(false).SetCastsShadows(false);
+                mMeshPreviewer.SetModel(std::move(model));
+            }
+        } else {
+            X_LOG_ERROR("Failed to load mesh asset");
+        }
+    }
+
     void XEditor::AssetsView() {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
         ImGui::Begin("Assets");
@@ -744,25 +774,9 @@ namespace x {
                                                   0,
                                                   ImVec2(cellWidth, thumbnailSize + 25))) {
                                 // Handle selection
-                                sSelectedAsset = itemIndex;
-                                if (auto descriptor = mAssetDescriptors.at(sSelectedAsset);
-                                    descriptor.GetTypeFromId() == kAssetType_Mesh) {
-                                    // Update mesh previewer
-                                    if (mEditorResources.LoadResource<Model>(descriptor.mId)) {
-                                        std::optional<ResourceHandle<Model>> modelResource =
-                                          mEditorResources.FetchResource<Model>(descriptor.mId);
-                                        if (modelResource.has_value()) {
-                                            // TODO: Create material
-                                            auto model = make_unique<ModelComponent>();
-                                            model->SetModelHandle(*modelResource)
-                                              .SetReceiveShadows(false)
-                                              .SetCastsShadows(false);
-                                            mMeshPreviewer.SetModel(std::move(model));
-                                        }
-                                    } else {
-                                        X_LOG_ERROR("Failed to load mesh asset");
-                                    }
-                                }
+                                sSelectedAsset  = itemIndex;
+                                auto descriptor = mAssetDescriptors.at(sSelectedAsset);
+                                if (descriptor.GetTypeFromId() == kAssetType_Mesh) { OnSelectedMeshAsset(descriptor); }
                             }
                             ImGui::PopStyleVar(2);
 

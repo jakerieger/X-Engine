@@ -4,15 +4,12 @@
 
 #pragma once
 
+#include <imgui.h>
 #include "Common/Types.hpp"
 #include "Engine/Window.hpp"
 #include "TextureManager.hpp"
 #include "Engine/Game.hpp"
 #include "XPak/ProjectDescriptor.hpp"
-#include "Res/resource.h"
-
-#include <imgui.h>
-
 #include "MeshPreviewer.hpp"
 
 namespace x {
@@ -39,7 +36,6 @@ namespace x {
         void OnResize(u32 width, u32 height) override;
         void OnShutdown() override;
         void OnUpdate() override;
-
         void OnRender() override;
 
         LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) override;
@@ -82,16 +78,18 @@ namespace x {
         void EntitiesView();
         void EntitiesPropertiesView();
         void ViewportView();
+
         void AssetsView();
         void AssetPreviewView();
 
         // Popups
         bool mSceneSelectorOpen {false};
+        void SelectSceneModal();
 
         // Button/menu actions
         void OnOpenProject();
         void OnLoadScene(const str& selectedScene);
-
+        void OnSelectedMeshAsset(const AssetDescriptor& descriptor);
         void OnImportAsset();
 
         // I/O

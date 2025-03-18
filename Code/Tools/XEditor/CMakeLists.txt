@@ -13,13 +13,15 @@ add_executable(XEditor WIN32
     ${IMGUI_SOURCES}
     ${COMMON_SOURCES}
     ${EDITOR_DIR}/AssetBrowserIcons.h
+    ${EDITOR_DIR}/Controls.cpp
+    ${EDITOR_DIR}/Controls.hpp
     ${EDITOR_DIR}/EditorIcons.h
-    ${EDITOR_DIR}/XEditor.hpp
-    ${EDITOR_DIR}/XEditor.cpp
-    ${EDITOR_DIR}/TextureManager.cpp
-    ${EDITOR_DIR}/TextureManager.hpp
     ${EDITOR_DIR}/MeshPreviewer.cpp
     ${EDITOR_DIR}/MeshPreviewer.hpp
+    ${EDITOR_DIR}/TextureManager.cpp
+    ${EDITOR_DIR}/TextureManager.hpp
+    ${EDITOR_DIR}/XEditor.cpp
+    ${EDITOR_DIR}/XEditor.hpp
     ${EDITOR_DIR}/main.cpp
 )
 
