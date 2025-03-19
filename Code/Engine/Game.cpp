@@ -57,6 +57,19 @@ namespace x {
         }
     }
 
+    void Game::ReloadSceneCache() {
+        // Find and load all of our scene descriptor
+        mScenes.clear();
+        const auto sceneIds = AssetManager::GetScenes();
+        for (const auto& scene : sceneIds) {
+            auto sceneData = AssetManager::GetAssetData(scene);
+            if (!sceneData || sceneData->size() == 0) { X_LOG_FATAL("Failed to load scene data!"); }
+            SceneDescriptor descriptor;
+            SceneParser::Parse(*sceneData, descriptor);
+            mScenes[descriptor.mName] = descriptor;
+        }
+    }
+
     void Game::RegisterEventHandlers() {
         RegisterHandler<WindowResizeEvent>(
           [this](const WindowResizeEvent& e) { OnResize(e.GetWidth(), e.GetHeight()); });
@@ -174,15 +187,7 @@ namespace x {
         if (!ShaderManager::LoadShaders(mRenderContext)) { X_LOG_FATAL("Failed to load shaders!"); }
         if (!AssetManager::LoadAssets(workingDir)) { X_LOG_FATAL("Failed to load assets"); }
 
-        // Find and load all of our scene descriptor
-        const auto sceneIds = AssetManager::GetScenes();
-        for (const auto& scene : sceneIds) {
-            auto sceneData = AssetManager::GetAssetData(scene);
-            if (!sceneData || sceneData->size() == 0) { X_LOG_FATAL("Failed to load scene data!"); }
-            SceneDescriptor descriptor;
-            SceneParser::Parse(*sceneData, descriptor);
-            mScenes[descriptor.mName] = descriptor;
-        }
+        ReloadSceneCache();
 
         mRenderSystem = make_unique<RenderSystem>(mRenderContext, viewport);
         mRenderSystem->Initialize();

@@ -70,7 +70,7 @@ namespace x {
             char mName[256] {0};
         } mEntityProperties;
 
-        void UpdateAssetDescriptors();
+        void ReloadAssetCache();
 
         // Views/Tabs
         void MainMenu();
@@ -85,17 +85,18 @@ namespace x {
         // Popups
         bool mSceneSelectorOpen {false};
         void SelectSceneModal();
+        bool mSaveSceneAsOpen {false};
+        void SaveSceneAsModal();
 
         // Button/menu actions
         void OnOpenProject();
         void OnLoadScene(const str& selectedScene);
         void OnSelectedMeshAsset(const AssetDescriptor& descriptor);
         void OnImportAsset();
+        void OnSaveScene(const char* name = nullptr);
 
         // I/O
         void LoadProject(const str& filename);
-        /// @brief Saves the current scene state to a descriptor file on disk (.scene)
-        void SaveScene(const char* filename = nullptr) const;
         /// @brief Returns the initial directory for file dialogs when opening/saving files
         Path GetInitialDirectory() const;
         /// @brief Returns the AssetType based on the given filename/extension

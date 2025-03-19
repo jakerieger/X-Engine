@@ -39,6 +39,8 @@ namespace x {
 
         static bool ModelCastsShadows {false};
         static bool ModelReceivesShadows {false};
+
+        static char CurrentSceneName[256] {0};
     }  // namespace EditorState
 
     static ImTextureID SrvAsTextureId(ID3D11ShaderResourceView* srv) {
@@ -168,6 +170,28 @@ namespace x {
         return Window::MessageHandler(msg, wParam, lParam);
     }
 
+    void XEditor::SaveSceneAsModal() {
+        const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        if (ImGui::BeginPopupModal("Save Scene As", &mSaveSceneAsOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::SetNextItemWidth(408.0f);
+            ImGui::InputText("##scene_name_as", EditorState::CurrentSceneName, sizeof(EditorState::CurrentSceneName));
+
+            ImGui::Dummy(ImVec2(0, 2));
+
+            if (ImGui::Button("OK", ImVec2(200, 0))) {
+                // TODO: Implement
+            }
+            ImGui::SetItemDefaultFocus();
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(200, 0))) {
+                mSaveSceneAsOpen = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+    }
+
     void XEditor::OnOpenProject() {
         const auto filter = "Project (*.xproj)|*.xproj|";
         char filename[MAX_PATH];
@@ -191,7 +215,9 @@ namespace x {
         EditorState::CameraFovY     = camera.GetFovY();
         EditorState::CameraNearZ    = camera.GetClipPlanes().first;
         EditorState::CameraFarZ     = camera.GetClipPlanes().second;
+        // TODO: Remove the mSceneSettings member, its redundant
         std::strcpy(mSceneSettings.mName, selectedScene.c_str());
+        std::strcpy(EditorState::CurrentSceneName, selectedScene.c_str());
 
         SetWindowTitle(std::format("XEditor | {}", selectedScene));
 
@@ -253,11 +279,11 @@ namespace x {
             }
 
             AssetManager::LoadAssets(rootContentDir.Parent());
-            UpdateAssetDescriptors();
+            ReloadAssetCache();
         }
     }
 
-    void XEditor::UpdateAssetDescriptors() {
+    void XEditor::ReloadAssetCache() {
         if (mLoadedProject.mLoaded && mGame.IsInitialized()) {
             mAssetDescriptors.clear();
             mAssetDescriptors = AssetManager::GetAssetDescriptors();
@@ -310,35 +336,19 @@ namespace x {
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("Open Project", "Ctrl+O")) { OnOpenProject(); }
                 ImGui::Separator();
-                // if (ImGui::MenuItem("New Scene", "Ctrl+N")) {
-                //     // Do new scene action
-                // }
                 if (ImGui::MenuItem("Open Scene", "Ctrl+Shift+O", false, mLoadedProject.mLoaded)) {
                     mSceneSelectorOpen = true;
                 }
-                // if (ImGui::MenuItem("Save Scene", "Ctrl+S")) {
-                //     if (Platform::ShowAlert(mHwnd,
-                //                             "Save Scene",
-                //                             "You are about to overwrite the current scene. Do you wish to continue?",
-                //                             Platform::AlertSeverity::Question) == IDYES &&
-                //         !mLoadedScenePath.Exists()) {
-                //         SaveScene();
-                //     }
-                // }
-                // if (ImGui::MenuItem("Save Scene As", "Ctrl+Shift+S")) {
-                //     const char* filter = "Scene (*.scene)|*.scene|";
-                //     char filename[MAX_PATH];
-                //     if (Platform::SaveFileDialog(mHwnd,
-                //                                  mLoadedScenePath.Parent().CStr(),
-                //                                  filter,
-                //                                  "Save Scene File",
-                //                                  "scene",
-                //                                  filename,
-                //                                  MAX_PATH)) {
-                //         SaveSceneAs(filename);
-                //         LoadScene(filename);
-                //     }
-                // }
+                if (ImGui::MenuItem("Save Scene", "Ctrl+S")) {
+                    // const bool confirmed =
+                    //   Platform::ShowAlert(mHwnd,
+                    //                       "Save Scene",
+                    //                       "You are about to overwrite the current scene. Do you wish to continue?",
+                    //                       Platform::AlertSeverity::Question);
+                    // if (confirmed == IDYES) {  }
+                    OnSaveScene();
+                }
+                if (ImGui::MenuItem("Save Scene As", "Ctrl+Shift+S")) { mSaveSceneAsOpen = true; }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Exit", "Alt+F4")) { this->Quit(); }
                 ImGui::EndMenu();
@@ -367,11 +377,11 @@ namespace x {
         }
         ImGui::PopStyleVar();
 
-        // Select Scene dialog
-        {
-            if (mSceneSelectorOpen) { ImGui::OpenPopup("Select Scene"); }
-            SelectSceneModal();
-        }
+        if (mSceneSelectorOpen) { ImGui::OpenPopup("Select Scene"); }
+        SelectSceneModal();
+
+        if (mSaveSceneAsOpen) { ImGui::OpenPopup("Save Scene As"); }
+        SaveSceneAsModal();
     }
 
     void XEditor::SceneSettingsView() {
@@ -952,7 +962,7 @@ namespace x {
         mSession.mLastProjectPath = Path(filename);
         mSession.SaveSession();
         mGame.Initialize(this, &mSceneViewport, mProjectRoot);
-        UpdateAssetDescriptors();
+        ReloadAssetCache();
 
         // TODO: Do this asynchronously
         GenerateAssetThumbnails();
@@ -961,7 +971,7 @@ namespace x {
         OnLoadScene(mLoadedProject.mStartupScene);
     }
 
-    void XEditor::SaveScene(const char* filename) const {
+    void XEditor::OnSaveScene(const char* name) {
         const auto* scene = mGame.GetActiveScene();
         SceneDescriptor descriptor;
         SceneParser::StateToDescriptor(scene->GetState(),
@@ -969,7 +979,16 @@ namespace x {
                                        (strcmp(mSceneSettings.mName, "") == 0) ? scene->GetName()
                                                                                : mSceneSettings.mName);
         if (descriptor.IsValid()) {
-            SceneParser::WriteToFile(descriptor, filename == nullptr ? mLoadedScenePath.Str() : filename);
+            if (name == nullptr) {
+                SceneParser::WriteToFile(descriptor, mLoadedScenePath.Str());
+            } else {
+                const auto scenePath = Path(mLoadedProject.mContentDirectory) / "Scenes" / name;
+                SceneParser::WriteToFile(descriptor, scenePath.Str());
+                AssetGenerator::GenerateAsset(scenePath, kAssetType_Scene, Path(mLoadedProject.mContentDirectory));
+            }
+
+            ReloadAssetCache();
+            mGame.ReloadSceneCache();
         } else {
             Platform::ShowAlert(mHwnd,
                                 "Error saving scene",

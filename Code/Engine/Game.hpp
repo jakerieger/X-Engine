@@ -43,6 +43,8 @@ namespace x {
         X_NODISCARD SceneMap& GetSceneMap();
 
     private:
+        friend class XEditor;
+
         bool mDebugUIEnabled {false};
         bool mIsRunning {false};
         bool mIsPaused {false};
@@ -67,10 +69,10 @@ namespace x {
         void InitializeEngine();
 
         void RenderDepthOnly(const SceneState& state) const;
+        void ReloadSceneCache();
 
         void RegisterEventHandlers();
         void OnResize(u32 width, u32 height) const;
-
         void OnKeyDown(u32 key);
         void OnKeyUp(u32 key);
         void OnMouseButtonDown(u32 button);
