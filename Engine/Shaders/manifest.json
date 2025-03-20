@@ -9,8 +9,8 @@
         "sourceDir": "Source",
         "graphics": [
             {
-                "name": "OpaquePBR",
-                "source": "OpaquePBR.hlsl"
+                "name": "PrimaryLit",
+                "source": "PrimaryLit.hlsl"
             },
             {
                 "name": "ShadowPass",

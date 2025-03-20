@@ -5,8 +5,8 @@
 #include "ShaderManager.hpp"
 
 #pragma region Shaders
-#include <OpaquePBR_PS.h>
-#include <OpaquePBR_VS.h>
+#include <PrimaryLit_VS.h>
+#include <PrimaryLit_PS.h>
 #include <ScreenTexture_VS.h>
 #include <ScreenTexture_PS.h>
 #include <ShadowPass_VS.h>
@@ -57,13 +57,13 @@ namespace x {
         mComputeShaders.clear();
 
         if (!CreateGraphicsShader(context,
-                                  kOpaquePBRShaderId,
-                                  X_ARRAY_W_SIZE(kOpaquePBR_VSBytes),
-                                  X_ARRAY_W_SIZE(kOpaquePBR_PSBytes))) {
-            X_LOG_ERROR("Failed to create OpaquePBR shader")
+                                  kPrimaryLitShaderId,
+                                  X_ARRAY_W_SIZE(kPrimaryLit_VSBytes),
+                                  X_ARRAY_W_SIZE(kPrimaryLit_PSBytes))) {
+            X_LOG_ERROR("Failed to create PrimaryLit shader")
             return false;
         }
-        X_LOG_INFO("Loaded OpaquePBR shader");
+        X_LOG_INFO("Loaded PrimaryLit shader");
 
         if (!CreateGraphicsShader(context,
                                   kScreenQuadShaderId,

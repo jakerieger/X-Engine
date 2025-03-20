@@ -31,3 +31,10 @@ target_link_libraries(XEditor
 )
 
 target_compile_definitions(XEditor PRIVATE ${WINDOWS_COMPILE_DEFS})
+
+add_custom_command(
+    TARGET XEditor POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_SOURCE_DIR}/Themes
+    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Themes
+)

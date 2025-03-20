@@ -7,7 +7,7 @@
 
 namespace x {
     PBRMaterial::PBRMaterial(RenderContext& context, bool transparent) : IMaterial(context, transparent) {
-        mShader = ShaderManager::GetGraphicsShader(kOpaquePBRShaderId);
+        mShader = ShaderManager::GetGraphicsShader(kPrimaryLitShaderId);
         CreateBuffers();
     }
 

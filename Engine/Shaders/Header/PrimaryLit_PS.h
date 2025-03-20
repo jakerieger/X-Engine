@@ -244,7 +244,7 @@ ret
 // Approximately 95 instruction slots used
 #endif
 
-const BYTE kOpaquePBR_PSBytes[] =
+const BYTE kPrimaryLit_PSBytes[] =
 {
      68,  88,  66,  67, 109, 115, 
      88, 207, 247, 235, 198, 202, 

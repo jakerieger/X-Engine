@@ -24,6 +24,40 @@ namespace x {
         void SaveSession() const;
     };
 
+    struct EditorTheme {
+        str mName;
+        ImVec4 mWindowBackground;
+        ImVec4 mChildBackground;
+        ImVec4 mFrameBackground;
+        ImVec4 mAltBackground;
+        ImVec4 mHeaderBackground;
+        ImVec4 mTextHighlight;
+        ImVec4 mTextPrimary;
+        ImVec4 mTextSecondary;
+        ImVec4 mTextDisabled;
+        ImVec4 mBorder;
+        ImVec4 mError;
+        ImVec4 mWarning;
+        ImVec4 mSuccess;
+        ImVec4 mLink;
+        ImVec4 mScrollbar;
+        ImVec4 mPrimary;
+        ImVec4 mSecondary;
+        f32 mBorderRadius;
+        f32 mBorderWidth;
+
+        bool LoadTheme(const str& theme);
+        void SaveTheme() const;
+        void Apply() const;
+    };
+
+    struct EditorSettings {
+        str mTheme {"Dark"};
+
+        bool LoadSettings();
+        void SaveSettings() const;
+    };
+
     class XEditor final : public Window {
     public:
         // Using `this->` to denote members of parent Window class
@@ -62,7 +96,10 @@ namespace x {
         vector<AssetDescriptor> mAssetDescriptors;
         ResourceManager mEditorResources;
 
+        // Editor structures
         EditorSession mSession;
+        EditorSettings mSettings;
+        EditorTheme mTheme;
 
         // ImGui settings variables.
         // These are used to store editable data that is then used to update the current scene
@@ -109,8 +146,6 @@ namespace x {
 
         // ImGui-specific functions
         void SetupDockspace(const f32 yOffset);
-        void ApplyTheme();
-
         bool LoadEditorIcons();
         void GenerateAssetThumbnails();
     };

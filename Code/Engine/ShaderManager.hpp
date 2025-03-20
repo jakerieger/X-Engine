@@ -8,7 +8,7 @@
 #include "Shader.hpp"
 
 namespace x {
-    static constexpr u32 kOpaquePBRShaderId      = 0;
+    static constexpr u32 kPrimaryLitShaderId     = 0;
     static constexpr u32 kTransparentPBRShaderId = 1;
     static constexpr u32 kScreenQuadShaderId     = 2;
     static constexpr u32 kShadowMapShaderId      = 3;
