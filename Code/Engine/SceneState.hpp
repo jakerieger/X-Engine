@@ -5,6 +5,7 @@
 #pragma once
 
 #include <map>
+#include <ranges>
 
 #include "Common/Types.hpp"
 #include "EntityId.hpp"
@@ -26,6 +27,12 @@ namespace x {
         SceneState() = default;
 
         EntityId CreateEntity(const str& name) {
+            for (const auto& entityName : mEntities | std::views::values) {
+                if (entityName == name) {
+                    return EntityId {};  // Return invalid entity
+                }
+            }
+
             const auto newId  = ++mNextId;
             const auto entity = EntityId {newId};
             mEntities[entity] = name;
@@ -111,6 +118,13 @@ namespace x {
             if constexpr (Same<T, TransformComponent>) { return mTransforms; }
             if constexpr (Same<T, ModelComponent>) { return mModels; }
             if constexpr (Same<T, BehaviorComponent>) { return mBehaviors; }
+        }
+
+        template<typename T>
+            requires IsValidComponent<T>
+        bool HasComponent(EntityId entity) const {
+            if (GetComponent<T>(entity)) { return true; }
+            return false;
         }
 
         LightState& GetLightState() {

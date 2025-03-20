@@ -78,4 +78,13 @@ namespace x {
 
         return pressed;
     }
+
+    void CenteredText(const char* text, const ImVec2& containerPos, const ImVec2& containerSize) {
+        ImDrawList* drawList  = ImGui::GetWindowDrawList();
+        const ImVec2 textSize = ImGui::CalcTextSize(text, nullptr, true);
+        const auto textPos    = ImVec2(containerPos.x + (containerSize.x - textSize.x) * 0.5f,
+                                    containerPos.y + (containerSize.y - textSize.y) * 0.5f);
+        drawList->AddText(textPos, ImGui::GetColorU32(ImGuiCol_Text), text);
+        ImGui::Dummy(containerSize);
+    }
 }  // namespace x

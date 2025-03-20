@@ -103,11 +103,13 @@ namespace x {
 
         // ImGui settings variables.
         // These are used to store editable data that is then used to update the current scene
+        // TODO: Remove
         struct SceneSettings {
             char mName[128] {0};
             char mDesc[512] {0};
         } mSceneSettings;
 
+        // TODO: Remove
         struct EntityProperties {
             char mName[256] {0};
         } mEntityProperties;
@@ -117,6 +119,7 @@ namespace x {
         // Views/Tabs
         void MainMenu();
         void SceneSettingsView();
+
         void EntitiesView();
         void EntitiesPropertiesView();
         void ViewportView();
@@ -138,6 +141,7 @@ namespace x {
         void OnSelectedMeshAsset(const AssetDescriptor& descriptor);
         void OnImportAsset();
         void OnSaveScene(const char* name = nullptr);
+        void OnAddEntity(const str& name) const;
 
         // I/O
         void LoadProject(const str& filename);

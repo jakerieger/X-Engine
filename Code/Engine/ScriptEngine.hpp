@@ -141,7 +141,8 @@ namespace x {
 
         void CallAwakeBehavior(const str& scriptId, const BehaviorEntity& entity) {
             if (!mBehaviorContexts.contains(scriptId)) {
-                X_PANIC("Could not find associated script in behavior contexts for id '%s'", scriptId.c_str());
+                X_LOG_WARN("Could not find associated script in behavior contexts for id '%s'", scriptId.c_str());
+                return;
             }
 
             const auto& context = mBehaviorContexts[scriptId];
@@ -154,7 +155,8 @@ namespace x {
 
         void CallUpdateBehavior(const str& scriptId, f32 deltaTime, const BehaviorEntity& entity) {
             if (!mBehaviorContexts.contains(scriptId)) {
-                X_PANIC("Could not find associated script in behavior contexts for id '%s'", scriptId.c_str());
+                X_LOG_WARN("Could not find associated script in behavior contexts for id '%s'", scriptId.c_str());
+                return;
             }
 
             const auto& context = mBehaviorContexts[scriptId];
@@ -167,7 +169,8 @@ namespace x {
 
         void CallDestroyedBehavior(const str& scriptId, const BehaviorEntity& entity) {
             if (!mBehaviorContexts.contains(scriptId)) {
-                X_PANIC("Could not find associated script in behavior contexts for id '%s'", scriptId.c_str());
+                X_LOG_WARN("Could not find associated script in behavior contexts for id '%s'", scriptId.c_str());
+                return;
             }
 
             const auto& context = mBehaviorContexts[scriptId];

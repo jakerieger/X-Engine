@@ -366,44 +366,72 @@ namespace x {
         }
     }
 
+    struct ComponentOption {
+        str mHeader;
+        str mSubHeader;
+        bool mAvailable {false};
+    };
+
     void XEditor::AddComponentModel() {
-        static vector<std::pair<str, str>> componentTypes = {
-          {"Model", "Renders a mesh with a given material"},
-          {"Behavior", "Control the entity's behavior with a script"},
-          {"Rigidbody", "Lets the entity interact with the physics system"},
-          {"Audio Source", "Plays an audio source"},
-          {"Camera", "Creates an image of a particular viewpoint in the scene"}};
+        auto& state = mGame.GetActiveScene()->GetState();
+
+        using ComponentMap             = unordered_map<str, str>;
+        static ComponentMap components = {
+          {"Model", "Renders a 3D model/mesh, making it visible in the scene"},
+          {"Behavior", "Custom Lua script that defines unique behaviors and functionality"}};
+
+        static str selectedComponent;
+        static constexpr f32 itemHeight = 48.0f;
 
         const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        i32 availableComponents {0};
         if (ImGui::BeginPopupModal("Add Component", &mAddComponentOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
-            static i32 selectedComponent {kNoSelection};
-            u32 index {0};
-            for (auto [name, description] : componentTypes) {
-                str id = "##" + std::to_string(index) + "component_select";
-                if (description.length() > 50) { description = description.substr(0, 58) + "..."; }
-                if (SelectableWithHeaders(id.c_str(),
-                                          name.c_str(),
-                                          description.c_str(),
-                                          selectedComponent == index,
-                                          ImGuiSelectableFlags_None,
-                                          ImVec2(0, 48))) {
-                    selectedComponent = index;
+            for (const auto& [name, description] : components) {
+                bool available {true};
+
+                if (name == "Model") {
+                    if (state.HasComponent<ModelComponent>(sSelectedEntity)) { available = false; }
+                } else if (name == "Behavior") {
+                    if (state.HasComponent<BehaviorComponent>(sSelectedEntity)) { available = false; }
                 }
-                index++;
-                ImGui::Dummy(ImVec2(0, 2.f));
+
+                if (available) {
+                    availableComponents++;
+                    const auto id = "##" + name + "_component_option";
+                    if (SelectableWithHeaders(id.c_str(),
+                                              name.c_str(),
+                                              description.c_str(),
+                                              selectedComponent == name,
+                                              true,
+                                              ImVec2(0, itemHeight))) {
+                        selectedComponent = name;
+                    }
+                    ImGui::Dummy(ImVec2(0, 2.f));
+                }
+            }
+
+            if (availableComponents == 0) {
+                const ImVec2 size = ImGui::GetContentRegionAvail();
+                CenteredText("No components available", ImGui::GetCursorScreenPos(), ImVec2(size.x, 48));
             }
 
             // Buttons
-            if (ImGui::Button("OK", ImVec2(200, 0))) {
-                selectedComponent = kNoSelection;
+            if (ImGui::Button("OK", ImVec2(240, 0))) {
+                if (selectedComponent == "Model") {
+                    // TODO: This will require a lot more work than simply adding the component since it's tied into
+                    // the render system
+                    // state.AddComponent<ModelComponent>(sSelectedEntity);
+                } else if (selectedComponent == "Behavior") {
+                    state.AddComponent<BehaviorComponent>(sSelectedEntity);
+                }
+
                 mAddComponentOpen = false;
                 ImGui::CloseCurrentPopup();
             }
             ImGui::SetItemDefaultFocus();
             ImGui::SameLine();
-            if (ImGui::Button("Cancel", ImVec2(200, 0))) {
-                selectedComponent = kNoSelection;
+            if (ImGui::Button("Cancel", ImVec2(240, 0))) {
                 mAddComponentOpen = false;
                 ImGui::CloseCurrentPopup();
             }
@@ -733,7 +761,6 @@ namespace x {
         }
         ImGui::PopStyleVar();
 
-        ImGui::PushStyleColor(ImGuiCol_PopupBg, HexToImVec4("36363a"));
         if (ImGui::BeginPopupModal("Add New Entity", &openAddEntityPopup, ImGuiWindowFlags_AlwaysAutoResize)) {
             ImGui::Text("Entity name:");
             ImGui::PushItemWidth(300.0f);
@@ -743,8 +770,11 @@ namespace x {
                                                        ImGuiInputTextFlags_EnterReturnsTrue);
             ImGui::PopItemWidth();
             ImGui::Separator();
-            if (ImGui::Button("Confirm", ImVec2(150, 0)) || enterPressed) {
-                if (strlen(entityNameBuffer) > 0) { ImGui::CloseCurrentPopup(); }
+            if (ImGui::Button("OK", ImVec2(150, 0)) || enterPressed) {
+                if (strlen(entityNameBuffer) > 0) {
+                    ImGui::CloseCurrentPopup();
+                    OnAddEntity(entityNameBuffer);
+                }
             }
 
             ImGui::SameLine();
@@ -753,7 +783,6 @@ namespace x {
 
             ImGui::EndPopup();
         }
-        ImGui::PopStyleColor();
 
         ImGui::End();
     }
@@ -769,7 +798,11 @@ namespace x {
                 auto& state = mGame.GetActiveScene()->GetState();
 
                 auto* transform = state.GetComponentMutable<TransformComponent>(sSelectedEntity);
-                X_PANIC_ASSERT(transform != nullptr, "Transform component null")
+                if (!transform) {
+                    X_LOG_ERROR("Entity missing required Transform component")
+                    return;
+                }
+
                 EditorState::TransformPosition = transform->GetPosition();
                 EditorState::TransformRotation = transform->GetRotation();
                 EditorState::TransformScale    = transform->GetScale();
@@ -780,8 +813,6 @@ namespace x {
                     EditorState::ModelReceivesShadows = model->GetReceiveShadows();
                 }
                 auto* behavior = state.GetComponentMutable<BehaviorComponent>(sSelectedEntity);
-
-                // TODO: These are gonna need globals like the camera settings did
 
                 if (ImGui::CollapsingHeader("General##properties", ImGuiTreeNodeFlags_DefaultOpen)) {
                     ImGui::Text("Name:");
@@ -837,26 +868,36 @@ namespace x {
                         ImGui::SameLine(kLabelWidth);
 
                         const auto& modelAsset =
-                          *std::ranges::find_if(mAssetDescriptors, [&model](const AssetDescriptor& asset) {
+                          std::ranges::find_if(mAssetDescriptors, [&model](const AssetDescriptor& asset) {
                               return asset.mId == model->GetModelId();
                           });
-                        const str modelText = std::format("{} (Change)", Path(modelAsset.mFilename).Filename());
-                        if (ImGui::Button(modelText.c_str(), ImVec2(size.x - kLabelWidth, 0))) {
-                            selectAssetOpen = true;
-                            // TODO: Do something with selectedAsset
-                            if (selectedAsset.mId != 0) model->SetModelId(selectedAsset.mId);
-                            // TODO: Handle actually switching the asset on the component
+                        if (modelAsset == mAssetDescriptors.end()) {
+                            X_LOG_ERROR("No model asset found for entity '%s'",
+                                        state.GetEntities().at(sSelectedEntity).c_str());
+                        } else {
+                            const str modelText = std::format("{} (Change)", Path(modelAsset->mFilename).Filename());
+                            if (ImGui::Button(modelText.c_str(), ImVec2(size.x - kLabelWidth, 0))) {
+                                selectAssetOpen = true;
+                                if (selectedAsset.mId != 0) model->SetModelId(selectedAsset.mId);
+                                // TODO: Handle actually switching the asset on the component
+                            }
                         }
 
                         ImGui::Text("Material (Asset):");
                         ImGui::SameLine(kLabelWidth);
 
                         const auto& materialAsset =
-                          *std::ranges::find_if(mAssetDescriptors, [&model](const AssetDescriptor& asset) {
+                          std::ranges::find_if(mAssetDescriptors, [&model](const AssetDescriptor& asset) {
                               return asset.mId == model->GetMaterialId();
                           });
-                        const str materialText = std::format("{} (Change)", Path(materialAsset.mFilename).Filename());
-                        ImGui::Button(materialText.c_str(), ImVec2(size.x - kLabelWidth, 0));
+                        if (materialAsset == mAssetDescriptors.end()) {
+                            X_LOG_ERROR("No material asset found for entity '%s'",
+                                        state.GetEntities().at(sSelectedEntity).c_str());
+                        } else {
+                            const str materialText =
+                              std::format("{} (Change)", Path(materialAsset->mFilename).Filename());
+                            ImGui::Button(materialText.c_str(), ImVec2(size.x - kLabelWidth, 0));
+                        }
 
                         ImGui::Text("Casts Shadows:");
                         ImGui::SameLine(kLabelWidth);
@@ -879,11 +920,13 @@ namespace x {
                         ImGui::SetNextItemWidth(size.x - kLabelWidth);
 
                         const auto& scriptAsset =
-                          *std::ranges::find_if(mAssetDescriptors, [&behavior](const AssetDescriptor& asset) {
+                          std::ranges::find_if(mAssetDescriptors, [&behavior](const AssetDescriptor& asset) {
                               return asset.mId == behavior->GetScriptId();
                           });
-                        const str scriptText = std::format("{} (Change)", Path(scriptAsset.mFilename).Filename());
-                        ImGui::Button(scriptText.c_str(), ImVec2(size.x - kLabelWidth, 0));
+                        if (scriptAsset != mAssetDescriptors.end()) {
+                            const str scriptText = std::format("{} (Change)", Path(scriptAsset->mFilename).Filename());
+                            ImGui::Button(scriptText.c_str(), ImVec2(size.x - kLabelWidth, 0));
+                        }
                     }
                 }
             }
@@ -1292,6 +1335,12 @@ namespace x {
                                 "Unable to parse scene state to descriptor.",
                                 Platform::AlertSeverity::Error);
         }
+    }
+
+    void XEditor::OnAddEntity(const str& name) const {
+        auto& state              = mGame.GetActiveScene()->GetState();
+        const EntityId newEntity = state.CreateEntity(name);
+        if (newEntity.Valid()) { state.AddComponent<TransformComponent>(newEntity); }
     }
 
     Path XEditor::GetInitialDirectory() const {
