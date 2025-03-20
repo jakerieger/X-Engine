@@ -3,12 +3,17 @@
 //
 
 #include "XEditor.hpp"
-#include "Common/FileDialogs.hpp"
-#include "Common/WindowsHelpers.hpp"
-#include "XPak/AssetGenerator.hpp"
-#include "Engine/SceneParser.hpp"
 #include "Res/resource.h"
 #include "Controls.hpp"
+
+#include "Common/FileDialogs.hpp"
+#include "Common/WindowsHelpers.hpp"
+
+#include "Engine/SceneParser.hpp"
+#include "Engine/EngineCommon.hpp"
+
+#include "XPak/AssetGenerator.hpp"
+
 #include <Inter.h>
 #include <JetBrainsMono.h>
 #include <imgui_impl_win32.h>
@@ -20,9 +25,11 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 namespace x {
     static constexpr ImVec2 kViewportSize {1024, 576};  // Default viewport size
-    static constexpr f32 kLabelWidth = 140.0f;
+    static constexpr f32 kLabelWidth {140.0f};
+    static constexpr i32 kNoSelection {-1};
+    static constexpr u32 kAssetIconColumnCount {9};
+
     static EntityId sSelectedEntity {};
-    static constexpr i32 kNoSelection = -1;
     static i32 sSelectedAsset {kNoSelection};
 
     // TODO: Consider making this a class
@@ -66,6 +73,22 @@ namespace x {
         color.w = alpha;
 
         return color;
+    }
+
+    static ImVec4 GetLogEntryColor(const u32 severity) {
+        switch (severity) {
+            default:
+            case X_LOG_SEVERITY_INFO:
+                return HexToImVec4("b9b9b9");
+            case X_LOG_SEVERITY_WARN:
+                return HexToImVec4("ffe100");
+            case X_LOG_SEVERITY_ERROR:
+                return HexToImVec4("eb529e");
+            case X_LOG_SEVERITY_FATAL:
+                return ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+            case X_LOG_SEVERITY_DEBUG:
+                return HexToImVec4("ebc388");
+        }
     }
 
     bool EditorSession::LoadSession() {
@@ -119,6 +142,10 @@ namespace x {
         mSceneViewport.Resize(1, 1);
 
         if (mSession.LoadSession()) { LoadProject(mSession.mLastProjectPath.Str()); }
+
+        X_LOG_WARN("Test warning log entry")
+        X_LOG_ERROR("Test error log entry")
+        X_LOG_DEBUG("Test debug log entry")
     }
 
     void XEditor::OnResize(u32 width, u32 height) {
@@ -154,6 +181,7 @@ namespace x {
         EntitiesView();
         EntitiesPropertiesView();
         AssetsView();
+        LogView();
         AssetPreviewView();
 
         ImGui::PopFont();
@@ -180,7 +208,11 @@ namespace x {
             ImGui::Dummy(ImVec2(0, 2));
 
             if (ImGui::Button("OK", ImVec2(200, 0))) {
-                // TODO: Implement
+                if (EditorState::CurrentSceneName[0] != '\0' || strcmp(EditorState::CurrentSceneName, "") == 0) {
+                    OnSaveScene(EditorState::CurrentSceneName);
+                    mSaveSceneAsOpen = false;
+                    ImGui::CloseCurrentPopup();
+                }
             }
             ImGui::SetItemDefaultFocus();
             ImGui::SameLine();
@@ -729,11 +761,10 @@ namespace x {
                 // Setup for grid layout
                 const auto& assets = mAssetDescriptors;
 
-                constexpr f32 fullWidth             = 1920.0f;
-                constexpr u32 desiredRowsAtFullSize = 9;
+                constexpr f32 fullWidth = 1920.0f;
                 const auto currentWidth = GetWidth();  // Get current client window width, TODO: Change this to the max
                 // available width of the assets panel itself
-                const f32 columnsCount = std::floorf((desiredRowsAtFullSize * currentWidth) / fullWidth);
+                const f32 columnsCount = std::floorf((kAssetIconColumnCount * currentWidth) / fullWidth);
                 // I could calculate this as the floor of the result of the proportion MAX_WIDTH/8  = CURR_WIDTH/x
 
                 const auto& style        = ImGui::GetStyle();
@@ -877,6 +908,77 @@ namespace x {
         ImGui::PopStyleVar();
     }
 
+    void XEditor::LogView() {
+        static bool showInfo {false};
+        static bool showWarn {true};
+        static bool showError {true};
+        static bool showFatal {true};
+        static bool showDebug {true};
+        static bool autoScroll {true};
+
+        auto& logger = GetLogger();
+
+        auto ShouldShowSeverity = [&](const u32 severity) -> bool {
+            switch (severity) {
+                case X_LOG_SEVERITY_INFO:
+                    return showInfo;
+                case X_LOG_SEVERITY_WARN:
+                    return showWarn;
+                case X_LOG_SEVERITY_ERROR:
+                    return showError;
+                case X_LOG_SEVERITY_FATAL:
+                    return showFatal;
+                case X_LOG_SEVERITY_DEBUG:
+                    return showDebug;
+                default:
+                    return true;
+            }
+        };
+
+        ImGui::Begin("Log");
+        {
+            if (ImGui::Button("Clear")) { logger.ClearEntries(); }
+            ImGui::SameLine();
+            ImGui::Checkbox("Info", &showInfo);
+            ImGui::SameLine();
+            ImGui::Checkbox("Warn", &showWarn);
+            ImGui::SameLine();
+            ImGui::Checkbox("Error", &showError);
+            ImGui::SameLine();
+            ImGui::Checkbox("Fatal", &showFatal);
+            ImGui::SameLine();
+            ImGui::Checkbox("Debug", &showDebug);
+
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, HexToImVec4("17171a"));
+            ImGui::BeginChild("ScrollingRegion", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
+
+            // Display logs
+            std::lock_guard<std::mutex> lock(logger.GetBufferMutex());
+            size_t startIndex =
+              (logger.GetCurrentEntry() - logger.GetTotalEntries() + logger.kMaxEntries) % logger.kMaxEntries;
+            for (size_t i = 0; i < logger.GetTotalEntries(); i++) {
+                size_t index      = (startIndex + i) % logger.kMaxEntries;
+                const auto& entry = logger.GetEntries()[index];
+
+                // Apply filters
+                if (!ShouldShowSeverity(entry.severity)) continue;
+
+                ImGui::PushStyleColor(ImGuiCol_Text, GetLogEntryColor(entry.severity));
+                ImGui::TextUnformatted(std::format("[{}] {}", entry.timestamp, entry.message).c_str());
+                ImGui::PopStyleColor();
+            }
+
+            // Auto-scroll to bottom
+            if (autoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) { ImGui::SetScrollHereY(1.0f); }
+
+            ImGui::Dummy(ImVec2(0, 4));
+
+            ImGui::EndChild();
+            ImGui::PopStyleColor();
+        }
+        ImGui::End();
+    }
+
     void XEditor::AssetPreviewView() {
         ImGui::Begin("Asset Preview", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
         {
@@ -974,21 +1076,20 @@ namespace x {
     void XEditor::OnSaveScene(const char* name) {
         const auto* scene = mGame.GetActiveScene();
         SceneDescriptor descriptor;
-        SceneParser::StateToDescriptor(scene->GetState(),
-                                       descriptor,
-                                       (strcmp(mSceneSettings.mName, "") == 0) ? scene->GetName()
-                                                                               : mSceneSettings.mName);
+        SceneParser::StateToDescriptor(scene->GetState(), descriptor, name == nullptr ? scene->GetName() : name);
         if (descriptor.IsValid()) {
             if (name == nullptr) {
                 SceneParser::WriteToFile(descriptor, mLoadedScenePath.Str());
             } else {
-                const auto scenePath = Path(mLoadedProject.mContentDirectory) / "Scenes" / name;
+                const str sceneFileName = str(name) + ".scene";
+                const auto scenePath    = Path(mLoadedProject.mContentDirectory) / "Scenes" / sceneFileName;
                 SceneParser::WriteToFile(descriptor, scenePath.Str());
                 AssetGenerator::GenerateAsset(scenePath, kAssetType_Scene, Path(mLoadedProject.mContentDirectory));
             }
 
             ReloadAssetCache();
             mGame.ReloadSceneCache();
+            OnLoadScene(name);
         } else {
             Platform::ShowAlert(mHwnd,
                                 "Error saving scene",
@@ -1064,12 +1165,15 @@ namespace x {
                   ImGui::DockBuilderSplitNode(dockLeftId, ImGuiDir_Down, 0.5f, nullptr, &dockLeftId);
                 ImGuiID dockRightBottomId =
                   ImGui::DockBuilderSplitNode(dockRightId, ImGuiDir_Down, 0.5f, nullptr, &dockRightId);
+                ImGuiID dockBottomLeftId =
+                  ImGui::DockBuilderSplitNode(dockBottomId, ImGuiDir_Left, 0.5f, nullptr, &dockBottomId);
 
                 ImGui::DockBuilderDockWindow("Scene", dockLeftId);
                 ImGui::DockBuilderDockWindow("Entities", dockLeftBottomId);
                 ImGui::DockBuilderDockWindow("Properties", dockRightId);
                 ImGui::DockBuilderDockWindow("Viewport", dockMainId);
                 ImGui::DockBuilderDockWindow("Assets", dockBottomId);
+                ImGui::DockBuilderDockWindow("Log", dockBottomId);
                 ImGui::DockBuilderDockWindow("Asset Preview", dockRightBottomId);
 
                 ImGui::DockBuilderFinish(imguiViewport->ID);
@@ -1201,47 +1305,106 @@ namespace x {
 #include "EditorIcons.h"
 #pragma endregion
 
-    void XEditor::LoadEditorIcons() {
+    bool XEditor::LoadEditorIcons() {
         // Asset Browser Icons
         auto result = mTextureManager.LoadFromMemory(AUDIOICON_BYTES, 128, 128, 4, "AudioIcon");
-        if (!result) { throw std::runtime_error("Failed to load Audio icon"); }
+        if (!result) {
+            X_LOG_ERROR("Failed to load Audio icon");
+            return false;
+        }
         result = mTextureManager.LoadFromMemory(MATERIALICON_BYTES, 128, 128, 4, "MaterialIcon");
-        if (!result) { throw std::runtime_error("Failed to load Material icon"); }
+        if (!result) {
+            X_LOG_ERROR("Failed to load Material icon");
+            return false;
+        }
         result = mTextureManager.LoadFromMemory(MESHICON_BYTES, 128, 128, 4, "MeshIcon");
-        if (!result) { throw std::runtime_error("Failed to load Mesh icon"); }
+        if (!result) {
+            X_LOG_ERROR("Failed to load Mesh icon");
+            return false;
+        }
         result = mTextureManager.LoadFromMemory(SCENEICON_BYTES, 128, 128, 4, "SceneIcon");
-        if (!result) { throw std::runtime_error("Failed to load Scene icon"); }
+        if (!result) {
+            X_LOG_ERROR("Failed to load Scene icon");
+            return false;
+        }
         result = mTextureManager.LoadFromMemory(SCRIPTICON_BYTES, 128, 128, 4, "ScriptIcon");
-        if (!result) { throw std::runtime_error("Failed to load Script icon"); }
+        if (!result) {
+            X_LOG_ERROR("Failed to load Script icon");
+            return false;
+        }
         result = mTextureManager.LoadFromMemory(FOLDERICON_BYTES, 128, 128, 4, "FolderIcon");
-        if (!result) { throw std::runtime_error("Failed to load Folder icon"); }
+        if (!result) {
+            X_LOG_ERROR("Failed to load Folder icon");
+            return false;
+        }
         result = mTextureManager.LoadFromMemory(FOLDERICONEMPTY_BYTES, 128, 128, 4, "FolderEmptyIcon");
-        if (!result) { throw std::runtime_error("Failed to load Folder icon"); }
+        if (!result) {
+            X_LOG_ERROR("Failed to load Folder icon");
+            return false;
+        }
 
         // Toolbar / Editor Icons
         result = mTextureManager.LoadFromMemory(MOVEICON_BYTES, 24, 24, 4, "MoveIcon");
-        if (!result) { throw std::runtime_error("Failed to load Move icon"); }
+        if (!result) {
+            X_LOG_ERROR("Failed to load Move icon");
+            return false;
+        }
         result = mTextureManager.LoadFromMemory(PAUSEICON_BYTES, 24, 24, 4, "PauseIcon");
-        if (!result) { throw std::runtime_error("Failed to load Pause icon"); }
+        if (!result) {
+            X_LOG_ERROR("Failed to load Pause icon");
+            return false;
+        }
         result = mTextureManager.LoadFromMemory(PLAYICON_BYTES, 24, 24, 4, "PlayIcon");
-        if (!result) { throw std::runtime_error("Failed to load Play icon"); }
+        if (!result) {
+            X_LOG_ERROR("Failed to load Play icon");
+            return false;
+        }
         result = mTextureManager.LoadFromMemory(REDOICON_BYTES, 24, 24, 4, "RedoIcon");
-        if (!result) { throw std::runtime_error("Failed to load Redo icon"); }
+        if (!result) {
+            X_LOG_ERROR("Failed to load Redo icon");
+            return false;
+        }
         result = mTextureManager.LoadFromMemory(UNDOICON_BYTES, 24, 24, 4, "UndoIcon");
-        if (!result) { throw std::runtime_error("Failed to load Undo icon"); }
+        if (!result) {
+            X_LOG_ERROR("Failed to load Undo icon");
+            return false;
+        }
         result = mTextureManager.LoadFromMemory(ROTATEICON_BYTES, 24, 24, 4, "RotateIcon");
-        if (!result) { throw std::runtime_error("Failed to load Rotate icon"); }
+        if (!result) {
+            X_LOG_ERROR("Failed to load Rotate icon");
+            return false;
+        }
         result = mTextureManager.LoadFromMemory(SCALEICON_BYTES, 24, 24, 4, "ScaleIcon");
-        if (!result) { throw std::runtime_error("Failed to load Scale icon"); }
+        if (!result) {
+            X_LOG_ERROR("Failed to load Scale icon");
+            return false;
+        }
         result = mTextureManager.LoadFromMemory(SELECTICON_BYTES, 24, 24, 4, "SelectIcon");
-        if (!result) { throw std::runtime_error("Failed to load Select icon"); }
+        if (!result) {
+            X_LOG_ERROR("Failed to load Select icon");
+            return false;
+        }
         result = mTextureManager.LoadFromMemory(SEPARATORICON_BYTES, 24, 24, 4, "SeparatorIcon");
-        if (!result) { throw std::runtime_error("Failed to load Separator icon"); }
+        if (!result) {
+            X_LOG_ERROR("Failed to load Separator icon");
+            return false;
+        }
         result = mTextureManager.LoadFromMemory(SETTINGSICON_BYTES, 24, 24, 4, "SettingsIcon");
-        if (!result) { throw std::runtime_error("Failed to load Settings icon"); }
+        if (!result) {
+            X_LOG_ERROR("Failed to load Settings icon");
+            return false;
+        }
         result = mTextureManager.LoadFromMemory(SNAP_TO_GRIDICON_BYTES, 24, 24, 4, "SnapToGridIcon");
-        if (!result) { throw std::runtime_error("Failed to load SnapToGrid icon"); }
+        if (!result) {
+            X_LOG_ERROR("Failed to load SnapToGrid icon");
+            return false;
+        }
         result = mTextureManager.LoadFromMemory(STOPICON_BYTES, 24, 24, 4, "StopIcon");
-        if (!result) { throw std::runtime_error("Failed to load Stop icon"); }
+        if (!result) {
+            X_LOG_ERROR("Failed to load Stop icon");
+            return false;
+        }
+
+        return true;
     }
 }  // namespace x

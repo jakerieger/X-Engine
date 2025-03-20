@@ -74,7 +74,7 @@ namespace x {
         vector<u64> mAssetIds;
 
         bool IsValid() const {
-            return (!mName.empty()) && (!mDescription.empty()) && (mEntities.size() > 0);
+            return (!mName.empty()) && (mEntities.size() > 0);
         }
     };
 

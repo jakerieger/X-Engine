@@ -275,14 +275,21 @@ namespace x {
     }
 
     void Game::TransitionScene(const str& name) {
-        if (name.empty()) {
-            X_LOG_WARN("Attempted to load blank scene")
+        if (name.empty() || mScenes.empty()) {
+            X_LOG_WARN("Attempted to load blank or non-existent scene")
             return;
         }
 
         mActiveScene.reset();
         mActiveScene = make_unique<Scene>(mRenderContext, mScriptEngine);
-        mActiveScene->Load(mScenes[name]);
+
+        if (const auto it = mScenes.find(name); it != mScenes.end()) {
+            mActiveScene->Load(it->second);
+        } else {
+            X_LOG_WARN("Scene not found in scene cache. Engine may not have loaded it yet.")
+            return;
+        }
+
         mActiveScene->RegisterVolatiles(mVolatiles);
         mActiveScene->Update(0.0f);
     }

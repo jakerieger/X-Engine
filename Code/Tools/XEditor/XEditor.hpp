@@ -5,12 +5,16 @@
 #pragma once
 
 #include <imgui.h>
-#include "Common/Types.hpp"
-#include "Engine/Window.hpp"
-#include "TextureManager.hpp"
-#include "Engine/Game.hpp"
-#include "XPak/ProjectDescriptor.hpp"
+
 #include "MeshPreviewer.hpp"
+#include "TextureManager.hpp"
+
+#include "Common/Types.hpp"
+
+#include "Engine/Window.hpp"
+#include "Engine/Game.hpp"
+
+#include "XPak/ProjectDescriptor.hpp"
 
 namespace x {
     struct EditorSession {
@@ -36,6 +40,7 @@ namespace x {
         void OnResize(u32 width, u32 height) override;
         void OnShutdown() override;
         void OnUpdate() override;
+
         void OnRender() override;
 
         LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) override;
@@ -78,8 +83,8 @@ namespace x {
         void EntitiesView();
         void EntitiesPropertiesView();
         void ViewportView();
-
         void AssetsView();
+        void LogView();
         void AssetPreviewView();
 
         // Popups
@@ -105,7 +110,8 @@ namespace x {
         // ImGui-specific functions
         void SetupDockspace(const f32 yOffset);
         void ApplyTheme();
-        void LoadEditorIcons();
+
+        bool LoadEditorIcons();
         void GenerateAssetThumbnails();
     };
 }  // namespace x

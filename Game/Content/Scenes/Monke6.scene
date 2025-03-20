@@ -1,0 +1,50 @@
+version: 1.0
+name: Monke6
+description: ""
+world:
+  camera:
+    position: [0, 1, -5]
+    eye: [0, 0, 0]
+    fovY: 60
+    nearZ: 0.100000001
+    farZ: 1000
+  lights:
+    sun:
+      enabled: true
+      intensity: 2
+      color: [1, 1, 1]
+      direction: [0.600000024, 0.600000024, -0.600000024]
+      castsShadows: true
+    pointLights:
+      []
+    areaLights:
+      []
+    spotLights:
+      []
+entities:
+  - id: 1
+    name: room
+    components:
+      transform:
+        position: [0, -0.5, 0]
+        rotation: [0, 0, 0]
+        scale: [1, 1, 1]
+      model:
+        mesh: 215365451938862602
+        material: 340630636645970125
+        castsShadows: true
+        receiveShadows: true
+  - id: 2
+    name: monke
+    components:
+      transform:
+        position: [0, 0, 0]
+        rotation: [0, 0, 0]
+        scale: [1, 1, 1]
+      model:
+        mesh: 149647991954226505
+        material: 343790720738094327
+        castsShadows: true
+        receiveShadows: true
+      behavior:
+        script: 455646657286743680
