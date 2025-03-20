@@ -366,6 +366,51 @@ namespace x {
         }
     }
 
+    void XEditor::AddComponentModel() {
+        static vector<std::pair<str, str>> componentTypes = {
+          {"Model", "Renders a mesh with a given material"},
+          {"Behavior", "Control the entity's behavior with a script"},
+          {"Rigidbody", "Lets the entity interact with the physics system"},
+          {"Audio Source", "Plays an audio source"},
+          {"Camera", "Creates an image of a particular viewpoint in the scene"}};
+
+        const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        if (ImGui::BeginPopupModal("Add Component", &mAddComponentOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
+            static i32 selectedComponent {kNoSelection};
+            u32 index {0};
+            for (auto [name, description] : componentTypes) {
+                str id = "##" + std::to_string(index) + "component_select";
+                if (description.length() > 50) { description = description.substr(0, 58) + "..."; }
+                if (SelectableWithHeaders(id.c_str(),
+                                          name.c_str(),
+                                          description.c_str(),
+                                          selectedComponent == index,
+                                          ImGuiSelectableFlags_None,
+                                          ImVec2(0, 48))) {
+                    selectedComponent = index;
+                }
+                index++;
+                ImGui::Dummy(ImVec2(0, 2.f));
+            }
+
+            // Buttons
+            if (ImGui::Button("OK", ImVec2(200, 0))) {
+                selectedComponent = kNoSelection;
+                mAddComponentOpen = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SetItemDefaultFocus();
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(200, 0))) {
+                selectedComponent = kNoSelection;
+                mAddComponentOpen = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+    }
+
     void XEditor::OnOpenProject() {
         const auto filter = "Project (*.xproj)|*.xproj|";
         char filename[MAX_PATH];
@@ -842,15 +887,24 @@ namespace x {
                     }
                 }
             }
+
+            ImGui::Dummy(ImVec2(0, 2.f));
+            ImGui::Separator();
+            ImGui::Dummy(ImVec2(0, 2.f));
+
+            if (ImGui::Button("Add Component##button", ImVec2(size.x, 0))) { mAddComponentOpen = true; }
         }
         ImGui::End();
 
         if (selectAssetOpen) { ImGui::OpenPopup("Select Asset"); }
+        if (mAddComponentOpen) { ImGui::OpenPopup("Add Component"); }
 
         if (ImGui::BeginPopupModal("Select Asset", &selectAssetOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
             ImGui::Dummy(ImVec2(380, 500));
             ImGui::EndPopup();
         }
+
+        AddComponentModel();
     }
 
     void XEditor::ViewportView() {
@@ -1099,8 +1153,8 @@ namespace x {
             size_t startIndex =
               (logger.GetCurrentEntry() - logger.GetTotalEntries() + logger.kMaxEntries) % logger.kMaxEntries;
             for (size_t i = 0; i < logger.GetTotalEntries(); i++) {
-                size_t index      = (startIndex + i) % logger.kMaxEntries;
-                const auto& entry = logger.GetEntries()[index];
+                const size_t index = (startIndex + i) % logger.kMaxEntries;
+                const auto& entry  = logger.GetEntries()[index];
 
                 // Apply filters
                 if (!ShouldShowSeverity(entry.severity)) continue;

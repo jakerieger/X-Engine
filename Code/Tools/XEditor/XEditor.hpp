@@ -129,6 +129,8 @@ namespace x {
         void SelectSceneModal();
         bool mSaveSceneAsOpen {false};
         void SaveSceneAsModal();
+        bool mAddComponentOpen {false};
+        void AddComponentModel();
 
         // Button/menu actions
         void OnOpenProject();
