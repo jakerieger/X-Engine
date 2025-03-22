@@ -27,7 +27,7 @@ namespace x {
     bool AssetDropTarget(const char* label,
                          char* buf,
                          size_t bufSize,
-                         const char* btnLabel,
+                         ImTextureID btnIcon,
                          const char* payloadType,
                          const std::function<void(const AssetDescriptor&)>& callback,
                          ImGuiInputTextFlags flags = ImGuiInputTextFlags_ReadOnly);

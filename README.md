@@ -21,7 +21,7 @@ The actual game executable code is in [Code/Game/main.cpp](Code/Game/main.cpp).
 If you'd like to know how the actual "engine" part of this code-base works, you can check out
 the [Engine Architecture](Docs/Engine-Architecture.md) doc.
 
-![](Docs/image/EditorScreen02.png)
+![](Docs/image/EditorScreen03.png)
 > [XEditor](Code/Tools/XEditor) - the main editing tool for the engine.
 
 ## Building
@@ -53,6 +53,8 @@ cmake --build . --config <Debug/Release/Dist>
 ```
 
 ## Docs
+
+*These are all pretty out-of-date right now.*
 
 - [Engine Architecture](Docs/Engine-Architecture.md)
     - Basic overview of how the engine is designed and structured.

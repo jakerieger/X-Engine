@@ -224,7 +224,7 @@ namespace x {
         colors[ImGuiCol_TableRowBg]            = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
         colors[ImGuiCol_TableRowBgAlt]         = ImVec4(1.00f, 1.00f, 1.00f, 0.06f);
         colors[ImGuiCol_TextSelectedBg]        = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
-        colors[ImGuiCol_DragDropTarget]        = link;
+        colors[ImGuiCol_DragDropTarget]        = primary;
         colors[ImGuiCol_NavHighlight]          = ImVec4(30.f / 255.f, 30.f / 255.f, 30.f / 255.f, 1.00f);
         colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
         colors[ImGuiCol_NavWindowingDimBg]     = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
@@ -321,7 +321,7 @@ namespace x {
         ViewportView();
         SceneSettingsView();
         EntitiesView();
-        EntitiesPropertiesView();
+        EntityComponentsView();
         AssetsView();
         LogView();
         AssetPreviewView();
@@ -608,15 +608,28 @@ namespace x {
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Assets")) {
-                if (ImGui::MenuItem("Import Asset...")) { OnImportAsset(); }
+                if (ImGui::BeginMenu("Create")) {
+                    if (ImGui::MenuItem("Material")) {}
+                    if (ImGui::MenuItem("Script")) {}
+                    ImGui::EndMenu();
+                }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Import Asset")) { OnImportAsset(); }
                 if (ImGui::MenuItem("Generate Pak File")) {}
 
                 ImGui::EndMenu();
             }
-            if (ImGui::BeginMenu("View")) {
-                if (ImGui::MenuItem("Reset Layout")) {
-                    // Trigger first-time layout setup again
-                    mDockspaceSetup = false;
+            if (ImGui::BeginMenu("Window")) {
+                if (ImGui::BeginMenu("Layouts")) {
+                    // TODO: Add default layouts here
+                    if (ImGui::MenuItem("Reset")) { mDockspaceSetup = false; }
+                    ImGui::EndMenu();
+                }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Help")) {
+                if (ImGui::MenuItem("About")) {
+                    // TODO: Open about popup
                 }
                 ImGui::EndMenu();
             }
@@ -787,9 +800,12 @@ namespace x {
         ImGui::End();
     }
 
-    void XEditor::EntitiesPropertiesView() {
+    void XEditor::EntityComponentsView() {
         static bool selectAssetOpen {false};
         static AssetDescriptor selectedAsset {};
+
+        ImTextureID selectAssetIcon =
+          SrvAsTextureId(mTextureManager.GetTexture("SelectAssetIcon").value().mShaderResourceView.Get());
 
         ImGui::Begin("Properties");
         const ImVec2 size = ImGui::GetContentRegionAvail();
@@ -875,12 +891,7 @@ namespace x {
                             X_LOG_ERROR("No model asset found for entity '%s'",
                                         state.GetEntities().at(sSelectedEntity).c_str());
                         } else {
-                            static char buffer[256] {0};
-                            const auto currentValue = Path(modelAsset->mFilename).Filename();
-                            std::strcpy(buffer, currentValue.c_str());
-
                             auto UpdateMesh = [this, &model](const AssetDescriptor& descriptor) {
-                                // TODO: Update mesh
                                 const auto oldId = model->GetModelId();
                                 if (oldId == descriptor.mId) { return; }
 
@@ -893,14 +904,18 @@ namespace x {
                                     }
                                 }
 
-                                X_LOG_WARN("Old model ID: %llu", model->GetModelId());
-                                X_LOG_WARN("New model ID: %llu", descriptor.mId);
+                                X_LOG_DEBUG("Old model ID: %llu", model->GetModelId());
+                                X_LOG_DEBUG("New model ID: %llu", descriptor.mId);
                             };
+
+                            static char buffer[256] {0};
+                            const auto currentValue = Path(modelAsset->mFilename).Filename();
+                            std::strcpy(buffer, currentValue.c_str());
 
                             if (AssetDropTarget("##model_drop_target",
                                                 buffer,
                                                 sizeof(buffer),
-                                                "[-]",
+                                                selectAssetIcon,
                                                 X_DROP_TARGET_MESH,
                                                 UpdateMesh)) {}
                         }
@@ -916,9 +931,26 @@ namespace x {
                             X_LOG_ERROR("No material asset found for entity '%s'",
                                         state.GetEntities().at(sSelectedEntity).c_str());
                         } else {
-                            const str materialText =
-                              std::format("{} (Change)", Path(materialAsset->mFilename).Filename());
-                            ImGui::Button(materialText.c_str(), ImVec2(size.x - kLabelWidth, 0));
+                            auto UpdateMaterial = [this, &materialAsset](const AssetDescriptor& descriptor) {
+                                const auto oldId = materialAsset->mId;
+                                if (oldId == descriptor.mId) { return; }
+
+                                // TODO: Implement
+
+                                X_LOG_DEBUG("Old material ID: %llu", oldId);
+                                X_LOG_DEBUG("New material ID: %llu", descriptor.mId);
+                            };
+
+                            static char buffer[256] {0};
+                            const auto currentValue = Path(materialAsset->mFilename).Filename();
+                            std::strcpy(buffer, currentValue.c_str());
+
+                            if (AssetDropTarget("##material_drop_target",
+                                                buffer,
+                                                sizeof(buffer),
+                                                selectAssetIcon,
+                                                X_DROP_TARGET_MATERIAL,
+                                                UpdateMaterial)) {}
                         }
 
                         ImGui::Text("Casts Shadows:");
@@ -946,8 +978,26 @@ namespace x {
                               return asset.mId == behavior->GetScriptId();
                           });
                         if (scriptAsset != mAssetDescriptors.end()) {
-                            const str scriptText = std::format("{} (Change)", Path(scriptAsset->mFilename).Filename());
-                            ImGui::Button(scriptText.c_str(), ImVec2(size.x - kLabelWidth, 0));
+                            auto UpdateScript = [this, &scriptAsset](const AssetDescriptor& descriptor) {
+                                const auto oldId = scriptAsset->mId;
+                                if (oldId == descriptor.mId) { return; }
+
+                                // TODO: Implement
+
+                                X_LOG_DEBUG("Old script ID: %llu", oldId);
+                                X_LOG_DEBUG("New script ID: %llu", descriptor.mId);
+                            };
+
+                            static char buffer[256] {0};
+                            const auto currentValue = Path(scriptAsset->mFilename).Filename();
+                            std::strcpy(buffer, currentValue.c_str());
+
+                            if (AssetDropTarget("##script_drop_target",
+                                                buffer,
+                                                sizeof(buffer),
+                                                selectAssetIcon,
+                                                X_DROP_TARGET_SCRIPT,
+                                                UpdateScript)) {}
                         }
                     }
                 }
@@ -1098,7 +1148,7 @@ namespace x {
                                         case kAssetType_Script:
                                             return X_DROP_TARGET_SCRIPT;
                                         default:
-                                            return nullptr;
+                                            return "\0";
                                     }
                                 };
 
@@ -1580,6 +1630,11 @@ namespace x {
         result = mTextureManager.LoadFromMemory(STOPICON_BYTES, 24, 24, 4, "StopIcon");
         if (!result) {
             X_LOG_ERROR("Failed to load Stop icon");
+            return false;
+        }
+        result = mTextureManager.LoadFromMemory(SELECTASSETICON_BYTES, 24, 24, 4, "SelectAssetIcon");
+        if (!result) {
+            X_LOG_ERROR("Failed to load SelectAsset icon");
             return false;
         }
 

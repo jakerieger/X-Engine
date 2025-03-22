@@ -121,7 +121,7 @@ namespace x {
         void SceneSettingsView();
 
         void EntitiesView();
-        void EntitiesPropertiesView();
+        void EntityComponentsView();
         void ViewportView();
         void AssetsView();
         void LogView();

@@ -89,7 +89,7 @@ namespace x {
     bool AssetDropTarget(const char* label,
                          char* buf,
                          size_t bufSize,
-                         const char* btnLabel,
+                         ImTextureID btnIcon,
                          const char* payloadType,
                          const std::function<void(const AssetDescriptor&)>& callback,
                          ImGuiInputTextFlags flags) {
@@ -97,9 +97,12 @@ namespace x {
         ImGui::BeginGroup();
 
         // Calculate sizes
-        float availWidth        = ImGui::GetContentRegionAvail().x;
-        const float buttonWidth = ImGui::CalcTextSize(btnLabel).x + ImGui::GetStyle().FramePadding.x * 2.0f;
-        const float inputWidth  = availWidth - buttonWidth - ImGui::GetStyle().ItemInnerSpacing.x;
+        float availWidth       = ImGui::GetContentRegionAvail().x;
+        float lineHeight       = ImGui::GetTextLineHeight();
+        float padding          = ImGui::GetStyle().FramePadding.y * 2.0f;
+        float inputHeight      = lineHeight + padding;
+        float buttonWidth      = inputHeight;
+        const float inputWidth = availWidth - buttonWidth - ImGui::GetStyle().ItemInnerSpacing.x;
 
         // Use InputText directly with its own width
         ImGui::PushItemWidth(inputWidth);
@@ -120,7 +123,8 @@ namespace x {
 
         // Add button on the same line
         ImGui::SameLine();
-        bool buttonPressed = ImGui::Button(btnLabel);
+        const auto btnId         = std::format("{}_button", label);
+        const bool buttonPressed = ImGui::ImageButton(btnId.c_str(), btnIcon, ImVec2(inputHeight - 8, inputHeight - 8));
 
         // End the group
         ImGui::EndGroup();
