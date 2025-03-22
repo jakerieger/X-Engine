@@ -107,9 +107,10 @@ namespace x {
 
         // Check for drag-drop on the input field
         bool dragDropHandled = false;
-        if (ImGui::IsItemHovered() && ImGui::BeginDragDropTarget()) {
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) && ImGui::BeginDragDropTarget()) {
             const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(payloadType);
-            if (payload != nullptr) { dragDropHandled = true; }
+            if (payload) { dragDropHandled = true; }
+
             ImGui::EndDragDropTarget();
         }
 

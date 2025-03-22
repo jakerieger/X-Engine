@@ -1073,45 +1073,28 @@ namespace x {
                             }
                             ImGui::PopStyleVar(2);
 
-                            // Drag Drop Source
-                            if (ImGui::BeginDragDropSource()) {
-                                static u64 assetId = asset.mId;
-                                if (!ImGui::SetDragDropPayload(X_DROP_TARGET_MESH, &assetId, sizeof(assetId))) {
-                                    X_LOG_ERROR("Failed to set drag drop payload.");
-                                }
+                            // DRAG DROP
+                            if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+                                auto GetPayloadType = [](const u64 id) -> const char* {
+                                    const auto type = AssetDescriptor::GetTypeFromId(id);
+                                    switch (type) {
+                                        case kAssetType_Mesh:
+                                            return X_DROP_TARGET_MESH;
+                                        case kAssetType_Texture:
+                                            return X_DROP_TARGET_TEXTURE;
+                                        case kAssetType_Material:
+                                            return X_DROP_TARGET_MATERIAL;
+                                        case kAssetType_Audio:
+                                            return X_DROP_TARGET_AUDIO;
+                                        case kAssetType_Script:
+                                            return X_DROP_TARGET_SCRIPT;
+                                        default:
+                                            return nullptr;
+                                    }
+                                };
 
-                                // Show a preview of what's being dragged
-                                ImGui::Text("%s", Path(asset.mFilename).Filename().c_str());
-
-                                // If you want to show the thumbnail in the drag preview
-                                // if (asset.GetTypeFromId() == kAssetType_Texture) {
-                                //     auto thumbnail = mTextureManager.GetTexture(std::to_string(asset.mId));
-                                //     if (thumbnail.has_value()) {
-                                //         ImGui::Image(SrvAsTextureId(thumbnail->mShaderResourceView.Get()),
-                                //                      ImVec2(50, 50)  // Small preview size
-                                //         );
-                                //     }
-                                // } else {
-                                //     // For non-texture assets, show the appropriate icon (smaller)
-                                //     ID3D11ShaderResourceView* iconSrv {nullptr};
-                                //
-                                //     // Get the appropriate icon based on asset type
-                                //     switch (asset.GetTypeFromId()) {
-                                //         case kAssetType_Audio: {
-                                //             auto icon = mTextureManager.GetTexture("AudioIcon");
-                                //             if (icon.has_value()) iconSrv = icon->mShaderResourceView.Get();
-                                //         } break;
-                                //         case kAssetType_Material: {
-                                //             auto icon = mTextureManager.GetTexture("MaterialIcon");
-                                //             if (icon.has_value()) iconSrv = icon->mShaderResourceView.Get();
-                                //         } break;
-                                //         // ... other asset types
-                                //         default:
-                                //             break;
-                                //     }
-                                //
-                                //     if (iconSrv) { ImGui::Image(SrvAsTextureId(iconSrv), ImVec2(50, 50)); }
-                                // }
+                                ImGui::SetDragDropPayload(GetPayloadType(asset.mId), &asset.mId, sizeof(u64));
+                                ImGui::Text("%s", asset.mFilename.c_str());
 
                                 ImGui::EndDragDropSource();
                             }
