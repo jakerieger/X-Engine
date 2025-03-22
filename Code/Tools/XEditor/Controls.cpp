@@ -5,7 +5,10 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include "Controls.hpp"
+
+#include "Common/FileDialogs.hpp"
 #include "Common/Types.hpp"
+#include "Engine/EngineCommon.hpp"
 
 ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) {
     return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y);
@@ -83,8 +86,12 @@ namespace x {
         return pressed;
     }
 
-    bool
-    AssetDropTarget(const char* label, char* buf, size_t bufSize, const char* btnLabel, ImGuiInputTextFlags flags) {
+    bool AssetDropTarget(const char* label,
+                         char* buf,
+                         size_t bufSize,
+                         const char* btnLabel,
+                         const char* payloadType,
+                         ImGuiInputTextFlags flags) {
         // Begin a named group to keep the input and button together
         ImGui::BeginGroup();
 
@@ -101,10 +108,8 @@ namespace x {
         // Check for drag-drop on the input field
         bool dragDropHandled = false;
         if (ImGui::IsItemHovered() && ImGui::BeginDragDropTarget()) {
-            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("X_DNDTYPE_ASSET")) {
-                // TODO: Handle asset drop
-                dragDropHandled = true;
-            }
+            const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(payloadType);
+            if (payload != nullptr) { dragDropHandled = true; }
             ImGui::EndDragDropTarget();
         }
 

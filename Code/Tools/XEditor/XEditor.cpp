@@ -884,7 +884,16 @@ namespace x {
                             static char buffer[256] {0};
                             const auto currentValue = Path(modelAsset->mFilename).Filename();
                             std::strcpy(buffer, currentValue.c_str());
-                            if (AssetDropTarget("##model_drop_target", buffer, sizeof(buffer), "[-]")) {}
+                            if (AssetDropTarget("##model_drop_target",
+                                                buffer,
+                                                sizeof(buffer),
+                                                "[-]",
+                                                X_DROP_TARGET_MESH)) {
+                                Platform::ShowAlert(mHwnd,
+                                                    "Debug",
+                                                    "DragDrop source received",
+                                                    Platform::AlertSeverity::Info);
+                            }
                         }
 
                         ImGui::Text("Material (Asset):");
@@ -1063,6 +1072,49 @@ namespace x {
                                 if (descriptor.GetTypeFromId() == kAssetType_Mesh) { OnSelectedMeshAsset(descriptor); }
                             }
                             ImGui::PopStyleVar(2);
+
+                            // Drag Drop Source
+                            if (ImGui::BeginDragDropSource()) {
+                                static u64 assetId = asset.mId;
+                                if (!ImGui::SetDragDropPayload(X_DROP_TARGET_MESH, &assetId, sizeof(assetId))) {
+                                    X_LOG_ERROR("Failed to set drag drop payload.");
+                                }
+
+                                // Show a preview of what's being dragged
+                                ImGui::Text("%s", Path(asset.mFilename).Filename().c_str());
+
+                                // If you want to show the thumbnail in the drag preview
+                                // if (asset.GetTypeFromId() == kAssetType_Texture) {
+                                //     auto thumbnail = mTextureManager.GetTexture(std::to_string(asset.mId));
+                                //     if (thumbnail.has_value()) {
+                                //         ImGui::Image(SrvAsTextureId(thumbnail->mShaderResourceView.Get()),
+                                //                      ImVec2(50, 50)  // Small preview size
+                                //         );
+                                //     }
+                                // } else {
+                                //     // For non-texture assets, show the appropriate icon (smaller)
+                                //     ID3D11ShaderResourceView* iconSrv {nullptr};
+                                //
+                                //     // Get the appropriate icon based on asset type
+                                //     switch (asset.GetTypeFromId()) {
+                                //         case kAssetType_Audio: {
+                                //             auto icon = mTextureManager.GetTexture("AudioIcon");
+                                //             if (icon.has_value()) iconSrv = icon->mShaderResourceView.Get();
+                                //         } break;
+                                //         case kAssetType_Material: {
+                                //             auto icon = mTextureManager.GetTexture("MaterialIcon");
+                                //             if (icon.has_value()) iconSrv = icon->mShaderResourceView.Get();
+                                //         } break;
+                                //         // ... other asset types
+                                //         default:
+                                //             break;
+                                //     }
+                                //
+                                //     if (iconSrv) { ImGui::Image(SrvAsTextureId(iconSrv), ImVec2(50, 50)); }
+                                // }
+
+                                ImGui::EndDragDropSource();
+                            }
 
                             // Calculate image position (centered in the cell)
                             f32 imageStartX = ImGui::GetItemRectMin().x + (padding * 1.5f);
