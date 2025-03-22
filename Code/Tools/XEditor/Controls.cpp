@@ -7,6 +7,10 @@
 #include "Controls.hpp"
 #include "Common/Types.hpp"
 
+ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) {
+    return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y);
+}
+
 namespace x {
     bool SelectableWithHeaders(const char* id,
                                const char* header,
@@ -77,6 +81,41 @@ namespace x {
         ImGui::PopStyleColor();
 
         return pressed;
+    }
+
+    bool
+    AssetDropTarget(const char* label, char* buf, size_t bufSize, const char* btnLabel, ImGuiInputTextFlags flags) {
+        // Begin a named group to keep the input and button together
+        ImGui::BeginGroup();
+
+        // Calculate sizes
+        float availWidth        = ImGui::GetContentRegionAvail().x;
+        const float buttonWidth = ImGui::CalcTextSize(btnLabel).x + ImGui::GetStyle().FramePadding.x * 2.0f;
+        const float inputWidth  = availWidth - buttonWidth - ImGui::GetStyle().ItemInnerSpacing.x;
+
+        // Use InputText directly with its own width
+        ImGui::PushItemWidth(inputWidth);
+        bool valueChanged = ImGui::InputText(label, buf, bufSize, flags);
+        ImGui::PopItemWidth();
+
+        // Check for drag-drop on the input field
+        bool dragDropHandled = false;
+        if (ImGui::IsItemHovered() && ImGui::BeginDragDropTarget()) {
+            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("X_DNDTYPE_ASSET")) {
+                // TODO: Handle asset drop
+                dragDropHandled = true;
+            }
+            ImGui::EndDragDropTarget();
+        }
+
+        // Add button on the same line
+        ImGui::SameLine();
+        bool buttonPressed = ImGui::Button(btnLabel);
+
+        // End the group
+        ImGui::EndGroup();
+
+        return valueChanged || buttonPressed || dragDropHandled;
     }
 
     void CenteredText(const char* text, const ImVec2& containerPos, const ImVec2& containerSize) {

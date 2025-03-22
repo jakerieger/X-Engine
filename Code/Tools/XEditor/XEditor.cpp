@@ -875,12 +875,16 @@ namespace x {
                             X_LOG_ERROR("No model asset found for entity '%s'",
                                         state.GetEntities().at(sSelectedEntity).c_str());
                         } else {
-                            const str modelText = std::format("{} (Change)", Path(modelAsset->mFilename).Filename());
-                            if (ImGui::Button(modelText.c_str(), ImVec2(size.x - kLabelWidth, 0))) {
-                                selectAssetOpen = true;
-                                if (selectedAsset.mId != 0) model->SetModelId(selectedAsset.mId);
-                                // TODO: Handle actually switching the asset on the component
-                            }
+                            // const str modelText = std::format("{} (Change)", Path(modelAsset->mFilename).Filename());
+                            // if (ImGui::Button(modelText.c_str(), ImVec2(size.x - kLabelWidth, 0))) {
+                            //     selectAssetOpen = true;
+                            //     if (selectedAsset.mId != 0) model->SetModelId(selectedAsset.mId);
+                            //     // TODO: Handle actually switching the asset on the component
+                            // }
+                            static char buffer[256] {0};
+                            const auto currentValue = Path(modelAsset->mFilename).Filename();
+                            std::strcpy(buffer, currentValue.c_str());
+                            if (AssetDropTarget("##model_drop_target", buffer, sizeof(buffer), "[-]")) {}
                         }
 
                         ImGui::Text("Material (Asset):");
