@@ -4,8 +4,10 @@
 
 #pragma once
 
+#include <functional>
 #include <imgui.h>
 #include "Common/Types.hpp"
+#include "XPak/AssetDescriptor.hpp"
 
 #define X_DROP_TARGET_MESH "DropTarget_Mesh"
 #define X_DROP_TARGET_MATERIAL "DropTarget_Material"
@@ -27,6 +29,7 @@ namespace x {
                          size_t bufSize,
                          const char* btnLabel,
                          const char* payloadType,
+                         const std::function<void(const AssetDescriptor&)>& callback,
                          ImGuiInputTextFlags flags = ImGuiInputTextFlags_ReadOnly);
 
     void CenteredText(const char* text, const ImVec2& containerPos, const ImVec2& containerSize);

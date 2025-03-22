@@ -91,6 +91,7 @@ namespace x {
                          size_t bufSize,
                          const char* btnLabel,
                          const char* payloadType,
+                         const std::function<void(const AssetDescriptor&)>& callback,
                          ImGuiInputTextFlags flags) {
         // Begin a named group to keep the input and button together
         ImGui::BeginGroup();
@@ -109,7 +110,10 @@ namespace x {
         bool dragDropHandled = false;
         if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) && ImGui::BeginDragDropTarget()) {
             const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(payloadType);
-            if (payload) { dragDropHandled = true; }
+            if (payload) {
+                dragDropHandled = true;
+                callback(*(AssetDescriptor*)payload->Data);
+            }
 
             ImGui::EndDragDropTarget();
         }

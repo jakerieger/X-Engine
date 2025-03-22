@@ -875,25 +875,34 @@ namespace x {
                             X_LOG_ERROR("No model asset found for entity '%s'",
                                         state.GetEntities().at(sSelectedEntity).c_str());
                         } else {
-                            // const str modelText = std::format("{} (Change)", Path(modelAsset->mFilename).Filename());
-                            // if (ImGui::Button(modelText.c_str(), ImVec2(size.x - kLabelWidth, 0))) {
-                            //     selectAssetOpen = true;
-                            //     if (selectedAsset.mId != 0) model->SetModelId(selectedAsset.mId);
-                            //     // TODO: Handle actually switching the asset on the component
-                            // }
                             static char buffer[256] {0};
                             const auto currentValue = Path(modelAsset->mFilename).Filename();
                             std::strcpy(buffer, currentValue.c_str());
+
+                            auto UpdateMesh = [this, &model](const AssetDescriptor& descriptor) {
+                                // TODO: Update mesh
+                                const auto oldId = model->GetModelId();
+                                if (oldId == descriptor.mId) { return; }
+
+                                auto& resourceManager = mGame.GetActiveScene()->GetResourceManager();
+                                if (resourceManager.LoadResource<Model>(descriptor.mId)) {
+                                    auto modelResource = resourceManager.FetchResource<Model>(descriptor.mId);
+                                    if (modelResource.has_value()) {
+                                        model->SetModelHandle(*modelResource);
+                                        model->SetModelId(descriptor.mId);
+                                    }
+                                }
+
+                                X_LOG_WARN("Old model ID: %llu", model->GetModelId());
+                                X_LOG_WARN("New model ID: %llu", descriptor.mId);
+                            };
+
                             if (AssetDropTarget("##model_drop_target",
                                                 buffer,
                                                 sizeof(buffer),
                                                 "[-]",
-                                                X_DROP_TARGET_MESH)) {
-                                Platform::ShowAlert(mHwnd,
-                                                    "Debug",
-                                                    "DragDrop source received",
-                                                    Platform::AlertSeverity::Info);
-                            }
+                                                X_DROP_TARGET_MESH,
+                                                UpdateMesh)) {}
                         }
 
                         ImGui::Text("Material (Asset):");
