@@ -54,9 +54,9 @@ namespace x {
                 // Load model resource
                 if (!mResources.LoadResource<Model>(model.mMeshId)) { X_LOG_FATAL("Failed to load model"); }
                 auto modelHandle = mResources.FetchResource<Model>(model.mMeshId);
-                if (!modelHandle.has_value()) { X_LOG_FATAL("Failed to fetch model resource"); }
+                if (!modelHandle.Valid()) { X_LOG_FATAL("Failed to fetch model resource"); }
 
-                modelComponent.SetModelHandle(*modelHandle)
+                modelComponent.SetModelHandle(modelHandle)
                   .SetCastsShadows(model.mCastsShadows)
                   .SetReceiveShadows(model.mReceiveShadows)
                   .SetModelId(model.mMeshId)
@@ -249,16 +249,14 @@ namespace x {
                     X_LOG_FATAL("Failed to to load texture resource: '%llu'", texture.mAssetId)
                 }
 
-                std::optional<ResourceHandle<Texture2D>> resource =
-                  mResources.FetchResource<Texture2D>(texture.mAssetId);
+                ResourceHandle<Texture2D> resource = mResources.FetchResource<Texture2D>(texture.mAssetId);
 
-                if (!resource.has_value()) { X_LOG_FATAL("Failed to fetch texture resource: '%llu'", texture.mAssetId) }
-                if (!resource->Valid()) { X_LOG_FATAL("Resource invalid: '%llu'", texture.mAssetId) }
+                if (!resource.Valid()) { X_LOG_FATAL("Failed to fetch texture resource: '%llu'", texture.mAssetId) }
 
-                if (texture.mName == "albedo") { mat->SetAlbedoMap(*resource); }
-                if (texture.mName == "metallic") { mat->SetMetallicMap(*resource); }
-                if (texture.mName == "roughness") { mat->SetRoughnessMap(*resource); }
-                if (texture.mName == "normal") { mat->SetNormalMap(*resource); }
+                if (texture.mName == "albedo") { mat->SetAlbedoMap(resource); }
+                if (texture.mName == "metallic") { mat->SetMetallicMap(resource); }
+                if (texture.mName == "roughness") { mat->SetRoughnessMap(resource); }
+                if (texture.mName == "normal") { mat->SetNormalMap(resource); }
             }
         }
 

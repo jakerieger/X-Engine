@@ -24,11 +24,14 @@
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace x {
+#pragma region Global Constants
     static constexpr ImVec2 kViewportSize {1024, 576};  // Default viewport size
     static constexpr f32 kLabelWidth {140.0f};
     static constexpr i32 kNoSelection {-1};
     static constexpr u32 kAssetIconColumnCount {9};
+#pragma endregion
 
+#pragma region UI State
     static EntityId sSelectedEntity {};
     static i32 sSelectedAsset {kNoSelection};
 
@@ -49,7 +52,9 @@ namespace x {
 
         static char CurrentSceneName[256] {0};
     }  // namespace EditorState
+#pragma endregion
 
+#pragma region Helpers
     static ImTextureID SrvAsTextureId(ID3D11ShaderResourceView* srv) {
         return RCAST<ImTextureID>(RCAST<void*>(srv));
     }
@@ -90,7 +95,9 @@ namespace x {
                 return HexToImVec4("ebc388");
         }
     }
+#pragma endregion
 
+#pragma region EditorSession
     bool EditorSession::LoadSession() {
         const auto sessionFile = Path(".session");
         if (sessionFile.Exists()) {
@@ -112,7 +119,9 @@ namespace x {
         out << YAML::EndMap;
         if (!FileWriter::WriteAllText(sessionFile, out.c_str())) { X_LOG_ERROR("Failed to save editor session"); }
     }
+#pragma endregion
 
+#pragma region EditorTheme
     bool EditorTheme::LoadTheme(const str& theme) {
         const auto themeFile = Path("Themes") / (theme + ".yaml");
         if (themeFile.Exists()) {
@@ -231,7 +240,9 @@ namespace x {
         colors[ImGuiCol_ModalWindowDimBg]      = ImVec4(0.00f, 0.00f, 0.00f, 0.0f);
         colors[ImGuiCol_DockingPreview]        = primary;
     }
+#pragma endregion
 
+#pragma region EditorSettings
     bool EditorSettings::LoadSettings() {
         const auto settingsFile = Path("engine.yaml");
         if (settingsFile.Exists()) {
@@ -253,7 +264,9 @@ namespace x {
         out << YAML::EndMap;
         FileWriter::WriteAllText(settingsFile, out.c_str());
     }
+#pragma endregion
 
+#pragma region Window Events
     void XEditor::OnInitialize() {
         SetWindowTitle("XEditor | Untitled");
         this->SetWindowIcon(APPICON);
@@ -270,6 +283,9 @@ namespace x {
         mDefaultFont           = fontAtlas->AddFontDefault();
         mFonts["display"] =
           fontAtlas->AddFontFromMemoryCompressedTTF(Inter_compressed_data, Inter_compressed_size, 16.0f);
+        mFonts["mono"] = fontAtlas->AddFontFromMemoryCompressedTTF(JetBrainsMono_TTF_compressed_data,
+                                                                   JetBrainsMono_TTF_compressed_size,
+                                                                   16.0f);
         fontAtlas->Build();
 
         ImGui_ImplWin32_Init(mHwnd);
@@ -313,18 +329,18 @@ namespace x {
 
         ImGui::PushFont(mFonts["display"]);
 
-        MainMenu();
+        View_MainMenu();
         const f32 menuBarHeight = ImGui::GetFrameHeight();
 
         SetupDockspace(menuBarHeight);
 
-        ViewportView();
-        SceneSettingsView();
-        EntitiesView();
-        EntityComponentsView();
-        AssetsView();
-        LogView();
-        AssetPreviewView();
+        View_Viewport();
+        View_SceneSettings();
+        View_Entities();
+        View_EntityProperties();
+        View_AssetBrowser();
+        View_Log();
+        View_AssetPreview();
 
         ImGui::PopFont();
 
@@ -339,8 +355,10 @@ namespace x {
         if (ImGui_ImplWin32_WndProcHandler(mHwnd, msg, wParam, lParam)) return true;
         return Window::MessageHandler(msg, wParam, lParam);
     }
+#pragma endregion
 
-    void XEditor::SaveSceneAsModal() {
+#pragma region Editor Modals
+    void XEditor::Modal_SaveSceneAs() {
         const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
         if (ImGui::BeginPopupModal("Save Scene As", &mSaveSceneAsOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
@@ -366,13 +384,7 @@ namespace x {
         }
     }
 
-    struct ComponentOption {
-        str mHeader;
-        str mSubHeader;
-        bool mAvailable {false};
-    };
-
-    void XEditor::AddComponentModel() {
+    void XEditor::Modal_AddComponent() {
         auto& state = mGame.GetActiveScene()->GetState();
 
         using ComponentMap             = unordered_map<str, str>;
@@ -439,105 +451,14 @@ namespace x {
         }
     }
 
-    void XEditor::OnOpenProject() {
-        const auto filter = "Project (*.xproj)|*.xproj|";
-        char filename[MAX_PATH];
-        if (Platform::OpenFileDialog(mHwnd,
-                                     GetInitialDirectory().CStr(),
-                                     filter,
-                                     "Open Project File",
-                                     filename,
-                                     MAX_PATH)) {
-            LoadProject(filename);
+    void XEditor::Modal_SelectAsset() {
+        if (ImGui::BeginPopupModal("Select Asset", &mSelectAssetOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::Dummy(ImVec2(300, 400));
+            ImGui::EndPopup();
         }
     }
 
-    void XEditor::OnLoadScene(const str& selectedScene) {
-        mGame.TransitionScene(selectedScene);
-
-        auto& state                 = mGame.GetActiveScene()->GetState();
-        auto& camera                = state.MainCamera;
-        EditorState::CameraPosition = camera.GetPosition();
-        EditorState::CameraEye      = camera.GetEye();
-        EditorState::CameraFovY     = camera.GetFovY();
-        EditorState::CameraNearZ    = camera.GetClipPlanes().first;
-        EditorState::CameraFarZ     = camera.GetClipPlanes().second;
-        // TODO: Remove the mSceneSettings member, its redundant
-        std::strcpy(mSceneSettings.mName, selectedScene.c_str());
-        std::strcpy(EditorState::CurrentSceneName, selectedScene.c_str());
-
-        SetWindowTitle(std::format("XEditor | {}", selectedScene));
-
-        sSelectedEntity = mGame.GetActiveScene()->GetState().GetEntities().begin()->first;
-    }
-
-    void XEditor::OnImportAsset() {
-        const auto filter = "All Supported Asset Files "
-                            "(*.dds;*.glb;*.obj;*.fbx;*.lua;*.material;*.scene;*.wav)|*.dds;*.glb;*.obj;*.fbx;*.lua;*."
-                            "material;*.scene;*.wav|Texture Files (*.dds)|*.dds|Mesh Files "
-                            "(*.glb;*.obj;*.fbx)|*.glb;*.obj;*.fbx|Script Files "
-                            "(*.lua)|*.lua|Material Files (*.material)|*.material|Scene Files (*.scene)|*.scene|Audio "
-                            "Files (*.wav)|*.wav|";
-        char filename[MAX_PATH];
-        Path initialDir = GetInitialDirectory();
-        if (Platform::OpenFileDialog(mHwnd, GetInitialDirectory().CStr(), filter, "Import Asset", filename, MAX_PATH)) {
-            auto assetFile            = Path(filename);
-            const AssetType assetType = GetAssetTypeFromFile(assetFile);
-            const auto rootContentDir = Path(mLoadedProject.mContentDirectory);
-            Path contentDir;
-            switch (assetType) {
-                case kAssetType_Audio:
-                    contentDir = rootContentDir / "Audio";
-                    break;
-                case kAssetType_Material:
-                    contentDir = rootContentDir / "Materials";
-                    break;
-                case kAssetType_Mesh:
-                    contentDir = rootContentDir / "Models";
-                    break;
-                case kAssetType_Scene:
-                    contentDir = rootContentDir / "Scenes";
-                    break;
-                case kAssetType_Script:
-                    contentDir = rootContentDir / "Scripts";
-                    break;
-                case kAssetType_Texture:
-                    contentDir = rootContentDir / "Textures";
-                    break;
-                case kAssetType_Invalid:
-                default:
-                    X_LOG_ERROR("Invalid asset type for file '%s'", filename);
-                    return;
-            }
-
-            if (!contentDir.Exists()) {
-                if (!contentDir.Create()) {
-                    X_LOG_ERROR("Failed to create directory '%s'", filename);
-                    return;
-                }
-            }
-
-            const auto copiedAssetFile = assetFile.Copy(contentDir);
-            assert(copiedAssetFile.Exists());
-
-            if (!AssetGenerator::GenerateAsset(copiedAssetFile, assetType, rootContentDir)) {
-                X_LOG_ERROR("Failed to generate asset '%s'", filename);
-                return;
-            }
-
-            AssetManager::LoadAssets(rootContentDir.Parent());
-            ReloadAssetCache();
-        }
-    }
-
-    void XEditor::ReloadAssetCache() {
-        if (mLoadedProject.mLoaded && mGame.IsInitialized()) {
-            mAssetDescriptors.clear();
-            mAssetDescriptors = AssetManager::GetAssetDescriptors();
-        }
-    }
-
-    void XEditor::SelectSceneModal() {
+    void XEditor::Modal_SelectScene() {
         const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
         if (ImGui::BeginPopupModal("Select Scene", &mSceneSelectorOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
@@ -576,8 +497,10 @@ namespace x {
             ImGui::EndPopup();
         }
     }
+#pragma endregion
 
-    void XEditor::MainMenu() {
+#pragma region Editor Views
+    void XEditor::View_MainMenu() {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
@@ -638,13 +561,13 @@ namespace x {
         ImGui::PopStyleVar();
 
         if (mSceneSelectorOpen) { ImGui::OpenPopup("Select Scene"); }
-        SelectSceneModal();
+        Modal_SelectScene();
 
         if (mSaveSceneAsOpen) { ImGui::OpenPopup("Save Scene As"); }
-        SaveSceneAsModal();
+        Modal_SaveSceneAs();
     }
 
-    void XEditor::SceneSettingsView() {
+    void XEditor::View_SceneSettings() {
         ImGui::Begin("Scene");
         {
             if (mGame.IsInitialized() && mGame.GetActiveScene()->Loaded()) {
@@ -732,7 +655,7 @@ namespace x {
         ImGui::End();
     }
 
-    void XEditor::EntitiesView() {
+    void XEditor::View_Entities() {
         ImGui::Begin("Entities");
         const ImVec2 windowSize = ImGui::GetContentRegionAvail();
 
@@ -800,12 +723,10 @@ namespace x {
         ImGui::End();
     }
 
-    void XEditor::EntityComponentsView() {
-        static bool selectAssetOpen {false};
-        static AssetDescriptor selectedAsset {};
-
-        ImTextureID selectAssetIcon =
+    void XEditor::View_EntityProperties() {
+        static const ImTextureID selectAssetIcon =
           SrvAsTextureId(mTextureManager.GetTexture("SelectAssetIcon").value().mShaderResourceView.Get());
+        static AssetDescriptor selectedAsset {};
 
         ImGui::Begin("Properties");
         const ImVec2 size = ImGui::GetContentRegionAvail();
@@ -897,9 +818,10 @@ namespace x {
 
                                 auto& resourceManager = mGame.GetActiveScene()->GetResourceManager();
                                 if (resourceManager.LoadResource<Model>(descriptor.mId)) {
-                                    auto modelResource = resourceManager.FetchResource<Model>(descriptor.mId);
-                                    if (modelResource.has_value()) {
-                                        model->SetModelHandle(*modelResource);
+                                    const ResourceHandle<Model> modelResource =
+                                      resourceManager.FetchResource<Model>(descriptor.mId);
+                                    if (modelResource.Valid()) {
+                                        model->SetModelHandle(modelResource);
                                         model->SetModelId(descriptor.mId);
                                     }
                                 }
@@ -917,7 +839,10 @@ namespace x {
                                                 sizeof(buffer),
                                                 selectAssetIcon,
                                                 X_DROP_TARGET_MESH,
-                                                UpdateMesh)) {}
+                                                UpdateMesh)) {
+                                mSelectAssetOpen   = true;
+                                mSelectAssetFilter = kAssetType_Mesh;
+                            }
                         }
 
                         ImGui::Text("Material (Asset):");
@@ -950,7 +875,10 @@ namespace x {
                                                 sizeof(buffer),
                                                 selectAssetIcon,
                                                 X_DROP_TARGET_MATERIAL,
-                                                UpdateMaterial)) {}
+                                                UpdateMaterial)) {
+                                mSelectAssetOpen   = true;
+                                mSelectAssetFilter = kAssetType_Material;
+                            }
                         }
 
                         ImGui::Text("Casts Shadows:");
@@ -997,7 +925,10 @@ namespace x {
                                                 sizeof(buffer),
                                                 selectAssetIcon,
                                                 X_DROP_TARGET_SCRIPT,
-                                                UpdateScript)) {}
+                                                UpdateScript)) {
+                                mSelectAssetOpen   = true;
+                                mSelectAssetFilter = kAssetType_Script;
+                            }
                         }
                     }
                 }
@@ -1011,18 +942,14 @@ namespace x {
         }
         ImGui::End();
 
-        if (selectAssetOpen) { ImGui::OpenPopup("Select Asset"); }
         if (mAddComponentOpen) { ImGui::OpenPopup("Add Component"); }
+        if (mSelectAssetOpen) { ImGui::OpenPopup("Select Asset"); }
 
-        if (ImGui::BeginPopupModal("Select Asset", &selectAssetOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImGui::Dummy(ImVec2(380, 500));
-            ImGui::EndPopup();
-        }
-
-        AddComponentModel();
+        Modal_AddComponent();
+        Modal_SelectAsset();
     }
 
-    void XEditor::ViewportView() {
+    void XEditor::View_Viewport() {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
         ImGui::Begin("Viewport");
         {
@@ -1048,21 +975,7 @@ namespace x {
         ImGui::PopStyleVar();
     }
 
-    void XEditor::OnSelectedMeshAsset(const AssetDescriptor& descriptor) {
-        if (mEditorResources.LoadResource<Model>(descriptor.mId)) {
-            const std::optional<ResourceHandle<Model>> modelResource =
-              mEditorResources.FetchResource<Model>(descriptor.mId);
-            if (modelResource.has_value()) {
-                auto model = make_unique<ModelComponent>();
-                model->SetModelHandle(*modelResource).SetReceiveShadows(false).SetCastsShadows(false);
-                mMeshPreviewer.SetModel(std::move(model));
-            }
-        } else {
-            X_LOG_ERROR("Failed to load mesh asset");
-        }
-    }
-
-    void XEditor::AssetsView() {
+    void XEditor::View_AssetBrowser() {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
         ImGui::Begin("Assets");
         {
@@ -1245,7 +1158,7 @@ namespace x {
         ImGui::PopStyleVar();
     }
 
-    void XEditor::LogView() {
+    void XEditor::View_Log() {
         static bool showInfo {false};
         static bool showWarn {true};
         static bool showError {true};
@@ -1316,7 +1229,7 @@ namespace x {
         ImGui::End();
     }
 
-    void XEditor::AssetPreviewView() {
+    void XEditor::View_AssetPreview() {
         ImGui::Begin("Asset Preview", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
         {
             if (sSelectedAsset != kNoSelection) {
@@ -1351,7 +1264,147 @@ namespace x {
         }
         ImGui::End();
     }
+#pragma endregion
 
+#pragma region Editor Actions
+    void XEditor::OnSelectedMeshAsset(const AssetDescriptor& descriptor) {
+        if (mEditorResources.LoadResource<Model>(descriptor.mId)) {
+            const std::optional<ResourceHandle<Model>> modelResource =
+              mEditorResources.FetchResource<Model>(descriptor.mId);
+            if (modelResource.has_value()) {
+                auto model = make_unique<ModelComponent>();
+                model->SetModelHandle(*modelResource).SetReceiveShadows(false).SetCastsShadows(false);
+                mMeshPreviewer.SetModel(std::move(model));
+            }
+        } else {
+            X_LOG_ERROR("Failed to load mesh asset");
+        }
+    }
+
+    void XEditor::OnSaveScene(const char* name) {
+        const auto* scene = mGame.GetActiveScene();
+        SceneDescriptor descriptor;
+        SceneParser::StateToDescriptor(scene->GetState(), descriptor, name == nullptr ? scene->GetName() : name);
+        if (descriptor.IsValid()) {
+            if (name == nullptr) {
+                SceneParser::WriteToFile(descriptor, mLoadedScenePath.Str());
+            } else {
+                const str sceneFileName = str(name) + ".scene";
+                const auto scenePath    = Path(mLoadedProject.mContentDirectory) / "Scenes" / sceneFileName;
+                SceneParser::WriteToFile(descriptor, scenePath.Str());
+                AssetGenerator::GenerateAsset(scenePath, kAssetType_Scene, Path(mLoadedProject.mContentDirectory));
+            }
+
+            ReloadAssetCache();
+            mGame.ReloadSceneCache();
+            OnLoadScene(name);
+        } else {
+            Platform::ShowAlert(mHwnd,
+                                "Error saving scene",
+                                "Unable to parse scene state to descriptor.",
+                                Platform::AlertSeverity::Error);
+        }
+    }
+
+    void XEditor::OnAddEntity(const str& name) const {
+        auto& state              = mGame.GetActiveScene()->GetState();
+        const EntityId newEntity = state.CreateEntity(name);
+        if (newEntity.Valid()) { state.AddComponent<TransformComponent>(newEntity); }
+    }
+
+    void XEditor::OnOpenProject() {
+        const auto filter = "Project (*.xproj)|*.xproj|";
+        char filename[MAX_PATH];
+        if (Platform::OpenFileDialog(mHwnd,
+                                     GetInitialDirectory().CStr(),
+                                     filter,
+                                     "Open Project File",
+                                     filename,
+                                     MAX_PATH)) {
+            LoadProject(filename);
+        }
+    }
+
+    void XEditor::OnLoadScene(const str& selectedScene) {
+        mGame.TransitionScene(selectedScene);
+
+        auto& state                 = mGame.GetActiveScene()->GetState();
+        auto& camera                = state.MainCamera;
+        EditorState::CameraPosition = camera.GetPosition();
+        EditorState::CameraEye      = camera.GetEye();
+        EditorState::CameraFovY     = camera.GetFovY();
+        EditorState::CameraNearZ    = camera.GetClipPlanes().first;
+        EditorState::CameraFarZ     = camera.GetClipPlanes().second;
+        // TODO: Remove the mSceneSettings member, its redundant
+        std::strcpy(mSceneSettings.mName, selectedScene.c_str());
+        std::strcpy(EditorState::CurrentSceneName, selectedScene.c_str());
+
+        SetWindowTitle(std::format("XEditor | {}", selectedScene));
+
+        sSelectedEntity = mGame.GetActiveScene()->GetState().GetEntities().begin()->first;
+    }
+
+    void XEditor::OnImportAsset() {
+        const auto filter = "All Supported Asset Files "
+                            "(*.dds;*.glb;*.obj;*.fbx;*.lua;*.material;*.scene;*.wav)|*.dds;*.glb;*.obj;*.fbx;*.lua;*."
+                            "material;*.scene;*.wav|Texture Files (*.dds)|*.dds|Mesh Files "
+                            "(*.glb;*.obj;*.fbx)|*.glb;*.obj;*.fbx|Script Files "
+                            "(*.lua)|*.lua|Material Files (*.material)|*.material|Scene Files (*.scene)|*.scene|Audio "
+                            "Files (*.wav)|*.wav|";
+        char filename[MAX_PATH];
+        Path initialDir = GetInitialDirectory();
+        if (Platform::OpenFileDialog(mHwnd, GetInitialDirectory().CStr(), filter, "Import Asset", filename, MAX_PATH)) {
+            auto assetFile            = Path(filename);
+            const AssetType assetType = GetAssetTypeFromFile(assetFile);
+            const auto rootContentDir = Path(mLoadedProject.mContentDirectory);
+            Path contentDir;
+            switch (assetType) {
+                case kAssetType_Audio:
+                    contentDir = rootContentDir / "Audio";
+                    break;
+                case kAssetType_Material:
+                    contentDir = rootContentDir / "Materials";
+                    break;
+                case kAssetType_Mesh:
+                    contentDir = rootContentDir / "Models";
+                    break;
+                case kAssetType_Scene:
+                    contentDir = rootContentDir / "Scenes";
+                    break;
+                case kAssetType_Script:
+                    contentDir = rootContentDir / "Scripts";
+                    break;
+                case kAssetType_Texture:
+                    contentDir = rootContentDir / "Textures";
+                    break;
+                case kAssetType_Invalid:
+                default:
+                    X_LOG_ERROR("Invalid asset type for file '%s'", filename);
+                    return;
+            }
+
+            if (!contentDir.Exists()) {
+                if (!contentDir.Create()) {
+                    X_LOG_ERROR("Failed to create directory '%s'", filename);
+                    return;
+                }
+            }
+
+            const auto copiedAssetFile = assetFile.Copy(contentDir);
+            assert(copiedAssetFile.Exists());
+
+            if (!AssetGenerator::GenerateAsset(copiedAssetFile, assetType, rootContentDir)) {
+                X_LOG_ERROR("Failed to generate asset '%s'", filename);
+                return;
+            }
+
+            AssetManager::LoadAssets(rootContentDir.Parent());
+            ReloadAssetCache();
+        }
+    }
+#pragma endregion
+
+#pragma region Editor Utils
     void XEditor::GenerateAssetThumbnails() {
         const auto& assets = mAssetDescriptors;
         for (const auto& asset : assets) {
@@ -1410,37 +1463,6 @@ namespace x {
         OnLoadScene(mLoadedProject.mStartupScene);
     }
 
-    void XEditor::OnSaveScene(const char* name) {
-        const auto* scene = mGame.GetActiveScene();
-        SceneDescriptor descriptor;
-        SceneParser::StateToDescriptor(scene->GetState(), descriptor, name == nullptr ? scene->GetName() : name);
-        if (descriptor.IsValid()) {
-            if (name == nullptr) {
-                SceneParser::WriteToFile(descriptor, mLoadedScenePath.Str());
-            } else {
-                const str sceneFileName = str(name) + ".scene";
-                const auto scenePath    = Path(mLoadedProject.mContentDirectory) / "Scenes" / sceneFileName;
-                SceneParser::WriteToFile(descriptor, scenePath.Str());
-                AssetGenerator::GenerateAsset(scenePath, kAssetType_Scene, Path(mLoadedProject.mContentDirectory));
-            }
-
-            ReloadAssetCache();
-            mGame.ReloadSceneCache();
-            OnLoadScene(name);
-        } else {
-            Platform::ShowAlert(mHwnd,
-                                "Error saving scene",
-                                "Unable to parse scene state to descriptor.",
-                                Platform::AlertSeverity::Error);
-        }
-    }
-
-    void XEditor::OnAddEntity(const str& name) const {
-        auto& state              = mGame.GetActiveScene()->GetState();
-        const EntityId newEntity = state.CreateEntity(name);
-        if (newEntity.Valid()) { state.AddComponent<TransformComponent>(newEntity); }
-    }
-
     Path XEditor::GetInitialDirectory() const {
         if (mLoadedProject.mLoaded) {
             return Path(mLoadedProject.mContentDirectory).Parent();
@@ -1467,6 +1489,13 @@ namespace x {
         }
 
         return kAssetType_Invalid;
+    }
+
+    void XEditor::ReloadAssetCache() {
+        if (mLoadedProject.mLoaded && mGame.IsInitialized()) {
+            mAssetDescriptors.clear();
+            mAssetDescriptors = AssetManager::GetAssetDescriptors();
+        }
     }
 
     void XEditor::SetupDockspace(const f32 yOffset) {
@@ -1640,4 +1669,5 @@ namespace x {
 
         return true;
     }
+#pragma endregion
 }  // namespace x

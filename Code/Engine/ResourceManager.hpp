@@ -122,11 +122,9 @@ namespace x {
         }
 
         template<typename T>
-        std::optional<ResourceHandle<T>> FetchResource(const u64 id) {
+        ResourceHandle<T> FetchResource(const u64 id) {
             auto it = mResources.find(id);
-            if (it == mResources.end()) {
-                return {};  // nullopt
-            }
+            if (it == mResources.end()) { return ResourceHandle<T> {}; }
 
             Resource<T>* typedResource = DCAST<Resource<T>*>(it->second);
             if (!typedResource) { return {}; }

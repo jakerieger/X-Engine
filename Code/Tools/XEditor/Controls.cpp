@@ -106,17 +106,13 @@ namespace x {
 
         // Use InputText directly with its own width
         ImGui::PushItemWidth(inputWidth);
-        bool valueChanged = ImGui::InputText(label, buf, bufSize, flags);
+        ImGui::InputText(label, buf, bufSize, flags);
         ImGui::PopItemWidth();
 
         // Check for drag-drop on the input field
-        bool dragDropHandled = false;
         if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) && ImGui::BeginDragDropTarget()) {
             const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(payloadType);
-            if (payload) {
-                dragDropHandled = true;
-                callback(*(AssetDescriptor*)payload->Data);
-            }
+            if (payload) { callback(*(AssetDescriptor*)payload->Data); }
 
             ImGui::EndDragDropTarget();
         }
@@ -129,7 +125,7 @@ namespace x {
         // End the group
         ImGui::EndGroup();
 
-        return valueChanged || buttonPressed || dragDropHandled;
+        return buttonPressed;
     }
 
     void CenteredText(const char* text, const ImVec2& containerPos, const ImVec2& containerSize) {

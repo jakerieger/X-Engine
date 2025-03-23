@@ -117,23 +117,25 @@ namespace x {
         void ReloadAssetCache();
 
         // Views/Tabs
-        void MainMenu();
-        void SceneSettingsView();
-
-        void EntitiesView();
-        void EntityComponentsView();
-        void ViewportView();
-        void AssetsView();
-        void LogView();
-        void AssetPreviewView();
+        void View_MainMenu();
+        void View_SceneSettings();
+        void View_Entities();
+        void View_EntityProperties();
+        void View_Viewport();
+        void View_AssetBrowser();
+        void View_Log();
+        void View_AssetPreview();
 
         // Popups
         bool mSceneSelectorOpen {false};
-        void SelectSceneModal();
+        void Modal_SelectScene();
         bool mSaveSceneAsOpen {false};
-        void SaveSceneAsModal();
+        void Modal_SaveSceneAs();
         bool mAddComponentOpen {false};
-        void AddComponentModel();
+        void Modal_AddComponent();
+        bool mSelectAssetOpen {false};
+        AssetType mSelectAssetFilter {kAssetType_Invalid};
+        void Modal_SelectAsset();
 
         // Button/menu actions
         void OnOpenProject();
