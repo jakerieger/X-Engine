@@ -34,7 +34,7 @@ namespace x {
             const auto transforms =
               TransformMatrices(XMMatrixIdentity(), mCamera.GetViewMatrix(), mCamera.GetProjectionMatrix());
 
-            mViewport.Resize(viewportSize.x, viewportSize.y);
+            mViewport.Resize((u32)viewportSize.x, (u32)viewportSize.y);
             mViewport.ClearAll();
             mViewport.BindRenderTarget();
             mViewport.AttachViewport();

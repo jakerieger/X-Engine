@@ -128,14 +128,17 @@ namespace x {
 
         // Popups
         bool mSceneSelectorOpen {false};
-        void Modal_SelectScene();
-        bool mSaveSceneAsOpen {false};
-        void Modal_SaveSceneAs();
-        bool mAddComponentOpen {false};
-        void Modal_AddComponent();
         bool mSelectAssetOpen {false};
         AssetType mSelectAssetFilter {kAssetType_Invalid};
+        bool mAddComponentOpen {false};
+        bool mSaveSceneAsOpen {false};
+        bool mAboutOpen {false};
+
+        void Modal_SelectScene();
+        void Modal_SaveSceneAs();
+        void Modal_AddComponent();
         void Modal_SelectAsset();
+        void Modal_About();
 
         // Button/menu actions
         void OnOpenProject();

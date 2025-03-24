@@ -488,6 +488,14 @@ namespace x {
         }
     }
 
+    void XEditor::Modal_About() {
+        if (ImGui::BeginPopupModal("About", &mAboutOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
+            const auto banner = mTextureManager.GetTexture("BannerLogoNoBg");
+            ImGui::Image(SrvAsTextureId(banner->mShaderResourceView.Get()), ImVec2(600, 225));
+            ImGui::EndPopup();
+        }
+    }
+
     void XEditor::Modal_SelectScene() {
         const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
@@ -582,9 +590,7 @@ namespace x {
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Help")) {
-                if (ImGui::MenuItem("About")) {
-                    // TODO: Open about popup
-                }
+                if (ImGui::MenuItem("About")) { mAboutOpen = true; }
                 ImGui::EndMenu();
             }
             ImGui::EndMainMenuBar();
@@ -596,6 +602,9 @@ namespace x {
 
         if (mSaveSceneAsOpen) { ImGui::OpenPopup("Save Scene As"); }
         Modal_SaveSceneAs();
+
+        if (mAboutOpen) { ImGui::OpenPopup("About"); }
+        Modal_About();
     }
 
     void XEditor::View_SceneSettings() {
@@ -1591,6 +1600,7 @@ namespace x {
 #pragma region Embedded Icon Includes
 #include "AssetBrowserIcons.h"
 #include "EditorIcons.h"
+#include "Logos.h"
 #pragma endregion
 
     bool XEditor::LoadEditorIcons() {
@@ -1695,6 +1705,12 @@ namespace x {
         result = mTextureManager.LoadFromMemory(SELECTASSETICON_BYTES, 24, 24, 4, "SelectAssetIcon");
         if (!result) {
             X_LOG_ERROR("Failed to load SelectAsset icon");
+            return false;
+        }
+
+        result = mTextureManager.LoadFromMemory(BANNER_NOBG_BYTES, 800, 300, 4, "BannerLogoNoBg");
+        if (!result) {
+            X_LOG_ERROR("Failed to load BannerLogoNoBg");
             return false;
         }
 
