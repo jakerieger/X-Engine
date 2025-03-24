@@ -453,7 +453,37 @@ namespace x {
 
     void XEditor::Modal_SelectAsset() {
         if (ImGui::BeginPopupModal("Select Asset", &mSelectAssetOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImGui::Dummy(ImVec2(300, 400));
+            // Collect all available assets of the current filter type
+            vector<AssetDescriptor> availableAssets;
+            std::ranges::copy_if(
+              mAssetDescriptors,
+              std::back_inserter(availableAssets),
+              [this](const AssetDescriptor& desc) { return desc.GetTypeFromId() == mSelectAssetFilter; });
+
+            // Assets list
+            static u64 selectedAssetId {0};
+            for (const auto& desc : availableAssets) {
+                if (SelectableWithHeaders(std::format("##{}_asset_select", desc.mId).c_str(),
+                                          desc.mFilename.c_str(),
+                                          std::to_string(desc.mId).c_str(),
+                                          desc.mId == selectedAssetId,
+                                          0,
+                                          ImVec2(408, 48))) {
+                    selectedAssetId = desc.mId;
+                }
+            }
+
+            // OK and Cancel buttons
+            if (ImGui::Button("OK", ImVec2(200, 0))) {
+                mSelectAssetOpen = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(200, 0))) {
+                mSelectAssetOpen = false;
+                ImGui::CloseCurrentPopup();
+            }
+
             ImGui::EndPopup();
         }
     }
@@ -534,6 +564,7 @@ namespace x {
                 if (ImGui::BeginMenu("Create")) {
                     if (ImGui::MenuItem("Material")) {}
                     if (ImGui::MenuItem("Script")) {}
+                    if (ImGui::MenuItem("Texture")) {}
                     ImGui::EndMenu();
                 }
                 ImGui::Separator();
