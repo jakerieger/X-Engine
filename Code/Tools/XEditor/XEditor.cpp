@@ -489,9 +489,11 @@ namespace x {
     }
 
     void XEditor::Modal_About() {
+        const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
         if (ImGui::BeginPopupModal("About", &mAboutOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
-            const auto banner = mTextureManager.GetTexture("BannerLogoNoBg");
-            ImGui::Image(SrvAsTextureId(banner->mShaderResourceView.Get()), ImVec2(600, 225));
+            const auto banner = mTextureManager.GetTexture("AboutBanner");
+            ImGui::Image(SrvAsTextureId(banner->mShaderResourceView.Get()), ImVec2(800, 300));
             ImGui::EndPopup();
         }
     }
@@ -1708,9 +1710,9 @@ namespace x {
             return false;
         }
 
-        result = mTextureManager.LoadFromMemory(BANNER_NOBG_BYTES, 800, 300, 4, "BannerLogoNoBg");
+        result = mTextureManager.LoadFromMemory(ABOUT_BANNER_BYTES, 800, 300, 4, "AboutBanner");
         if (!result) {
-            X_LOG_ERROR("Failed to load BannerLogoNoBg");
+            X_LOG_ERROR("Failed to load AboutBanner");
             return false;
         }
 
