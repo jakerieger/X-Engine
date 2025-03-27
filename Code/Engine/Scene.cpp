@@ -120,17 +120,16 @@ namespace x {
         static f32 sceneTime {0.f};
         sceneTime += deltaTime;
 
-        const auto& camera    = mState.GetMainCamera();
-        const auto clipPlanes = camera.GetClipPlanes();
+        const auto* camera = mState.GetMainCamera();
 
         // Calculate LVP
         // TODO: I only need to update this if either the light direction or the screen size changes; this can be
         // optimized!
         const auto lvp                             = CalculateLightViewProjection(mState.GetLightState().mSun,
                                                       5.0f,  // TODO: this needs tweaking depending on the light height
-                                                      camera.GetAspectRatio(),
-                                                      clipPlanes.first,
-                                                      clipPlanes.second);
+                                                      camera->GetAspectRatio(),
+                                                      camera->GetNearPlane(),
+                                                      camera->GetFarPlane());
         mState.GetLightState().mSun.mLightViewProj = XMMatrixTranspose(lvp);
 
         // Update scene entities
@@ -165,7 +164,7 @@ namespace x {
 
         // Sort transparent objects by distance from camera
         if (mTransparentObjects.size() > 1) {
-            const auto cameraPos = mState.GetMainCamera().GetPosition();
+            const auto cameraPos = mState.GetMainCamera()->GetPosition();
             std::ranges::sort(mTransparentObjects,
                               [cameraPos](const ModelTransformPair& lhs, const ModelTransformPair& rhs) {
                                   const auto& lhsTransform = lhs.second;
@@ -191,24 +190,24 @@ namespace x {
     void Scene::DrawOpaque() {
         for (const auto [model, transform] : mOpaqueObjects) {
             Matrix world    = transform->GetTransformMatrix();
-            auto view       = mState.GetMainCamera().GetViewMatrix();
-            auto projection = mState.GetMainCamera().GetProjectionMatrix();
+            auto view       = mState.GetMainCamera()->GetViewMatrix();
+            auto projection = mState.GetMainCamera()->GetProjectionMatrix();
             model->Draw(mContext,
                         {world, view, projection},
                         mState.GetLightState(),
-                        mState.GetMainCamera().GetPosition());
+                        mState.GetMainCamera()->GetPosition());
         }
     }
 
     void Scene::DrawTransparent() {
         for (const auto [model, transform] : mTransparentObjects) {
             Matrix world    = transform->GetTransformMatrix();
-            auto view       = mState.GetMainCamera().GetViewMatrix();
-            auto projection = mState.GetMainCamera().GetProjectionMatrix();
+            auto view       = mState.GetMainCamera()->GetViewMatrix();
+            auto projection = mState.GetMainCamera()->GetProjectionMatrix();
             model->Draw(mContext,
                         {world, view, projection},
                         mState.GetLightState(),
-                        mState.GetMainCamera().GetPosition());
+                        mState.GetMainCamera()->GetPosition());
         }
     }
 
@@ -233,7 +232,7 @@ namespace x {
     }
 
     void Scene::RegisterVolatiles(vector<Volatile*>& volatiles) {
-        volatiles.push_back(&mState.GetMainCamera());
+        volatiles.push_back(mState.GetMainCamera());
     }
 
     void Scene::LoadMaterial(const MaterialDescriptor& material, ModelComponent& modelComponent) {

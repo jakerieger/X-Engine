@@ -59,6 +59,7 @@ namespace x {
         TransformDescriptor mTransform;
         std::optional<ModelDescriptor> mModel {std::nullopt};
         std::optional<BehaviorDescriptor> mBehavior {std::nullopt};
+        std::optional<CameraDescriptor> mCamera {std::nullopt};
     };
 
     struct SceneDescriptor {

@@ -2,12 +2,6 @@ version: '1.0'
 name: Monke
 description: A basic demo scene containing a floor and rotating Suzanne model.
 world:
-  camera:
-    position: [ 0, 1, -5 ]
-    eye: [ 0, 0, 0 ]
-    fovY: 60
-    nearZ: 0.1
-    farZ: 1000
   lights:
     sun:
       enabled: true

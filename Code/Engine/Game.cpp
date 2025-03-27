@@ -17,7 +17,7 @@ namespace x {
         mClock.Tick();
 
         if ((!mIsPaused || !mIsFocused) && !paused) {
-            auto& camera = mActiveScene->GetState().GetMainCamera();
+            auto* camera = mActiveScene->GetState().GetMainCamera();
 
             if (mMouse.IsCaptured()) {
                 const auto deltaX = mInput.GetMouseDeltaX();
@@ -27,16 +27,16 @@ namespace x {
                     constexpr f32 mouseSensitivity = 0.001f;
                     const auto deltaYaw            = deltaX * mouseSensitivity;
                     const auto deltaPitch          = deltaY * mouseSensitivity;
-                    camera.Rotate(deltaPitch, deltaYaw);
+                    camera->Rotate(deltaPitch, deltaYaw);
                 }
 
                 mInput.ResetMouseDeltas();
             }
 
-            if (mInput.GetKeyDown(KeyCode::D)) { camera.MoveRight(0.1f); }
-            if (mInput.GetKeyDown(KeyCode::A)) { camera.MoveRight(-0.1f); }
-            if (mInput.GetKeyDown(KeyCode::W)) { camera.MoveForward(0.1f); }
-            if (mInput.GetKeyDown(KeyCode::S)) { camera.MoveForward(-0.1f); }
+            if (mInput.GetKeyDown(KeyCode::D)) { camera->MoveRight(0.1f); }
+            if (mInput.GetKeyDown(KeyCode::A)) { camera->MoveRight(-0.1f); }
+            if (mInput.GetKeyDown(KeyCode::W)) { camera->MoveForward(0.1f); }
+            if (mInput.GetKeyDown(KeyCode::S)) { camera->MoveForward(-0.1f); }
 
             mActiveScene->Update(CAST<f32>(mClock.GetDeltaTime()));
         }

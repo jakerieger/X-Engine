@@ -172,10 +172,12 @@ namespace x {
         }
 
         X_NODISCARD CameraComponent* GetMainCamera() {
+            if (!mMainCamera) { X_LOG_WARN("Main camera nullptr"); }
             return mMainCamera;
         }
 
         X_NODISCARD CameraComponent* GetMainCamera() const {
+            if (!mMainCamera) { X_LOG_WARN("Main camera nullptr"); }
             return mMainCamera;
         }
 

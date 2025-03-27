@@ -37,14 +37,14 @@ namespace x {
     void SceneParser::StateToDescriptor(const SceneState& state, SceneDescriptor& descriptor, const str& sceneName) {
         descriptor.mName = sceneName;
 
-        const auto* camera = state.GetMainCamera();
-        CameraDescriptor cameraDescriptor;
-        cameraDescriptor.mLookAt   = {0.0f, 0.0f, 0.0f};  // TODO: Disabled for now
-        cameraDescriptor.mPosition = camera->GetPosition();
-        cameraDescriptor.mFovY     = camera->GetFOVDegrees();
-        cameraDescriptor.mNearZ    = camera->GetNearPlane();
-        cameraDescriptor.mFarZ     = camera->GetFarPlane();
-        descriptor.mWorld.mCamera  = cameraDescriptor;
+        // const auto* camera = state.GetMainCamera();
+        // CameraDescriptor cameraDescriptor;
+        // cameraDescriptor.mLookAt   = {0.0f, 0.0f, 0.0f};  // TODO: Disabled for now
+        // cameraDescriptor.mPosition = camera->GetPosition();
+        // cameraDescriptor.mFovY     = camera->GetFOVDegrees();
+        // cameraDescriptor.mNearZ    = camera->GetNearPlane();
+        // cameraDescriptor.mFarZ     = camera->GetFarPlane();
+        // descriptor.mWorld.mCamera  = cameraDescriptor;
 
         const auto& sun = state.GetLightState().mSun;
         SunDescriptor sunDescriptor;
@@ -64,6 +64,7 @@ namespace x {
             const TransformComponent* transform = state.GetComponent<TransformComponent>(id);
             const ModelComponent* model         = state.GetComponent<ModelComponent>(id);
             const BehaviorComponent* behavior   = state.GetComponent<BehaviorComponent>(id);
+            const CameraComponent* camera       = state.GetComponent<CameraComponent>(id);
 
             if (transform) {
                 auto& transformDescriptor     = entityDescriptor.mTransform;
@@ -87,6 +88,9 @@ namespace x {
                 entityDescriptor.mBehavior   = behaviorDescriptor;
             }
 
+            //  TODO: Parse camera component
+            if (camera) {}
+
             descriptor.mEntities.push_back(entityDescriptor);
         }
     }
@@ -104,16 +108,16 @@ namespace x {
                 out << YAML::Key << "world" << YAML::BeginMap;
 
                 // ============================== Camera ==============================//
-                auto& camera = descriptor.mWorld.mCamera;
-                out << YAML::Key << "camera" << YAML::BeginMap;
-                out << YAML::Key << "position" << YAML::Value << YAML::Flow;
-                EmitFloat3(out, camera.mPosition);
-                out << YAML::Key << "eye" << YAML::Value << YAML::Flow;
-                EmitFloat3(out, camera.mLookAt);
-                out << YAML::Key << "fovY" << YAML::Value << camera.mFovY;
-                out << YAML::Key << "nearZ" << YAML::Value << camera.mNearZ;
-                out << YAML::Key << "farZ" << YAML::Value << camera.mFarZ;
-                out << YAML::EndMap;
+                // auto& camera = descriptor.mWorld.mCamera;
+                // out << YAML::Key << "camera" << YAML::BeginMap;
+                // out << YAML::Key << "position" << YAML::Value << YAML::Flow;
+                // EmitFloat3(out, camera.mPosition);
+                // out << YAML::Key << "eye" << YAML::Value << YAML::Flow;
+                // EmitFloat3(out, camera.mLookAt);
+                // out << YAML::Key << "fovY" << YAML::Value << camera.mFovY;
+                // out << YAML::Key << "nearZ" << YAML::Value << camera.mNearZ;
+                // out << YAML::Key << "farZ" << YAML::Value << camera.mFarZ;
+                // out << YAML::EndMap;
                 // ====================================================================//
 
                 // ============================== Lights ==============================//
@@ -215,13 +219,13 @@ namespace x {
     }
 
     void ParseWorld(const YAML::Node& world, SceneDescriptor& descriptor) {
-        YAML::Node cameraNode = world["camera"];
-
-        descriptor.mWorld.mCamera.mPosition = ParseFloat3(cameraNode["position"]);
-        descriptor.mWorld.mCamera.mLookAt   = ParseFloat3(cameraNode["eye"]);
-        descriptor.mWorld.mCamera.mFovY     = cameraNode["fovY"].as<f32>();
-        descriptor.mWorld.mCamera.mNearZ    = cameraNode["nearZ"].as<f32>();
-        descriptor.mWorld.mCamera.mFarZ     = cameraNode["farZ"].as<f32>();
+        // YAML::Node cameraNode = world["camera"];
+        //
+        // descriptor.mWorld.mCamera.mPosition = ParseFloat3(cameraNode["position"]);
+        // descriptor.mWorld.mCamera.mLookAt   = ParseFloat3(cameraNode["eye"]);
+        // descriptor.mWorld.mCamera.mFovY     = cameraNode["fovY"].as<f32>();
+        // descriptor.mWorld.mCamera.mNearZ    = cameraNode["nearZ"].as<f32>();
+        // descriptor.mWorld.mCamera.mFarZ     = cameraNode["farZ"].as<f32>();
 
         YAML::Node lightNode = world["lights"];
         YAML::Node sunNode   = lightNode["sun"];
@@ -275,6 +279,8 @@ namespace x {
 
                 entityDescriptor.mBehavior = behaviorDescriptor;
             }
+
+            // TODO: Parse camera component
 
             entitiesArray.push_back(entityDescriptor);
         }
