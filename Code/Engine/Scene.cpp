@@ -21,13 +21,13 @@ namespace x {
         mOpaqueObjects.clear();
         mTransparentObjects.clear();
 
-        auto& mainCamera = mState.MainCamera;
-        auto& sun        = mState.Lights.mSun;
+        auto* mainCamera = mState.GetMainCamera();
+        auto& sun        = mState.mLights.mSun;
 
         const auto& cameraDescriptor = descriptor.mWorld.mCamera;
-        mainCamera.SetPosition(Float3ToVectorSet(cameraDescriptor.mPosition));
-        mainCamera.SetFOV(cameraDescriptor.mFovY);
-        mainCamera.SetClipPlanes(cameraDescriptor.mNearZ, cameraDescriptor.mFarZ);
+        mainCamera->SetPosition(cameraDescriptor.mPosition);
+        mainCamera->SetFOVDegrees(cameraDescriptor.mFovY);
+        mainCamera->SetClipPlanes(cameraDescriptor.mNearZ, cameraDescriptor.mFarZ);
 
         const auto& sunDescriptor = descriptor.mWorld.mLights.mSun;
         sun.mEnabled              = sunDescriptor.mEnabled;

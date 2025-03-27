@@ -9,7 +9,7 @@
 namespace x {
     struct CameraDescriptor {
         Float3 mPosition;
-        Float3 mEye;
+        Float3 mLookAt;
         f32 mFovY;
         f32 mNearZ;
         f32 mFarZ;

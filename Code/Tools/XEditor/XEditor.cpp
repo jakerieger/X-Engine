@@ -662,7 +662,7 @@ namespace x {
                     ImGui::Spacing();
 
                     // Sun
-                    auto& sun = state.Lights.mSun;
+                    auto& sun = state.mLights.mSun;
                     ImGui::Text("Sun");
                     ImGui::Spacing();
 

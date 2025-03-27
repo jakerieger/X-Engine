@@ -2,6 +2,7 @@
 // Created: 1/13/2025.
 //
 
+// ReSharper disable CppNotAllPathsReturnValue
 #pragma once
 
 #include <map>
@@ -15,10 +16,12 @@
 #include "TransformComponent.hpp"
 #include "ModelComponent.hpp"
 #include "BehaviorComponent.hpp"
+#include "CameraComponent.hpp"
 
 namespace x {
     template<typename T>
-    concept IsValidComponent = Same<T, TransformComponent> || Same<T, ModelComponent> || Same<T, BehaviorComponent>;
+    concept IsValidComponent =
+      Same<T, TransformComponent> || Same<T, ModelComponent> || Same<T, BehaviorComponent> || Same<T, CameraComponent>;
 
     class SceneState {
         friend class Scene;
@@ -28,9 +31,7 @@ namespace x {
 
         EntityId CreateEntity(const str& name) {
             for (const auto& entityName : mEntities | std::views::values) {
-                if (entityName == name) {
-                    return EntityId {};  // Return invalid entity
-                }
+                if (entityName == name) { return EntityId {}; }
             }
 
             const auto newId  = ++mNextId;
@@ -54,30 +55,57 @@ namespace x {
             mEntities[entity] = name;
         }
 
-        [[nodiscard]] SceneState Clone() const {
-            SceneState newState;
-
-            newState.mNextId   = mNextId;
-            newState.mEntities = mEntities;
-
-            newState.Lights     = Lights;
-            newState.MainCamera = MainCamera;
-
-            newState.mTransforms = mTransforms;
-            newState.mModels     = mModels;
-            newState.mBehaviors  = mBehaviors;
-
-            return newState;
+        SceneState(const SceneState& other) {
+            mTransforms = other.mTransforms;
+            mModels     = other.mModels;
+            mBehaviors  = other.mBehaviors;
+            mEntities   = other.mEntities;
+            mNextId     = other.mNextId;
+            mLights     = other.mLights;
+            mMainCamera = other.mMainCamera;
         }
+
+        SceneState& operator=(const SceneState& other) {
+            mTransforms = other.mTransforms;
+            mModels     = other.mModels;
+            mBehaviors  = other.mBehaviors;
+            mEntities   = other.mEntities;
+            mNextId     = other.mNextId;
+            mLights     = other.mLights;
+            mMainCamera = other.mMainCamera;
+            return *this;
+        }
+
+        SceneState(SceneState&& other) noexcept
+            : mNextId(other.mNextId), mEntities(std::move(other.mEntities)), mMainCamera(other.mMainCamera),
+              mLights(std::move(other.mLights)), mTransforms(std::move(other.mTransforms)),
+              mModels(std::move(other.mModels)), mBehaviors(std::move(other.mBehaviors)),
+              mCameras(std::move(other.mCameras)) {
+            other.mMainCamera = nullptr;
+        }
+
+        SceneState& operator=(SceneState&& other) noexcept {
+            if (this != &other) {
+                mNextId           = other.mNextId;
+                mEntities         = std::move(other.mEntities);
+                mLights           = std::move(other.mLights);
+                mMainCamera       = other.mMainCamera;
+                other.mMainCamera = nullptr;
+                mTransforms       = std::move(other.mTransforms);
+                mModels           = std::move(other.mModels);
+                mBehaviors        = std::move(other.mBehaviors);
+                mCameras          = std::move(other.mCameras);
+            }
+            return *this;
+        };
 
         template<typename T>
             requires IsValidComponent<T>
         const T* GetComponent(EntityId entity) const {
             if constexpr (Same<T, TransformComponent>) { return mTransforms.GetComponent(entity); }
-
             if constexpr (Same<T, ModelComponent>) { return mModels.GetComponent(entity); }
-
             if constexpr (Same<T, BehaviorComponent>) { return mBehaviors.GetComponent(entity); }
+            if constexpr (Same<T, CameraComponent>) { return mCameras.GetComponent(entity); }
 
             return nullptr;
         }
@@ -86,10 +114,9 @@ namespace x {
             requires IsValidComponent<T>
         T* GetComponentMutable(EntityId entity) {
             if constexpr (Same<T, TransformComponent>) { return mTransforms.GetComponentMutable(entity); }
-
             if constexpr (Same<T, ModelComponent>) { return mModels.GetComponentMutable(entity); }
-
             if constexpr (Same<T, BehaviorComponent>) { return mBehaviors.GetComponentMutable(entity); }
+            if constexpr (Same<T, CameraComponent>) { return mCameras.GetComponentMutable(entity); }
 
             return nullptr;
         }
@@ -98,10 +125,17 @@ namespace x {
             requires IsValidComponent<T>
         T& AddComponent(EntityId entity) {
             if constexpr (Same<T, TransformComponent>) { return mTransforms.AddComponent(entity).component; }
-
             if constexpr (Same<T, ModelComponent>) { return mModels.AddComponent(entity).component; }
-
             if constexpr (Same<T, BehaviorComponent>) { return mBehaviors.AddComponent(entity).component; }
+            if constexpr (Same<T, CameraComponent>) {
+                auto& camera = mCameras.AddComponent(entity).component;
+                if (!mMainCamera) {
+                    // If no camera has been added to the scene yet, make this our main camera
+                    // The highest ranking camera in the scene hierarchy is always the main camera
+                    mMainCamera = &camera;
+                }
+                return camera;
+            }
         }
 
         template<typename T>
@@ -110,6 +144,7 @@ namespace x {
             if constexpr (Same<T, TransformComponent>) { return mTransforms; }
             if constexpr (Same<T, ModelComponent>) { return mModels; }
             if constexpr (Same<T, BehaviorComponent>) { return mBehaviors; }
+            if constexpr (Same<T, CameraComponent>) { return mCameras; }
         }
 
         template<typename T>
@@ -118,6 +153,7 @@ namespace x {
             if constexpr (Same<T, TransformComponent>) { return mTransforms; }
             if constexpr (Same<T, ModelComponent>) { return mModels; }
             if constexpr (Same<T, BehaviorComponent>) { return mBehaviors; }
+            if constexpr (Same<T, CameraComponent>) { return mCameras; }
         }
 
         template<typename T>
@@ -127,43 +163,46 @@ namespace x {
             return false;
         }
 
-        LightState& GetLightState() {
-            return Lights;
+        X_NODISCARD LightState& GetLightState() {
+            return mLights;
         }
 
-        [[nodiscard]] LightState const& GetLightState() const {
-            return Lights;
+        X_NODISCARD LightState const& GetLightState() const {
+            return mLights;
         }
 
-        Camera& GetMainCamera() {
-            return MainCamera;
+        X_NODISCARD CameraComponent* GetMainCamera() {
+            return mMainCamera;
         }
 
-        [[nodiscard]] Camera const& GetMainCamera() const {
-            return MainCamera;
+        X_NODISCARD CameraComponent* GetMainCamera() const {
+            return mMainCamera;
         }
 
         void Reset() {
             mEntities.clear();
             mNextId     = 0;
-            Lights      = {};
-            MainCamera  = {};
+            mMainCamera = nullptr;
+            mLights     = {};
             mTransforms = {};
             mModels     = {};
             mBehaviors  = {};
         }
 
         // Global state
-        LightState Lights;
-        Camera MainCamera;
+        // Camera MainCamera;
 
     private:
         u64 mNextId = 0;
         std::map<EntityId, std::string> mEntities;
 
+        CameraComponent* mMainCamera {nullptr};
+        LightState mLights;
+
         // Component managers
         ComponentManager<TransformComponent> mTransforms;
         ComponentManager<ModelComponent> mModels;
         ComponentManager<BehaviorComponent> mBehaviors;
+        ComponentManager<CameraComponent> mCameras;
     };
 }  // namespace x

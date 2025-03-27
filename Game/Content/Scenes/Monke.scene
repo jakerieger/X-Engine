@@ -45,3 +45,15 @@ entities:
         receiveShadows: true
       behavior:
         script: 455646657286743680
+  - id: 2
+    name: camera
+    components:
+      transform:
+        position: [ 0, 0, -5 ]
+        rotation: [ 0, 0, 0 ]
+        scale: [ 1, 1, 1 ]
+      camera:
+        fov: 60
+        nearZ: 0.01
+        farZ: 1000.0
+        orthographic: false

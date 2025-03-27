@@ -37,13 +37,13 @@ namespace x {
     void SceneParser::StateToDescriptor(const SceneState& state, SceneDescriptor& descriptor, const str& sceneName) {
         descriptor.mName = sceneName;
 
-        const auto& camera = state.GetMainCamera();
+        const auto* camera = state.GetMainCamera();
         CameraDescriptor cameraDescriptor;
-        cameraDescriptor.mEye      = camera.GetEye();
-        cameraDescriptor.mPosition = camera.GetPosition();
-        cameraDescriptor.mFovY     = camera.GetFovY();
-        cameraDescriptor.mNearZ    = camera.GetClipPlanes().first;
-        cameraDescriptor.mFarZ     = camera.GetClipPlanes().second;
+        cameraDescriptor.mLookAt   = {0.0f, 0.0f, 0.0f};  // TODO: Disabled for now
+        cameraDescriptor.mPosition = camera->GetPosition();
+        cameraDescriptor.mFovY     = camera->GetFOVDegrees();
+        cameraDescriptor.mNearZ    = camera->GetNearPlane();
+        cameraDescriptor.mFarZ     = camera->GetFarPlane();
         descriptor.mWorld.mCamera  = cameraDescriptor;
 
         const auto& sun = state.GetLightState().mSun;
@@ -109,7 +109,7 @@ namespace x {
                 out << YAML::Key << "position" << YAML::Value << YAML::Flow;
                 EmitFloat3(out, camera.mPosition);
                 out << YAML::Key << "eye" << YAML::Value << YAML::Flow;
-                EmitFloat3(out, camera.mEye);
+                EmitFloat3(out, camera.mLookAt);
                 out << YAML::Key << "fovY" << YAML::Value << camera.mFovY;
                 out << YAML::Key << "nearZ" << YAML::Value << camera.mNearZ;
                 out << YAML::Key << "farZ" << YAML::Value << camera.mFarZ;
@@ -218,7 +218,7 @@ namespace x {
         YAML::Node cameraNode = world["camera"];
 
         descriptor.mWorld.mCamera.mPosition = ParseFloat3(cameraNode["position"]);
-        descriptor.mWorld.mCamera.mEye      = ParseFloat3(cameraNode["eye"]);
+        descriptor.mWorld.mCamera.mLookAt   = ParseFloat3(cameraNode["eye"]);
         descriptor.mWorld.mCamera.mFovY     = cameraNode["fovY"].as<f32>();
         descriptor.mWorld.mCamera.mNearZ    = cameraNode["nearZ"].as<f32>();
         descriptor.mWorld.mCamera.mFarZ     = cameraNode["farZ"].as<f32>();

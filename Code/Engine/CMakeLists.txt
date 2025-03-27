@@ -19,6 +19,8 @@ add_library(x STATIC
     ${ENGINE_DIR}/BloomEffect.hpp
     ${ENGINE_DIR}/Camera.cpp
     ${ENGINE_DIR}/Camera.hpp
+    ${ENGINE_DIR}/CameraComponent.cpp
+    ${ENGINE_DIR}/CameraComponent.hpp
     ${ENGINE_DIR}/Clock.cpp
     ${ENGINE_DIR}/Clock.hpp
     ${ENGINE_DIR}/ColorGradeEffect.cpp
