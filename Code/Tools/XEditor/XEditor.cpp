@@ -37,12 +37,6 @@ namespace x {
 
     // TODO: Consider making this a class
     namespace EditorState {
-        static Float3 CameraPosition {};
-        static Float3 CameraEye {};
-        static f32 CameraFovY {};
-        static f32 CameraNearZ {};
-        static f32 CameraFarZ {};
-
         static Float3 TransformPosition {};
         static Float3 TransformRotation {};
         static Float3 TransformScale {};
@@ -624,45 +618,9 @@ namespace x {
                 ImGui::Spacing();
                 ImGui::Spacing();
 
-                auto& camera = state.MainCamera;
                 if (ImGui::CollapsingHeader("World", ImGuiTreeNodeFlags_DefaultOpen)) {
-                    ImGui::Text("Camera");
-                    ImGui::Spacing();
-                    ImGui::Text("Position:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::DragFloat3("##camera_pos", (f32*)&EditorState::CameraPosition, 0.01f);
-                    camera.SetPosition(XMLoadFloat3(&EditorState::CameraPosition));
-
-                    ImGui::Text("Eye:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::DragFloat3("##camera_eye", (f32*)&EditorState::CameraEye, 0.01f);
-                    camera.SetEye(XMLoadFloat3(&EditorState::CameraEye));
-
-                    ImGui::Text("FOV Y:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::InputFloat("##camera_fov", &EditorState::CameraFovY, 0.1f, 1.0f, "%.1f");
-                    camera.SetFOV(EditorState::CameraFovY);
-
-                    ImGui::Text("Near Z:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::InputFloat("##camera_nearz", &EditorState::CameraNearZ, 0.1f, 100.0f, "%.1f");
-
-                    ImGui::Text("Far Z:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::InputFloat("##camera_farz", &EditorState::CameraFarZ, 0.1f, 100.0f, "%.1f");
-
-                    camera.SetClipPlanes(EditorState::CameraNearZ, EditorState::CameraFarZ);
-
-                    ImGui::Spacing();
-                    ImGui::Spacing();
-
                     // Sun
-                    auto& sun = state.mLights.mSun;
+                    auto& sun = state.GetLightState().mSun;
                     ImGui::Text("Sun");
                     ImGui::Spacing();
 
@@ -1370,13 +1328,7 @@ namespace x {
     void XEditor::OnLoadScene(const str& selectedScene) {
         mGame.TransitionScene(selectedScene);
 
-        auto& state                 = mGame.GetActiveScene()->GetState();
-        auto& camera                = state.MainCamera;
-        EditorState::CameraPosition = camera.GetPosition();
-        EditorState::CameraEye      = camera.GetEye();
-        EditorState::CameraFovY     = camera.GetFovY();
-        EditorState::CameraNearZ    = camera.GetClipPlanes().first;
-        EditorState::CameraFarZ     = camera.GetClipPlanes().second;
+        auto& state = mGame.GetActiveScene()->GetState();
         // TODO: Remove the mSceneSettings member, its redundant
         std::strcpy(mSceneSettings.mName, selectedScene.c_str());
         std::strcpy(EditorState::CurrentSceneName, selectedScene.c_str());

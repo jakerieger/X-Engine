@@ -21,13 +21,7 @@ namespace x {
         mOpaqueObjects.clear();
         mTransparentObjects.clear();
 
-        auto* mainCamera = mState.GetMainCamera();
-        auto& sun        = mState.mLights.mSun;
-
-        const auto& cameraDescriptor = descriptor.mWorld.mCamera;
-        mainCamera->SetPosition(cameraDescriptor.mPosition);
-        mainCamera->SetFOVDegrees(cameraDescriptor.mFovY);
-        mainCamera->SetClipPlanes(cameraDescriptor.mNearZ, cameraDescriptor.mFarZ);
+        auto& sun = mState.mLights.mSun;
 
         const auto& sunDescriptor = descriptor.mWorld.mLights.mSun;
         sun.mEnabled              = sunDescriptor.mEnabled;
@@ -78,6 +72,15 @@ namespace x {
                 behaviorComponent.Load(behavior.mScriptId);
                 if (!mScriptEngine.LoadScript(*scriptBytecode, entity.mName)) { X_LOG_FATAL("Failed to load script"); }
             }
+
+            if (entity.mCamera.has_value()) {
+                auto& camera          = entity.mCamera.value();
+                auto& cameraComponent = mState.AddComponent<CameraComponent>(newEntity);
+                cameraComponent.SetFOVDegrees(camera.mFOV)
+                  .SetClipPlanes(camera.mNearZ, camera.mFarZ)
+                  .SetOrthographic(camera.mOrthographic)
+                  .SetWidthHeight(camera.mWidth, camera.mHeight);
+            }
         }
 
         mInitialState = mState;  // Cache init state so scene can be reset
@@ -100,7 +103,7 @@ namespace x {
         mResources.Clear();
     }
 
-    void Scene::ResetToInitialState() {
+    void Scene::ResetState() {
         mState.Reset();
         mState = mInitialState;
     }
@@ -120,18 +123,6 @@ namespace x {
         static f32 sceneTime {0.f};
         sceneTime += deltaTime;
 
-        const auto* camera = mState.GetMainCamera();
-
-        // Calculate LVP
-        // TODO: I only need to update this if either the light direction or the screen size changes; this can be
-        // optimized!
-        const auto lvp                             = CalculateLightViewProjection(mState.GetLightState().mSun,
-                                                      5.0f,  // TODO: this needs tweaking depending on the light height
-                                                      camera->GetAspectRatio(),
-                                                      camera->GetNearPlane(),
-                                                      camera->GetFarPlane());
-        mState.GetLightState().mSun.mLightViewProj = XMMatrixTranspose(lvp);
-
         // Update scene entities
         mTransparentObjects.clear();
         mOpaqueObjects.clear();
@@ -139,6 +130,7 @@ namespace x {
             const auto* behaviorComponent = mState.GetComponentMutable<BehaviorComponent>(entityId);
             auto* transformComponent      = mState.GetComponentMutable<TransformComponent>(entityId);
             auto* modelComponent          = mState.GetComponentMutable<ModelComponent>(entityId);
+            auto* cameraComponent         = mState.GetComponentMutable<CameraComponent>(entityId);
 
             if (behaviorComponent) {
                 BehaviorEntity entity(name, transformComponent);
@@ -160,7 +152,21 @@ namespace x {
                 auto* waterMaterial = material->As<WaterMaterial>();
                 if (waterMaterial) { waterMaterial->SetWaveTime(sceneTime); }
             }
+
+            if (cameraComponent) { cameraComponent->SetPosition(transformComponent->GetPosition()); }
         }
+
+        const auto* camera = mState.GetMainCamera();
+
+        // Calculate LVP
+        // TODO: I only need to update this if either the light direction or the screen size changes; this can be
+        // optimized!
+        const auto lvp                             = CalculateLightViewProjection(mState.GetLightState().mSun,
+                                                      5.0f,  // TODO: this needs tweaking depending on the light height
+                                                      camera->GetAspectRatio(),
+                                                      camera->GetNearPlane(),
+                                                      camera->GetFarPlane());
+        mState.GetLightState().mSun.mLightViewProj = XMMatrixTranspose(lvp);
 
         // Sort transparent objects by distance from camera
         if (mTransparentObjects.size() > 1) {

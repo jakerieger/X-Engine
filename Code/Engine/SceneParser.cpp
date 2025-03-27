@@ -37,15 +37,6 @@ namespace x {
     void SceneParser::StateToDescriptor(const SceneState& state, SceneDescriptor& descriptor, const str& sceneName) {
         descriptor.mName = sceneName;
 
-        // const auto* camera = state.GetMainCamera();
-        // CameraDescriptor cameraDescriptor;
-        // cameraDescriptor.mLookAt   = {0.0f, 0.0f, 0.0f};  // TODO: Disabled for now
-        // cameraDescriptor.mPosition = camera->GetPosition();
-        // cameraDescriptor.mFovY     = camera->GetFOVDegrees();
-        // cameraDescriptor.mNearZ    = camera->GetNearPlane();
-        // cameraDescriptor.mFarZ     = camera->GetFarPlane();
-        // descriptor.mWorld.mCamera  = cameraDescriptor;
-
         const auto& sun = state.GetLightState().mSun;
         SunDescriptor sunDescriptor;
         sunDescriptor.mColor           = Float3(sun.mColor.x, sun.mColor.y, sun.mColor.z);
@@ -88,8 +79,18 @@ namespace x {
                 entityDescriptor.mBehavior   = behaviorDescriptor;
             }
 
-            //  TODO: Parse camera component
-            if (camera) {}
+            if (camera) {
+                CameraDescriptor cameraDescriptor;
+                cameraDescriptor.mFOV          = camera->GetFOVDegrees();
+                cameraDescriptor.mNearZ        = camera->GetNearPlane();
+                cameraDescriptor.mFarZ         = camera->GetFarPlane();
+                cameraDescriptor.mOrthographic = camera->GetOrthographic();
+                if (cameraDescriptor.mOrthographic) {
+                    cameraDescriptor.mWidth  = camera->GetWidth();
+                    cameraDescriptor.mHeight = camera->GetHeight();
+                }
+                entityDescriptor.mCamera = cameraDescriptor;
+            }
 
             descriptor.mEntities.push_back(entityDescriptor);
         }
@@ -183,25 +184,34 @@ namespace x {
                     out << YAML::EndMap;
 
                     // Model
-                    {
-                        if (entity.mModel.has_value()) {
-                            auto& model = entity.mModel.value();
-                            out << YAML::Key << "model" << YAML::Value << YAML::BeginMap;
-                            out << YAML::Key << "mesh" << YAML::Value << model.mMeshId;
-                            out << YAML::Key << "material" << YAML::Value << model.mMaterialId;
-                            out << YAML::Key << "castsShadows" << YAML::Value << model.mCastsShadows;
-                            out << YAML::Key << "receiveShadows" << YAML::Value << model.mReceiveShadows;
-                            out << YAML::EndMap;
-                        }
+                    if (entity.mModel.has_value()) {
+                        auto& model = entity.mModel.value();
+                        out << YAML::Key << "model" << YAML::Value << YAML::BeginMap;
+                        out << YAML::Key << "mesh" << YAML::Value << model.mMeshId;
+                        out << YAML::Key << "material" << YAML::Value << model.mMaterialId;
+                        out << YAML::Key << "castsShadows" << YAML::Value << model.mCastsShadows;
+                        out << YAML::Key << "receiveShadows" << YAML::Value << model.mReceiveShadows;
+                        out << YAML::EndMap;
                     }
 
                     // Behavior
-                    {
-                        if (entity.mBehavior.has_value()) {
-                            auto& behavior = entity.mBehavior.value();
-                            out << YAML::Key << "behavior" << YAML::Value << YAML::BeginMap;
-                            out << YAML::Key << "script" << YAML::Value << behavior.mScriptId;
-                            out << YAML::EndMap;
+                    if (entity.mBehavior.has_value()) {
+                        auto& behavior = entity.mBehavior.value();
+                        out << YAML::Key << "behavior" << YAML::Value << YAML::BeginMap;
+                        out << YAML::Key << "script" << YAML::Value << behavior.mScriptId;
+                        out << YAML::EndMap;
+                    }
+
+                    if (entity.mCamera.has_value()) {
+                        auto& camera = entity.mCamera.value();
+                        out << YAML::Key << "camera" << YAML::Value << YAML::BeginMap;
+                        out << YAML::Key << "fov" << YAML::Value << camera.mFOV;
+                        out << YAML::Key << "nearZ" << YAML::Value << camera.mNearZ;
+                        out << YAML::Key << "farZ" << YAML::Value << camera.mFarZ;
+                        out << YAML::Key << "orthographic" << YAML::Value << camera.mOrthographic;
+                        if (camera.mOrthographic) {
+                            out << YAML::Key << "width" << YAML::Value << camera.mWidth;
+                            out << YAML::Key << "height" << YAML::Value << camera.mHeight;
                         }
                     }
 
@@ -280,7 +290,20 @@ namespace x {
                 entityDescriptor.mBehavior = behaviorDescriptor;
             }
 
-            // TODO: Parse camera component
+            YAML::Node cameraNode = componentsNode["camera"];
+            if (cameraNode.IsDefined()) {
+                CameraDescriptor cameraDescriptor {};
+                cameraDescriptor.mFOV          = cameraNode["fov"].as<f32>();
+                cameraDescriptor.mNearZ        = cameraNode["nearZ"].as<f32>();
+                cameraDescriptor.mFarZ         = cameraNode["farZ"].as<f32>();
+                cameraDescriptor.mOrthographic = cameraNode["orthographic"].as<bool>();
+                if (cameraDescriptor.mOrthographic) {
+                    if (cameraNode["width"].IsDefined()) { cameraDescriptor.mWidth = cameraNode["width"].as<f32>(); }
+                    if (cameraNode["height"].IsDefined()) { cameraDescriptor.mHeight = cameraNode["height"].as<f32>(); }
+                }
+
+                entityDescriptor.mCamera = cameraDescriptor;
+            }
 
             entitiesArray.push_back(entityDescriptor);
         }

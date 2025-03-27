@@ -43,7 +43,7 @@ entities:
     name: camera
     components:
       transform:
-        position: [ 0, 0, -5 ]
+        position: [ 0, 2, -5 ]
         rotation: [ 0, 0, 0 ]
         scale: [ 1, 1, 1 ]
       camera:

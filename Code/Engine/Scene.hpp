@@ -18,7 +18,7 @@ namespace x {
         void Unload();
 
         void Reset();
-        void ResetToInitialState();
+        void ResetState();
 
         void Awake();
         void Update(f32 deltaTime);
