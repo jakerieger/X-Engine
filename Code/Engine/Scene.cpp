@@ -156,16 +156,14 @@ namespace x {
             if (cameraComponent) { cameraComponent->SetPosition(transformComponent->GetPosition()); }
         }
 
-        const auto* camera = mState.GetMainCamera();
-
         // Calculate LVP
         // TODO: I only need to update this if either the light direction or the screen size changes; this can be
         // optimized!
         const auto lvp                             = CalculateLightViewProjection(mState.GetLightState().mSun,
                                                       5.0f,  // TODO: this needs tweaking depending on the light height
-                                                      camera->GetAspectRatio(),
-                                                      camera->GetNearPlane(),
-                                                      camera->GetFarPlane());
+                                                      mState.GetMainCamera()->GetAspectRatio(),
+                                                      mState.GetMainCamera()->GetNearPlane(),
+                                                      mState.GetMainCamera()->GetFarPlane());
         mState.GetLightState().mSun.mLightViewProj = XMMatrixTranspose(lvp);
 
         // Sort transparent objects by distance from camera

@@ -760,6 +760,12 @@ namespace x {
                                                                sizeof(mEntityProperties.mName),
                                                                ImGuiInputTextFlags_EnterReturnsTrue);
                     if (enterPressed) { state.RenameEntity(sSelectedEntity, mEntityProperties.mName); }
+
+                    ImGui::Text("Enabled:");
+                    ImGui::SameLine(kLabelWidth);
+                    ImGui::SetNextItemWidth(size.x - kLabelWidth);
+                    static bool enabled {true};
+                    ImGui::Checkbox("##entity_enabled", &enabled);
                 }
 
                 if (ImGui::CollapsingHeader("Transform##properties", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -1526,13 +1532,11 @@ namespace x {
                 ImGuiID dockLeftId =
                   ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Left, 0.28f, nullptr, &dockMainId);
                 ImGuiID dockBottomId =
-                  ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Down, 0.35f, nullptr, &dockMainId);
+                  ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Down, 0.42f, nullptr, &dockMainId);
                 ImGuiID dockLeftBottomId =
                   ImGui::DockBuilderSplitNode(dockLeftId, ImGuiDir_Down, 0.5f, nullptr, &dockLeftId);
                 ImGuiID dockRightBottomId =
                   ImGui::DockBuilderSplitNode(dockRightId, ImGuiDir_Down, 0.5f, nullptr, &dockRightId);
-                ImGuiID dockBottomLeftId =
-                  ImGui::DockBuilderSplitNode(dockBottomId, ImGuiDir_Left, 0.5f, nullptr, &dockBottomId);
 
                 ImGui::DockBuilderDockWindow("Scene", dockLeftId);
                 ImGui::DockBuilderDockWindow("Entities", dockLeftBottomId);
