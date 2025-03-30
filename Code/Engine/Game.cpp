@@ -180,7 +180,7 @@ namespace x {
         Shutdown();
     }
 
-    void Game::Initialize(Window* window, Viewport* viewport, const Path& workingDir) {
+    void Game::Initialize(IWindow* window, Viewport* viewport, const Path& workingDir) {
         mWindow = window;
 
         // These need to be loaded first before the rest of the engine can use them!

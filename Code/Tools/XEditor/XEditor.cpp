@@ -74,6 +74,10 @@ namespace x {
         return color;
     }
 
+    static ImVec4 ColorWithOpacity(const ImVec4 color, const f32 alpha = 1.0f) {
+        return ImVec4(color.x, color.y, color.z, alpha);
+    }
+
     static ImVec4 GetLogEntryColor(const u32 severity) {
         switch (severity) {
             default:
@@ -123,22 +127,18 @@ namespace x {
 
             mName             = themeNode["name"].as<str>();
             mWindowBackground = HexToImVec4(themeNode["windowBackground"].as<str>());
-            mChildBackground  = HexToImVec4(themeNode["childBackground"].as<str>());
-            mFrameBackground  = HexToImVec4(themeNode["frameBackground"].as<str>());
-            mAltBackground    = HexToImVec4(themeNode["altBackground"].as<str>());
+            mMenuBackground   = HexToImVec4(themeNode["menuBackground"].as<str>());
+            mTabHeader        = HexToImVec4(themeNode["tabHeader"].as<str>());
+            mPanelBackground  = HexToImVec4(themeNode["panelBackground"].as<str>());
+            mButtonBackground = HexToImVec4(themeNode["buttonBackground"].as<str>());
+            mInputBackground  = HexToImVec4(themeNode["inputBackground"].as<str>());
             mHeaderBackground = HexToImVec4(themeNode["headerBackground"].as<str>());
             mTextHighlight    = HexToImVec4(themeNode["textHighlight"].as<str>());
             mTextPrimary      = HexToImVec4(themeNode["textPrimary"].as<str>());
             mTextSecondary    = HexToImVec4(themeNode["textSecondary"].as<str>());
-            mTextDisabled     = HexToImVec4(themeNode["textDisabled"].as<str>());
+            mSelected         = HexToImVec4(themeNode["selected"].as<str>());
+            mIcon             = HexToImVec4(themeNode["icon"].as<str>());
             mBorder           = HexToImVec4(themeNode["border"].as<str>());
-            mError            = HexToImVec4(themeNode["error"].as<str>());
-            mWarning          = HexToImVec4(themeNode["warning"].as<str>());
-            mSuccess          = HexToImVec4(themeNode["success"].as<str>());
-            mLink             = HexToImVec4(themeNode["link"].as<str>());
-            mScrollbar        = HexToImVec4(themeNode["scrollbar"].as<str>());
-            mPrimary          = HexToImVec4(themeNode["primary"].as<str>());
-            mSecondary        = HexToImVec4(themeNode["secondary"].as<str>());
             mBorderRadius     = themeNode["borderRadius"].as<f32>(2.0f);
             mBorderWidth      = themeNode["borderWidth"].as<f32>(1.0f);
 
@@ -159,80 +159,62 @@ namespace x {
         style.FrameBorderSize  = 0.f;
         style.TabRounding      = mBorderRadius;
 
-        const auto windowBackground    = mWindowBackground;
-        const auto childBackground     = mChildBackground;
-        const auto frameBackground     = mFrameBackground;
-        const auto secondaryBackground = mAltBackground;
-        const auto headerBackground    = mHeaderBackground;
-        const auto textHighlight       = mTextHighlight;
-        const auto textPrimary         = mTextPrimary;
-        const auto textSecondary       = mTextSecondary;
-        const auto textDisabled        = mTextDisabled;
-        const auto border              = mBorder;
-        const auto error               = mError;
-        const auto warning             = mWarning;
-        const auto success             = mSuccess;
-        const auto link                = mLink;
-        const auto scrollbar           = mScrollbar;
-        const auto primary             = mPrimary;
-        const auto secondary           = mSecondary;
-
-        colors[ImGuiCol_Text]                  = textPrimary;
-        colors[ImGuiCol_TextDisabled]          = textDisabled;
-        colors[ImGuiCol_WindowBg]              = windowBackground;
-        colors[ImGuiCol_ChildBg]               = childBackground;
-        colors[ImGuiCol_PopupBg]               = windowBackground;
-        colors[ImGuiCol_Border]                = border;
         colors[ImGuiCol_BorderShadow]          = ImVec4(0.f, 0.f, 0.f, 0.f);
-        colors[ImGuiCol_FrameBg]               = frameBackground;
-        colors[ImGuiCol_FrameBgHovered]        = secondaryBackground;
-        colors[ImGuiCol_FrameBgActive]         = secondaryBackground;
-        colors[ImGuiCol_TitleBg]               = frameBackground;
-        colors[ImGuiCol_TitleBgActive]         = frameBackground;
-        colors[ImGuiCol_TitleBgCollapsed]      = frameBackground;
-        colors[ImGuiCol_MenuBarBg]             = windowBackground;
-        colors[ImGuiCol_ScrollbarBg]           = windowBackground;
-        colors[ImGuiCol_ScrollbarGrab]         = scrollbar;
-        colors[ImGuiCol_ScrollbarGrabHovered]  = scrollbar;
-        colors[ImGuiCol_ScrollbarGrabActive]   = scrollbar;
-        colors[ImGuiCol_CheckMark]             = textPrimary;
-        colors[ImGuiCol_SliderGrab]            = scrollbar;
-        colors[ImGuiCol_SliderGrabActive]      = scrollbar;
-        colors[ImGuiCol_Button]                = secondary;
-        colors[ImGuiCol_ButtonHovered]         = ImVec4(secondary.x, secondary.y, secondary.z, 0.75f);
-        colors[ImGuiCol_ButtonActive]          = ImVec4(secondary.x, secondary.y, secondary.z, 0.60f);
-        colors[ImGuiCol_Header]                = secondaryBackground;
-        colors[ImGuiCol_HeaderHovered]         = headerBackground;
-        colors[ImGuiCol_HeaderActive]          = headerBackground;
-        colors[ImGuiCol_Separator]             = border;
-        colors[ImGuiCol_SeparatorHovered]      = link;
-        colors[ImGuiCol_SeparatorActive]       = link;
-        colors[ImGuiCol_ResizeGrip]            = ImVec4(0.26f, 0.59f, 0.98f, 0.20f);
-        colors[ImGuiCol_ResizeGripHovered]     = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
-        colors[ImGuiCol_ResizeGripActive]      = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
-        colors[ImGuiCol_Tab]                   = headerBackground;
-        colors[ImGuiCol_TabHovered]            = headerBackground;
-        colors[ImGuiCol_TabActive]             = headerBackground;
-        colors[ImGuiCol_TabUnfocused]          = colors[ImGuiCol_Tab];
-        colors[ImGuiCol_TabUnfocusedActive]    = colors[ImGuiCol_TabActive];
-        colors[ImGuiCol_TableBorderLight]      = ImVec4(0.f, 0.f, 0.f, 0.f);
-        colors[ImGuiCol_TableBorderStrong]     = ImVec4(0.f, 0.f, 0.f, 0.f);
-        colors[ImGuiCol_PlotLines]             = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
-        colors[ImGuiCol_PlotLinesHovered]      = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
-        colors[ImGuiCol_PlotHistogram]         = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
-        colors[ImGuiCol_PlotHistogramHovered]  = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
-        colors[ImGuiCol_TableHeaderBg]         = ImVec4(0.19f, 0.19f, 0.20f, 1.00f);
-        colors[ImGuiCol_TableBorderStrong]     = ImVec4(0.31f, 0.31f, 0.35f, 1.00f);  // Prefer using Alpha=1.0 here
-        colors[ImGuiCol_TableBorderLight]      = ImVec4(0.23f, 0.23f, 0.25f, 1.00f);  // Prefer using Alpha=1.0 here
-        colors[ImGuiCol_TableRowBg]            = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-        colors[ImGuiCol_TableRowBgAlt]         = ImVec4(1.00f, 1.00f, 1.00f, 0.06f);
-        colors[ImGuiCol_TextSelectedBg]        = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
-        colors[ImGuiCol_DragDropTarget]        = primary;
+        colors[ImGuiCol_Border]                = mBorder;
+        colors[ImGuiCol_ButtonActive]          = ColorWithOpacity(mButtonBackground, 0.67f);
+        colors[ImGuiCol_ButtonHovered]         = ColorWithOpacity(mButtonBackground, 0.80f);
+        colors[ImGuiCol_Button]                = mButtonBackground;
+        colors[ImGuiCol_CheckMark]             = mIcon;
+        colors[ImGuiCol_ChildBg]               = mPanelBackground;
+        colors[ImGuiCol_DockingPreview]        = mSelected;
+        colors[ImGuiCol_DragDropTarget]        = mSelected;
+        colors[ImGuiCol_FrameBgActive]         = mInputBackground;
+        colors[ImGuiCol_FrameBgHovered]        = mInputBackground;
+        colors[ImGuiCol_FrameBg]               = mInputBackground;
+        colors[ImGuiCol_HeaderActive]          = ColorWithOpacity(mHeaderBackground, 0.67f);
+        colors[ImGuiCol_HeaderHovered]         = ColorWithOpacity(mHeaderBackground, 0.80f);
+        colors[ImGuiCol_Header]                = mHeaderBackground;
+        colors[ImGuiCol_MenuBarBg]             = mMenuBackground;
+        colors[ImGuiCol_ModalWindowDimBg]      = ImVec4(0.00f, 0.00f, 0.00f, 0.5f);
         colors[ImGuiCol_NavHighlight]          = ImVec4(30.f / 255.f, 30.f / 255.f, 30.f / 255.f, 1.00f);
-        colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
         colors[ImGuiCol_NavWindowingDimBg]     = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
-        colors[ImGuiCol_ModalWindowDimBg]      = ImVec4(0.00f, 0.00f, 0.00f, 0.0f);
-        colors[ImGuiCol_DockingPreview]        = primary;
+        colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
+        colors[ImGuiCol_PlotHistogramHovered]  = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+        colors[ImGuiCol_PlotHistogram]         = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+        colors[ImGuiCol_PlotLinesHovered]      = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
+        colors[ImGuiCol_PlotLines]             = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
+        colors[ImGuiCol_PopupBg]               = mPanelBackground;
+        colors[ImGuiCol_ResizeGripActive]      = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
+        colors[ImGuiCol_ResizeGripHovered]     = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
+        colors[ImGuiCol_ResizeGrip]            = ImVec4(0.26f, 0.59f, 0.98f, 0.20f);
+        colors[ImGuiCol_ScrollbarBg]           = mMenuBackground;
+        colors[ImGuiCol_ScrollbarGrabActive]   = mIcon;
+        colors[ImGuiCol_ScrollbarGrabHovered]  = mIcon;
+        colors[ImGuiCol_ScrollbarGrab]         = mIcon;
+        colors[ImGuiCol_SeparatorActive]       = mSelected;
+        colors[ImGuiCol_SeparatorHovered]      = mSelected;
+        colors[ImGuiCol_Separator]             = mWindowBackground;
+        colors[ImGuiCol_SliderGrabActive]      = mIcon;
+        colors[ImGuiCol_SliderGrab]            = mIcon;
+        colors[ImGuiCol_TabActive]             = mHeaderBackground;
+        colors[ImGuiCol_TabHovered]            = mHeaderBackground;
+        colors[ImGuiCol_TabUnfocusedActive]    = colors[ImGuiCol_TabActive];
+        colors[ImGuiCol_TabUnfocused]          = colors[ImGuiCol_Tab];
+        colors[ImGuiCol_Tab]                   = mTabHeader;
+        colors[ImGuiCol_TableBorderLight]      = ImVec4(0.23f, 0.23f, 0.25f, 1.00f);  // Prefer using Alpha=1.0 here
+        colors[ImGuiCol_TableBorderLight]      = ImVec4(0.f, 0.f, 0.f, 0.f);
+        colors[ImGuiCol_TableBorderStrong]     = ImVec4(0.31f, 0.31f, 0.35f, 1.00f);  // Prefer using Alpha=1.0 here
+        colors[ImGuiCol_TableBorderStrong]     = ImVec4(0.f, 0.f, 0.f, 0.f);
+        colors[ImGuiCol_TableHeaderBg]         = ImVec4(0.19f, 0.19f, 0.20f, 1.00f);
+        colors[ImGuiCol_TableRowBgAlt]         = ImVec4(1.00f, 1.00f, 1.00f, 0.06f);
+        colors[ImGuiCol_TableRowBg]            = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+        colors[ImGuiCol_TextDisabled]          = mTextSecondary;
+        colors[ImGuiCol_TextSelectedBg]        = ColorWithOpacity(mSelected, 0.5f);
+        colors[ImGuiCol_Text]                  = mTextHighlight;
+        colors[ImGuiCol_TitleBgActive]         = mTabHeader;
+        colors[ImGuiCol_TitleBgCollapsed]      = mTabHeader;
+        colors[ImGuiCol_TitleBg]               = mTabHeader;
+        colors[ImGuiCol_WindowBg]              = mWindowBackground;
     }
 #pragma endregion
 
@@ -301,7 +283,7 @@ namespace x {
     }
 
     void XEditor::OnResize(u32 width, u32 height) {
-        Window::OnResize(width, height);
+        IWindow::OnResize(width, height);
     }
 
     void XEditor::OnShutdown() {
@@ -328,13 +310,14 @@ namespace x {
 
         SetupDockspace(menuBarHeight);
 
-        View_Viewport();
-        View_SceneSettings();
-        View_Entities();
-        View_EntityProperties();
-        View_AssetBrowser();
-        View_Log();
-        View_AssetPreview();
+        if (mShowViewport) View_Viewport();
+        if (mShowSceneSettings) View_SceneSettings();
+        if (mShowEntities) View_Entities();
+        if (mShowEntityProperties) View_EntityProperties();
+        if (mShowAssetBrowser) View_AssetBrowser();
+        if (mShowLog) View_Log();
+        if (mShowAssetPreview) View_AssetPreview();
+        if (mShowPostProcessing) View_PostProcessing();
 
         ImGui::PopFont();
 
@@ -347,7 +330,7 @@ namespace x {
 
     LRESULT XEditor::MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) {
         if (ImGui_ImplWin32_WndProcHandler(mHwnd, msg, wParam, lParam)) return true;
-        return Window::MessageHandler(msg, wParam, lParam);
+        return IWindow::MessageHandler(msg, wParam, lParam);
     }
 #pragma endregion
 
@@ -492,6 +475,15 @@ namespace x {
         }
     }
 
+    void XEditor::Modal_NewProject() {
+        const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        if (ImGui::BeginPopupModal("New Project", &mNewProjectOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::Dummy({300, 200});
+            ImGui::EndPopup();
+        }
+    }
+
     void XEditor::Modal_SelectScene() {
         const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
@@ -538,6 +530,7 @@ namespace x {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
+                if (ImGui::MenuItem("New Project", "Ctrl+N")) { mNewProjectOpen = true; }
                 if (ImGui::MenuItem("Open Project", "Ctrl+O")) { OnOpenProject(); }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Open Scene", "Ctrl+Shift+O", false, mLoadedProject.mLoaded)) {
@@ -577,10 +570,21 @@ namespace x {
 
                 ImGui::EndMenu();
             }
+            if (ImGui::BeginMenu("View")) {
+                if (ImGui::MenuItem("Scene")) { mShowSceneSettings = !mShowSceneSettings; }
+                if (ImGui::MenuItem("Entities")) { mShowEntities = !mShowEntities; }
+                if (ImGui::MenuItem("Properties")) { mShowEntityProperties = !mShowEntityProperties; }
+                if (ImGui::MenuItem("Viewport")) { mShowViewport = !mShowViewport; }
+                if (ImGui::MenuItem("Asset Browser")) { mShowAssetBrowser = !mShowAssetBrowser; }
+                if (ImGui::MenuItem("Log")) { mShowLog = !mShowLog; }
+                if (ImGui::MenuItem("Asset Preview")) { mShowAssetPreview = !mShowAssetPreview; }
+                if (ImGui::MenuItem("Post Processing")) { mShowPostProcessing = !mShowPostProcessing; }
+                ImGui::EndMenu();
+            }
             if (ImGui::BeginMenu("Window")) {
                 if (ImGui::BeginMenu("Layouts")) {
                     // TODO: Add default layouts here
-                    if (ImGui::MenuItem("Reset")) { mDockspaceSetup = false; }
+                    if (ImGui::MenuItem("Reset")) { OnResetWindow(); }
                     ImGui::EndMenu();
                 }
                 ImGui::EndMenu();
@@ -601,6 +605,9 @@ namespace x {
 
         if (mAboutOpen) { ImGui::OpenPopup("About"); }
         Modal_About();
+
+        if (mNewProjectOpen) { ImGui::OpenPopup("New Project"); }
+        Modal_NewProject();
     }
 
     void XEditor::View_SceneSettings() {
@@ -667,7 +674,6 @@ namespace x {
         constexpr f32 heightAdjustment = 4.0f;
         const f32 listHeight           = windowSize.y - totalButtonArea - heightAdjustment;
 
-        ImGui::PushStyleColor(ImGuiCol_ChildBg, HexToImVec4("17171a"));
         ImGui::BeginChild("##entities_scroll_list", ImVec2(windowSize.x, listHeight), true);
         {
             if (mGame.IsInitialized() && mGame.GetActiveScene()->Loaded()) {
@@ -680,7 +686,6 @@ namespace x {
             }
         }
         ImGui::EndChild();
-        ImGui::PopStyleColor();
 
         ImGui::Dummy(ImVec2(0, buttonPadding));
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(buttonPadding, buttonPadding));
@@ -1009,7 +1014,6 @@ namespace x {
 
                 ImGui::Dummy(ImVec2(0, padding * 2));
 
-                ImGui::PushStyleColor(ImGuiCol_ChildBg, HexToImVec4("17171a"));
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4.0f, 4.0f));
                 if (ImGui::BeginChild("##GridScrollRegion", ImVec2(0, 0), false)) {
                     // Calculate number of rows needed
@@ -1157,7 +1161,6 @@ namespace x {
                 }
                 ImGui::EndChild();
                 ImGui::PopStyleVar();
-                ImGui::PopStyleColor();
             }
         }
         ImGui::End();
@@ -1205,7 +1208,6 @@ namespace x {
             ImGui::SameLine();
             ImGui::Checkbox("Debug", &showDebug);
 
-            ImGui::PushStyleColor(ImGuiCol_ChildBg, HexToImVec4("17171a"));
             ImGui::BeginChild("ScrollingRegion", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
 
             // Display logs
@@ -1219,9 +1221,7 @@ namespace x {
                 // Apply filters
                 if (!ShouldShowSeverity(entry.severity)) continue;
 
-                ImGui::PushStyleColor(ImGuiCol_Text, GetLogEntryColor(entry.severity));
                 ImGui::TextUnformatted(std::format("[{}] {}", entry.timestamp, entry.message).c_str());
-                ImGui::PopStyleColor();
             }
 
             // Auto-scroll to bottom
@@ -1230,7 +1230,6 @@ namespace x {
             ImGui::Dummy(ImVec2(0, 4));
 
             ImGui::EndChild();
-            ImGui::PopStyleColor();
         }
         ImGui::End();
     }
@@ -1268,6 +1267,12 @@ namespace x {
                 }
             }
         }
+        ImGui::End();
+    }
+
+    void XEditor::View_PostProcessing() {
+        ImGui::Begin("Post Processing");
+        {}
         ImGui::End();
     }
 #pragma endregion
@@ -1316,6 +1321,18 @@ namespace x {
         auto& state              = mGame.GetActiveScene()->GetState();
         const EntityId newEntity = state.CreateEntity(name);
         if (newEntity.Valid()) { state.AddComponent<TransformComponent>(newEntity); }
+    }
+
+    void XEditor::OnResetWindow() {
+        mShowSceneSettings    = true;
+        mShowEntities         = true;
+        mShowEntityProperties = true;
+        mShowViewport         = true;
+        mShowAssetBrowser     = true;
+        mShowLog              = true;
+        mShowAssetPreview     = true;
+        mShowPostProcessing   = true;
+        mDockspaceSetup       = false;
     }
 
     void XEditor::OnOpenProject() {
@@ -1545,6 +1562,7 @@ namespace x {
                 ImGui::DockBuilderDockWindow("Assets", dockBottomId);
                 ImGui::DockBuilderDockWindow("Log", dockBottomId);
                 ImGui::DockBuilderDockWindow("Asset Preview", dockRightBottomId);
+                ImGui::DockBuilderDockWindow("Post Processing", dockRightId);
 
                 ImGui::DockBuilderFinish(imguiViewport->ID);
             }

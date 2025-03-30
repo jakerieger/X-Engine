@@ -11,10 +11,10 @@
 
 using namespace x;
 
-class GameWindow final : public Window {
+class GameWindow final : public IWindow {
 public:
     GameWindow(const str& title, const str& initialScene)
-        : Window(title, 1600, 900), mGame(mContext), mInitialScene(initialScene) {
+        : IWindow(title, 1600, 900), mGame(mContext), mInitialScene(initialScene) {
         AddListener(&mGame);  // Let our game instance listen to window events (resize, lose focus, etc.)
     }
 

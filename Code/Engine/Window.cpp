@@ -9,7 +9,7 @@
 #include <windowsx.h>
 
 namespace x {
-    Window::Window(const str& title, const int width, const int height, WORD windowIcon) : mContext() {
+    IWindow::IWindow(const str& title, const int width, const int height, WORD windowIcon) : mContext() {
         mInstance      = nullptr;
         mHwnd          = nullptr;
         mCurrentWidth  = width;
@@ -18,11 +18,11 @@ namespace x {
         mWindowIcon    = windowIcon;
     }
 
-    Window::~Window() {
+    IWindow::~IWindow() {
         Shutdown();
     }
 
-    int Window::Run() {
+    int IWindow::Run() {
         mFocused = true;
 
         if (!Initialize()) {
@@ -49,12 +49,12 @@ namespace x {
         return 0;
     }
 
-    LRESULT Window::Quit() {
+    LRESULT IWindow::Quit() {
         ::PostQuitMessage(0);
         return S_OK;
     }
 
-    bool Window::Initialize() {
+    bool IWindow::Initialize() {
         // Initialize window
         const auto hr = ::CoInitializeEx(nullptr, COINIT_MULTITHREADED);
         if (FAILED(hr)) {
@@ -123,7 +123,7 @@ namespace x {
         return true;
     }
 
-    void Window::Shutdown() {
+    void IWindow::Shutdown() {
         OnShutdown();
 
         if (mWindowViewport) {
@@ -136,7 +136,7 @@ namespace x {
         ::CoUninitialize();
     }
 
-    LRESULT Window::ResizeHandler(u32 width, u32 height) {
+    LRESULT IWindow::ResizeHandler(u32 width, u32 height) {
         if (!mFocused) return S_OK;
 
         mCurrentWidth  = width;
@@ -156,7 +156,7 @@ namespace x {
         return S_OK;
     }
 
-    LRESULT Window::MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) {
+    LRESULT IWindow::MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) {
         switch (msg) {
             case WM_DESTROY:
                 return Quit();
@@ -210,25 +210,25 @@ namespace x {
         return ::DefWindowProcA(mHwnd, msg, wParam, lParam);
     }
 
-    void Window::SetWindowTitle(const str& title) const {
+    void IWindow::SetWindowTitle(const str& title) const {
         ::SetWindowTextA(mHwnd, title.c_str());
     }
 
-    void Window::SetWindowIcon(WORD resourceId) const {
+    void IWindow::SetWindowIcon(WORD resourceId) const {
         HICON icon = ::LoadIconA(::GetModuleHandleA(NULL), MAKEINTRESOURCE(resourceId));
         ::SendMessageA(mHwnd, WM_SETICON, ICON_SMALL, (LPARAM)icon);
         ::SendMessageA(mHwnd, WM_SETICON, ICON_BIG, (LPARAM)icon);
     }
 
-    LRESULT Window::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-        Window* self = nullptr;
+    LRESULT IWindow::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+        IWindow* self = nullptr;
 
         if (msg == WM_CREATE) {
             const auto* pCreate = RCAST<CREATESTRUCTA*>(lParam);
-            self                = CAST<Window*>(pCreate->lpCreateParams);
+            self                = CAST<IWindow*>(pCreate->lpCreateParams);
             ::SetWindowLongPtrA(hwnd, GWLP_USERDATA, RCAST<LONG_PTR>(self));
         } else {
-            self = RCAST<Window*>(GetWindowLongPtrA(hwnd, GWLP_USERDATA));
+            self = RCAST<IWindow*>(GetWindowLongPtrA(hwnd, GWLP_USERDATA));
         }
 
         if (self) { return self->MessageHandler(msg, wParam, lParam); }

@@ -26,7 +26,7 @@ namespace x {
         explicit Game(RenderContext& context);
         ~Game();
 
-        void Initialize(Window* window, Viewport* viewport, const Path& workingDir = Path::Current());
+        void Initialize(IWindow* window, Viewport* viewport, const Path& workingDir = Path::Current());
         void Shutdown();
         void Update(bool paused = false);
         void RenderFrame() const;
@@ -60,7 +60,7 @@ namespace x {
         ScriptEngine mScriptEngine;
         Input mInput;
         Mouse mMouse;
-        Window* mWindow;
+        IWindow* mWindow;
         SceneMap mScenes;
 
         void Pause();

@@ -11,10 +11,10 @@
 #include "Engine/RenderContext.hpp"
 
 namespace x {
-    class Window : public EventEmitter {
+    class IWindow : public EventEmitter {
     public:
-        Window(const str& title, int width, int height, WORD windowIcon = 0);
-        virtual ~Window();
+        IWindow(const str& title, int width, int height, WORD windowIcon = 0);
+        virtual ~IWindow();
 
         int Run();
         LRESULT Quit();

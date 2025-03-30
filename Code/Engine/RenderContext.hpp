@@ -51,7 +51,7 @@ namespace x {
 
     private:
         friend class Mesh;
-        friend class Window;
+        friend class IWindow;
         friend class Viewport;
 
         void ResizeSwapchainBuffers(u32 width, u32 height);

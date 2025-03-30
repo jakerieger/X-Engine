@@ -27,22 +27,18 @@ namespace x {
     struct EditorTheme {
         str mName;
         ImVec4 mWindowBackground;
-        ImVec4 mChildBackground;
-        ImVec4 mFrameBackground;
-        ImVec4 mAltBackground;
+        ImVec4 mMenuBackground;
+        ImVec4 mTabHeader;
+        ImVec4 mPanelBackground;
+        ImVec4 mButtonBackground;
+        ImVec4 mInputBackground;
         ImVec4 mHeaderBackground;
         ImVec4 mTextHighlight;
         ImVec4 mTextPrimary;
         ImVec4 mTextSecondary;
-        ImVec4 mTextDisabled;
+        ImVec4 mSelected;
+        ImVec4 mIcon;
         ImVec4 mBorder;
-        ImVec4 mError;
-        ImVec4 mWarning;
-        ImVec4 mSuccess;
-        ImVec4 mLink;
-        ImVec4 mScrollbar;
-        ImVec4 mPrimary;
-        ImVec4 mSecondary;
         f32 mBorderRadius;
         f32 mBorderWidth;
 
@@ -58,13 +54,13 @@ namespace x {
         void SaveSettings() const;
     };
 
-    class XEditor final : public Window {
+    class XEditor final : public IWindow {
     public:
         // Using `this->` to denote members of parent Window class
         // Window will initialize `mContext` and since its constructor gets called before our subclass initializes its
         // members, we can use `mContext` as inputs to our Editor member variable constructors.
         XEditor()
-            : Window("XEditor", 1440, 800), mTextureManager(this->mContext), mMeshPreviewer(this->mContext),
+            : IWindow("XEditor", 1440, 800), mTextureManager(this->mContext), mMeshPreviewer(this->mContext),
               mSceneViewport(this->mContext), mGame(this->mContext),
               mEditorResources(this->mContext, Memory::BYTES_2GB) {
             this->SetOpenMaximized(true);
@@ -125,6 +121,17 @@ namespace x {
         void View_AssetBrowser();
         void View_Log();
         void View_AssetPreview();
+        void View_PostProcessing();
+
+        // View toggles
+        bool mShowSceneSettings {true};
+        bool mShowEntities {true};
+        bool mShowEntityProperties {true};
+        bool mShowViewport {true};
+        bool mShowAssetBrowser {true};
+        bool mShowLog {true};
+        bool mShowAssetPreview {true};
+        bool mShowPostProcessing {true};
 
         // Popups
         bool mSceneSelectorOpen {false};
@@ -133,12 +140,14 @@ namespace x {
         bool mAddComponentOpen {false};
         bool mSaveSceneAsOpen {false};
         bool mAboutOpen {false};
+        bool mNewProjectOpen {false};
 
         void Modal_SelectScene();
         void Modal_SaveSceneAs();
         void Modal_AddComponent();
         void Modal_SelectAsset();
         void Modal_About();
+        void Modal_NewProject();
 
         // Button/menu actions
         void OnOpenProject();
@@ -147,6 +156,7 @@ namespace x {
         void OnImportAsset();
         void OnSaveScene(const char* name = nullptr);
         void OnAddEntity(const str& name) const;
+        void OnResetWindow();
 
         // I/O
         void LoadProject(const str& filename);
