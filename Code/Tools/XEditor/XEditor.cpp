@@ -97,7 +97,7 @@ namespace x {
 
 #pragma region EditorSession
     bool EditorSession::LoadSession() {
-        const auto sessionFile = Path(".session");
+        const auto sessionFile = Path::Current() / ".session";
         if (sessionFile.Exists()) {
             YAML::Node session = YAML::LoadFile(sessionFile.Str());
             if (session["last_project"].IsDefined()) {
@@ -109,7 +109,7 @@ namespace x {
     }
 
     void EditorSession::SaveSession() const {
-        const auto sessionFile = Path(".session");
+        const auto sessionFile = Path::Current() / ".session";
         YAML::Emitter out;
         out << YAML::BeginMap;
         out << YAML::Key << "last_project";
@@ -121,7 +121,7 @@ namespace x {
 
 #pragma region EditorTheme
     bool EditorTheme::LoadTheme(const str& theme) {
-        const auto themeFile = Path("Themes") / (theme + ".yaml");
+        const auto themeFile = Path::Current() / "Themes" / (theme + ".yaml");
         if (themeFile.Exists()) {
             YAML::Node themeNode = YAML::LoadFile(themeFile.Str());
 
@@ -220,7 +220,7 @@ namespace x {
 
 #pragma region EditorSettings
     bool EditorSettings::LoadSettings() {
-        const auto settingsFile = Path("engine.yaml");
+        const auto settingsFile = Path::Current() / "engine.yaml";
         if (settingsFile.Exists()) {
             YAML::Node settings = YAML::LoadFile(settingsFile.Str());
             mTheme              = settings["theme"].as<str>();
@@ -230,7 +230,7 @@ namespace x {
     }
 
     void EditorSettings::SaveSettings() const {
-        const auto settingsFile = Path("engine.yaml");
+        const auto settingsFile = Path::Current() / "engine.yaml";
         YAML::Emitter out;
         out << YAML::BeginMap;
         {
@@ -1410,7 +1410,22 @@ namespace x {
         mDockspaceSetup       = false;
     }
 
-    void XEditor::OnImportEngineContent() {}
+    void XEditor::OnImportEngineContent() {
+        const auto engineContentPath = Path::Current() / "EngineContent";
+        if (!engineContentPath.Exists()) {
+            Platform::ShowAlert(
+              mHwnd,
+              "Error",
+              str("Unable to load engine content, directory missing: " + engineContentPath.Str()).c_str(),
+              Platform::AlertSeverity::Error);
+        }
+
+        // TODO: 1. Copy EngineContent to project's Content directory
+
+        // TODO: 2. Generate asset descriptors for copied assets
+
+        // TODO: 3. Update editor asset cache and regenerate thumbnails
+    }
 
     void XEditor::OnOpenProject() {
         const auto filter = "Project (*.xproj)|*.xproj|";

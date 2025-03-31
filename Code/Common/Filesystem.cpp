@@ -297,9 +297,10 @@ namespace x {
 
 #pragma region Path
     Path Path::Current() {
-        char buffer[1024];
-        if (!getcwd(buffer, sizeof(buffer))) { throw std::runtime_error("Failed to get current working directory"); }
-        return Path(buffer);
+        char buffer[MAX_PATH];
+        ::GetModuleFileNameA(nullptr, buffer, MAX_PATH);
+        const str::size_type pos = str(buffer).find_last_of("\\/");
+        return Path(str(buffer).substr(0, pos));
     }
 
     Path Path::Parent() const {
