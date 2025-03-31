@@ -1,3 +1,8 @@
 *.rc linguist-vendored
 Code/Vendor/* linguist-vendored
 *.h linguist-vendored
+Engine/EngineContent/Audio filter=lfs diff=lfs merge=lfs -text
+Engine/EngineContent/Materials filter=lfs diff=lfs merge=lfs -text
+Engine/EngineContent/Models filter=lfs diff=lfs merge=lfs -text
+Engine/EngineContent/Scripts filter=lfs diff=lfs merge=lfs -text
+Engine/EngineContent/Textures filter=lfs diff=lfs merge=lfs -text

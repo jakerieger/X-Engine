@@ -308,7 +308,10 @@ namespace x {
         View_MainMenu();
         const f32 menuBarHeight = ImGui::GetFrameHeight();
 
-        SetupDockspace(menuBarHeight);
+        View_Toolbar(menuBarHeight);
+        const f32 yOffset = menuBarHeight + 36.0f;
+
+        SetupDockspace(yOffset);
 
         if (mShowViewport) View_Viewport();
         if (mShowSceneSettings) View_SceneSettings();
@@ -528,6 +531,8 @@ namespace x {
 #pragma region Editor Views
     void XEditor::View_MainMenu() {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::PushStyleColor(ImGuiCol_Text, mTheme.mTextPrimary);
+
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("New Project", "Ctrl+N")) { mNewProjectOpen = true; }
@@ -566,7 +571,7 @@ namespace x {
                 }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Import Asset")) { OnImportAsset(); }
-                if (ImGui::MenuItem("Generate Pak File")) {}
+                if (ImGui::MenuItem("Import Engine Content")) { OnImportEngineContent(); }
 
                 ImGui::EndMenu();
             }
@@ -595,7 +600,9 @@ namespace x {
             }
             ImGui::EndMainMenuBar();
         }
+
         ImGui::PopStyleVar();
+        ImGui::PopStyleColor();
 
         if (mSceneSelectorOpen) { ImGui::OpenPopup("Select Scene"); }
         Modal_SelectScene();
@@ -608,6 +615,74 @@ namespace x {
 
         if (mNewProjectOpen) { ImGui::OpenPopup("New Project"); }
         Modal_NewProject();
+    }
+
+    void XEditor::View_Toolbar(const f32 menuBarHeight) {
+        constexpr ImGuiWindowFlags toolbarFlags = ImGuiWindowFlags_NoTitleBar |            // No title bar needed
+                                                  ImGuiWindowFlags_NoScrollbar |           // Disable scrolling
+                                                  ImGuiWindowFlags_NoMove |                // Prevent moving
+                                                  ImGuiWindowFlags_NoResize |              // Prevent resizing
+                                                  ImGuiWindowFlags_NoCollapse |            // Prevent collapsing
+                                                  ImGuiWindowFlags_NoSavedSettings |       // Don't save position/size
+                                                  ImGuiWindowFlags_NoBringToFrontOnFocus;  // Don't change z-order
+
+        ImGui::SetNextWindowPos(ImVec2(0, menuBarHeight));
+        ImGui::SetNextWindowSize(ImVec2(ImGui::GetMainViewport()->Size.x, 36.0f));
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2, 2));
+
+        const ImVec4 background = ImGui::GetStyleColorVec4(ImGuiCol_MenuBarBg);
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, background);
+
+        if (ImGui::Begin("##Toolbar", nullptr, toolbarFlags)) {
+            const auto playIcon  = SrvAsTextureId(mTextureManager.GetTexture("PlayIcon")->mShaderResourceView.Get());
+            const auto pauseIcon = SrvAsTextureId(mTextureManager.GetTexture("PauseIcon")->mShaderResourceView.Get());
+            const auto stopIcon  = SrvAsTextureId(mTextureManager.GetTexture("StopIcon")->mShaderResourceView.Get());
+
+            static constexpr auto btnSize = ImVec2(24, 24);
+
+            // Move the next 3 buttons to the window center
+            // Total width is (24*3) + (2*3) or (72) + (6) or 78
+
+            auto windowWidth        = ImGui::GetWindowWidth();
+            auto middleButtonsWidth = (btnSize.x * 3) + 40;  // Calculated the '+ 40' using photoshop, no clue how it's
+                                                             // derived, but I'll be damned if it ain't centered
+            auto xOffset = (windowWidth / 2) - (middleButtonsWidth / 2);
+
+            ImGui::SameLine(xOffset);
+
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+            ImGui::ImageButton("##play_btn",
+                               playIcon,
+                               btnSize,
+                               {0, 0},
+                               {1, 1},
+                               ImVec4(0, 0, 0, 0),
+                               ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
+            ImGui::SameLine();  // 4
+            ImGui::ImageButton("##pause_btn",
+                               pauseIcon,
+                               btnSize,
+                               {0, 0},
+                               {1, 1},
+                               ImVec4(0, 0, 0, 0),
+                               ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
+            ImGui::SameLine();  // 4
+            ImGui::ImageButton("##stop_btn",
+                               stopIcon,
+                               btnSize,
+                               {0, 0},
+                               {1, 1},
+                               ImVec4(0, 0, 0, 0),
+                               ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
+            ImGui::PopStyleColor();
+
+            ImGui::End();
+        }
+
+        ImGui::PopStyleColor();
+        ImGui::PopStyleVar(2);
     }
 
     void XEditor::View_SceneSettings() {
@@ -1335,6 +1410,8 @@ namespace x {
         mDockspaceSetup       = false;
     }
 
+    void XEditor::OnImportEngineContent() {}
+
     void XEditor::OnOpenProject() {
         const auto filter = "Project (*.xproj)|*.xproj|";
         char filename[MAX_PATH];
@@ -1575,7 +1652,7 @@ namespace x {
 
 #pragma region Embedded Icon Includes
 #include "AssetBrowserIcons.h"
-#include "EditorIcons.h"
+#include "ToolbarIcons.h"
 #include "Logos.h"
 #pragma endregion
 
@@ -1658,21 +1735,6 @@ namespace x {
             X_LOG_ERROR("Failed to load Select icon");
             return false;
         }
-        result = mTextureManager.LoadFromMemory(SEPARATORICON_BYTES, 24, 24, 4, "SeparatorIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load Separator icon");
-            return false;
-        }
-        result = mTextureManager.LoadFromMemory(SETTINGSICON_BYTES, 24, 24, 4, "SettingsIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load Settings icon");
-            return false;
-        }
-        result = mTextureManager.LoadFromMemory(SNAP_TO_GRIDICON_BYTES, 24, 24, 4, "SnapToGridIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load SnapToGrid icon");
-            return false;
-        }
         result = mTextureManager.LoadFromMemory(STOPICON_BYTES, 24, 24, 4, "StopIcon");
         if (!result) {
             X_LOG_ERROR("Failed to load Stop icon");
@@ -1680,7 +1742,7 @@ namespace x {
         }
         result = mTextureManager.LoadFromMemory(SELECTASSETICON_BYTES, 24, 24, 4, "SelectAssetIcon");
         if (!result) {
-            X_LOG_ERROR("Failed to load SelectAsset icon");
+            X_LOG_ERROR("Failed to load Stop icon");
             return false;
         }
 

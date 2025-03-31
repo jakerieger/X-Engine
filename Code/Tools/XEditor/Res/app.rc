@@ -1,2 +1,38 @@
+#include <windows.h>
+#include <winver.h>
+
 #include "resource.h"
 APPICON ICON DISCARDABLE "icon.ico"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     1,0,0,0
+PRODUCTVERSION  1,0,0,0
+FILEFLAGSMASK   0x3fL
+#ifdef _DEBUG
+FILEFLAGS       VS_FF_DEBUG
+#else
+FILEFLAGS       0x0L
+#endif
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_APP
+FILESUBTYPE     0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904E4" // U.S. English in Windows ANSI
+        BEGIN
+            VALUE "CompanyName",      "Jake Rieger"
+            VALUE "FileDescription",   "The X Engine editor"
+            VALUE "FileVersion",       "1.0.0.0"
+            VALUE "InternalName",      "XEditor"
+            VALUE "LegalCopyright",    "Copyright © 2025 Jake Rieger"
+            VALUE "OriginalFilename",  "XEditor.exe"
+            VALUE "ProductName",       "XEditor"
+            VALUE "ProductVersion",    "1.0.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252 // U.S. English, Windows ANSI
+    END
+END

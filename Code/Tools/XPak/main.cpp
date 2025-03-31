@@ -12,7 +12,6 @@
 #include <CLI/CLI.hpp>
 
 using namespace x;
-using namespace x::Filesystem;
 
 struct PackArgs {
     str mProjectFile;

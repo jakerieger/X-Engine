@@ -114,6 +114,7 @@ namespace x {
 
         // Views/Tabs
         void View_MainMenu();
+        void View_Toolbar(f32 menuBarHeight);
         void View_SceneSettings();
         void View_Entities();
         void View_EntityProperties();
@@ -157,6 +158,7 @@ namespace x {
         void OnSaveScene(const char* name = nullptr);
         void OnAddEntity(const str& name) const;
         void OnResetWindow();
+        void OnImportEngineContent();
 
         // I/O
         void LoadProject(const str& filename);
