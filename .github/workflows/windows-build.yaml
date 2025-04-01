@@ -35,10 +35,3 @@ jobs:
       - name: Build
         run: |
           cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
-
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: x-engine-${{matrix.build_type}}
-          path: ${{github.workspace}}/build/**/*.exe
-          if-no-files-found: ignore
