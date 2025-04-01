@@ -2,9 +2,9 @@ name: Windows Build
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [ master, dev ]
   pull_request:
-    branches: [ main, master, develop ]
+    branches: [ master, dev ]
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
