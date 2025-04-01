@@ -2,10 +2,8 @@
 // Created: 12/12/24.
 //
 
-#include "Filesystem.hpp"
-
-#include <assert.h>
 #include <sstream>
+#include "Filesystem.hpp"
 
 #ifdef _WIN32
     // Windows does not define the S_ISREG and S_ISDIR macros in stat.h, so we do.
@@ -419,25 +417,47 @@ namespace x {
         return Create();
     }
 
-    Path Path::Copy(const Path& dest) const {
-        assert(IsFile());
-
-        if (dest == *this || dest / Filename() == *this) { return dest; }
-
-        const auto fileContents = FileReader::ReadAllBytes(*this);
-        if (dest.HasExtension()) {
-            FileWriter::WriteAllBytes(dest, fileContents);
-            return dest;
-        } else {
-            Path out = dest / Filename();
-            FileWriter::WriteAllBytes(out, fileContents);
-            return out;
-        }
+    bool Path::Copy(const Path& dest) const {
+        X_ASSERT(IsFile());
+        if (dest == *this) { return true; }
+        if (!::CopyFileA(path.c_str(), dest.path.c_str(), FALSE)) { return false; }
+        return true;
     }
 
-    Path Path::CopyDirectory(const Path& dest) {
-        assert(IsDirectory());
-        return {};
+    bool Path::CopyDirectory(const Path& dest) const {
+        X_ASSERT(IsDirectory());
+
+        const DWORD srcAttrs = ::GetFileAttributesA(path.c_str());
+        if (srcAttrs == INVALID_FILE_ATTRIBUTES) { return false; }
+        if (!(srcAttrs & FILE_ATTRIBUTE_DIRECTORY)) { return false; }
+
+        if (!::CreateDirectoryA(dest.CStr(), nullptr) && ::GetLastError() != ERROR_ALREADY_EXISTS) { return false; }
+
+        const str searchPattern = path + "\\*";
+        WIN32_FIND_DATAA findData;
+        const HANDLE hFind = ::FindFirstFileA(searchPattern.c_str(), &findData);
+        if (hFind == INVALID_HANDLE_VALUE) { return false; }
+
+        bool success {true};
+        do {
+            if (strcmp(findData.cFileName, ".") == 0 || strcmp(findData.cFileName, "..") == 0) { continue; }
+
+            Path srcPath  = Join(findData.cFileName);
+            Path destPath = dest / findData.cFileName;
+
+            if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+                if (!srcPath.CopyDirectory(destPath)) { success = false; }
+            } else {
+                if (!srcPath.Copy(destPath)) { success = false; }
+            }
+        } while (::FindNextFileA(hFind, &findData));
+
+        const DWORD lastError = ::GetLastError();
+        ::FindClose(hFind);
+
+        if (lastError != ERROR_NO_MORE_FILES) { success = false; }
+
+        return success;
     }
 
     DirectoryEntries Path::Entries() const {

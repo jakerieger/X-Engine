@@ -1166,7 +1166,7 @@ namespace x {
 
                             if (asset.GetTypeFromId() == kAssetType_Texture) {
                                 auto thumbnail = mTextureManager.GetTexture(std::to_string(asset.mId));
-                                assert(thumbnail.has_value());
+                                X_ASSERT(thumbnail.has_value());
 
                                 ImGui::GetWindowDrawList()->AddImage(
                                   SrvAsTextureId(thumbnail->mShaderResourceView.Get()),
@@ -1178,27 +1178,27 @@ namespace x {
                                 switch (asset.GetTypeFromId()) {
                                     case kAssetType_Audio: {
                                         auto icon = mTextureManager.GetTexture("AudioIcon");
-                                        assert(icon.has_value());
+                                        X_ASSERT(icon.has_value());
                                         iconSrv = icon->mShaderResourceView.Get();
                                     } break;
                                     case kAssetType_Material: {
                                         auto icon = mTextureManager.GetTexture("MaterialIcon");
-                                        assert(icon.has_value());
+                                        X_ASSERT(icon.has_value());
                                         iconSrv = icon->mShaderResourceView.Get();
                                     } break;
                                     case kAssetType_Mesh: {
                                         auto icon = mTextureManager.GetTexture("MeshIcon");
-                                        assert(icon.has_value());
+                                        X_ASSERT(icon.has_value());
                                         iconSrv = icon->mShaderResourceView.Get();
                                     } break;
                                     case kAssetType_Scene: {
                                         auto icon = mTextureManager.GetTexture("SceneIcon");
-                                        assert(icon.has_value());
+                                        X_ASSERT(icon.has_value());
                                         iconSrv = icon->mShaderResourceView.Get();
                                     } break;
                                     case kAssetType_Script: {
                                         auto icon = mTextureManager.GetTexture("ScriptIcon");
-                                        assert(icon.has_value());
+                                        X_ASSERT(icon.has_value());
                                         iconSrv = icon->mShaderResourceView.Get();
                                     } break;
                                     default:
@@ -1411,20 +1411,39 @@ namespace x {
     }
 
     void XEditor::OnImportEngineContent() {
-        const auto engineContentPath = Path::Current() / "EngineContent";
-        if (!engineContentPath.Exists()) {
-            Platform::ShowAlert(
-              mHwnd,
-              "Error",
-              str("Unable to load engine content, directory missing: " + engineContentPath.Str()).c_str(),
-              Platform::AlertSeverity::Error);
+        const Path contentSrc = Path::Current() / "EngineContent";
+        if (!contentSrc.Exists()) {
+            Platform::ShowAlert(mHwnd,
+                                "Error",
+                                str("Unable to load engine content, directory missing: " + contentSrc.Str()).c_str(),
+                                Platform::AlertSeverity::Error);
         }
 
-        // TODO: 1. Copy EngineContent to project's Content directory
+        const Path contentDest = mProjectRoot / "Content" / "EngineContent";
+        if (!contentSrc.CopyDirectory(contentDest)) {
+            Platform::ShowAlert(mHwnd, "Error", "Unable to copy engine content", Platform::AlertSeverity::Error);
+            return;
+        }
 
-        // TODO: 2. Generate asset descriptors for copied assets
+        vector<Path> failedToGenerate;
+        for (const auto& entry : contentDest.Entries()) {
+            if (entry.IsDirectory()) {
+                for (const auto& file : entry.Entries()) {
+                    if (!AssetGenerator::GenerateAsset(file, GetAssetTypeFromFile(file), mProjectRoot / "Content")) {
+                        failedToGenerate.push_back(file);
+                    }
+                }
+            }
+        }
+        if (failedToGenerate.size() > 0) {
+            for (const auto& entry : failedToGenerate) {
+                X_LOG_ERROR("Failed to generate asset for file: %s", entry.CStr());
+            }
+        }
 
-        // TODO: 3. Update editor asset cache and regenerate thumbnails
+        ReloadAssetCache();
+
+        Platform::ShowAlert(mHwnd, "XEditor", "Engine content has been imported", Platform::AlertSeverity::Info);
     }
 
     void XEditor::OnOpenProject() {
@@ -1499,10 +1518,13 @@ namespace x {
                 }
             }
 
-            const auto copiedAssetFile = assetFile.Copy(contentDir);
-            assert(copiedAssetFile.Exists());
+            const Path dest = contentDir / assetFile.Filename();
+            if (!assetFile.Copy(dest)) {
+                X_LOG_ERROR("Failed to copy '%s'", filename);
+                return;
+            }
 
-            if (!AssetGenerator::GenerateAsset(copiedAssetFile, assetType, rootContentDir)) {
+            if (!AssetGenerator::GenerateAsset(dest, assetType, rootContentDir)) {
                 X_LOG_ERROR("Failed to generate asset '%s'", filename);
                 return;
             }

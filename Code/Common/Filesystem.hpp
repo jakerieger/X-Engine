@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Types.hpp"
+#include "Macros.hpp"
 #include <fstream>
 #include <vector>
 #include <algorithm>
@@ -144,37 +145,32 @@ namespace x {
         explicit Path(const str& path) : path(Normalize(path)) {}
         static Path Current();
 
-        [[nodiscard]] Path Parent() const;
-        [[nodiscard]] bool Exists() const;
-        [[nodiscard]] bool IsFile() const;
-        [[nodiscard]] bool IsDirectory() const;
-        [[nodiscard]] bool HasExtension() const;
+        X_NODISCARD Path Parent() const;
+        X_NODISCARD bool Exists() const;
+        X_NODISCARD bool IsFile() const;
+        X_NODISCARD bool IsDirectory() const;
+        X_NODISCARD bool HasExtension() const;
 
         /// @brief Returns the file extension without the period '.'
         ///
         /// i.e. 'txt' or 'jpeg'
-        [[nodiscard]] str Extension() const;
-        [[nodiscard]] Path ReplaceExtension(const str& ext) const;
-        [[nodiscard]] Path Join(const str& subPath) const;
-        [[nodiscard]] Path operator/(const str& subPath) const;
-        [[nodiscard]] str Str() const;
-        [[nodiscard]] const char* CStr() const;
-        [[nodiscard]] str Filename() const;
-        [[nodiscard]] Path RelativeTo(const Path& basePath) const;
+        X_NODISCARD str Extension() const;
+        X_NODISCARD Path ReplaceExtension(const str& ext) const;
+        X_NODISCARD Path Join(const str& subPath) const;
+        X_NODISCARD Path operator/(const str& subPath) const;
+        X_NODISCARD str Str() const;
+        X_NODISCARD const char* CStr() const;
+        X_NODISCARD str Filename() const;
+        X_NODISCARD Path RelativeTo(const Path& basePath) const;
 
-        [[nodiscard]] bool operator==(const Path& other) const;
+        X_NODISCARD bool operator==(const Path& other) const;
 
-        [[nodiscard]] bool Create() const;
-        [[nodiscard]] bool CreateAll() const;
-        [[nodiscard]] Path Copy(const Path& dest) const;
-        [[nodiscard]] Path CopyDirectory(const Path& dest);
+        X_NODISCARD bool Create() const;
+        X_NODISCARD bool CreateAll() const;
+        X_NODISCARD bool Copy(const Path& dest) const;
+        X_NODISCARD bool CopyDirectory(const Path& dest) const;
 
-        // TODO: Implement
-        static Path Copy(const Path& src, const Path& dest) {}
-        static Path CopyDirectory(const Path& src, const Path& dest) {}
-        static Path Move(const Path& src, const Path& dest) {}
-
-        [[nodiscard]] DirectoryEntries Entries() const;
+        X_NODISCARD DirectoryEntries Entries() const;
 
     private:
         str path;
