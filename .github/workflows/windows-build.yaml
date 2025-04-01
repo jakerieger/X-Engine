@@ -1,0 +1,44 @@
+name: Windows Build
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [ Debug, Release ]
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetches all history for all branches and tags
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Setup Visual Studio Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          toolset: 14.34  # Visual Studio 2022
+
+      - name: Configure CMake
+        run: |
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+
+      - name: Build
+        run: |
+          cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: x-engine-${{matrix.build_type}}
+          path: ${{github.workspace}}/build/**/*.exe
+          if-no-files-found: ignore
