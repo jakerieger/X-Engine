@@ -25,8 +25,9 @@ jobs:
 
       - name: Setup Visual Studio Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1
-        with:
-          toolset: 14.34  # Visual Studio 2022
+
+      - name: Check MSVC Version
+        run: cl /version
 
       - name: Configure CMake
         run: |
