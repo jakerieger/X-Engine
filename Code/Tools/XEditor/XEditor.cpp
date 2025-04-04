@@ -692,13 +692,6 @@ namespace x {
                 auto& state = mGame.GetActiveScene()->GetState();
 
                 const f32 width = ImGui::GetContentRegionAvail().x;
-                ImGui::Text("Name: ");
-                ImGui::SameLine(kLabelWidth);
-                ImGui::SetNextItemWidth(width - kLabelWidth);
-                ImGui::InputText("##scene_name", mSceneSettings.mName, sizeof(mSceneSettings.mName));
-
-                ImGui::Spacing();
-                ImGui::Spacing();
 
                 if (ImGui::CollapsingHeader("World", ImGuiTreeNodeFlags_DefaultOpen)) {
                     // Sun
@@ -753,10 +746,7 @@ namespace x {
         {
             if (mGame.IsInitialized() && mGame.GetActiveScene()->Loaded()) {
                 for (auto& [id, name] : mGame.GetActiveScene()->GetState().GetEntities()) {
-                    if (ImGui::Selectable(name.c_str(), id == sSelectedEntity)) {
-                        sSelectedEntity = id;
-                        std::strcpy(mEntityProperties.mName, name.c_str());
-                    }
+                    if (ImGui::Selectable(name.c_str(), id == sSelectedEntity)) { sSelectedEntity = id; }
                 }
             }
         }
@@ -832,14 +822,14 @@ namespace x {
                 auto* behavior = state.GetComponentMutable<BehaviorComponent>(sSelectedEntity);
 
                 if (ImGui::CollapsingHeader("General##properties", ImGuiTreeNodeFlags_DefaultOpen)) {
-                    ImGui::Text("Name:");
-                    ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(size.x - kLabelWidth);
-                    const bool enterPressed = ImGui::InputText("##entity_name_input",
-                                                               mEntityProperties.mName,
-                                                               sizeof(mEntityProperties.mName),
-                                                               ImGuiInputTextFlags_EnterReturnsTrue);
-                    if (enterPressed) { state.RenameEntity(sSelectedEntity, mEntityProperties.mName); }
+                    // ImGui::Text("Name:");
+                    // ImGui::SameLine(kLabelWidth);
+                    // ImGui::SetNextItemWidth(size.x - kLabelWidth);
+                    // const bool enterPressed = ImGui::InputText("##entity_name_input",
+                    //                                            mEntityProperties.mName,
+                    //                                            sizeof(mEntityProperties.mName),
+                    //                                            ImGuiInputTextFlags_EnterReturnsTrue);
+                    // if (enterPressed) { state.RenameEntity(sSelectedEntity, mEntityProperties.mName); }
 
                     ImGui::Text("Enabled:");
                     ImGui::SameLine(kLabelWidth);
@@ -1463,8 +1453,6 @@ namespace x {
         mGame.TransitionScene(selectedScene);
 
         auto& state = mGame.GetActiveScene()->GetState();
-        // TODO: Remove the mSceneSettings member, its redundant
-        std::strcpy(mSceneSettings.mName, selectedScene.c_str());
         std::strcpy(EditorState::CurrentSceneName, selectedScene.c_str());
 
         SetWindowTitle(std::format("XEditor | {}", selectedScene));

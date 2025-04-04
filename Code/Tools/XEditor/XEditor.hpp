@@ -97,19 +97,6 @@ namespace x {
         EditorSettings mSettings;
         EditorTheme mTheme;
 
-        // ImGui settings variables.
-        // These are used to store editable data that is then used to update the current scene
-        // TODO: Remove
-        struct SceneSettings {
-            char mName[128] {0};
-            char mDesc[512] {0};
-        } mSceneSettings;
-
-        // TODO: Remove
-        struct EntityProperties {
-            char mName[256] {0};
-        } mEntityProperties;
-
         void ReloadAssetCache();
 
         // Views/Tabs
