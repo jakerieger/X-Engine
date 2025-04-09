@@ -3,7 +3,6 @@
 #include <typeindex>
 
 #include "Common/Types.hpp"
-#include "Memory.hpp"
 #include "ArenaAllocator.hpp"
 #include "RenderContext.hpp"
 
@@ -85,7 +84,7 @@ namespace x {
         std::unordered_map<std::type_index, unique_ptr<ResourceLoaderBase>> mLoaders;
 
     public:
-        explicit ResourceManager(RenderContext& context, const size_t arenaSize = Memory::BYTES_1GB)
+        explicit ResourceManager(RenderContext& context, const size_t arenaSize = X_GIGABYTES(1))
             : mAllocator(arenaSize), mRenderContext(context) {
             for (const auto& [type, factory] : ResourceRegistry::GetLoaderFactories()) {
                 mLoaders[type] = factory();

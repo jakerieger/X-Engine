@@ -7,8 +7,8 @@
 #define X_ALIGN_MALLOC(size, align) _aligned_malloc(size, align)
 #define X_ALIGN_FREE(ptr) _aligned_free(ptr)
 #define X_KILOBYTES(n) ((size_t)(n) * 1024)
-#define X_MEGABYTES(n) (KILOBYTES(n) * 1024)
-#define X_GIGABYTES(n) (MEGABYTES(n) * 1024)
+#define X_MEGABYTES(n) (X_KILOBYTES(n) * 1024)
+#define X_GIGABYTES(n) (X_MEGABYTES(n) * 1024)
 
 #ifdef _DEBUG
     #define X_DEBUG_ONLY(expr) expr

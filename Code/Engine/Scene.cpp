@@ -8,7 +8,7 @@
 
 namespace x {
     Scene::Scene(RenderContext& context, ScriptEngine& scriptEngine)
-        : mResources(context, Memory::BYTES_128MB), mState(), mInitialState(), mContext(context),
+        : mResources(context, X_MEGABYTES(128)), mState(), mInitialState(), mContext(context),
           mScriptEngine(scriptEngine) {}
 
     Scene::~Scene() {
@@ -149,6 +149,7 @@ namespace x {
                         mOpaqueObjects.push_back({modelComponent, transformComponent});
                     }
                 }
+                // TODO: Shitty hack, remove
                 auto* waterMaterial = material->As<WaterMaterial>();
                 if (waterMaterial) { waterMaterial->SetWaveTime(sceneTime); }
             }
@@ -193,6 +194,7 @@ namespace x {
 
     void Scene::DrawOpaque() {
         for (const auto [model, transform] : mOpaqueObjects) {
+            if (model == nullptr) { continue; }
             Matrix world    = transform->GetTransformMatrix();
             auto view       = mState.GetMainCamera()->GetViewMatrix();
             auto projection = mState.GetMainCamera()->GetProjectionMatrix();
@@ -205,6 +207,7 @@ namespace x {
 
     void Scene::DrawTransparent() {
         for (const auto [model, transform] : mTransparentObjects) {
+            if (model == nullptr) { continue; }
             Matrix world    = transform->GetTransformMatrix();
             auto view       = mState.GetMainCamera()->GetViewMatrix();
             auto projection = mState.GetMainCamera()->GetProjectionMatrix();

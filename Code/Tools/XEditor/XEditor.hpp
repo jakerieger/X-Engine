@@ -61,8 +61,7 @@ namespace x {
         // members, we can use `mContext` as inputs to our Editor member variable constructors.
         XEditor()
             : IWindow("XEditor", 1440, 800), mTextureManager(this->mContext), mMeshPreviewer(this->mContext),
-              mSceneViewport(this->mContext), mGame(this->mContext),
-              mEditorResources(this->mContext, Memory::BYTES_2GB) {
+              mSceneViewport(this->mContext), mGame(this->mContext), mEditorResources(this->mContext, X_GIGABYTES(2)) {
             this->SetOpenMaximized(true);
         }
 
@@ -146,6 +145,12 @@ namespace x {
         void OnAddEntity(const str& name) const;
         void OnResetWindow();
         void OnImportEngineContent();
+
+        // Helpers
+        SceneState& GetSceneState();
+        SceneState& GetSceneState() const;
+        Scene* GetCurrentScene() const;
+        std::map<EntityId, str> GetEntities();
 
         // I/O
         void LoadProject(const str& filename);

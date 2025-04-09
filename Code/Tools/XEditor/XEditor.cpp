@@ -365,7 +365,7 @@ namespace x {
     }
 
     void XEditor::Modal_AddComponent() {
-        auto& state = mGame.GetActiveScene()->GetState();
+        auto& state = GetSceneState();
 
         using ComponentMap             = unordered_map<str, str>;
         static ComponentMap components = {
@@ -688,8 +688,8 @@ namespace x {
     void XEditor::View_SceneSettings() {
         ImGui::Begin("Scene");
         {
-            if (mGame.IsInitialized() && mGame.GetActiveScene()->Loaded()) {
-                auto& state = mGame.GetActiveScene()->GetState();
+            if (mGame.IsInitialized() && GetCurrentScene()->Loaded()) {
+                auto& state = GetSceneState();
 
                 const f32 width = ImGui::GetContentRegionAvail().x;
 
@@ -744,8 +744,8 @@ namespace x {
 
         ImGui::BeginChild("##entities_scroll_list", ImVec2(windowSize.x, listHeight), true);
         {
-            if (mGame.IsInitialized() && mGame.GetActiveScene()->Loaded()) {
-                for (auto& [id, name] : mGame.GetActiveScene()->GetState().GetEntities()) {
+            if (mGame.IsInitialized() && GetCurrentScene()->Loaded()) {
+                for (auto& [id, name] : GetEntities()) {
                     if (ImGui::Selectable(name.c_str(), id == sSelectedEntity)) { sSelectedEntity = id; }
                 }
             }
@@ -801,8 +801,8 @@ namespace x {
         ImGui::Begin("Properties");
         const ImVec2 size = ImGui::GetContentRegionAvail();
         {
-            if (mGame.IsInitialized() && mGame.GetActiveScene()->Loaded() && sSelectedEntity.Valid()) {
-                auto& state = mGame.GetActiveScene()->GetState();
+            if (mGame.IsInitialized() && GetCurrentScene()->Loaded() && sSelectedEntity.Valid()) {
+                auto& state = GetSceneState();
 
                 auto* transform = state.GetComponentMutable<TransformComponent>(sSelectedEntity);
                 if (!transform) {
@@ -892,7 +892,7 @@ namespace x {
                                 const auto oldId = model->GetModelId();
                                 if (oldId == descriptor.mId) { return; }
 
-                                auto& resourceManager = mGame.GetActiveScene()->GetResourceManager();
+                                auto& resourceManager = GetCurrentScene()->GetResourceManager();
                                 if (resourceManager.LoadResource<Model>(descriptor.mId)) {
                                     const ResourceHandle<Model> modelResource =
                                       resourceManager.FetchResource<Model>(descriptor.mId);
@@ -1358,7 +1358,7 @@ namespace x {
     }
 
     void XEditor::OnSaveScene(const char* name) {
-        const auto* scene = mGame.GetActiveScene();
+        const auto* scene = GetCurrentScene();
         SceneDescriptor descriptor;
         SceneParser::StateToDescriptor(scene->GetState(), descriptor, name == nullptr ? scene->GetName() : name);
         if (descriptor.IsValid()) {
@@ -1383,9 +1383,13 @@ namespace x {
     }
 
     void XEditor::OnAddEntity(const str& name) const {
-        auto& state              = mGame.GetActiveScene()->GetState();
+        auto& state              = GetSceneState();
         const EntityId newEntity = state.CreateEntity(name);
-        if (newEntity.Valid()) { state.AddComponent<TransformComponent>(newEntity); }
+        if (newEntity.Valid()) {
+            state.AddComponent<TransformComponent>(newEntity);
+            // Scene needs to be updated or the viewport renderer freaks out
+            GetCurrentScene()->Update(0.0f);
+        }
     }
 
     void XEditor::OnResetWindow() {
@@ -1451,13 +1455,9 @@ namespace x {
 
     void XEditor::OnLoadScene(const str& selectedScene) {
         mGame.TransitionScene(selectedScene);
-
-        auto& state = mGame.GetActiveScene()->GetState();
         std::strcpy(EditorState::CurrentSceneName, selectedScene.c_str());
-
-        SetWindowTitle(std::format("XEditor | {}", selectedScene));
-
-        sSelectedEntity = mGame.GetActiveScene()->GetState().GetEntities().begin()->first;
+        this->SetWindowTitle(std::format("XEditor | {}", selectedScene));
+        sSelectedEntity = GetEntities().begin()->first;
     }
 
     void XEditor::OnImportAsset() {
@@ -1524,6 +1524,22 @@ namespace x {
 #pragma endregion
 
 #pragma region Editor Utils
+    SceneState& XEditor::GetSceneState() {
+        return mGame.GetActiveScene()->GetState();
+    }
+
+    SceneState& XEditor::GetSceneState() const {
+        return mGame.GetActiveScene()->GetState();
+    }
+
+    Scene* XEditor::GetCurrentScene() const {
+        return mGame.GetActiveScene();
+    }
+
+    std::map<EntityId, str> XEditor::GetEntities() {
+        return GetSceneState().GetEntities();
+    }
+
     void XEditor::GenerateAssetThumbnails() {
         const auto& assets = mAssetDescriptors;
         for (const auto& asset : assets) {
