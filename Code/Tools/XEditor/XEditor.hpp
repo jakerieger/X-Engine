@@ -109,6 +109,7 @@ namespace x {
         void View_Log();
         void View_AssetPreview();
         void View_PostProcessing();
+        void View_Material();
 
         // View toggles
         bool mShowSceneSettings {true};
@@ -119,6 +120,7 @@ namespace x {
         bool mShowLog {true};
         bool mShowAssetPreview {true};
         bool mShowPostProcessing {true};
+        bool mShowMaterial {false};
 
         // Popups
         bool mSceneSelectorOpen {false};
@@ -128,6 +130,7 @@ namespace x {
         bool mSaveSceneAsOpen {false};
         bool mAboutOpen {false};
         bool mNewProjectOpen {false};
+        bool mCreateMaterialOpen {false};
 
         void Modal_SelectScene();
         void Modal_SaveSceneAs();
@@ -135,6 +138,7 @@ namespace x {
         void Modal_SelectAsset();
         void Modal_About();
         void Modal_NewProject();
+        void Modal_CreateMaterial();
 
         // Button/menu actions
         void OnOpenProject();
@@ -145,6 +149,7 @@ namespace x {
         void OnAddEntity(const str& name) const;
         void OnResetWindow();
         void OnImportEngineContent();
+        void OnCreateMaterial();
 
         // Helpers
         SceneState& GetSceneState();

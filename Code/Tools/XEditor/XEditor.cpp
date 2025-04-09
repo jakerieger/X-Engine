@@ -321,6 +321,7 @@ namespace x {
         if (mShowLog) View_Log();
         if (mShowAssetPreview) View_AssetPreview();
         if (mShowPostProcessing) View_PostProcessing();
+        if (mShowMaterial) View_Material();
 
         ImGui::PopFont();
 
@@ -487,6 +488,37 @@ namespace x {
         }
     }
 
+    void XEditor::Modal_CreateMaterial() {
+        static i32 selectedType            = 0;
+        static const char* materialTypes[] = {"Standard Lit", "Basic Lit"};
+        char nameBuffer[256] {0};
+
+        const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        if (ImGui::BeginPopupModal("Create Material", &mCreateMaterialOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::Text("Material Type");
+            ImGui::SetNextItemWidth(408);
+            if (ImGui::Combo("##material_type_combo", &selectedType, materialTypes, std::size(materialTypes))) {
+                selectedType = selectedType % std::size(materialTypes);
+            }
+            ImGui::SetNextItemWidth(408);
+            ImGui::InputText("##material_name", nameBuffer, sizeof(nameBuffer));
+
+            if (ImGui::Button("OK", ImVec2(200, 0))) {
+                mCreateMaterialOpen = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SetItemDefaultFocus();
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(200, 0))) {
+                mCreateMaterialOpen = false;
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
+        }
+    }
+
     void XEditor::Modal_SelectScene() {
         const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
@@ -564,7 +596,10 @@ namespace x {
             }
             if (ImGui::BeginMenu("Assets")) {
                 if (ImGui::BeginMenu("Create")) {
-                    if (ImGui::MenuItem("Material")) {}
+                    if (ImGui::MenuItem("Material")) {
+                        mCreateMaterialOpen = true;
+                        if (!mShowMaterial) { mShowMaterial = true; }
+                    }
                     if (ImGui::MenuItem("Script")) {}
                     if (ImGui::MenuItem("Texture")) {}
                     ImGui::EndMenu();
@@ -584,6 +619,7 @@ namespace x {
                 if (ImGui::MenuItem("Log")) { mShowLog = !mShowLog; }
                 if (ImGui::MenuItem("Asset Preview")) { mShowAssetPreview = !mShowAssetPreview; }
                 if (ImGui::MenuItem("Post Processing")) { mShowPostProcessing = !mShowPostProcessing; }
+                if (ImGui::MenuItem("Material")) { mShowMaterial = !mShowMaterial; }
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Window")) {
@@ -615,6 +651,9 @@ namespace x {
 
         if (mNewProjectOpen) { ImGui::OpenPopup("New Project"); }
         Modal_NewProject();
+
+        if (mCreateMaterialOpen) { ImGui::OpenPopup("Create Material"); }
+        Modal_CreateMaterial();
     }
 
     void XEditor::View_Toolbar(const f32 menuBarHeight) {
@@ -1340,6 +1379,12 @@ namespace x {
         {}
         ImGui::End();
     }
+
+    void XEditor::View_Material() {
+        ImGui::Begin("Material");
+        {}
+        ImGui::End();
+    }
 #pragma endregion
 
 #pragma region Editor Actions
@@ -1401,6 +1446,7 @@ namespace x {
         mShowLog              = true;
         mShowAssetPreview     = true;
         mShowPostProcessing   = true;
+        mShowMaterial         = false;
         mDockspaceSetup       = false;
     }
 
@@ -1681,6 +1727,7 @@ namespace x {
                 ImGui::DockBuilderDockWindow("Log", dockBottomId);
                 ImGui::DockBuilderDockWindow("Asset Preview", dockRightBottomId);
                 ImGui::DockBuilderDockWindow("Post Processing", dockRightId);
+                ImGui::DockBuilderDockWindow("Material", dockMainId);
 
                 ImGui::DockBuilderFinish(imguiViewport->ID);
             }
