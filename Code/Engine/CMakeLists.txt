@@ -49,7 +49,6 @@ add_library(x STATIC
     ${ENGINE_DIR}/MaterialParser.cpp
     ${ENGINE_DIR}/MaterialParser.hpp
     ${ENGINE_DIR}/Math.hpp
-    ${ENGINE_DIR}/Memory.hpp
     ${ENGINE_DIR}/Model.cpp
     ${ENGINE_DIR}/Model.hpp
     ${ENGINE_DIR}/ModelComponent.cpp

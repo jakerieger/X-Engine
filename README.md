@@ -1,4 +1,4 @@
-![](Docs/image/banner.png)
+![](Docs/branding/XEngineBannerNoBg.png)
 
 ---
 
@@ -11,5 +11,5 @@ It boasts a modest forward renderer, entity component system, fully integrated e
 
 Entity behavior and scripting is handled by a JIT-compiled Lua runtime, and the engine core itself is quite lightweight and modular, compiling to a small static library that can be linked to any C++ application one wishes.
 
-![](Docs/image/EditorScreen03.png)
+![](Docs/image/EditorScreen04.png)
 > [XEditor](Code/Tools/XEditor) - the main editing tool for the engine.
