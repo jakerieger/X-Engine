@@ -6,6 +6,7 @@
 #include <imgui_internal.h>
 #include "Controls.hpp"
 
+#include "Utilities.hpp"
 #include "Common/FileDialogs.hpp"
 #include "Common/Types.hpp"
 #include "Engine/EngineCommon.hpp"
@@ -135,5 +136,51 @@ namespace x {
                                     containerPos.y + (containerSize.y - textSize.y) * 0.5f);
         drawList->AddText(textPos, ImGui::GetColorU32(ImGuiCol_Text), text);
         ImGui::Dummy(containerSize);
+    }
+
+    bool DragFloatNColored(
+      const char* label, f32* v, int components, f32 vSpeed, f32 vMin, f32 vMax, const char* format, f32 power) {
+        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        if (window->SkipItems) return false;
+
+        ImGuiContext& g = *GImGui;
+        bool valueChanged {false};
+
+        ImGui::BeginGroup();
+        {
+            ImGui::PushID(label);
+            ImGui::PushMultiItemsWidths(components, ImGui::CalcItemWidth());
+
+            const ImU32 R = ColorToU32(HexToImVec4("A8310D"));
+            const ImU32 G = ColorToU32(HexToImVec4("71A324"));
+            const ImU32 B = ColorToU32(HexToImVec4("387CD7"));
+
+            for (int i = 0; i < components; ++i) {
+                static const ImU32 colors[] = {R, G, B, 0xBBFFFFFF};
+
+                ImGui::PushID(i);
+                valueChanged |= ImGui::DragFloat("##v", &v[i], vSpeed, vMin, vMax, format, power);
+
+                const ImVec2 min      = ImGui::GetItemRectMin();
+                const ImVec2 max      = ImGui::GetItemRectMax();
+                const f32 spacing     = g.Style.FrameRounding;
+                const f32 halfSpacing = spacing * 0.5f;
+
+                window->DrawList->AddLine({min.x + spacing, max.y - halfSpacing},
+                                          {max.x - spacing, max.y - halfSpacing},
+                                          colors[i],
+                                          1);
+
+                ImGui::SameLine(0, g.Style.ItemInnerSpacing.x);
+                ImGui::PopID();
+                ImGui::PopItemWidth();
+            }
+
+            ImGui::PopID();
+            ImGui::TextUnformatted(label, ImGui::FindRenderedTextEnd(label));
+        }
+        ImGui::EndGroup();
+
+        return valueChanged;
     }
 }  // namespace x

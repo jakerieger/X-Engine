@@ -33,4 +33,7 @@ namespace x {
                          ImGuiInputTextFlags flags = ImGuiInputTextFlags_ReadOnly);
 
     void CenteredText(const char* text, const ImVec2& containerPos, const ImVec2& containerSize);
+
+    bool DragFloatNColored(
+      const char* label, f32* v, int components, f32 vSpeed, f32 vMin, f32 vMax, const char* format, f32 power);
 }  // namespace x

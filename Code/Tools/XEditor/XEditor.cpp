@@ -5,6 +5,7 @@
 #include "XEditor.hpp"
 #include "Res/resource.h"
 #include "Controls.hpp"
+#include "Utilities.hpp"
 
 #include "Common/FileDialogs.hpp"
 #include "Common/WindowsHelpers.hpp"
@@ -49,35 +50,6 @@ namespace x {
 #pragma endregion
 
 #pragma region Helpers
-    static ImTextureID SrvAsTextureId(ID3D11ShaderResourceView* srv) {
-        return RCAST<ImTextureID>(RCAST<void*>(srv));
-    }
-
-    static ImVec4 HexToImVec4(const str& hex, const f32 alpha = 1.0f) {
-        // Ensure the string is the correct length
-        if (hex.length() != 6) { throw std::invalid_argument("Hex color should be in the format 'RRGGBB'"); }
-
-        ImVec4 color;
-        const char red[3]   = {hex[0], hex[1], '\0'};
-        const char green[3] = {hex[2], hex[3], '\0'};
-        const char blue[3]  = {hex[4], hex[5], '\0'};
-
-        const i32 r = strtol(red, nullptr, 16);
-        const i32 g = strtol(green, nullptr, 16);
-        const i32 b = strtol(blue, nullptr, 16);
-
-        color.x = (f32)r / 255.0f;
-        color.y = (f32)g / 255.0f;
-        color.z = (f32)b / 255.0f;
-        color.w = alpha;
-
-        return color;
-    }
-
-    static ImVec4 ColorWithOpacity(const ImVec4 color, const f32 alpha = 1.0f) {
-        return ImVec4(color.x, color.y, color.z, alpha);
-    }
-
     static ImVec4 GetLogEntryColor(const u32 severity) {
         switch (severity) {
             default:
@@ -97,7 +69,7 @@ namespace x {
 
 #pragma region EditorSession
     bool EditorSession::LoadSession() {
-        const auto sessionFile = Path::Current() / ".session";
+        const auto sessionFile = Path::Current() / "session.yaml";
         if (sessionFile.Exists()) {
             YAML::Node session = YAML::LoadFile(sessionFile.Str());
             if (session["last_project"].IsDefined()) {
@@ -109,7 +81,7 @@ namespace x {
     }
 
     void EditorSession::SaveSession() const {
-        const auto sessionFile = Path::Current() / ".session";
+        const auto sessionFile = Path::Current() / "session.yaml";
         YAML::Emitter out;
         out << YAML::BeginMap;
         out << YAML::Key << "last_project";
@@ -754,8 +726,7 @@ namespace x {
 
                     ImGui::Text("Direction:");
                     ImGui::SameLine(kLabelWidth);
-                    ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::DragFloat3("##sun_direction", (f32*)&sun.mDirection, 0.01f);
+                    DragFloatNColored("##sun_direction", (f32*)&sun.mDirection, 3, 0.01f, 0.01f, 1.0f, "%.3f", 1.0f);
 
                     ImGui::Text("Casts Shadows:");
                     ImGui::SameLine(kLabelWidth);
@@ -881,34 +852,40 @@ namespace x {
                     ImGui::Text("Position:");
                     ImGui::SameLine(kLabelWidth);
                     ImGui::SetNextItemWidth(size.x - kLabelWidth);
-                    ImGui::DragFloat3("##entity_transform_position",
+                    DragFloatNColored("##entity_transform_position",
                                       (f32*)&EditorState::TransformPosition,
+                                      3,
                                       0.01f,
                                       -FLT_MAX,
                                       FLT_MAX,
-                                      "%.3f");
+                                      "%.3f",
+                                      1.0f);
                     transform->SetPosition(EditorState::TransformPosition);
 
                     ImGui::Text("Rotation:");
                     ImGui::SameLine(kLabelWidth);
                     ImGui::SetNextItemWidth(size.x - kLabelWidth);
-                    ImGui::DragFloat3("##entity_transform_rotation",
+                    DragFloatNColored("##entity_transform_rotation",
                                       (f32*)&EditorState::TransformRotation,
+                                      3,
                                       0.01f,
                                       -FLT_MAX,
                                       FLT_MAX,
-                                      "%.3f");
+                                      "%.3f",
+                                      1.0f);
                     transform->SetRotation(EditorState::TransformRotation);
 
                     ImGui::Text("Scale:");
                     ImGui::SameLine(kLabelWidth);
                     ImGui::SetNextItemWidth(size.x - kLabelWidth);
-                    ImGui::DragFloat3("##entity_transform_scale",
+                    DragFloatNColored("##entity_transform_scale",
                                       (f32*)&EditorState::TransformScale,
+                                      3,
                                       0.01f,
                                       -FLT_MAX,
                                       FLT_MAX,
-                                      "%.3f");
+                                      "%.3f",
+                                      1.0f);
                     transform->SetScale(EditorState::TransformScale);
 
                     transform->Update();
@@ -1325,7 +1302,9 @@ namespace x {
                 // Apply filters
                 if (!ShouldShowSeverity(entry.severity)) continue;
 
+                ImGui::PushStyleColor(ImGuiCol_Text, GetLogEntryColor(entry.severity));
                 ImGui::TextUnformatted(std::format("[{}] {}", entry.timestamp, entry.message).c_str());
+                ImGui::PopStyleColor();
             }
 
             // Auto-scroll to bottom

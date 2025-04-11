@@ -20,6 +20,7 @@ add_executable(XEditor WIN32
     ${EDITOR_DIR}/MeshPreviewer.hpp
     ${EDITOR_DIR}/TextureManager.cpp
     ${EDITOR_DIR}/TextureManager.hpp
+    ${EDITOR_DIR}/Utilities.hpp
     ${EDITOR_DIR}/XEditor.cpp
     ${EDITOR_DIR}/XEditor.hpp
     ${EDITOR_DIR}/main.cpp
@@ -46,4 +47,12 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_SOURCE_DIR}/Engine/EngineContent
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/EngineContent
+)
+
+# Copy LICENSES.txt
+add_custom_command(
+    TARGET XEditor POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_SOURCE_DIR}/LICENSES.txt
+    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/LICENSES.txt
 )

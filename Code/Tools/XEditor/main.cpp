@@ -4,12 +4,7 @@
 
 #include "XEditor.hpp"
 
-#undef X_MAIN
-#undef X_MODULE_HANDLE
-#define X_MAIN int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
-#define X_MODULE_HANDLE hInstance
-
-X_MAIN {
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow) {
     x::XEditor sceneEditor;
     return sceneEditor.Run();
 }
