@@ -26,19 +26,19 @@ namespace x {
 
     struct EditorTheme {
         str mName;
-        ImVec4 mWindowBackground;
-        ImVec4 mMenuBackground;
-        ImVec4 mTabHeader;
-        ImVec4 mPanelBackground;
+        ImVec4 mBorder;
         ImVec4 mButtonBackground;
-        ImVec4 mInputBackground;
         ImVec4 mHeaderBackground;
+        ImVec4 mIcon;
+        ImVec4 mInputBackground;
+        ImVec4 mMenuBackground;
+        ImVec4 mPanelBackground;
+        ImVec4 mSelected;
+        ImVec4 mTabHeader;
         ImVec4 mTextHighlight;
         ImVec4 mTextPrimary;
         ImVec4 mTextSecondary;
-        ImVec4 mSelected;
-        ImVec4 mIcon;
-        ImVec4 mBorder;
+        ImVec4 mWindowBackground;
         f32 mBorderRadius;
         f32 mBorderWidth;
 
@@ -74,87 +74,89 @@ namespace x {
 
         LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) override;
 
+        static bool HasSession();
+
     private:
         // UI / ImGui
         ImFont* mDefaultFont {nullptr};
-        unordered_map<str, ImFont*> mFonts;
+        MeshPreviewer mMeshPreviewer;
         Path mLoadedScenePath {};
         Path mProjectRoot {};
-        bool mDockspaceSetup {false};
         TextureManager mTextureManager;
-        MeshPreviewer mMeshPreviewer;
+        bool mDockspaceSetup {false};
+        unordered_map<str, ImFont*> mFonts;
 
         // Engine API
-        Viewport mSceneViewport;
         Game mGame;
         ProjectDescriptor mLoadedProject {};
-        vector<AssetDescriptor> mAssetDescriptors;
         ResourceManager mEditorResources;
+        Viewport mSceneViewport;
+        vector<AssetDescriptor> mAssetDescriptors;
 
         // Editor structures
         EditorSession mSession;
         EditorSettings mSettings;
         EditorTheme mTheme;
 
-        void ReloadAssetCache();
-
         // Views/Tabs
-        void View_MainMenu();
-        void View_Toolbar(f32 menuBarHeight);
-        void View_SceneSettings();
+        void View_AssetBrowser();
+        void View_AssetPreview();
         void View_Entities();
         void View_EntityProperties();
-        void View_Viewport();
-        void View_AssetBrowser();
         void View_Log();
-        void View_AssetPreview();
-        void View_PostProcessing();
+        void View_MainMenu();
         void View_Material();
+        void View_PostProcessing();
+        void View_SceneSettings();
+        void View_StartupScreen(f32 yOffset);
+        void View_StatusBar();
+        void View_Toolbar(f32 menuBarHeight);
+        void View_Viewport();
 
         // View toggles
-        bool mShowSceneSettings {true};
+        bool mShowAssetBrowser {true};
+        bool mShowAssetPreview {true};
         bool mShowEntities {true};
         bool mShowEntityProperties {true};
-        bool mShowViewport {true};
-        bool mShowAssetBrowser {true};
         bool mShowLog {true};
-        bool mShowAssetPreview {true};
-        bool mShowPostProcessing {true};
         bool mShowMaterial {false};
+        bool mShowPostProcessing {true};
+        bool mShowSceneSettings {true};
+        bool mShowViewport {true};
 
         // Popups
+        AssetType mSelectAssetFilter {kAssetType_Invalid};
+        bool mAboutOpen {false};
+        bool mAddComponentOpen {false};
+        bool mCreateMaterialOpen {false};
+        bool mNewProjectOpen {false};
+        bool mSaveSceneAsOpen {false};
         bool mSceneSelectorOpen {false};
         bool mSelectAssetOpen {false};
-        AssetType mSelectAssetFilter {kAssetType_Invalid};
-        bool mAddComponentOpen {false};
-        bool mSaveSceneAsOpen {false};
-        bool mAboutOpen {false};
-        bool mNewProjectOpen {false};
-        bool mCreateMaterialOpen {false};
 
-        void Modal_SelectScene();
-        void Modal_SaveSceneAs();
-        void Modal_AddComponent();
-        void Modal_SelectAsset();
         void Modal_About();
-        void Modal_NewProject();
+        void Modal_AddComponent();
         void Modal_CreateMaterial();
+        void Modal_NewProject();
+        void Modal_SaveSceneAs();
+        void Modal_SelectAsset();
+        void Modal_SelectScene();
 
         // Button/menu actions
-        void OnOpenProject();
-        void OnLoadScene(const str& selectedScene);
-        void OnSelectedMeshAsset(const AssetDescriptor& descriptor);
-        void OnImportAsset();
-        void OnSaveScene(const char* name = nullptr);
         void OnAddEntity(const str& name) const;
-        void OnResetWindow();
-        void OnImportEngineContent();
         void OnCreateMaterial();
+        void OnImportAsset();
+        void OnImportEngineContent();
+        void OnLoadScene(const str& selectedScene);
+        void OnOpenProject();
+        void OnResetWindow();
+        void OnSaveScene(const char* name = nullptr);
+        void OnSelectedMeshAsset(const AssetDescriptor& descriptor);
 
         // Helpers
-        SceneState& GetSceneState();
-        SceneState& GetSceneState() const;
         Scene* GetCurrentScene() const;
+        SceneState& GetSceneState() const;
+        SceneState& GetSceneState();
         std::map<EntityId, str> GetEntities();
 
         // I/O
@@ -163,10 +165,11 @@ namespace x {
         Path GetInitialDirectory() const;
         /// @brief Returns the AssetType based on the given filename/extension
         static AssetType GetAssetTypeFromFile(const Path& path);
+        void ReloadAssetCache();
 
         // ImGui-specific functions
-        void SetupDockspace(const f32 yOffset);
         bool LoadEditorIcons();
         void GenerateAssetThumbnails();
+        void SetupDockspace(const f32 yOffset);
     };
 }  // namespace x

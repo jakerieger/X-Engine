@@ -15,9 +15,12 @@ add_executable(XEditor WIN32
     ${EDITOR_DIR}/AssetBrowserIcons.h
     ${EDITOR_DIR}/Controls.cpp
     ${EDITOR_DIR}/Controls.hpp
+    ${EDITOR_DIR}/ImGuiHelpers.hpp
     ${EDITOR_DIR}/ToolbarIcons.h
     ${EDITOR_DIR}/MeshPreviewer.cpp
     ${EDITOR_DIR}/MeshPreviewer.hpp
+    ${EDITOR_DIR}/StartupScreen.cpp
+    ${EDITOR_DIR}/StartupScreen.hpp
     ${EDITOR_DIR}/TextureManager.cpp
     ${EDITOR_DIR}/TextureManager.hpp
     ${EDITOR_DIR}/Utilities.hpp

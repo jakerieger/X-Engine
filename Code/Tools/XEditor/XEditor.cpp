@@ -1,19 +1,14 @@
 // Author: Jake Rieger
 // Created: 3/11/2025.
 //
-
-#include "XEditor.hpp"
-#include "Res/resource.h"
-#include "Controls.hpp"
-#include "Utilities.hpp"
-
-#include "Common/FileDialogs.hpp"
-#include "Common/WindowsHelpers.hpp"
-
-#include "Engine/SceneParser.hpp"
-#include "Engine/EngineCommon.hpp"
-
-#include "XPak/AssetGenerator.hpp"
+// This file contains the bulk of the relevant code for the editor. If your editor/IDE supports regions, code folding
+// should be enabled for each section of the file.
+//
+// All assets used by the editor (icons, fonts, etc.) are embedded in the app itself. Header files ending in .h instead
+// of .hpp contain byte arrays for the asset(s).
+//
+// You can Ctrl+F with "View_" or "Modal_" to match functions for those UI elements. Event handlers for UI input actions
+// begin with "On", i.e. "OnSaveProject", and can be found the way.
 
 #include <Inter.h>
 #include <JetBrainsMono.h>
@@ -22,6 +17,17 @@
 #include <imgui_internal.h>
 #include <yaml-cpp/yaml.h>
 
+#include "XEditor.hpp"
+#include "Res/resource.h"
+#include "Controls.hpp"
+#include "Utilities.hpp"
+#include "ImGuiHelpers.hpp"
+#include "Common/FileDialogs.hpp"
+#include "Common/WindowsHelpers.hpp"
+#include "Engine/SceneParser.hpp"
+#include "Engine/EngineCommon.hpp"
+#include "XPak/AssetGenerator.hpp"
+
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace x {
@@ -29,7 +35,9 @@ namespace x {
     static constexpr ImVec2 kViewportSize {1024, 576};  // Default viewport size
     static constexpr f32 kLabelWidth {140.0f};
     static constexpr i32 kNoSelection {-1};
-    static constexpr u32 kAssetIconColumnCount {9};
+    static constexpr u32 kAssetIconColumnCount {11};
+    static constexpr f32 kToolbarHeight {36.0f};
+    static constexpr f32 kStatusBarHeight {24.0f};
 #pragma endregion
 
 #pragma region UI State
@@ -155,7 +163,7 @@ namespace x {
         colors[ImGuiCol_PlotHistogram]         = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
         colors[ImGuiCol_PlotLinesHovered]      = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
         colors[ImGuiCol_PlotLines]             = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
-        colors[ImGuiCol_PopupBg]               = mPanelBackground;
+        colors[ImGuiCol_PopupBg]               = mWindowBackground;
         colors[ImGuiCol_ResizeGripActive]      = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
         colors[ImGuiCol_ResizeGripHovered]     = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
         colors[ImGuiCol_ResizeGrip]            = ImVec4(0.26f, 0.59f, 0.98f, 0.20f);
@@ -229,8 +237,16 @@ namespace x {
 
         ImFontAtlas* fontAtlas = io.Fonts;
         mDefaultFont           = fontAtlas->AddFontDefault();
+
         mFonts["display"] =
           fontAtlas->AddFontFromMemoryCompressedTTF(Inter_compressed_data, Inter_compressed_size, 16.0f);
+
+        mFonts["display_20"] =
+          fontAtlas->AddFontFromMemoryCompressedTTF(Inter_compressed_data, Inter_compressed_size, 20.0f);
+
+        mFonts["title"] =
+          fontAtlas->AddFontFromMemoryCompressedTTF(Inter_compressed_data, Inter_compressed_size, 128.0f);
+
         mFonts["mono"] = fontAtlas->AddFontFromMemoryCompressedTTF(JetBrainsMono_TTF_compressed_data,
                                                                    JetBrainsMono_TTF_compressed_size,
                                                                    16.0f);
@@ -280,20 +296,26 @@ namespace x {
         View_MainMenu();
         const f32 menuBarHeight = ImGui::GetFrameHeight();
 
-        View_Toolbar(menuBarHeight);
-        const f32 yOffset = menuBarHeight + 36.0f;
+        if (HasSession()) {
+            View_Toolbar(menuBarHeight);
+            const f32 yOffset = menuBarHeight + kToolbarHeight;
 
-        SetupDockspace(yOffset);
+            SetupDockspace(yOffset);
 
-        if (mShowViewport) View_Viewport();
-        if (mShowSceneSettings) View_SceneSettings();
-        if (mShowEntities) View_Entities();
-        if (mShowEntityProperties) View_EntityProperties();
-        if (mShowAssetBrowser) View_AssetBrowser();
-        if (mShowLog) View_Log();
-        if (mShowAssetPreview) View_AssetPreview();
-        if (mShowPostProcessing) View_PostProcessing();
-        if (mShowMaterial) View_Material();
+            if (mShowViewport) View_Viewport();
+            if (mShowSceneSettings) View_SceneSettings();
+            if (mShowEntities) View_Entities();
+            if (mShowEntityProperties) View_EntityProperties();
+            if (mShowAssetBrowser) View_AssetBrowser();
+            if (mShowLog) View_Log();
+            if (mShowAssetPreview) View_AssetPreview();
+            if (mShowPostProcessing) View_PostProcessing();
+            if (mShowMaterial) View_Material();
+
+            View_StatusBar();
+        } else {
+            View_StartupScreen(menuBarHeight);
+        }
 
         ImGui::PopFont();
 
@@ -307,6 +329,10 @@ namespace x {
     LRESULT XEditor::MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) {
         if (ImGui_ImplWin32_WndProcHandler(mHwnd, msg, wParam, lParam)) return true;
         return IWindow::MessageHandler(msg, wParam, lParam);
+    }
+
+    bool XEditor::HasSession() {
+        return (Path::Current() / "session.yaml").Exists();
     }
 #pragma endregion
 
@@ -364,12 +390,12 @@ namespace x {
                 if (available) {
                     availableComponents++;
                     const auto id = "##" + name + "_component_option";
-                    if (SelectableWithHeaders(id.c_str(),
-                                              name.c_str(),
-                                              description.c_str(),
-                                              selectedComponent == name,
-                                              true,
-                                              ImVec2(0, itemHeight))) {
+                    if (Gui::SelectableWithHeaders(id.c_str(),
+                                                   name.c_str(),
+                                                   description.c_str(),
+                                                   selectedComponent == name,
+                                                   true,
+                                                   ImVec2(0, itemHeight))) {
                         selectedComponent = name;
                     }
                     ImGui::Dummy(ImVec2(0, 2.f));
@@ -378,7 +404,7 @@ namespace x {
 
             if (availableComponents == 0) {
                 const ImVec2 size = ImGui::GetContentRegionAvail();
-                CenteredText("No components available", ImGui::GetCursorScreenPos(), ImVec2(size.x, 48));
+                Gui::CenteredText("No components available", ImGui::GetCursorScreenPos(), ImVec2(size.x, 48));
             }
 
             // Buttons
@@ -416,12 +442,12 @@ namespace x {
             // Assets list
             static u64 selectedAssetId {0};
             for (const auto& desc : availableAssets) {
-                if (SelectableWithHeaders(std::format("##{}_asset_select", desc.mId).c_str(),
-                                          desc.mFilename.c_str(),
-                                          std::to_string(desc.mId).c_str(),
-                                          desc.mId == selectedAssetId,
-                                          0,
-                                          ImVec2(408, 48))) {
+                if (Gui::SelectableWithHeaders(std::format("##{}_asset_select", desc.mId).c_str(),
+                                               desc.mFilename.c_str(),
+                                               std::to_string(desc.mId).c_str(),
+                                               desc.mId == selectedAssetId,
+                                               0,
+                                               ImVec2(408, 48))) {
                     selectedAssetId = desc.mId;
                 }
             }
@@ -446,7 +472,7 @@ namespace x {
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
         if (ImGui::BeginPopupModal("About", &mAboutOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
             const auto banner = mTextureManager.GetTexture("AboutBanner");
-            ImGui::Image(SrvAsTextureId(banner->mShaderResourceView.Get()), ImVec2(800, 300));
+            ImGui::Image(SrvToTextureId(banner->mShaderResourceView.Get()), ImVec2(800, 300));
             ImGui::EndPopup();
         }
     }
@@ -502,12 +528,12 @@ namespace x {
                 str id          = "##" + std::to_string(index) + "scene_select";  // ex. ##0_select_scene
                 str description = desc.mDescription;
                 if (description.length() > 50) { description = description.substr(0, 50) + "..."; }
-                if (SelectableWithHeaders(id.c_str(),
-                                          name.c_str(),
-                                          description.c_str(),
-                                          selectedScene == name,
-                                          ImGuiSelectableFlags_None,
-                                          ImVec2(0, 48))) {
+                if (Gui::SelectableWithHeaders(id.c_str(),
+                                               name.c_str(),
+                                               description.c_str(),
+                                               selectedScene == name,
+                                               ImGuiSelectableFlags_None,
+                                               ImVec2(0, 48))) {
                     selectedScene = name;
                 }
                 index++;
@@ -638,7 +664,7 @@ namespace x {
                                                   ImGuiWindowFlags_NoBringToFrontOnFocus;  // Don't change z-order
 
         ImGui::SetNextWindowPos(ImVec2(0, menuBarHeight));
-        ImGui::SetNextWindowSize(ImVec2(ImGui::GetMainViewport()->Size.x, 36.0f));
+        ImGui::SetNextWindowSize(ImVec2(ImGui::GetMainViewport()->Size.x, kToolbarHeight));
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2, 2));
@@ -647,9 +673,9 @@ namespace x {
         ImGui::PushStyleColor(ImGuiCol_WindowBg, background);
 
         if (ImGui::Begin("##Toolbar", nullptr, toolbarFlags)) {
-            const auto playIcon  = SrvAsTextureId(mTextureManager.GetTexture("PlayIcon")->mShaderResourceView.Get());
-            const auto pauseIcon = SrvAsTextureId(mTextureManager.GetTexture("PauseIcon")->mShaderResourceView.Get());
-            const auto stopIcon  = SrvAsTextureId(mTextureManager.GetTexture("StopIcon")->mShaderResourceView.Get());
+            const auto playIcon  = SrvToTextureId(mTextureManager.GetTexture("PlayIcon")->mShaderResourceView.Get());
+            const auto pauseIcon = SrvToTextureId(mTextureManager.GetTexture("PauseIcon")->mShaderResourceView.Get());
+            const auto stopIcon  = SrvToTextureId(mTextureManager.GetTexture("StopIcon")->mShaderResourceView.Get());
 
             static constexpr auto btnSize = ImVec2(24, 24);
 
@@ -726,7 +752,14 @@ namespace x {
 
                     ImGui::Text("Direction:");
                     ImGui::SameLine(kLabelWidth);
-                    DragFloatNColored("##sun_direction", (f32*)&sun.mDirection, 3, 0.01f, 0.01f, 1.0f, "%.3f", 1.0f);
+                    Gui::DragFloatNColored("##sun_direction",
+                                           (f32*)&sun.mDirection,
+                                           3,
+                                           0.01f,
+                                           0.01f,
+                                           1.0f,
+                                           "%.3f",
+                                           1.0f);
 
                     ImGui::Text("Casts Shadows:");
                     ImGui::SameLine(kLabelWidth);
@@ -738,6 +771,64 @@ namespace x {
             }
         }
         ImGui::End();
+    }
+
+    void XEditor::View_StartupScreen(f32 yOffset) {
+        constexpr ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
+                                                 ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize |
+                                                 ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
+                                                 ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoScrollbar;
+
+        ImVec2 size = ImGui::GetMainViewport()->Size;
+        ImGui::SetNextWindowSize({size.x, size.y - yOffset});
+        ImGui::SetNextWindowPos(ImVec2(0, yOffset));
+
+        const f32 yHalfway      = (size.y - yOffset) / 2.0f;
+        const f32 buttonSize    = 220.0f;
+        const f32 buttonSpacing = 40.0f;
+        const f32 buttonsWidth  = (buttonSize * 3.0f) + (buttonSpacing * 2.0f);
+        const ImVec2 buttonCursorPos {(size.x / 2.0f) - (buttonsWidth / 2.0f), yHalfway};
+        const ImVec2 titleSize {579, 97};
+        const ImVec2 titleCursorPos {(size.x / 2.0f) - (titleSize.x / 2.0f), yHalfway - buttonSize};
+
+        {
+            Gui::ScopedStyleVars vars({{ImGuiStyleVar_WindowRounding, 0.0f}, {ImGuiStyleVar_WindowBorderSize, 0.0f}});
+            Gui::ScopedColorVars colors({{ImGuiCol_WindowBg, ImGui::GetStyleColorVec4(ImGuiCol_MenuBarBg)}});
+            ImGui::Begin("Startup Screen", nullptr, windowFlags);
+            {
+                // Draw title image
+                ID3D11ShaderResourceView* titleImage = mTextureManager.GetTexture("XEditor")->mShaderResourceView.Get();
+                ImGui::SetCursorPos(titleCursorPos);
+                ImGui::Image(SrvToTextureId(titleImage), titleSize);
+
+                Gui::ScopedStyleVars buttonVars(
+                  {{ImGuiStyleVar_FrameRounding, 16.0f}, {ImGuiStyleVar_FrameBorderSize, 4.0f}});
+                Gui::ScopedColorVars buttonColors({{ImGuiCol_Border, HexToImVec4("353535")},
+                                                   {ImGuiCol_Button, HexToImVec4("161616")},
+                                                   {ImGuiCol_ButtonActive, HexToImVec4("222222")},
+                                                   {ImGuiCol_ButtonHovered, HexToImVec4("1F1F1F")}});
+
+                ImGui::PushFont(mFonts["display_20"]);
+
+                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(buttonSpacing, 4.0f));
+                ImGui::SetCursorPos(buttonCursorPos);
+                if (Gui::BorderedButton("New Project", ImVec2(buttonSize, buttonSize))) {
+                    // TODO: OnNewProject()
+                }
+                ImGui::SameLine();
+
+                if (Gui::BorderedButton("Open Project", ImVec2(buttonSize, buttonSize))) { OnOpenProject(); }
+                ImGui::SameLine();
+
+                if (Gui::BorderedButton("Settings", ImVec2(buttonSize, buttonSize))) {
+                    // TODO: OnShowSettings()
+                }
+                ImGui::PopStyleVar();
+
+                ImGui::PopFont();
+            }
+            ImGui::End();
+        }
     }
 
     void XEditor::View_Entities() {
@@ -805,7 +896,7 @@ namespace x {
 
     void XEditor::View_EntityProperties() {
         static const ImTextureID selectAssetIcon =
-          SrvAsTextureId(mTextureManager.GetTexture("SelectAssetIcon").value().mShaderResourceView.Get());
+          SrvToTextureId(mTextureManager.GetTexture("SelectAssetIcon").value().mShaderResourceView.Get());
         static AssetDescriptor selectedAsset {};
 
         ImGui::Begin("Properties");
@@ -852,40 +943,40 @@ namespace x {
                     ImGui::Text("Position:");
                     ImGui::SameLine(kLabelWidth);
                     ImGui::SetNextItemWidth(size.x - kLabelWidth);
-                    DragFloatNColored("##entity_transform_position",
-                                      (f32*)&EditorState::TransformPosition,
-                                      3,
-                                      0.01f,
-                                      -FLT_MAX,
-                                      FLT_MAX,
-                                      "%.3f",
-                                      1.0f);
+                    Gui::DragFloatNColored("##entity_transform_position",
+                                           (f32*)&EditorState::TransformPosition,
+                                           3,
+                                           0.01f,
+                                           -FLT_MAX,
+                                           FLT_MAX,
+                                           "%.3f",
+                                           1.0f);
                     transform->SetPosition(EditorState::TransformPosition);
 
                     ImGui::Text("Rotation:");
                     ImGui::SameLine(kLabelWidth);
                     ImGui::SetNextItemWidth(size.x - kLabelWidth);
-                    DragFloatNColored("##entity_transform_rotation",
-                                      (f32*)&EditorState::TransformRotation,
-                                      3,
-                                      0.01f,
-                                      -FLT_MAX,
-                                      FLT_MAX,
-                                      "%.3f",
-                                      1.0f);
+                    Gui::DragFloatNColored("##entity_transform_rotation",
+                                           (f32*)&EditorState::TransformRotation,
+                                           3,
+                                           0.01f,
+                                           -FLT_MAX,
+                                           FLT_MAX,
+                                           "%.3f",
+                                           1.0f);
                     transform->SetRotation(EditorState::TransformRotation);
 
                     ImGui::Text("Scale:");
                     ImGui::SameLine(kLabelWidth);
                     ImGui::SetNextItemWidth(size.x - kLabelWidth);
-                    DragFloatNColored("##entity_transform_scale",
-                                      (f32*)&EditorState::TransformScale,
-                                      3,
-                                      0.01f,
-                                      -FLT_MAX,
-                                      FLT_MAX,
-                                      "%.3f",
-                                      1.0f);
+                    Gui::DragFloatNColored("##entity_transform_scale",
+                                           (f32*)&EditorState::TransformScale,
+                                           3,
+                                           0.01f,
+                                           -FLT_MAX,
+                                           FLT_MAX,
+                                           "%.3f",
+                                           1.0f);
                     transform->SetScale(EditorState::TransformScale);
 
                     transform->Update();
@@ -926,12 +1017,12 @@ namespace x {
                             const auto currentValue = Path(modelAsset->mFilename).Filename();
                             std::strcpy(buffer, currentValue.c_str());
 
-                            if (AssetDropTarget("##model_drop_target",
-                                                buffer,
-                                                sizeof(buffer),
-                                                selectAssetIcon,
-                                                X_DROP_TARGET_MESH,
-                                                UpdateMesh)) {
+                            if (Gui::AssetDropTarget("##model_drop_target",
+                                                     buffer,
+                                                     sizeof(buffer),
+                                                     selectAssetIcon,
+                                                     X_DROP_TARGET_MESH,
+                                                     UpdateMesh)) {
                                 mSelectAssetOpen   = true;
                                 mSelectAssetFilter = kAssetType_Mesh;
                             }
@@ -962,12 +1053,12 @@ namespace x {
                             const auto currentValue = Path(materialAsset->mFilename).Filename();
                             std::strcpy(buffer, currentValue.c_str());
 
-                            if (AssetDropTarget("##material_drop_target",
-                                                buffer,
-                                                sizeof(buffer),
-                                                selectAssetIcon,
-                                                X_DROP_TARGET_MATERIAL,
-                                                UpdateMaterial)) {
+                            if (Gui::AssetDropTarget("##material_drop_target",
+                                                     buffer,
+                                                     sizeof(buffer),
+                                                     selectAssetIcon,
+                                                     X_DROP_TARGET_MATERIAL,
+                                                     UpdateMaterial)) {
                                 mSelectAssetOpen   = true;
                                 mSelectAssetFilter = kAssetType_Material;
                             }
@@ -1012,12 +1103,12 @@ namespace x {
                             const auto currentValue = Path(scriptAsset->mFilename).Filename();
                             std::strcpy(buffer, currentValue.c_str());
 
-                            if (AssetDropTarget("##script_drop_target",
-                                                buffer,
-                                                sizeof(buffer),
-                                                selectAssetIcon,
-                                                X_DROP_TARGET_SCRIPT,
-                                                UpdateScript)) {
+                            if (Gui::AssetDropTarget("##script_drop_target",
+                                                     buffer,
+                                                     sizeof(buffer),
+                                                     selectAssetIcon,
+                                                     X_DROP_TARGET_SCRIPT,
+                                                     UpdateScript)) {
                                 mSelectAssetOpen   = true;
                                 mSelectAssetFilter = kAssetType_Script;
                             }
@@ -1061,7 +1152,7 @@ namespace x {
             }
 
             auto* srv = mSceneViewport.GetShaderResourceView().Get();
-            ImGui::Image(SrvAsTextureId(srv), contentSize);
+            ImGui::Image(SrvToTextureId(srv), contentSize);
         }
         ImGui::End();
         ImGui::PopStyleVar();
@@ -1175,7 +1266,7 @@ namespace x {
                                 X_ASSERT(thumbnail.has_value());
 
                                 ImGui::GetWindowDrawList()->AddImage(
-                                  SrvAsTextureId(thumbnail->mShaderResourceView.Get()),
+                                  SrvToTextureId(thumbnail->mShaderResourceView.Get()),
                                   ImVec2(imageStartX, imageStartY),
                                   ImVec2(imageStartX + thumbnailSize, imageStartY + thumbnailSize));
                             } else {
@@ -1212,7 +1303,7 @@ namespace x {
                                 }
 
                                 ImGui::GetWindowDrawList()->AddImage(
-                                  SrvAsTextureId(iconSrv),
+                                  SrvToTextureId(iconSrv),
                                   ImVec2(imageStartX, imageStartY),
                                   ImVec2(imageStartX + thumbnailSize, imageStartY + thumbnailSize));
                             }
@@ -1334,7 +1425,7 @@ namespace x {
                 const AssetType assetType = asset.GetTypeFromId();
                 if (assetType == kAssetType_Texture) {
                     const auto preview =
-                      SrvAsTextureId(mTextureManager.GetTexture(std::to_string(asset.mId))->mShaderResourceView.Get());
+                      SrvToTextureId(mTextureManager.GetTexture(std::to_string(asset.mId))->mShaderResourceView.Get());
                     ImVec2 regionSize = ImGui::GetContentRegionAvail();
                     regionSize.y      = regionSize.x;
                     ImGui::Image(preview, regionSize);
@@ -1345,7 +1436,7 @@ namespace x {
                     ImVec2 regionSize = ImGui::GetContentRegionAvail();
                     regionSize.y      = regionSize.x;
                     auto* srv         = mMeshPreviewer.Render(regionSize);
-                    ImGui::Image(SrvAsTextureId(srv), regionSize);
+                    ImGui::Image(SrvToTextureId(srv), regionSize);
                 } else if (assetType == kAssetType_Script) {
                 }
             }
@@ -1363,6 +1454,35 @@ namespace x {
         ImGui::Begin("Material");
         {}
         ImGui::End();
+    }
+
+    void XEditor::View_StatusBar() {
+        constexpr ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar |            // No title bar needed
+                                                 ImGuiWindowFlags_NoScrollbar |           // Disable scrolling
+                                                 ImGuiWindowFlags_NoMove |                // Prevent moving
+                                                 ImGuiWindowFlags_NoResize |              // Prevent resizing
+                                                 ImGuiWindowFlags_NoCollapse |            // Prevent collapsing
+                                                 ImGuiWindowFlags_NoSavedSettings |       // Don't save position/size
+                                                 ImGuiWindowFlags_NoBringToFrontOnFocus;  // Don't change z-order
+
+        ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetMainViewport()->Size.y - kStatusBarHeight));
+        ImGui::SetNextWindowSize(ImVec2(ImGui::GetMainViewport()->Size.x, kStatusBarHeight));
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2, 2));
+
+        const ImVec4 background = ImGui::GetStyleColorVec4(ImGuiCol_MenuBarBg);
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, background);
+
+        if (ImGui::Begin("##Statusbar", nullptr, windowFlags)) {
+            ImGui::Dummy({2.0f, 0.0f});
+            ImGui::SameLine();
+            ImGui::Text("Ready");
+            ImGui::End();
+        }
+
+        ImGui::PopStyleColor();
+        ImGui::PopStyleVar(2);
     }
 #pragma endregion
 
@@ -1416,17 +1536,19 @@ namespace x {
         }
     }
 
+    void XEditor::OnCreateMaterial() {}
+
     void XEditor::OnResetWindow() {
-        mShowSceneSettings    = true;
+        mDockspaceSetup       = false;
+        mShowAssetBrowser     = true;
+        mShowAssetPreview     = true;
         mShowEntities         = true;
         mShowEntityProperties = true;
-        mShowViewport         = true;
-        mShowAssetBrowser     = true;
         mShowLog              = true;
-        mShowAssetPreview     = true;
-        mShowPostProcessing   = true;
         mShowMaterial         = false;
-        mDockspaceSetup       = false;
+        mShowPostProcessing   = true;
+        mShowSceneSettings    = true;
+        mShowViewport         = true;
     }
 
     void XEditor::OnImportEngineContent() {
@@ -1663,7 +1785,7 @@ namespace x {
         constexpr ImGuiDockNodeFlags flags = ImGuiDockNodeFlags_PassthruCentralNode;
 
         ImGui::SetNextWindowPos(ImVec2(0, yOffset));
-        ImGui::SetNextWindowSize(ImVec2(imguiViewport->Size.x, imguiViewport->Size.y - yOffset));
+        ImGui::SetNextWindowSize(ImVec2(imguiViewport->Size.x, imguiViewport->Size.y - yOffset - kStatusBarHeight));
         ImGui::SetNextWindowViewport(imguiViewport->ID);
 
         constexpr ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
@@ -1814,6 +1936,12 @@ namespace x {
         }
 
         result = mTextureManager.LoadFromMemory(ABOUT_BANNER_BYTES, 800, 300, 4, "AboutBanner");
+        if (!result) {
+            X_LOG_ERROR("Failed to load AboutBanner");
+            return false;
+        }
+
+        result = mTextureManager.LoadFromMemory(XEDITOR_BYTES, 539, 97, 4, "XEditor");
         if (!result) {
             X_LOG_ERROR("Failed to load AboutBanner");
             return false;

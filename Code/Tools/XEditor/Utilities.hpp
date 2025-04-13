@@ -9,7 +9,7 @@
 #include "Common/Types.hpp"
 
 namespace x {
-    static ImTextureID SrvAsTextureId(ID3D11ShaderResourceView* srv) {
+    static ImTextureID SrvToTextureId(ID3D11ShaderResourceView* srv) {
         return RCAST<ImTextureID>(RCAST<void*>(srv));
     }
 

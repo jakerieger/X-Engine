@@ -34,10 +34,17 @@ namespace x {
         ::ZeroMemory(&msg, sizeof(MSG));
         while (msg.message != WM_QUIT) {
             if (::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+                if (msg.message == WM_QUIT) {
+                    mQuitRequested = true;
+                    break;
+                }
+
                 ::TranslateMessage(&msg);
                 ::DispatchMessage(&msg);
                 continue;
             }
+
+            if (mQuitRequested) break;
 
             OnUpdate();
             OnRender();
@@ -50,7 +57,8 @@ namespace x {
     }
 
     LRESULT IWindow::Quit() {
-        ::PostQuitMessage(0);
+        mQuitRequested = true;
+        ::DestroyWindow(mHwnd);
         return S_OK;
     }
 
@@ -159,7 +167,8 @@ namespace x {
     LRESULT IWindow::MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) {
         switch (msg) {
             case WM_DESTROY:
-                return Quit();
+                mQuitRequested = true;
+                return 0;
             case WM_SIZE:
                 return ResizeHandler(LOWORD(lParam), HIWORD(lParam));
 

@@ -6,6 +6,7 @@
 #include <imgui_internal.h>
 #include "Controls.hpp"
 
+#include "ImGuiHelpers.hpp"
 #include "Utilities.hpp"
 #include "Common/FileDialogs.hpp"
 #include "Common/Types.hpp"
@@ -15,7 +16,7 @@ ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) {
     return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y);
 }
 
-namespace x {
+namespace x::Gui {
     bool SelectableWithHeaders(const char* id,
                                const char* header,
                                const char* subheader,
@@ -151,9 +152,9 @@ namespace x {
             ImGui::PushID(label);
             ImGui::PushMultiItemsWidths(components, ImGui::CalcItemWidth());
 
-            const ImU32 R = ColorToU32(HexToImVec4("A8310D"));
-            const ImU32 G = ColorToU32(HexToImVec4("71A324"));
-            const ImU32 B = ColorToU32(HexToImVec4("387CD7"));
+            const ImU32 R = ColorToU32(HexToImVec4("ed4918"));
+            const ImU32 G = ColorToU32(HexToImVec4("a3eb34"));
+            const ImU32 B = ColorToU32(HexToImVec4("4292fc"));
 
             for (int i = 0; i < components; ++i) {
                 static const ImU32 colors[] = {R, G, B, 0xBBFFFFFF};
@@ -183,4 +184,36 @@ namespace x {
 
         return valueChanged;
     }
-}  // namespace x
+
+    bool BorderedButton(const char* label, const ImVec2& size) {
+        // Define colors
+        const ImVec4 normalColorBorder  = HexToImVec4("353535");
+        const ImVec4 hoveredColorBorder = HexToImVec4("FF00E5");
+        const ImVec4 activeColorBorder  = HexToImVec4("FF00E5");
+
+        ImGui::PushStyleColor(ImGuiCol_Border, normalColorBorder);
+
+        const bool result = ImGui::Button(label, size);
+
+        const bool hovered = ImGui::IsItemHovered();
+        const bool active  = ImGui::IsItemActive();
+
+        const ImVec2 min = ImGui::GetItemRectMin();
+        const ImVec2 max = ImGui::GetItemRectMax();
+
+        ImGui::PopStyleColor();
+
+        const ImU32 borderColor = ImGui::ColorConvertFloat4ToU32(active    ? activeColorBorder
+                                                                 : hovered ? hoveredColorBorder
+                                                                           : normalColorBorder);
+
+        ImGui::GetWindowDrawList()->AddRect(min,
+                                            max,
+                                            borderColor,
+                                            ImGui::GetStyle().FrameRounding,
+                                            0,  // All corners
+                                            ImGui::GetStyle().FrameBorderSize);
+
+        return result;
+    }
+}  // namespace x::Gui

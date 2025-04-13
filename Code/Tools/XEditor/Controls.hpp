@@ -15,7 +15,7 @@
 #define X_DROP_TARGET_AUDIO "DropTarget_Audio"
 #define X_DROP_TARGET_TEXTURE "DropTarget_Texture"
 
-namespace x {
+namespace x::Gui {
     bool SelectableWithHeaders(const char* id,
                                const char* header,
                                const char* subheader,
@@ -36,4 +36,6 @@ namespace x {
 
     bool DragFloatNColored(
       const char* label, f32* v, int components, f32 vSpeed, f32 vMin, f32 vMax, const char* format, f32 power);
-}  // namespace x
+
+    bool BorderedButton(const char* label, const ImVec2& size = {0, 0});
+}  // namespace x::Gui

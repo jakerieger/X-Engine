@@ -55,6 +55,7 @@ namespace x {
         void SetWindowIcon(WORD resourceId) const;
 
     private:
+        bool mQuitRequested {false};
         bool mFocused {false};
         bool mOpenMaximized {false};
         int mWindowIcon;

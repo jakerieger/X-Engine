@@ -3,8 +3,16 @@
 //
 
 #include "XEditor.hpp"
+#include "StartupScreen.hpp"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow) {
-    x::XEditor sceneEditor;
-    return sceneEditor.Run();
+    using namespace x;
+
+    // if (!XEditor::HasSession()) {
+    //     StartupScreen startupScreen;
+    //     startupScreen.Run();
+    // }
+
+    XEditor editor;
+    return editor.Run();
 }

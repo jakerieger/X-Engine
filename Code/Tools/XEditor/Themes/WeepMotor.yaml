@@ -1,17 +1,17 @@
 name: WeepMotor
 description: Based on the CryEngine 5.7 color scheme
-windowBackground: 424242
-menuBackground: 232323
-tabHeader: 424242
-panelBackground: 232323
+border: 232323
 buttonBackground: 646464
-inputBackground: 323232
 headerBackground: 646464
+icon: a7a7a7
+inputBackground: 323232
+menuBackground: 232323
+panelBackground: 232323
+selected: 60adec
+tabHeader: 424242
 textHighlight: d4d2d6
 textPrimary: a9a49e
 textSecondary: 6c6a73
-icon: a7a7a7
-border: 232323
-selected: 60adec
+windowBackground: 424242
 borderRadius: 2.0
 borderWidth: 1.0
