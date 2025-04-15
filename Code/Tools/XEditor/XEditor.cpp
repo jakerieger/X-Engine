@@ -1165,6 +1165,9 @@ namespace x {
                               model->SetMaterial(mat);
                               model->SetMaterialId(descriptor.mId);
 
+                              // TODO: You currently can't create more than one entity with a model component or
+                              // Material->Bind throws
+
                               GetCurrentScene()->Update(0.0f);
                           };
 
