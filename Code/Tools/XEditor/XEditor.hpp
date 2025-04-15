@@ -8,12 +8,9 @@
 
 #include "MeshPreviewer.hpp"
 #include "TextureManager.hpp"
-
 #include "Common/Types.hpp"
-
 #include "Engine/Window.hpp"
 #include "Engine/Game.hpp"
-
 #include "XPak/ProjectDescriptor.hpp"
 
 namespace x {
@@ -60,8 +57,8 @@ namespace x {
         // Window will initialize `mContext` and since its constructor gets called before our subclass initializes its
         // members, we can use `mContext` as inputs to our Editor member variable constructors.
         XEditor()
-            : IWindow("XEditor", 1440, 800), mTextureManager(this->mContext), mMeshPreviewer(this->mContext),
-              mSceneViewport(this->mContext), mGame(this->mContext), mEditorResources(this->mContext, X_GIGABYTES(2)) {
+            : IWindow("XEditor", 1440, 800), mMeshPreviewer(this->mContext), mTextureManager(this->mContext),
+              mGame(this->mContext), mEditorResources(this->mContext, 2_GIGABYTES), mSceneViewport(this->mContext) {
             this->SetOpenMaximized(true);
         }
 
@@ -153,7 +150,7 @@ namespace x {
         void OnResetWindow();
         void OnSaveScene(const char* name = nullptr);
         void OnSelectedMeshAsset(const AssetDescriptor& descriptor);
-        void OnCreateProject();
+        bool OnCreateProject(const char* name, const char* location, const char* engineVersion);
 
         // Helpers
         Scene* GetCurrentScene() const;

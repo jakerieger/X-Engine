@@ -6,9 +6,27 @@
 
 #define X_ALIGN_MALLOC(size, align) _aligned_malloc(size, align)
 #define X_ALIGN_FREE(ptr) _aligned_free(ptr)
+
+/// Return n kilobytes as bytes
 #define X_KILOBYTES(n) ((size_t)(n) * 1024)
+
+/// Return n megabytes as bytes
 #define X_MEGABYTES(n) (X_KILOBYTES(n) * 1024)
+
+/// Return n gigabytes as bytes
 #define X_GIGABYTES(n) (X_MEGABYTES(n) * 1024)
+
+inline constexpr size_t operator"" _KILOBYTES(unsigned long long n) {
+    return n * 1024;
+}
+
+inline constexpr size_t operator"" _MEGABYTES(unsigned long long n) {
+    return n * 1024 * 1024;
+}
+
+inline constexpr size_t operator"" _GIGABYTES(unsigned long long n) {
+    return n * 1024 * 1024 * 1024;
+}
 
 #ifdef _DEBUG
     #define X_DEBUG_ONLY(expr) expr

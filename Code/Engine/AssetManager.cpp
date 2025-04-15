@@ -59,6 +59,10 @@ namespace x {
         return assetDescriptors;
     }
 
+    void AssetManager::ReloadAssets() {
+        LoadAssets(mWorkingDirectory);
+    }
+
     bool AssetManager::LoadAssets(const Path& workingDir) {
         mWorkingDirectory = workingDir;
 #ifdef X_USE_PAK_FILE

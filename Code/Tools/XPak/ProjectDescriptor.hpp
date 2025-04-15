@@ -19,6 +19,7 @@ namespace x {
         bool mLoaded {false};
 
         bool FromFile(const str& filename);
+        bool ToFile(const Path& filename) const;
         std::string ToString() const;
     };
 }  // namespace x

@@ -302,7 +302,7 @@ namespace x {
         View_MainMenu();
         const f32 menuBarHeight = ImGui::GetFrameHeight();
 
-        if (HasSession()) {
+        if (HasSession() && mLoadedProject.mLoaded) {
             View_Toolbar(menuBarHeight);
             const f32 yOffset = menuBarHeight + kToolbarHeight;
 
@@ -490,12 +490,24 @@ namespace x {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(20.0f, 20.0f));
 
         static char nameBuffer[256] {0};
-        static char locationBuffer[256] {0};
+        static char locationBuffer[512] {0};
+        static str projectRoot;
 
-        const str documentsDir = Platform::GetPlatformDirectory(Platform::kPlatformDir_Documents).Str();
-        std::strcpy(locationBuffer, documentsDir.c_str());
+        const char* engineVersions[] = {"XENGINE 1.0.0"};
+        static int selectedVersion   = 0;
 
         if (ImGui::BeginPopupModal("New Project", &mNewProjectOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
+            if (ImGui::IsWindowAppearing()) {
+                std::memset(nameBuffer, 0, std::size(nameBuffer));
+                std::memset(locationBuffer, 0, std::size(locationBuffer));
+
+                const Path documentsDir = Platform::GetPlatformDirectory(Platform::kPlatformDir_Documents);
+                const Path projectsRoot = documentsDir / "XENGINE Projects";
+
+                std::strcpy(locationBuffer, projectsRoot.CStr());
+                projectRoot = projectsRoot.Str();
+            }
+
             {
                 Gui::ScopedFont font(mFonts["display_26"]);
                 ImGui::Text("Create a new project");
@@ -508,10 +520,8 @@ namespace x {
             Gui::SpacingY(20.0f);
 
             ImGui::Text("Engine Version");
-            const char* versions[] = {"XENGINE 1.0.0"};
-            static int currentItem = 0;
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-            if (ImGui::Combo("##engine_version", &currentItem, versions, 1)) {
+            if (ImGui::Combo("##engine_version", &selectedVersion, engineVersions, 1)) {
                 // TODO: Do nothing for now I guess
             }
 
@@ -526,14 +536,26 @@ namespace x {
             ImGui::Text("Name");
             ImGui::SameLine(90);
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-            ImGui::InputText("##project_name", nameBuffer, std::size(nameBuffer));
+            if (ImGui::InputText("##project_name", nameBuffer, std::size(nameBuffer))) {
+                const auto nameSize = std::strlen(nameBuffer);
+                if (nameSize > 0 && nameSize + projectRoot.size() < std::size(locationBuffer)) {
+                    const Path projPath = Path(projectRoot) / nameBuffer;
+                    std::strcpy(locationBuffer, projPath.CStr());
+                }
+            }
 
             Gui::SpacingY(2.0f);
 
             ImGui::Text("Location");
             ImGui::SameLine(90);
-            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-            ImGui::InputText("##project_location", locationBuffer, std::size(locationBuffer));
+            constexpr f32 selectLocationButtonWidth = 24;
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - selectLocationButtonWidth);
+            ImGui::InputText("##project_location",
+                             locationBuffer,
+                             std::size(locationBuffer),
+                             ImGuiInputTextFlags_ReadOnly);
+            ImGui::SameLine();
+            if (ImGui::Button("##select_location", {selectLocationButtonWidth, 0})) {}
 
             Gui::SpacingY(20.0f);
 
@@ -545,7 +567,10 @@ namespace x {
 
             Gui::SpacingX(offset);
             ImGui::SameLine();
-            if (ImGui::Button("Cancel##new_project", {cancelButtonWidth, buttonHeight})) { mNewProjectOpen = false; }
+            if (ImGui::Button("Cancel##new_project", {cancelButtonWidth, buttonHeight})) {
+                mNewProjectOpen = false;
+                //
+            }
             ImGui::SameLine();
             {
                 Gui::ScopedColorVars colors({{ImGuiCol_Button, HexToImVec4("1a97b8")},
@@ -553,7 +578,9 @@ namespace x {
                                              {ImGuiCol_ButtonHovered, ColorWithOpacity(HexToImVec4("1a97b8"), 0.8f)},
                                              {ImGuiCol_Text, HexToImVec4("FFFFFF")}});
                 if (ImGui::Button("Create Project##new_project", {createButtonWidth, buttonHeight})) {
-                    OnCreateProject();
+                    if (OnCreateProject(nameBuffer, locationBuffer, engineVersions[selectedVersion])) {
+                        mNewProjectOpen = false;
+                    }
                 }
             }
 
@@ -723,6 +750,7 @@ namespace x {
         if (mAboutOpen) { ImGui::OpenPopup("About"); }
         Modal_About();
 
+        // TODO: This will render twice when on the welcome screen, disabled for now
         // if (mNewProjectOpen) { ImGui::OpenPopup("New Project"); }
         // Modal_NewProject();
 
@@ -1012,6 +1040,7 @@ namespace x {
                     EditorState::ModelReceivesShadows = model->GetReceiveShadows();
                 }
                 auto* behavior = state.GetComponentMutable<BehaviorComponent>(sSelectedEntity);
+                auto* camera   = state.GetComponentMutable<CameraComponent>(sSelectedEntity);
 
                 if (ImGui::CollapsingHeader("General##properties", ImGuiTreeNodeFlags_DefaultOpen)) {
                     // ImGui::Text("Name:");
@@ -1030,6 +1059,7 @@ namespace x {
                     ImGui::Checkbox("##entity_enabled", &enabled);
                 }
 
+                Gui::SpacingY(10.0f);
                 if (ImGui::CollapsingHeader("Transform##properties", ImGuiTreeNodeFlags_DefaultOpen)) {
                     ImGui::Text("Position:");
                     ImGui::SameLine(kLabelWidth);
@@ -1074,6 +1104,7 @@ namespace x {
                 }
 
                 if (model) {
+                    Gui::SpacingY(10.0f);
                     if (ImGui::CollapsingHeader("Model##properties", ImGuiTreeNodeFlags_DefaultOpen)) {
                         ImGui::Text("Mesh (Asset):");
                         ImGui::SameLine(kLabelWidth);
@@ -1170,6 +1201,7 @@ namespace x {
                 }
 
                 if (behavior) {
+                    Gui::SpacingY(10.0f);
                     if (ImGui::CollapsingHeader("Behavior##properties", ImGuiTreeNodeFlags_DefaultOpen)) {
                         ImGui::Text("Script (Asset):");
                         ImGui::SameLine(kLabelWidth);
@@ -1205,6 +1237,11 @@ namespace x {
                             }
                         }
                     }
+                }
+
+                if (camera) {
+                    Gui::SpacingY(10.0f);
+                    if (ImGui::CollapsingHeader("Camera##properties", ImGuiTreeNodeFlags_DefaultOpen)) {}
                 }
             }
 
@@ -1592,7 +1629,95 @@ namespace x {
         }
     }
 
-    void XEditor::OnCreateProject() {}
+    bool XEditor::OnCreateProject(const char* name, const char* location, const char* engineVersion) {
+        const Path projectPath {location};
+        if (projectPath.Exists()) {
+            X_LOG_WARN("Project already exists");
+            return false;
+        }
+        if (!projectPath.CreateAll()) {
+            X_LOG_ERROR("Failed to create project directories");
+            return false;
+        }
+        X_ASSERT(projectPath.Exists())
+
+        // Create .xproj file
+        ProjectDescriptor projectDescriptor;
+        // TODO: This sucks and I hate it :( - just make these the same type bozo
+        if (std::strcmp(engineVersion, "XENGINE 1.0.0") == 0) { projectDescriptor.mEngineVersion = 1; }
+        projectDescriptor.mName = name;
+        // TODO: Make this configurable
+        projectDescriptor.mContentDirectory = "Content";  // default content directory
+        projectDescriptor.mStartupScene     = "Empty";
+
+        const str projectFileName = std::format("{}.xproj", name);
+        const Path projectFile    = projectPath / projectFileName;
+        if (!projectDescriptor.ToFile(projectFile)) {
+            X_LOG_ERROR("Failed to save project");
+            return false;
+        }
+
+        // Create content directory
+        const Path contentRoot = projectPath / "Content";
+        if (!contentRoot.Create()) {
+            X_LOG_ERROR("Failed to create content directory");
+            return false;
+        }
+
+        // Create content subdirectories
+        vector<Path> subdirectories {
+          contentRoot / "Audio",
+          contentRoot / "Materials",
+          contentRoot / "Models",
+          contentRoot / "Scenes",
+          contentRoot / "Scripts",
+          contentRoot / "Textures",
+        };
+        for (const auto& subdirectory : subdirectories) {
+            if (!subdirectory.Create()) { X_LOG_ERROR("Failed to create subdirectory %s", subdirectory.CStr()); }
+        }
+
+        // Create the empty scene
+        SceneDescriptor emptyScene {};
+        emptyScene.mName                             = "Empty";
+        emptyScene.mDescription                      = "Empty scene";
+        emptyScene.mWorld.mLights.mSun.mEnabled      = true;
+        emptyScene.mWorld.mLights.mSun.mIntensity    = 2;
+        emptyScene.mWorld.mLights.mSun.mDirection    = {0.5f, 0.5f, -0.5f};
+        emptyScene.mWorld.mLights.mSun.mCastsShadows = true;
+        emptyScene.mWorld.mLights.mSun.mColor        = {0.9f, 0.9f, 0.9f};
+
+        CameraDescriptor cameraComponent {};
+        cameraComponent.mNearZ        = 0.01f;
+        cameraComponent.mFarZ         = 1000.0f;
+        cameraComponent.mFOV          = 60.0f;
+        cameraComponent.mOrthographic = false;
+        cameraComponent.mWidth        = 0.0f;
+        cameraComponent.mHeight       = 0.0f;
+
+        EntityDescriptor mainCamera {};
+        mainCamera.mId                  = 0;
+        mainCamera.mName                = "MainCamera";
+        mainCamera.mTransform.mPosition = {0.0f, 0.0f, -10.0f};
+        mainCamera.mTransform.mRotation = {0.0f, 0.0f, 0.0f};
+        mainCamera.mTransform.mScale    = {1.0f, 1.0f, 1.0f};
+        mainCamera.mCamera              = cameraComponent;
+
+        emptyScene.mEntities.push_back(mainCamera);
+
+        const Path sceneFile = contentRoot / "Scenes" / "Empty.scene";
+        SceneParser::WriteToFile(emptyScene, sceneFile.Str());
+        X_ASSERT(sceneFile.Exists())
+
+        // Generate asset descriptors
+        if (!AssetGenerator::GenerateAsset(sceneFile, kAssetType_Scene, contentRoot)) {
+            X_LOG_ERROR("Failed to generate scene asset descriptor");
+            return false;
+        }
+
+        LoadProject(projectFile.Str());
+        return true;
+    }
 
     void XEditor::OnSaveScene(const char* name) {
         const auto* scene = GetCurrentScene();
@@ -1654,6 +1779,14 @@ namespace x {
         }
 
         const Path contentDest = mProjectRoot / "Content" / "EngineContent";
+        if (contentDest.Exists()) {
+            Platform::ShowAlert(mHwnd,
+                                "XEditor",
+                                "Engine content has already been imported.",
+                                Platform::AlertSeverity::Info);
+            return;
+        }
+
         if (!contentSrc.CopyDirectory(contentDest)) {
             Platform::ShowAlert(mHwnd, "Error", "Unable to copy engine content", Platform::AlertSeverity::Error);
             return;
@@ -1675,7 +1808,10 @@ namespace x {
             }
         }
 
+        AssetManager::ReloadAssets();
         ReloadAssetCache();
+        mGame.ReloadSceneCache();
+        GenerateAssetThumbnails();
 
         Platform::ShowAlert(mHwnd, "XEditor", "Engine content has been imported", Platform::AlertSeverity::Info);
     }
@@ -1689,6 +1825,7 @@ namespace x {
                                      "Open Project File",
                                      filename,
                                      MAX_PATH)) {
+            // TODO: Make sure any previously loaded projects get properly unloaded or it'll just crash
             LoadProject(filename);
         }
     }
