@@ -12,10 +12,6 @@
 #include "Common/Types.hpp"
 #include "Engine/EngineCommon.hpp"
 
-ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) {
-    return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y);
-}
-
 namespace x::Gui {
     bool SelectableWithHeaders(const char* id,
                                const char* header,
@@ -215,5 +211,63 @@ namespace x::Gui {
                                             ImGui::GetStyle().FrameBorderSize);
 
         return result;
+    }
+
+    bool BorderedButtonWithIcon(const char* label,
+                                ImTextureID textureId,
+                                const ImVec2& size,
+                                const ImVec2& uv0,
+                                const ImVec2& uv1,
+                                int frame_padding) {
+        ImGuiContext& g     = *GImGui;
+        ImGuiWindow* window = g.CurrentWindow;
+        if (window->SkipItems) return false;
+
+        // Calculate total button size (icon + padding + text)
+        const ImGuiStyle& style = g.Style;
+
+        // Get label size
+        ImVec2 label_size = ImGui::CalcTextSize(label, NULL, true);
+
+        // Total height = button height + spacing + text height
+        ImVec2 total_size = ImVec2(size.x, size.y + style.ItemSpacing.y + label_size.y);
+
+        const ImGuiID id = window->GetID(label);
+        const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + total_size);
+
+        ImGui::ItemSize(total_size, style.FramePadding.y);
+        if (!ImGui::ItemAdd(bb, id)) return false;
+
+        bool hovered, held;
+        bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, 0);
+
+        // Render button (just the icon part)
+        ImRect button_bb(window->DC.CursorPos, window->DC.CursorPos + size);
+
+        // Render
+        const ImU32 col = ImGui::GetColorU32((held && hovered) ? ImGuiCol_ButtonActive
+                                             : hovered         ? ImGuiCol_ButtonHovered
+                                                               : ImGuiCol_Button);
+        ImGui::RenderNavHighlight(bb, id);
+        ImGui::RenderFrame(button_bb.Min, button_bb.Max, col, true, style.FrameRounding);
+
+        // Image is centered in the button
+        ImVec2 image_pos = button_bb.Min + (button_bb.Max - button_bb.Min - size) * 0.5f;
+        window->DrawList->AddImage(textureId, image_pos, image_pos + size, uv0, uv1, ImGui::GetColorU32(ImGuiCol_Text));
+
+        // Text is centered under the button
+        ImVec2 text_pos =
+          ImVec2(button_bb.Min.x + (size.x - label_size.x) * 0.5f, button_bb.Max.y + style.ItemSpacing.y);
+        window->DrawList->AddText(text_pos, ImGui::GetColorU32(ImGuiCol_Text), label);
+
+        return pressed;
+    }
+
+    void SpacingY(const f32 space) {
+        ImGui::Dummy(ImVec2(0, space));
+    }
+
+    void SpacingX(const f32 space) {
+        ImGui::Dummy(ImVec2(space, 0));
     }
 }  // namespace x::Gui

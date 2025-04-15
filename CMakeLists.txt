@@ -37,9 +37,9 @@ if (WIN32)
     add_subdirectory(${CODE_DIR}/Game)
 
     # Tools
-    add_subdirectory(${CODE_DIR}/Tools/XPak)
+    add_subdirectory(${CODE_DIR}/Tools/ResPak)
     add_subdirectory(${CODE_DIR}/Tools/XEditor)
-    add_subdirectory(${CODE_DIR}/Tools/Img2C)
+    add_subdirectory(${CODE_DIR}/Tools/XPak)
 else ()
     message(FATAL_ERROR "Project only supports Windows.")
 endif ()

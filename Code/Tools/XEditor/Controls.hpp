@@ -37,5 +37,16 @@ namespace x::Gui {
     bool DragFloatNColored(
       const char* label, f32* v, int components, f32 vSpeed, f32 vMin, f32 vMax, const char* format, f32 power);
 
-    bool BorderedButton(const char* label, const ImVec2& size = {0, 0});
+    bool BorderedButton(const char* label, const ImVec2& size);
+
+    bool BorderedButtonWithIcon(const char* label,
+                                ImTextureID textureId,
+                                const ImVec2& size,
+                                const ImVec2& uv0 = ImVec2(0, 0),
+                                const ImVec2& uv1 = ImVec2(1, 1),
+                                int frame_padding = -1);
+
+    void SpacingY(const f32 space);
+
+    void SpacingX(const f32 space);
 }  // namespace x::Gui

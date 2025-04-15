@@ -9,6 +9,38 @@
 #include <utility>
 #include "Common/Types.hpp"
 
+inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) {
+    return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y);
+}
+
+inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) {
+    return ImVec2(lhs.x - rhs.x, lhs.y - rhs.y);
+}
+
+inline ImVec2 operator*(const ImVec2& lhs, const ImVec2& rhs) {
+    return ImVec2(lhs.x * rhs.x, lhs.y * rhs.y);
+}
+
+inline ImVec2 operator/(const ImVec2& lhs, const ImVec2& rhs) {
+    return ImVec2(lhs.x / rhs.x, lhs.y / rhs.y);
+}
+
+inline ImVec2 operator+(const ImVec2& lhs, const float scalar) {
+    return ImVec2(lhs.x + scalar, lhs.y + scalar);
+}
+
+inline ImVec2 operator-(const ImVec2& lhs, const float scalar) {
+    return ImVec2(lhs.x - scalar, lhs.y - scalar);
+}
+
+inline ImVec2 operator*(const ImVec2& lhs, const float scalar) {
+    return ImVec2(lhs.x * scalar, lhs.y * scalar);
+}
+
+inline ImVec2 operator/(const ImVec2& lhs, const float scalar) {
+    return ImVec2(lhs.x / scalar, lhs.y / scalar);
+}
+
 namespace x::Gui {
     class ScopedStyleVars {
         using StyleVarPair = std::pair<ImGuiStyleVar_, int>;
@@ -44,5 +76,16 @@ namespace x::Gui {
 
     private:
         vector<ColorVarPair> mVars;
+    };
+
+    class ScopedFont {
+    public:
+        explicit ScopedFont(ImFont* font) {
+            ImGui::PushFont(font);
+        }
+
+        ~ScopedFont() {
+            ImGui::PopFont();
+        }
     };
 }  // namespace x::Gui

@@ -12,6 +12,8 @@ add_executable(XEditor WIN32
     ${APP_RES}
     ${IMGUI_SOURCES}
     ${COMMON_SOURCES}
+    ${CODE_DIR}/Tools/XPak/Compression.hpp
+    ${CODE_DIR}/Tools/XPak/Compression.cpp
     ${EDITOR_DIR}/AssetBrowserIcons.h
     ${EDITOR_DIR}/Controls.cpp
     ${EDITOR_DIR}/Controls.hpp
@@ -32,6 +34,7 @@ add_executable(XEditor WIN32
 target_link_libraries(XEditor
     x
     yaml-cpp
+    ${BROTLI_LIBS}
 )
 
 target_compile_definitions(XEditor PRIVATE ${WINDOWS_COMPILE_DEFS})

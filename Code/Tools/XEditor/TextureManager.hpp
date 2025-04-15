@@ -21,6 +21,8 @@ namespace x {
         explicit TextureManager(RenderContext& context) : mContext(context) {}
 
         bool LoadFromMemory(const u8* data, u32 width, u32 height, u32 channels, const str& name);
+        bool LoadFromMemoryCompressed(
+          const u8* data, const size_t compressedSize, u32 width, u32 height, u32 channels, const str& name);
         bool LoadFromDDSFile(const Path& ddsFile, const str& name);
         std::optional<TextureData> GetTexture(const str& name);
 

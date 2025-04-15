@@ -137,6 +137,7 @@ namespace x {
         void Modal_About();
         void Modal_AddComponent();
         void Modal_CreateMaterial();
+
         void Modal_NewProject();
         void Modal_SaveSceneAs();
         void Modal_SelectAsset();
@@ -152,6 +153,7 @@ namespace x {
         void OnResetWindow();
         void OnSaveScene(const char* name = nullptr);
         void OnSelectedMeshAsset(const AssetDescriptor& descriptor);
+        void OnCreateProject();
 
         // Helpers
         Scene* GetCurrentScene() const;

@@ -28,6 +28,13 @@
 #include "Engine/EngineCommon.hpp"
 #include "XPak/AssetGenerator.hpp"
 
+#pragma region Embedded Resources
+#include "AssetBrowserIcons.h"
+#include "ToolbarIcons.h"
+#include "Logos.h"
+#include "WelcomeScreenIcons.h"
+#pragma endregion
+
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace x {
@@ -244,6 +251,9 @@ namespace x {
         mFonts["display_20"] =
           fontAtlas->AddFontFromMemoryCompressedTTF(Inter_compressed_data, Inter_compressed_size, 20.0f);
 
+        mFonts["display_26"] =
+          fontAtlas->AddFontFromMemoryCompressedTTF(Inter_compressed_data, Inter_compressed_size, 26.0f);
+
         mFonts["title"] =
           fontAtlas->AddFontFromMemoryCompressedTTF(Inter_compressed_data, Inter_compressed_size, 128.0f);
 
@@ -264,10 +274,6 @@ namespace x {
         if (!mSettings.LoadSettings()) { mSettings.SaveSettings(); }
         mTheme.LoadTheme(mSettings.mTheme);
         mTheme.Apply();
-
-        X_LOG_WARN("Test warning log entry")
-        X_LOG_ERROR("Test error log entry")
-        X_LOG_DEBUG("Test debug log entry")
     }
 
     void XEditor::OnResize(u32 width, u32 height) {
@@ -480,10 +486,80 @@ namespace x {
     void XEditor::Modal_NewProject() {
         const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        ImGui::SetNextWindowSize({600, 0});
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(20.0f, 20.0f));
+
+        static char nameBuffer[256] {0};
+        static char locationBuffer[256] {0};
+
+        const str documentsDir = Platform::GetPlatformDirectory(Platform::kPlatformDir_Documents).Str();
+        std::strcpy(locationBuffer, documentsDir.c_str());
+
         if (ImGui::BeginPopupModal("New Project", &mNewProjectOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImGui::Dummy({300, 200});
+            {
+                Gui::ScopedFont font(mFonts["display_26"]);
+                ImGui::Text("Create a new project");
+            }
+            {
+                Gui::ScopedColorVars colors({{ImGuiCol_Separator, HexToImVec4("5e5e5e")}});
+                ImGui::Separator();
+            }
+
+            Gui::SpacingY(20.0f);
+
+            ImGui::Text("Engine Version");
+            const char* versions[] = {"XENGINE 1.0.0"};
+            static int currentItem = 0;
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+            if (ImGui::Combo("##engine_version", &currentItem, versions, 1)) {
+                // TODO: Do nothing for now I guess
+            }
+
+            Gui::SpacingY(10.0f);
+
+            const f32 locationLen = ImGui::CalcTextSize("Location").x;
+            const f32 nameLen     = ImGui::CalcTextSize("Name").x;
+            const f32 nameOffset  = locationLen - nameLen;
+
+            Gui::SpacingX(nameOffset - ImGui::GetStyle().ItemSpacing.x);
+            ImGui::SameLine();
+            ImGui::Text("Name");
+            ImGui::SameLine(90);
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+            ImGui::InputText("##project_name", nameBuffer, std::size(nameBuffer));
+
+            Gui::SpacingY(2.0f);
+
+            ImGui::Text("Location");
+            ImGui::SameLine(90);
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+            ImGui::InputText("##project_location", locationBuffer, std::size(locationBuffer));
+
+            Gui::SpacingY(20.0f);
+
+            constexpr f32 cancelButtonWidth = 100;
+            constexpr f32 createButtonWidth = 140;
+            constexpr f32 buttonHeight      = 24;
+            const f32 itemSpacing           = ImGui::GetStyle().ItemSpacing.x * 2;
+            const f32 offset = ImGui::GetContentRegionAvail().x - (cancelButtonWidth + createButtonWidth + itemSpacing);
+
+            Gui::SpacingX(offset);
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel##new_project", {cancelButtonWidth, buttonHeight})) { mNewProjectOpen = false; }
+            ImGui::SameLine();
+            {
+                Gui::ScopedColorVars colors({{ImGuiCol_Button, HexToImVec4("1a97b8")},
+                                             {ImGuiCol_ButtonActive, ColorWithOpacity(HexToImVec4("1a97b8"), 0.67f)},
+                                             {ImGuiCol_ButtonHovered, ColorWithOpacity(HexToImVec4("1a97b8"), 0.8f)},
+                                             {ImGuiCol_Text, HexToImVec4("FFFFFF")}});
+                if (ImGui::Button("Create Project##new_project", {createButtonWidth, buttonHeight})) {
+                    OnCreateProject();
+                }
+            }
+
             ImGui::EndPopup();
         }
+        ImGui::PopStyleVar();
     }
 
     void XEditor::Modal_CreateMaterial() {
@@ -647,8 +723,8 @@ namespace x {
         if (mAboutOpen) { ImGui::OpenPopup("About"); }
         Modal_About();
 
-        if (mNewProjectOpen) { ImGui::OpenPopup("New Project"); }
-        Modal_NewProject();
+        // if (mNewProjectOpen) { ImGui::OpenPopup("New Project"); }
+        // Modal_NewProject();
 
         if (mCreateMaterialOpen) { ImGui::OpenPopup("Create Material"); }
         Modal_CreateMaterial();
@@ -796,10 +872,24 @@ namespace x {
             Gui::ScopedColorVars colors({{ImGuiCol_WindowBg, ImGui::GetStyleColorVec4(ImGuiCol_MenuBarBg)}});
             ImGui::Begin("Startup Screen", nullptr, windowFlags);
             {
+                // Draw background logos
+                ID3D11ShaderResourceView* bgLogos =
+                  mTextureManager.GetTexture("BackgroundLogos")->mShaderResourceView.Get();
+                ImGui::SetCursorPos({0, yOffset});
+                ImGui::Image(SrvToTextureId(bgLogos), {size.x, size.y - yOffset});
+
                 // Draw title image
-                ID3D11ShaderResourceView* titleImage = mTextureManager.GetTexture("XEditor")->mShaderResourceView.Get();
+                ID3D11ShaderResourceView* titleImage =
+                  mTextureManager.GetTexture("XEditorLogo")->mShaderResourceView.Get();
                 ImGui::SetCursorPos(titleCursorPos);
                 ImGui::Image(SrvToTextureId(titleImage), titleSize);
+
+                // Button icons
+                ID3D11ShaderResourceView* controllerIcon =
+                  mTextureManager.GetTexture("ControllerIcon")->mShaderResourceView.Get();
+                ID3D11ShaderResourceView* folderIcon =
+                  mTextureManager.GetTexture("FolderOutlineIcon")->mShaderResourceView.Get();
+                ID3D11ShaderResourceView* cogIcon = mTextureManager.GetTexture("CogIcon")->mShaderResourceView.Get();
 
                 Gui::ScopedStyleVars buttonVars(
                   {{ImGuiStyleVar_FrameRounding, 16.0f}, {ImGuiStyleVar_FrameBorderSize, 4.0f}});
@@ -812,22 +902,23 @@ namespace x {
 
                 ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(buttonSpacing, 4.0f));
                 ImGui::SetCursorPos(buttonCursorPos);
-                if (Gui::BorderedButton("New Project", ImVec2(buttonSize, buttonSize))) {
-                    // TODO: OnNewProject()
-                }
+                if (Gui::BorderedButton("New Project", ImVec2(buttonSize, buttonSize))) { mNewProjectOpen = true; }
                 ImGui::SameLine();
 
                 if (Gui::BorderedButton("Open Project", ImVec2(buttonSize, buttonSize))) { OnOpenProject(); }
                 ImGui::SameLine();
 
-                if (Gui::BorderedButton("Settings", ImVec2(buttonSize, buttonSize))) {
-                    // TODO: OnShowSettings()
-                }
+                if (Gui::BorderedButton("Settings", ImVec2(buttonSize, buttonSize))) {}
                 ImGui::PopStyleVar();
 
                 ImGui::PopFont();
             }
             ImGui::End();
+        }
+
+        if (mNewProjectOpen) {
+            ImGui::OpenPopup("New Project");
+            Modal_NewProject();
         }
     }
 
@@ -896,7 +987,7 @@ namespace x {
 
     void XEditor::View_EntityProperties() {
         static const ImTextureID selectAssetIcon =
-          SrvToTextureId(mTextureManager.GetTexture("SelectAssetIcon").value().mShaderResourceView.Get());
+          SrvToTextureId(mTextureManager.GetTexture("ScaleIcon").value().mShaderResourceView.Get());
         static AssetDescriptor selectedAsset {};
 
         ImGui::Begin("Properties");
@@ -1501,6 +1592,8 @@ namespace x {
         }
     }
 
+    void XEditor::OnCreateProject() {}
+
     void XEditor::OnSaveScene(const char* name) {
         const auto* scene = GetCurrentScene();
         SceneDescriptor descriptor;
@@ -1839,111 +1932,234 @@ namespace x {
         ImGui::PopStyleVar(3);
     }
 
-#pragma region Embedded Icon Includes
-#include "AssetBrowserIcons.h"
-#include "ToolbarIcons.h"
-#include "Logos.h"
-#pragma endregion
-
     bool XEditor::LoadEditorIcons() {
         // Asset Browser Icons
-        auto result = mTextureManager.LoadFromMemory(AUDIOICON_BYTES, 128, 128, 4, "AudioIcon");
+        auto result = mTextureManager.LoadFromMemoryCompressed(AUDIOICON_BYTES,
+                                                               AUDIOICON_COMPRESSED_SIZE,
+                                                               AUDIOICON_WIDTH,
+                                                               AUDIOICON_HEIGHT,
+                                                               4,
+                                                               "AudioIcon");
         if (!result) {
             X_LOG_ERROR("Failed to load Audio icon");
             return false;
         }
-        result = mTextureManager.LoadFromMemory(MATERIALICON_BYTES, 128, 128, 4, "MaterialIcon");
+        result = mTextureManager.LoadFromMemoryCompressed(MATERIALICON_BYTES,
+                                                          MATERIALICON_COMPRESSED_SIZE,
+                                                          MATERIALICON_WIDTH,
+                                                          MATERIALICON_HEIGHT,
+                                                          4,
+                                                          "MaterialIcon");
         if (!result) {
             X_LOG_ERROR("Failed to load Material icon");
             return false;
         }
-        result = mTextureManager.LoadFromMemory(MESHICON_BYTES, 128, 128, 4, "MeshIcon");
+        result = mTextureManager.LoadFromMemoryCompressed(MESHICON_BYTES,
+                                                          MESHICON_COMPRESSED_SIZE,
+                                                          MESHICON_WIDTH,
+                                                          MESHICON_HEIGHT,
+                                                          4,
+                                                          "MeshIcon");
         if (!result) {
             X_LOG_ERROR("Failed to load Mesh icon");
             return false;
         }
-        result = mTextureManager.LoadFromMemory(SCENEICON_BYTES, 128, 128, 4, "SceneIcon");
+        result = mTextureManager.LoadFromMemoryCompressed(SCENEICON_BYTES,
+                                                          SCENEICON_COMPRESSED_SIZE,
+                                                          SCENEICON_WIDTH,
+                                                          SCENEICON_HEIGHT,
+                                                          4,
+                                                          "SceneIcon");
         if (!result) {
             X_LOG_ERROR("Failed to load Scene icon");
             return false;
         }
-        result = mTextureManager.LoadFromMemory(SCRIPTICON_BYTES, 128, 128, 4, "ScriptIcon");
+        result = mTextureManager.LoadFromMemoryCompressed(SCRIPTICON_BYTES,
+                                                          SCRIPTICON_COMPRESSED_SIZE,
+                                                          SCRIPTICON_WIDTH,
+                                                          SCRIPTICON_HEIGHT,
+                                                          4,
+                                                          "ScriptIcon");
         if (!result) {
             X_LOG_ERROR("Failed to load Script icon");
             return false;
         }
-        result = mTextureManager.LoadFromMemory(FOLDERICON_BYTES, 128, 128, 4, "FolderIcon");
+        result = mTextureManager.LoadFromMemoryCompressed(FOLDERICON_BYTES,
+                                                          FOLDERICON_COMPRESSED_SIZE,
+                                                          FOLDERICON_WIDTH,
+                                                          FOLDERICON_HEIGHT,
+                                                          4,
+                                                          "FolderIcon");
         if (!result) {
             X_LOG_ERROR("Failed to load Folder icon");
             return false;
         }
-        result = mTextureManager.LoadFromMemory(FOLDERICONEMPTY_BYTES, 128, 128, 4, "FolderEmptyIcon");
+        result = mTextureManager.LoadFromMemoryCompressed(FOLDERICONEMPTY_BYTES,
+                                                          FOLDERICONEMPTY_COMPRESSED_SIZE,
+                                                          FOLDERICONEMPTY_WIDTH,
+                                                          FOLDERICONEMPTY_HEIGHT,
+                                                          4,
+                                                          "FolderEmptyIcon");
         if (!result) {
             X_LOG_ERROR("Failed to load Folder icon");
             return false;
         }
 
         // Toolbar / Editor Icons
-        result = mTextureManager.LoadFromMemory(MOVEICON_BYTES, 24, 24, 4, "MoveIcon");
+        result = mTextureManager.LoadFromMemoryCompressed(MOVEICON_BYTES,
+                                                          MOVEICON_COMPRESSED_SIZE,
+                                                          MOVEICON_WIDTH,
+                                                          MOVEICON_HEIGHT,
+                                                          4,
+                                                          "MoveIcon");
         if (!result) {
             X_LOG_ERROR("Failed to load Move icon");
             return false;
         }
-        result = mTextureManager.LoadFromMemory(PAUSEICON_BYTES, 24, 24, 4, "PauseIcon");
+        result = mTextureManager.LoadFromMemoryCompressed(PAUSEICON_BYTES,
+                                                          PAUSEICON_COMPRESSED_SIZE,
+                                                          PAUSEICON_WIDTH,
+                                                          PAUSEICON_HEIGHT,
+                                                          4,
+                                                          "PauseIcon");
         if (!result) {
             X_LOG_ERROR("Failed to load Pause icon");
             return false;
         }
-        result = mTextureManager.LoadFromMemory(PLAYICON_BYTES, 24, 24, 4, "PlayIcon");
+        result = mTextureManager.LoadFromMemoryCompressed(PLAYICON_BYTES,
+                                                          PLAYICON_COMPRESSED_SIZE,
+                                                          PLAYICON_WIDTH,
+                                                          PLAYICON_HEIGHT,
+                                                          4,
+                                                          "PlayIcon");
         if (!result) {
             X_LOG_ERROR("Failed to load Play icon");
             return false;
         }
-        result = mTextureManager.LoadFromMemory(REDOICON_BYTES, 24, 24, 4, "RedoIcon");
+        result = mTextureManager.LoadFromMemoryCompressed(REDOICON_BYTES,
+                                                          REDOICON_COMPRESSED_SIZE,
+                                                          REDOICON_WIDTH,
+                                                          REDOICON_HEIGHT,
+                                                          4,
+                                                          "RedoIcon");
         if (!result) {
             X_LOG_ERROR("Failed to load Redo icon");
             return false;
         }
-        result = mTextureManager.LoadFromMemory(UNDOICON_BYTES, 24, 24, 4, "UndoIcon");
+        result = mTextureManager.LoadFromMemoryCompressed(UNDOICON_BYTES,
+                                                          UNDOICON_COMPRESSED_SIZE,
+                                                          UNDOICON_WIDTH,
+                                                          UNDOICON_HEIGHT,
+                                                          4,
+                                                          "UndoIcon");
         if (!result) {
             X_LOG_ERROR("Failed to load Undo icon");
             return false;
         }
-        result = mTextureManager.LoadFromMemory(ROTATEICON_BYTES, 24, 24, 4, "RotateIcon");
+        result = mTextureManager.LoadFromMemoryCompressed(ROTATEICON_BYTES,
+                                                          ROTATEICON_COMPRESSED_SIZE,
+                                                          ROTATEICON_WIDTH,
+                                                          ROTATEICON_HEIGHT,
+                                                          4,
+                                                          "RotateIcon");
         if (!result) {
             X_LOG_ERROR("Failed to load Rotate icon");
             return false;
         }
-        result = mTextureManager.LoadFromMemory(SCALEICON_BYTES, 24, 24, 4, "ScaleIcon");
+        result = mTextureManager.LoadFromMemoryCompressed(SCALEICON_BYTES,
+                                                          SCALEICON_COMPRESSED_SIZE,
+                                                          SCALEICON_WIDTH,
+                                                          SCALEICON_HEIGHT,
+                                                          4,
+                                                          "ScaleIcon");
         if (!result) {
             X_LOG_ERROR("Failed to load Scale icon");
             return false;
         }
-        result = mTextureManager.LoadFromMemory(SELECTICON_BYTES, 24, 24, 4, "SelectIcon");
+        result = mTextureManager.LoadFromMemoryCompressed(SELECTICON_BYTES,
+                                                          SELECTICON_COMPRESSED_SIZE,
+                                                          SELECTICON_WIDTH,
+                                                          SELECTICON_HEIGHT,
+                                                          4,
+                                                          "SelectIcon");
         if (!result) {
             X_LOG_ERROR("Failed to load Select icon");
             return false;
         }
-        result = mTextureManager.LoadFromMemory(STOPICON_BYTES, 24, 24, 4, "StopIcon");
+        result = mTextureManager.LoadFromMemoryCompressed(STOPICON_BYTES,
+                                                          STOPICON_COMPRESSED_SIZE,
+                                                          STOPICON_WIDTH,
+                                                          STOPICON_HEIGHT,
+                                                          4,
+                                                          "StopIcon");
         if (!result) {
             X_LOG_ERROR("Failed to load Stop icon");
             return false;
         }
-        result = mTextureManager.LoadFromMemory(SELECTASSETICON_BYTES, 24, 24, 4, "SelectAssetIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load Stop icon");
-            return false;
-        }
+        // result = mTextureManager.LoadFromMemoryCompressed(SELECTASSETICON_BYTES, 24, 24, 4, "SelectAssetIcon");
+        // if (!result) {
+        //     X_LOG_ERROR("Failed to load Stop icon");
+        //     return false;
+        // }
 
-        result = mTextureManager.LoadFromMemory(ABOUT_BANNER_BYTES, 800, 300, 4, "AboutBanner");
+        result = mTextureManager.LoadFromMemoryCompressed(ABOUT_BANNER_BYTES,
+                                                          ABOUT_BANNER_COMPRESSED_SIZE,
+                                                          ABOUT_BANNER_WIDTH,
+                                                          ABOUT_BANNER_HEIGHT,
+                                                          4,
+                                                          "AboutBanner");
         if (!result) {
             X_LOG_ERROR("Failed to load AboutBanner");
             return false;
         }
 
-        result = mTextureManager.LoadFromMemory(XEDITOR_BYTES, 539, 97, 4, "XEditor");
+        result = mTextureManager.LoadFromMemoryCompressed(XEDITOR_LOGO_BYTES,
+                                                          XEDITOR_LOGO_COMPRESSED_SIZE,
+                                                          XEDITOR_LOGO_WIDTH,
+                                                          XEDITOR_LOGO_HEIGHT,
+                                                          4,
+                                                          "XEditorLogo");
         if (!result) {
-            X_LOG_ERROR("Failed to load AboutBanner");
+            X_LOG_ERROR("Failed to load XEditorLogo");
+            return false;
+        }
+
+        result = mTextureManager.LoadFromMemoryCompressed(BACKGROUND_LOGOS_BYTES,
+                                                          BACKGROUND_LOGOS_COMPRESSED_SIZE,
+                                                          BACKGROUND_LOGOS_WIDTH,
+                                                          BACKGROUND_LOGOS_HEIGHT,
+                                                          4,
+                                                          "BackgroundLogos");
+        if (!result) {
+            X_LOG_ERROR("Failed to load BackgroundLogos");
+            return false;
+        }
+
+        // Welcome screen icons
+        result = mTextureManager.LoadFromMemoryCompressed(CONTROLLER_BYTES,
+                                                          CONTROLLER_COMPRESSED_SIZE,
+                                                          CONTROLLER_WIDTH,
+                                                          CONTROLLER_HEIGHT,
+                                                          4,
+                                                          "ControllerIcon");
+        if (!result) {
+            X_LOG_ERROR("Failed to load ControllerIcon");
+            return false;
+        }
+        result = mTextureManager.LoadFromMemoryCompressed(FOLDER_OUTLINE_BYTES,
+                                                          FOLDER_OUTLINE_COMPRESSED_SIZE,
+                                                          FOLDER_OUTLINE_WIDTH,
+                                                          FOLDER_OUTLINE_HEIGHT,
+                                                          4,
+                                                          "FolderOutlineIcon");
+        if (!result) {
+            X_LOG_ERROR("Failed to load FolderOutlineIcon");
+            return false;
+        }
+        result =
+          mTextureManager.LoadFromMemoryCompressed(COG_BYTES, COG_COMPRESSED_SIZE, COG_WIDTH, COG_HEIGHT, 4, "CogIcon");
+        if (!result) {
+            X_LOG_ERROR("Failed to load CogIcon");
             return false;
         }
 

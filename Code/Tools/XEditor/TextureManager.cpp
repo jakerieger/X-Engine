@@ -2,9 +2,11 @@
 // Created: 3/14/2025.
 //
 
+#include <DirectXTex.h>
+
 #include "TextureManager.hpp"
 #include "Common/Str.hpp"
-#include <DirectXTex.h>
+#include "XPak/Compression.hpp"
 
 namespace x {
     bool TextureManager::LoadFromMemory(const u8* data, u32 width, u32 height, u32 channels, const str& name) {
@@ -43,6 +45,19 @@ namespace x {
         }
 
         return false;
+    }
+
+    bool TextureManager::LoadFromMemoryCompressed(
+      const u8* data, const size_t compressedSize, u32 width, u32 height, u32 channels, const str& name) {
+        vector<u8> compressedData(compressedSize);
+        std::copy_n(data, compressedSize, compressedData.begin());
+        X_ASSERT(compressedData[0] == data[0]);
+
+        const size_t originalSize         = width * height * channels;
+        const vector<u8> uncompressedData = BrotliCompression::Decompress(compressedData, originalSize);
+        X_ASSERT(uncompressedData.size() == originalSize);
+
+        return LoadFromMemory(uncompressedData.data(), width, height, channels, name);
     }
 
     bool TextureManager::LoadFromDDSFile(const Path& ddsFile, const str& name) {
