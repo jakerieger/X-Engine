@@ -1239,9 +1239,63 @@ namespace x {
                     }
                 }
 
+                static f32 fovDegrees {45.0f};
+                static f32 nearZ {0.01f};
+                static f32 farZ {1000.0f};
+                static bool orthographic {false};
+                static Float2 viewport {1.0f, 1.0f};
+
                 if (camera) {
+                    fovDegrees   = camera->GetFOVDegrees();
+                    nearZ        = camera->GetNearPlane();
+                    farZ         = camera->GetFarPlane();
+                    orthographic = camera->GetOrthographic();
+                    viewport.x   = camera->GetWidth();
+                    viewport.y   = camera->GetHeight();
+
                     Gui::SpacingY(10.0f);
-                    if (ImGui::CollapsingHeader("Camera##properties", ImGuiTreeNodeFlags_DefaultOpen)) {}
+                    if (ImGui::CollapsingHeader("Camera##properties", ImGuiTreeNodeFlags_DefaultOpen)) {
+                        ImGui::Text("FOV:");
+                        ImGui::SameLine(kLabelWidth);
+                        ImGui::SetNextItemWidth(size.x - kLabelWidth);
+                        ImGui::InputFloat("##fov_properties", &fovDegrees, 1.0f, 5.0f, "%.1f");
+
+                        ImGui::Text("Near Plane:");
+                        ImGui::SameLine(kLabelWidth);
+                        ImGui::SetNextItemWidth(size.x - kLabelWidth);
+                        ImGui::InputFloat("##nearz_properties", &nearZ, 0.1f, 1.0f, "%.2f");
+
+                        ImGui::Text("Far Plane:");
+                        ImGui::SameLine(kLabelWidth);
+                        ImGui::SetNextItemWidth(size.x - kLabelWidth);
+                        ImGui::InputFloat("##farz_properties", &farZ, 0.1f, 1.0f, "%.2f");
+
+                        ImGui::Text("Orthographic:");
+                        ImGui::SameLine(kLabelWidth);
+                        ImGui::SetNextItemWidth(size.x - kLabelWidth);
+                        ImGui::Checkbox("##ortho_properties", &orthographic);
+
+                        if (orthographic) {
+                            ImGui::Text("Viewport:");
+                            ImGui::SameLine(kLabelWidth);
+                            ImGui::SetNextItemWidth(size.x - kLabelWidth);
+                            Gui::DragFloatNColored("##viewport_properties",
+                                                   (f32*)&viewport,
+                                                   2,
+                                                   1.0f,
+                                                   0.0f,
+                                                   FLT_MAX,
+                                                   "%.1f",
+                                                   1.0f);
+                        }
+                    }
+
+                    camera->SetFOVDegrees(fovDegrees);
+                    camera->SetNearPlane(nearZ);
+                    camera->SetFarPlane(farZ);
+                    camera->SetOrthographic(orthographic);
+                    camera->SetWidth(viewport.x);
+                    camera->SetHeight(viewport.y);
                 }
             }
 

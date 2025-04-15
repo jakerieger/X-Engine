@@ -60,18 +60,21 @@ namespace x {
     }
 
     CameraComponent& CameraComponent::SetWidth(const f32 width) {
+        if (width < 1.0f) { return *this; }
         mWidth = width;
         RecalculateProjectionMatrix();
         return *this;
     }
 
     CameraComponent& CameraComponent::SetHeight(const f32 height) {
+        if (height < 1.0f) { return *this; }
         mHeight = height;
         RecalculateProjectionMatrix();
         return *this;
     }
 
     CameraComponent& CameraComponent::SetWidthHeight(const f32 width, const f32 height) {
+        if (width < 1.0f || height < 1.0f) { return *this; }
         mWidth  = width;
         mHeight = height;
         RecalculateProjectionMatrix();
