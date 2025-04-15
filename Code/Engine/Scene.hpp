@@ -34,6 +34,7 @@ namespace x {
         X_NODISCARD bool Loaded() const;
 
         void RegisterVolatiles(vector<Volatile*>& volatiles);
+        shared_ptr<IMaterial> LoadMaterial(const MaterialDescriptor& material);
 
     private:
         ResourceManager mResources;

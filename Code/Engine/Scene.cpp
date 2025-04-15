@@ -273,4 +273,37 @@ namespace x {
             // Process material properties
         }
     }
+
+    shared_ptr<IMaterial> Scene::LoadMaterial(const MaterialDescriptor& material) {
+        if (material.mBaseMaterial == "PBR") {
+            const auto mat = make_shared<PBRMaterial>(mContext, material.mTransparent);
+
+            for (const auto& texture : material.mTextures) {
+                // Load texture resource
+                if (!mResources.LoadResource<Texture2D>(texture.mAssetId)) {
+                    X_LOG_FATAL("Failed to to load texture resource: '%llu'", texture.mAssetId)
+                }
+
+                ResourceHandle<Texture2D> resource = mResources.FetchResource<Texture2D>(texture.mAssetId);
+
+                if (!resource.Valid()) { X_LOG_FATAL("Failed to fetch texture resource: '%llu'", texture.mAssetId) }
+
+                if (texture.mName == "albedo") { mat->SetAlbedoMap(resource); }
+                if (texture.mName == "metallic") { mat->SetMetallicMap(resource); }
+                if (texture.mName == "roughness") { mat->SetRoughnessMap(resource); }
+                if (texture.mName == "normal") { mat->SetNormalMap(resource); }
+            }
+
+            return mat;
+        }
+
+        else if (material.mBaseMaterial == "Water") {
+            const auto mat = make_shared<WaterMaterial>(mContext, material.mTransparent);
+            // Process material properties
+
+            return mat;
+        }
+
+        return nullptr;
+    }
 }  // namespace x

@@ -112,7 +112,7 @@ namespace x {
 
         // View toggles
         bool mShowAssetBrowser {true};
-        bool mShowAssetPreview {true};
+        bool mShowAssetPreview {false};
         bool mShowEntities {true};
         bool mShowEntityProperties {true};
         bool mShowLog {true};
@@ -134,7 +134,6 @@ namespace x {
         void Modal_About();
         void Modal_AddComponent();
         void Modal_CreateMaterial();
-
         void Modal_NewProject();
         void Modal_SaveSceneAs();
         void Modal_SelectAsset();

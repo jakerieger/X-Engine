@@ -68,8 +68,8 @@ namespace x {
 
         // For ortho
         bool mOrthographic {false};  // Perspective camera by default
-        f32 mWidth {1.0f};
-        f32 mHeight {1.0f};
+        f32 mWidth {100.0f};
+        f32 mHeight {100.0f};
 
         void RecalculateViewMatrix();
         void RecalculateProjectionMatrix();

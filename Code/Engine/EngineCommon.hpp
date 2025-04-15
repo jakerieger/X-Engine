@@ -97,7 +97,7 @@ public:
     void Log(const uint32_t severity, const char* msg) {
         const auto severityStr = GetSeverityString(severity);
         const auto timestamp   = GetTimestamp();
-        const auto logEntry    = std::format("[{}] {} - {}\n", timestamp, severityStr, msg);
+        const auto logEntry    = std::format("[{}] | {} | {}\n", timestamp, severityStr, msg);
         mLogFile << logEntry;
         mLogFile.flush();  // ensure immediate write
 
@@ -166,8 +166,8 @@ private:
     }
 
     X_NODISCARD static std::string GetSeverityString(const uint32_t severity) {
-        if (severity == X_LOG_SEVERITY_INFO) return "INFO";
-        if (severity == X_LOG_SEVERITY_WARN) return "WARNING";
+        if (severity == X_LOG_SEVERITY_INFO) return "INFO ";
+        if (severity == X_LOG_SEVERITY_WARN) return "WARN ";
         if (severity == X_LOG_SEVERITY_ERROR) return "ERROR";
         if (severity == X_LOG_SEVERITY_FATAL) return "FATAL";
         if (severity == X_LOG_SEVERITY_DEBUG) return "DEBUG";

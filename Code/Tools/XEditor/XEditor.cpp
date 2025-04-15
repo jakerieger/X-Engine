@@ -418,7 +418,7 @@ namespace x {
                 if (selectedComponent == "Model") {
                     // TODO: This will require a lot more work than simply adding the component since it's tied into
                     // the render system
-                    // state.AddComponent<ModelComponent>(sSelectedEntity);
+                    state.AddComponent<ModelComponent>(sSelectedEntity);
                 } else if (selectedComponent == "Behavior") {
                     state.AddComponent<BehaviorComponent>(sSelectedEntity);
                 }
@@ -1042,16 +1042,14 @@ namespace x {
                 auto* behavior = state.GetComponentMutable<BehaviorComponent>(sSelectedEntity);
                 auto* camera   = state.GetComponentMutable<CameraComponent>(sSelectedEntity);
 
-                if (ImGui::CollapsingHeader("General##properties", ImGuiTreeNodeFlags_DefaultOpen)) {
-                    // ImGui::Text("Name:");
-                    // ImGui::SameLine(kLabelWidth);
-                    // ImGui::SetNextItemWidth(size.x - kLabelWidth);
-                    // const bool enterPressed = ImGui::InputText("##entity_name_input",
-                    //                                            mEntityProperties.mName,
-                    //                                            sizeof(mEntityProperties.mName),
-                    //                                            ImGuiInputTextFlags_EnterReturnsTrue);
-                    // if (enterPressed) { state.RenameEntity(sSelectedEntity, mEntityProperties.mName); }
+                {
+                    Gui::ScopedFont font(mFonts["display_20"]);
+                    ImGui::Text(GetEntities()[sSelectedEntity].c_str());
+                }
 
+                Gui::SpacingY(8.0f);
+
+                if (ImGui::CollapsingHeader("General##properties", ImGuiTreeNodeFlags_DefaultOpen)) {
                     ImGui::Text("Enabled:");
                     ImGui::SameLine(kLabelWidth);
                     ImGui::SetNextItemWidth(size.x - kLabelWidth);
@@ -1113,41 +1111,35 @@ namespace x {
                           std::ranges::find_if(mAssetDescriptors, [&model](const AssetDescriptor& asset) {
                               return asset.mId == model->GetModelId();
                           });
-                        if (modelAsset == mAssetDescriptors.end()) {
-                            X_LOG_ERROR("No model asset found for entity '%s'",
-                                        state.GetEntities().at(sSelectedEntity).c_str());
-                        } else {
-                            auto UpdateMesh = [this, &model](const AssetDescriptor& descriptor) {
-                                const auto oldId = model->GetModelId();
-                                if (oldId == descriptor.mId) { return; }
+                        const bool foundModel = modelAsset != mAssetDescriptors.end();
 
-                                auto& resourceManager = GetCurrentScene()->GetResourceManager();
-                                if (resourceManager.LoadResource<Model>(descriptor.mId)) {
-                                    const ResourceHandle<Model> modelResource =
-                                      resourceManager.FetchResource<Model>(descriptor.mId);
-                                    if (modelResource.Valid()) {
-                                        model->SetModelHandle(modelResource);
-                                        model->SetModelId(descriptor.mId);
-                                    }
+                        auto UpdateMesh = [this, &model](const AssetDescriptor& descriptor) {
+                            const auto oldId = model->GetModelId();
+                            if (oldId == descriptor.mId) { return; }
+
+                            auto& resourceManager = GetCurrentScene()->GetResourceManager();
+                            if (resourceManager.LoadResource<Model>(descriptor.mId)) {
+                                const ResourceHandle<Model> modelResource =
+                                  resourceManager.FetchResource<Model>(descriptor.mId);
+                                if (modelResource.Valid()) {
+                                    model->SetModelHandle(modelResource);
+                                    model->SetModelId(descriptor.mId);
                                 }
-
-                                X_LOG_DEBUG("Old model ID: %llu", model->GetModelId());
-                                X_LOG_DEBUG("New model ID: %llu", descriptor.mId);
-                            };
-
-                            static char buffer[256] {0};
-                            const auto currentValue = Path(modelAsset->mFilename).Filename();
-                            std::strcpy(buffer, currentValue.c_str());
-
-                            if (Gui::AssetDropTarget("##model_drop_target",
-                                                     buffer,
-                                                     sizeof(buffer),
-                                                     selectAssetIcon,
-                                                     X_DROP_TARGET_MESH,
-                                                     UpdateMesh)) {
-                                mSelectAssetOpen   = true;
-                                mSelectAssetFilter = kAssetType_Mesh;
                             }
+                        };
+
+                        static char modelBuffer[256] {0};
+                        const auto currentModel = foundModel ? Path(modelAsset->mFilename).Filename() : "None";
+                        std::strcpy(modelBuffer, currentModel.c_str());
+
+                        if (Gui::AssetDropTarget("##model_drop_target",
+                                                 modelBuffer,
+                                                 sizeof(modelBuffer),
+                                                 selectAssetIcon,
+                                                 X_DROP_TARGET_MESH,
+                                                 UpdateMesh)) {
+                            mSelectAssetOpen   = true;
+                            mSelectAssetFilter = kAssetType_Mesh;
                         }
 
                         ImGui::Text("Material (Asset):");
@@ -1157,33 +1149,37 @@ namespace x {
                           std::ranges::find_if(mAssetDescriptors, [&model](const AssetDescriptor& asset) {
                               return asset.mId == model->GetMaterialId();
                           });
-                        if (materialAsset == mAssetDescriptors.end()) {
-                            X_LOG_ERROR("No material asset found for entity '%s'",
-                                        state.GetEntities().at(sSelectedEntity).c_str());
-                        } else {
-                            auto UpdateMaterial = [this, &materialAsset](const AssetDescriptor& descriptor) {
-                                const auto oldId = materialAsset->mId;
-                                if (oldId == descriptor.mId) { return; }
+                        const bool foundMaterial = materialAsset != mAssetDescriptors.end();
 
-                                // TODO: Implement
+                        auto UpdateMaterial =
+                          [this, &materialAsset, &foundMaterial, &model](const AssetDescriptor& descriptor) {
+                              if (foundMaterial) {
+                                  if (materialAsset->mId == descriptor.mId) { return; }
+                              }
 
-                                X_LOG_DEBUG("Old material ID: %llu", oldId);
-                                X_LOG_DEBUG("New material ID: %llu", descriptor.mId);
-                            };
+                              const auto assetBytes = AssetManager::GetAssetData(descriptor.mId);
+                              X_ASSERT(assetBytes.has_value())
+                              const MaterialDescriptor desc = MaterialParser::Parse(*assetBytes);
+                              const auto mat                = GetCurrentScene()->LoadMaterial(desc);
+                              X_ASSERT(mat.get() != nullptr)
+                              model->SetMaterial(mat);
+                              model->SetMaterialId(descriptor.mId);
 
-                            static char buffer[256] {0};
-                            const auto currentValue = Path(materialAsset->mFilename).Filename();
-                            std::strcpy(buffer, currentValue.c_str());
+                              GetCurrentScene()->Update(0.0f);
+                          };
 
-                            if (Gui::AssetDropTarget("##material_drop_target",
-                                                     buffer,
-                                                     sizeof(buffer),
-                                                     selectAssetIcon,
-                                                     X_DROP_TARGET_MATERIAL,
-                                                     UpdateMaterial)) {
-                                mSelectAssetOpen   = true;
-                                mSelectAssetFilter = kAssetType_Material;
-                            }
+                        static char materialBuffer[256] {0};
+                        const auto currentMaterial = foundMaterial ? Path(materialAsset->mFilename).Filename() : "None";
+                        std::strcpy(materialBuffer, currentMaterial.c_str());
+
+                        if (Gui::AssetDropTarget("##material_drop_target",
+                                                 materialBuffer,
+                                                 sizeof(materialBuffer),
+                                                 selectAssetIcon,
+                                                 X_DROP_TARGET_MATERIAL,
+                                                 UpdateMaterial)) {
+                            mSelectAssetOpen   = true;
+                            mSelectAssetFilter = kAssetType_Material;
                         }
 
                         ImGui::Text("Casts Shadows:");
@@ -1243,7 +1239,7 @@ namespace x {
                 static f32 nearZ {0.01f};
                 static f32 farZ {1000.0f};
                 static bool orthographic {false};
-                static Float2 viewport {1.0f, 1.0f};
+                static Float2 viewport {100.0f, 100.0f};
 
                 if (camera) {
                     fovDegrees   = camera->GetFOVDegrees();
@@ -1813,7 +1809,7 @@ namespace x {
     void XEditor::OnResetWindow() {
         mDockspaceSetup       = false;
         mShowAssetBrowser     = true;
-        mShowAssetPreview     = true;
+        mShowAssetPreview     = false;
         mShowEntities         = true;
         mShowEntityProperties = true;
         mShowLog              = true;
