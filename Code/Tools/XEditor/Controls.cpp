@@ -6,6 +6,7 @@
 #include <imgui_internal.h>
 #include "Controls.hpp"
 
+#include "Color.hpp"
 #include "ImGuiHelpers.hpp"
 #include "Common/FileDialogs.hpp"
 #include "Common/Types.hpp"
@@ -136,10 +137,10 @@ namespace x::Gui {
 
     bool DragFloatNColored(
       const char* label, f32* v, int components, f32 vSpeed, f32 vMin, f32 vMax, const char* format, f32 power) {
-        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        const ImGuiWindow* window = ImGui::GetCurrentWindow();
         if (window->SkipItems) return false;
 
-        ImGuiContext& g = *GImGui;
+        const ImGuiContext& g = *GImGui;
         bool valueChanged {false};
 
         ImGui::BeginGroup();
@@ -147,9 +148,9 @@ namespace x::Gui {
             ImGui::PushID(label);
             ImGui::PushMultiItemsWidths(components, ImGui::CalcItemWidth());
 
-            const ImU32 R = ColorToU32(StrToColor("ed4918"));
-            const ImU32 G = ColorToU32(StrToColor("a3eb34"));
-            const ImU32 B = ColorToU32(StrToColor("4292fc"));
+            const ImU32 R = Color("#ed4918").ToU32_ABGR();
+            const ImU32 G = Color("#a3eb34").ToU32_ABGR();
+            const ImU32 B = Color("#4292fc").ToU32_ABGR();
 
             for (int i = 0; i < components; ++i) {
                 static const ImU32 colors[] = {R, G, B, 0xBBFFFFFF};
@@ -182,9 +183,9 @@ namespace x::Gui {
 
     bool BorderedButton(const char* label, const ImVec2& size) {
         // Define colors
-        const ImVec4 normalColorBorder  = StrToColor("353535");
-        const ImVec4 hoveredColorBorder = StrToColor("FF00E5");
-        const ImVec4 activeColorBorder  = StrToColor("FF00E5");
+        const ImVec4 normalColorBorder  = Color("#353535").ToImVec4();
+        const ImVec4 hoveredColorBorder = Color("#FF00E5").ToImVec4();
+        const ImVec4 activeColorBorder  = Color("#FF00E5").ToImVec4();
 
         ImGui::PushStyleColor(ImGuiCol_Border, normalColorBorder);
 

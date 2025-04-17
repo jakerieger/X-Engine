@@ -48,6 +48,7 @@ namespace x {
         X_NODISCARD XMFLOAT4 ToXMFLOAT4() const;
         X_NODISCARD str ToString() const;
         X_NODISCARD u32 ToU32() const;
+        X_NODISCARD u32 ToU32_ABGR() const;
         void ToFloatArray(f32* color) const;
         void ToHSV(f32& h, f32& s, f32& v) const;
 

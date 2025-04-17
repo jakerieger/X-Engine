@@ -168,6 +168,15 @@ namespace x {
         return (alphaByte << 24) | (redByte << 16) | (greenByte << 8) | blueByte;
     }
 
+    /// For ImGui 32-bit unsigned color representations
+    u32 Color::ToU32_ABGR() const {
+        const auto redByte   = CAST<u8>(FloatToU32(mRed));
+        const auto greenByte = CAST<u8>(FloatToU32(mGreen));
+        const auto blueByte  = CAST<u8>(FloatToU32(mBlue));
+        const auto alphaByte = CAST<u8>(FloatToU32(mAlpha));
+        return (alphaByte << 24) | (blueByte << 16) | (greenByte << 8) | redByte;
+    }
+
     void Color::ToFloatArray(f32* color) const {
         color[0] = mRed;
         color[1] = mGreen;

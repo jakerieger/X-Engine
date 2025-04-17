@@ -68,15 +68,15 @@ namespace x {
         switch (severity) {
             default:
             case X_LOG_SEVERITY_INFO:
-                return Gui::StrToColor("b9b9b9");
+                return Color("#b9b9b9").ToImVec4();
             case X_LOG_SEVERITY_WARN:
-                return Gui::StrToColor("ffe100");
+                return Color("#ffe100").ToImVec4();
             case X_LOG_SEVERITY_ERROR:
-                return Gui::StrToColor("eb529e");
+                return Color("#eb529e").ToImVec4();
             case X_LOG_SEVERITY_FATAL:
                 return ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
             case X_LOG_SEVERITY_DEBUG:
-                return Gui::StrToColor("ebc388");
+                return Color("#ebc388").ToImVec4();
         }
     }
 #pragma endregion
@@ -154,8 +154,8 @@ namespace x {
         colors[ImGuiCol_ChildBg]               = mPanelBackground.ToImVec4();
         colors[ImGuiCol_DockingPreview]        = mSelected.ToImVec4();
         colors[ImGuiCol_DragDropTarget]        = mSelected.ToImVec4();
-        colors[ImGuiCol_FrameBgActive]         = mInputBackground.Brightness(0.6f).ToImVec4();
-        colors[ImGuiCol_FrameBgHovered]        = mInputBackground.Brightness(1.4f).ToImVec4();
+        colors[ImGuiCol_FrameBgActive]         = mInputBackground.Brightness(0.4f).ToImVec4();
+        colors[ImGuiCol_FrameBgHovered]        = mInputBackground.Brightness(0.7f).ToImVec4();
         colors[ImGuiCol_FrameBg]               = mInputBackground.ToImVec4();
         colors[ImGuiCol_HeaderActive]          = mHeaderBackground.WithAlpha(0.67f).ToImVec4();
         colors[ImGuiCol_HeaderHovered]         = mHeaderBackground.WithAlpha(0.8f).ToImVec4();
@@ -517,7 +517,7 @@ namespace x {
                 ImGui::Text("Create a new project");
             }
             {
-                Gui::ScopedColorVars colors({{ImGuiCol_Separator, Gui::StrToColor("5e5e5e")}});
+                Gui::ScopedColorVars colors({{ImGuiCol_Separator, Color("#5e5e5e").ToImVec4()}});
                 ImGui::Separator();
             }
 
@@ -577,11 +577,11 @@ namespace x {
             }
             ImGui::SameLine();
             {
-                Gui::ScopedColorVars colors(
-                  {{ImGuiCol_Button, Gui::StrToColor("1a97b8")},
-                   {ImGuiCol_ButtonActive, Gui::ColorWithOpacity(Gui::StrToColor("1a97b8"), 0.67f)},
-                   {ImGuiCol_ButtonHovered, Gui::ColorWithOpacity(Gui::StrToColor("1a97b8"), 0.8f)},
-                   {ImGuiCol_Text, Gui::StrToColor("FFFFFF")}});
+                const Color buttonColor("#1a97b8");
+                Gui::ScopedColorVars colors({{ImGuiCol_Button, buttonColor.ToImVec4()},
+                                             {ImGuiCol_ButtonActive, buttonColor.WithAlpha(0.67f).ToImVec4()},
+                                             {ImGuiCol_ButtonHovered, buttonColor.WithAlpha(0.8f).ToImVec4()},
+                                             {ImGuiCol_Text, Color(1.0f, 1.0f).ToImVec4()}});
                 if (ImGui::Button("Create Project##new_project", {createButtonWidth, buttonHeight})) {
                     if (OnCreateProject(nameBuffer, locationBuffer, engineVersions[selectedVersion])) {
                         mNewProjectOpen = false;
@@ -926,10 +926,10 @@ namespace x {
 
                 Gui::ScopedStyleVars buttonVars(
                   {{ImGuiStyleVar_FrameRounding, 16.0f}, {ImGuiStyleVar_FrameBorderSize, 4.0f}});
-                Gui::ScopedColorVars buttonColors({{ImGuiCol_Border, Gui::StrToColor("353535")},
-                                                   {ImGuiCol_Button, Gui::StrToColor("161616")},
-                                                   {ImGuiCol_ButtonActive, Gui::StrToColor("222222")},
-                                                   {ImGuiCol_ButtonHovered, Gui::StrToColor("1F1F1F")}});
+                Gui::ScopedColorVars buttonColors({{ImGuiCol_Border, Color("#353535").ToImVec4()},
+                                                   {ImGuiCol_Button, Color("#161616").ToImVec4()},
+                                                   {ImGuiCol_ButtonActive, Color("#222222").ToImVec4()},
+                                                   {ImGuiCol_ButtonHovered, Color("#1F1F1F").ToImVec4()}});
 
                 ImGui::PushFont(mFonts["display_20"]);
 
