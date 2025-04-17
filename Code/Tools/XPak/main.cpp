@@ -154,7 +154,7 @@ int main(int argc, char* argv[]) {
             return 0;
         }
 
-        if (!AssetGenerator::GenerateAsset(sourceFile, assetType)) {
+        if (!AssetGenerator::GenerateAsset(sourceFile, assetType, Path::Current())) {
             std::cerr << "Could not generate asset" << std::endl;
             return EXIT_FAILURE;
         }

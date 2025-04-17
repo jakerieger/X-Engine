@@ -20,7 +20,6 @@
 #include "XEditor.hpp"
 #include "Res/resource.h"
 #include "Controls.hpp"
-#include "Utilities.hpp"
 #include "ImGuiHelpers.hpp"
 #include "Common/FileDialogs.hpp"
 #include "Common/WindowsHelpers.hpp"
@@ -69,15 +68,15 @@ namespace x {
         switch (severity) {
             default:
             case X_LOG_SEVERITY_INFO:
-                return HexToImVec4("b9b9b9");
+                return Gui::StrToColor("b9b9b9");
             case X_LOG_SEVERITY_WARN:
-                return HexToImVec4("ffe100");
+                return Gui::StrToColor("ffe100");
             case X_LOG_SEVERITY_ERROR:
-                return HexToImVec4("eb529e");
+                return Gui::StrToColor("eb529e");
             case X_LOG_SEVERITY_FATAL:
                 return ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
             case X_LOG_SEVERITY_DEBUG:
-                return HexToImVec4("ebc388");
+                return Gui::StrToColor("ebc388");
         }
     }
 #pragma endregion
@@ -113,19 +112,19 @@ namespace x {
             YAML::Node themeNode = YAML::LoadFile(themeFile.Str());
 
             mName             = themeNode["name"].as<str>();
-            mWindowBackground = HexToImVec4(themeNode["windowBackground"].as<str>());
-            mMenuBackground   = HexToImVec4(themeNode["menuBackground"].as<str>());
-            mTabHeader        = HexToImVec4(themeNode["tabHeader"].as<str>());
-            mPanelBackground  = HexToImVec4(themeNode["panelBackground"].as<str>());
-            mButtonBackground = HexToImVec4(themeNode["buttonBackground"].as<str>());
-            mInputBackground  = HexToImVec4(themeNode["inputBackground"].as<str>());
-            mHeaderBackground = HexToImVec4(themeNode["headerBackground"].as<str>());
-            mTextHighlight    = HexToImVec4(themeNode["textHighlight"].as<str>());
-            mTextPrimary      = HexToImVec4(themeNode["textPrimary"].as<str>());
-            mTextSecondary    = HexToImVec4(themeNode["textSecondary"].as<str>());
-            mSelected         = HexToImVec4(themeNode["selected"].as<str>());
-            mIcon             = HexToImVec4(themeNode["icon"].as<str>());
-            mBorder           = HexToImVec4(themeNode["border"].as<str>());
+            mWindowBackground = Color(themeNode["windowBackground"].as<str>());
+            mMenuBackground   = Color(themeNode["menuBackground"].as<str>());
+            mTabHeader        = Color(themeNode["tabHeader"].as<str>());
+            mPanelBackground  = Color(themeNode["panelBackground"].as<str>());
+            mButtonBackground = Color(themeNode["buttonBackground"].as<str>());
+            mInputBackground  = Color(themeNode["inputBackground"].as<str>());
+            mHeaderBackground = Color(themeNode["headerBackground"].as<str>());
+            mTextHighlight    = Color(themeNode["textHighlight"].as<str>());
+            mTextPrimary      = Color(themeNode["textPrimary"].as<str>());
+            mTextSecondary    = Color(themeNode["textSecondary"].as<str>());
+            mSelected         = Color(themeNode["selected"].as<str>());
+            mIcon             = Color(themeNode["icon"].as<str>());
+            mBorder           = Color(themeNode["border"].as<str>());
             mBorderRadius     = themeNode["borderRadius"].as<f32>(2.0f);
             mBorderWidth      = themeNode["borderWidth"].as<f32>(1.0f);
 
@@ -147,21 +146,21 @@ namespace x {
         style.TabRounding      = mBorderRadius;
 
         colors[ImGuiCol_BorderShadow]          = ImVec4(0.f, 0.f, 0.f, 0.f);
-        colors[ImGuiCol_Border]                = mBorder;
-        colors[ImGuiCol_ButtonActive]          = ColorWithOpacity(mButtonBackground, 0.67f);
-        colors[ImGuiCol_ButtonHovered]         = ColorWithOpacity(mButtonBackground, 0.80f);
-        colors[ImGuiCol_Button]                = mButtonBackground;
-        colors[ImGuiCol_CheckMark]             = mIcon;
-        colors[ImGuiCol_ChildBg]               = mPanelBackground;
-        colors[ImGuiCol_DockingPreview]        = mSelected;
-        colors[ImGuiCol_DragDropTarget]        = mSelected;
-        colors[ImGuiCol_FrameBgActive]         = mInputBackground;
-        colors[ImGuiCol_FrameBgHovered]        = mInputBackground;
-        colors[ImGuiCol_FrameBg]               = mInputBackground;
-        colors[ImGuiCol_HeaderActive]          = ColorWithOpacity(mHeaderBackground, 0.67f);
-        colors[ImGuiCol_HeaderHovered]         = ColorWithOpacity(mHeaderBackground, 0.80f);
-        colors[ImGuiCol_Header]                = mHeaderBackground;
-        colors[ImGuiCol_MenuBarBg]             = mMenuBackground;
+        colors[ImGuiCol_Border]                = mBorder.ToImVec4();
+        colors[ImGuiCol_ButtonActive]          = mButtonBackground.WithAlpha(0.67f).ToImVec4();
+        colors[ImGuiCol_ButtonHovered]         = mButtonBackground.WithAlpha(0.8f).ToImVec4();
+        colors[ImGuiCol_Button]                = mButtonBackground.ToImVec4();
+        colors[ImGuiCol_CheckMark]             = mIcon.ToImVec4();
+        colors[ImGuiCol_ChildBg]               = mPanelBackground.ToImVec4();
+        colors[ImGuiCol_DockingPreview]        = mSelected.ToImVec4();
+        colors[ImGuiCol_DragDropTarget]        = mSelected.ToImVec4();
+        colors[ImGuiCol_FrameBgActive]         = mInputBackground.Brightness(0.6f).ToImVec4();
+        colors[ImGuiCol_FrameBgHovered]        = mInputBackground.Brightness(1.4f).ToImVec4();
+        colors[ImGuiCol_FrameBg]               = mInputBackground.ToImVec4();
+        colors[ImGuiCol_HeaderActive]          = mHeaderBackground.WithAlpha(0.67f).ToImVec4();
+        colors[ImGuiCol_HeaderHovered]         = mHeaderBackground.WithAlpha(0.8f).ToImVec4();
+        colors[ImGuiCol_Header]                = mHeaderBackground.ToImVec4();
+        colors[ImGuiCol_MenuBarBg]             = mMenuBackground.ToImVec4();
         colors[ImGuiCol_ModalWindowDimBg]      = ImVec4(0.00f, 0.00f, 0.00f, 0.5f);
         colors[ImGuiCol_NavHighlight]          = ImVec4(30.f / 255.f, 30.f / 255.f, 30.f / 255.f, 1.00f);
         colors[ImGuiCol_NavWindowingDimBg]     = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
@@ -170,24 +169,24 @@ namespace x {
         colors[ImGuiCol_PlotHistogram]         = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
         colors[ImGuiCol_PlotLinesHovered]      = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
         colors[ImGuiCol_PlotLines]             = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
-        colors[ImGuiCol_PopupBg]               = mWindowBackground;
+        colors[ImGuiCol_PopupBg]               = mWindowBackground.ToImVec4();
         colors[ImGuiCol_ResizeGripActive]      = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
         colors[ImGuiCol_ResizeGripHovered]     = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
         colors[ImGuiCol_ResizeGrip]            = ImVec4(0.26f, 0.59f, 0.98f, 0.20f);
-        colors[ImGuiCol_ScrollbarBg]           = mMenuBackground;
-        colors[ImGuiCol_ScrollbarGrabActive]   = mIcon;
-        colors[ImGuiCol_ScrollbarGrabHovered]  = mIcon;
-        colors[ImGuiCol_ScrollbarGrab]         = mIcon;
-        colors[ImGuiCol_SeparatorActive]       = mSelected;
-        colors[ImGuiCol_SeparatorHovered]      = mSelected;
-        colors[ImGuiCol_Separator]             = mWindowBackground;
-        colors[ImGuiCol_SliderGrabActive]      = mIcon;
-        colors[ImGuiCol_SliderGrab]            = mIcon;
-        colors[ImGuiCol_TabActive]             = mHeaderBackground;
-        colors[ImGuiCol_TabHovered]            = mHeaderBackground;
+        colors[ImGuiCol_ScrollbarBg]           = mMenuBackground.ToImVec4();
+        colors[ImGuiCol_ScrollbarGrabActive]   = mIcon.ToImVec4();
+        colors[ImGuiCol_ScrollbarGrabHovered]  = mIcon.ToImVec4();
+        colors[ImGuiCol_ScrollbarGrab]         = mIcon.ToImVec4();
+        colors[ImGuiCol_SeparatorActive]       = mSelected.ToImVec4();
+        colors[ImGuiCol_SeparatorHovered]      = mSelected.ToImVec4();
+        colors[ImGuiCol_Separator]             = mWindowBackground.ToImVec4();
+        colors[ImGuiCol_SliderGrabActive]      = mIcon.ToImVec4();
+        colors[ImGuiCol_SliderGrab]            = mIcon.ToImVec4();
+        colors[ImGuiCol_TabActive]             = mHeaderBackground.ToImVec4();
+        colors[ImGuiCol_TabHovered]            = mHeaderBackground.ToImVec4();
         colors[ImGuiCol_TabUnfocusedActive]    = colors[ImGuiCol_TabActive];
         colors[ImGuiCol_TabUnfocused]          = colors[ImGuiCol_Tab];
-        colors[ImGuiCol_Tab]                   = mTabHeader;
+        colors[ImGuiCol_Tab]                   = mTabHeader.ToImVec4();
         colors[ImGuiCol_TableBorderLight]      = ImVec4(0.23f, 0.23f, 0.25f, 1.00f);  // Prefer using Alpha=1.0 here
         colors[ImGuiCol_TableBorderLight]      = ImVec4(0.f, 0.f, 0.f, 0.f);
         colors[ImGuiCol_TableBorderStrong]     = ImVec4(0.31f, 0.31f, 0.35f, 1.00f);  // Prefer using Alpha=1.0 here
@@ -195,13 +194,13 @@ namespace x {
         colors[ImGuiCol_TableHeaderBg]         = ImVec4(0.19f, 0.19f, 0.20f, 1.00f);
         colors[ImGuiCol_TableRowBgAlt]         = ImVec4(1.00f, 1.00f, 1.00f, 0.06f);
         colors[ImGuiCol_TableRowBg]            = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-        colors[ImGuiCol_TextDisabled]          = mTextSecondary;
-        colors[ImGuiCol_TextSelectedBg]        = ColorWithOpacity(mSelected, 0.5f);
-        colors[ImGuiCol_Text]                  = mTextHighlight;
-        colors[ImGuiCol_TitleBgActive]         = mTabHeader;
-        colors[ImGuiCol_TitleBgCollapsed]      = mTabHeader;
-        colors[ImGuiCol_TitleBg]               = mTabHeader;
-        colors[ImGuiCol_WindowBg]              = mWindowBackground;
+        colors[ImGuiCol_TextDisabled]          = mTextSecondary.ToImVec4();
+        colors[ImGuiCol_TextSelectedBg]        = mSelected.WithAlpha(0.5f).ToImVec4();
+        colors[ImGuiCol_Text]                  = mTextHighlight.ToImVec4();
+        colors[ImGuiCol_TitleBgActive]         = mTabHeader.ToImVec4();
+        colors[ImGuiCol_TitleBgCollapsed]      = mTabHeader.ToImVec4();
+        colors[ImGuiCol_TitleBg]               = mTabHeader.ToImVec4();
+        colors[ImGuiCol_WindowBg]              = mWindowBackground.ToImVec4();
     }
 #pragma endregion
 
@@ -375,7 +374,9 @@ namespace x {
         using ComponentMap             = unordered_map<str, str>;
         static ComponentMap components = {
           {"Model", "Renders a 3D model/mesh, making it visible in the scene"},
-          {"Behavior", "Custom Lua script that defines unique behaviors and functionality"}};
+          {"Behavior", "Custom Lua script that defines unique behaviors and functionality"},
+          {"Camera", "Captures and displays a view of the game world to the player"},
+        };
 
         static str selectedComponent;
         static constexpr f32 itemHeight = 48.0f;
@@ -391,6 +392,8 @@ namespace x {
                     if (state.HasComponent<ModelComponent>(sSelectedEntity)) { available = false; }
                 } else if (name == "Behavior") {
                     if (state.HasComponent<BehaviorComponent>(sSelectedEntity)) { available = false; }
+                } else if (name == "Camera") {
+                    if (state.HasComponent<CameraComponent>(sSelectedEntity)) { available = false; }
                 }
 
                 if (available) {
@@ -419,6 +422,8 @@ namespace x {
                     state.AddComponent<ModelComponent>(sSelectedEntity);
                 } else if (selectedComponent == "Behavior") {
                     state.AddComponent<BehaviorComponent>(sSelectedEntity);
+                } else if (selectedComponent == "Camera") {
+                    state.AddComponent<CameraComponent>(sSelectedEntity);
                 }
 
                 mAddComponentOpen = false;
@@ -475,8 +480,9 @@ namespace x {
         const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, {0.5f, 0.5f});
         if (ImGui::BeginPopupModal("About", &mAboutOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
-            const auto banner = mTextureManager.GetTexture("AboutBanner");
-            ImGui::Image(SrvToTextureId(banner->mShaderResourceView.Get()), {800, 300});
+            const auto banner     = mTextureManager.GetTexture("AboutBanner");
+            const auto* bannerSrv = banner->mShaderResourceView.Get();
+            ImGui::Image((ImTextureID)bannerSrv, {800, 300});
             ImGui::EndPopup();
         }
     }
@@ -511,7 +517,7 @@ namespace x {
                 ImGui::Text("Create a new project");
             }
             {
-                Gui::ScopedColorVars colors({{ImGuiCol_Separator, HexToImVec4("5e5e5e")}});
+                Gui::ScopedColorVars colors({{ImGuiCol_Separator, Gui::StrToColor("5e5e5e")}});
                 ImGui::Separator();
             }
 
@@ -571,10 +577,11 @@ namespace x {
             }
             ImGui::SameLine();
             {
-                Gui::ScopedColorVars colors({{ImGuiCol_Button, HexToImVec4("1a97b8")},
-                                             {ImGuiCol_ButtonActive, ColorWithOpacity(HexToImVec4("1a97b8"), 0.67f)},
-                                             {ImGuiCol_ButtonHovered, ColorWithOpacity(HexToImVec4("1a97b8"), 0.8f)},
-                                             {ImGuiCol_Text, HexToImVec4("FFFFFF")}});
+                Gui::ScopedColorVars colors(
+                  {{ImGuiCol_Button, Gui::StrToColor("1a97b8")},
+                   {ImGuiCol_ButtonActive, Gui::ColorWithOpacity(Gui::StrToColor("1a97b8"), 0.67f)},
+                   {ImGuiCol_ButtonHovered, Gui::ColorWithOpacity(Gui::StrToColor("1a97b8"), 0.8f)},
+                   {ImGuiCol_Text, Gui::StrToColor("FFFFFF")}});
                 if (ImGui::Button("Create Project##new_project", {createButtonWidth, buttonHeight})) {
                     if (OnCreateProject(nameBuffer, locationBuffer, engineVersions[selectedVersion])) {
                         mNewProjectOpen = false;
@@ -662,7 +669,7 @@ namespace x {
 #pragma region Editor Views
     void XEditor::View_MainMenu() {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        ImGui::PushStyleColor(ImGuiCol_Text, mTheme.mTextPrimary);
+        ImGui::PushStyleColor(ImGuiCol_Text, mTheme.mTextPrimary.ToImVec4());
 
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
@@ -775,9 +782,9 @@ namespace x {
         ImGui::PushStyleColor(ImGuiCol_WindowBg, background);
 
         if (ImGui::Begin("##Toolbar", nullptr, toolbarFlags)) {
-            const auto playIcon  = SrvToTextureId(mTextureManager.GetTexture("PlayIcon")->mShaderResourceView.Get());
-            const auto pauseIcon = SrvToTextureId(mTextureManager.GetTexture("PauseIcon")->mShaderResourceView.Get());
-            const auto stopIcon  = SrvToTextureId(mTextureManager.GetTexture("StopIcon")->mShaderResourceView.Get());
+            const auto playIcon  = (ImTextureID)(mTextureManager.GetTexture("PlayIcon")->mShaderResourceView.Get());
+            const auto pauseIcon = (ImTextureID)(mTextureManager.GetTexture("PauseIcon")->mShaderResourceView.Get());
+            const auto stopIcon  = (ImTextureID)(mTextureManager.GetTexture("StopIcon")->mShaderResourceView.Get());
 
             static constexpr ImVec2 btnSize = {24, 24};
 
@@ -902,13 +909,13 @@ namespace x {
                 ID3D11ShaderResourceView* bgLogos =
                   mTextureManager.GetTexture("BackgroundLogos")->mShaderResourceView.Get();
                 ImGui::SetCursorPos({0, yOffset});
-                ImGui::Image(SrvToTextureId(bgLogos), {size.x, size.y - yOffset});
+                ImGui::Image((ImTextureID)(bgLogos), {size.x, size.y - yOffset});
 
                 // Draw title image
                 ID3D11ShaderResourceView* titleImage =
                   mTextureManager.GetTexture("XEditorLogo")->mShaderResourceView.Get();
                 ImGui::SetCursorPos(titleCursorPos);
-                ImGui::Image(SrvToTextureId(titleImage), titleSize);
+                ImGui::Image((ImTextureID)(titleImage), titleSize);
 
                 // Button icons
                 ID3D11ShaderResourceView* controllerIcon =
@@ -919,10 +926,10 @@ namespace x {
 
                 Gui::ScopedStyleVars buttonVars(
                   {{ImGuiStyleVar_FrameRounding, 16.0f}, {ImGuiStyleVar_FrameBorderSize, 4.0f}});
-                Gui::ScopedColorVars buttonColors({{ImGuiCol_Border, HexToImVec4("353535")},
-                                                   {ImGuiCol_Button, HexToImVec4("161616")},
-                                                   {ImGuiCol_ButtonActive, HexToImVec4("222222")},
-                                                   {ImGuiCol_ButtonHovered, HexToImVec4("1F1F1F")}});
+                Gui::ScopedColorVars buttonColors({{ImGuiCol_Border, Gui::StrToColor("353535")},
+                                                   {ImGuiCol_Button, Gui::StrToColor("161616")},
+                                                   {ImGuiCol_ButtonActive, Gui::StrToColor("222222")},
+                                                   {ImGuiCol_ButtonHovered, Gui::StrToColor("1F1F1F")}});
 
                 ImGui::PushFont(mFonts["display_20"]);
 
@@ -1013,7 +1020,7 @@ namespace x {
 
     void XEditor::View_EntityProperties() {
         static const ImTextureID selectAssetIcon =
-          SrvToTextureId(mTextureManager.GetTexture("ScaleIcon").value().mShaderResourceView.Get());
+          (ImTextureID)(mTextureManager.GetTexture("ScaleIcon").value().mShaderResourceView.Get());
         static AssetDescriptor selectedAsset {};
 
         ImGui::Begin("Properties");
@@ -1331,7 +1338,7 @@ namespace x {
             }
 
             auto* srv = mSceneViewport.GetShaderResourceView().Get();
-            ImGui::Image(SrvToTextureId(srv), contentSize);
+            ImGui::Image((ImTextureID)(srv), contentSize);
         }
         ImGui::End();
         ImGui::PopStyleVar();
@@ -1445,7 +1452,7 @@ namespace x {
                                 X_ASSERT(thumbnail.has_value());
 
                                 ImGui::GetWindowDrawList()->AddImage(
-                                  SrvToTextureId(thumbnail->mShaderResourceView.Get()),
+                                  (ImTextureID)(thumbnail->mShaderResourceView.Get()),
                                   {imageStartX, imageStartY},
                                   {imageStartX + thumbnailSize, imageStartY + thumbnailSize});
                             } else {
@@ -1482,7 +1489,7 @@ namespace x {
                                 }
 
                                 ImGui::GetWindowDrawList()->AddImage(
-                                  SrvToTextureId(iconSrv),
+                                  (ImTextureID)(iconSrv),
                                   {imageStartX, imageStartY},
                                   {imageStartX + thumbnailSize, imageStartY + thumbnailSize});
                             }
@@ -1604,7 +1611,7 @@ namespace x {
                 const AssetType assetType = asset.GetTypeFromId();
                 if (assetType == kAssetType_Texture) {
                     const auto preview =
-                      SrvToTextureId(mTextureManager.GetTexture(std::to_string(asset.mId))->mShaderResourceView.Get());
+                      (ImTextureID)(mTextureManager.GetTexture(std::to_string(asset.mId))->mShaderResourceView.Get());
                     ImVec2 regionSize = ImGui::GetContentRegionAvail();
                     regionSize.y      = regionSize.x;
                     ImGui::Image(preview, regionSize);
@@ -1615,7 +1622,7 @@ namespace x {
                     ImVec2 regionSize = ImGui::GetContentRegionAvail();
                     regionSize.y      = regionSize.x;
                     auto* srv         = mMeshPreviewer.Render(regionSize);
-                    ImGui::Image(SrvToTextureId(srv), regionSize);
+                    ImGui::Image((ImTextureID)(srv), regionSize);
                 } else if (assetType == kAssetType_Script) {
                 }
             }

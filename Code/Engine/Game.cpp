@@ -125,7 +125,7 @@ namespace x {
 
     void Game::OnResize(u32 width, u32 height) const {
         for (const auto& v : mVolatiles) {
-            v->OnResize(width, height);
+            if (v) { v->OnResize(width, height); }
         }
     }
 

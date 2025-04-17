@@ -10,23 +10,24 @@ set(APP_RES
 
 add_executable(XEditor WIN32
     ${APP_RES}
-    ${IMGUI_SOURCES}
     ${COMMON_SOURCES}
+    ${IMGUI_SOURCES}
     ${CODE_DIR}/Tools/XPak/Compression.hpp
     ${CODE_DIR}/Tools/XPak/Compression.cpp
     ${EDITOR_DIR}/AssetBrowserIcons.h
+    ${EDITOR_DIR}/Color.cpp
+    ${EDITOR_DIR}/Color.hpp
     ${EDITOR_DIR}/Controls.cpp
     ${EDITOR_DIR}/Controls.hpp
     ${EDITOR_DIR}/ImGuiHelpers.hpp
-    ${EDITOR_DIR}/ToolbarIcons.h
     ${EDITOR_DIR}/MeshPreviewer.cpp
     ${EDITOR_DIR}/MeshPreviewer.hpp
     ${EDITOR_DIR}/TextureManager.cpp
     ${EDITOR_DIR}/TextureManager.hpp
-    ${EDITOR_DIR}/Utilities.hpp
+    ${EDITOR_DIR}/ToolbarIcons.h
+    ${EDITOR_DIR}/WelcomeScreenIcons.h
     ${EDITOR_DIR}/XEditor.cpp
     ${EDITOR_DIR}/XEditor.hpp
-    ${EDITOR_DIR}/WelcomeScreenIcons.h
     ${EDITOR_DIR}/main.cpp
 )
 

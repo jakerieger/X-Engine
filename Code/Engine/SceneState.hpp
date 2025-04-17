@@ -132,6 +132,7 @@ namespace x {
                 if (!mMainCamera) {
                     // If no camera has been added to the scene yet, make this our main camera
                     // The highest ranking camera in the scene hierarchy is always the main camera
+                    // by default, although (TODO) the ability to change this should be added
                     mMainCamera = &camera;
                 }
                 return camera;

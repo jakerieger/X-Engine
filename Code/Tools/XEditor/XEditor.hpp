@@ -12,6 +12,7 @@
 #include "Engine/Window.hpp"
 #include "Engine/Game.hpp"
 #include "XPak/ProjectDescriptor.hpp"
+#include "Color.hpp"
 
 namespace x {
     struct EditorSession {
@@ -23,19 +24,19 @@ namespace x {
 
     struct EditorTheme {
         str mName;
-        ImVec4 mBorder;
-        ImVec4 mButtonBackground;
-        ImVec4 mHeaderBackground;
-        ImVec4 mIcon;
-        ImVec4 mInputBackground;
-        ImVec4 mMenuBackground;
-        ImVec4 mPanelBackground;
-        ImVec4 mSelected;
-        ImVec4 mTabHeader;
-        ImVec4 mTextHighlight;
-        ImVec4 mTextPrimary;
-        ImVec4 mTextSecondary;
-        ImVec4 mWindowBackground;
+        Color mBorder;
+        Color mButtonBackground;
+        Color mHeaderBackground;
+        Color mIcon;
+        Color mInputBackground;
+        Color mMenuBackground;
+        Color mPanelBackground;
+        Color mSelected;
+        Color mTabHeader;
+        Color mTextHighlight;
+        Color mTextPrimary;
+        Color mTextSecondary;
+        Color mWindowBackground;
         f32 mBorderRadius;
         f32 mBorderWidth;
 
