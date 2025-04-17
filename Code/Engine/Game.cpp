@@ -124,7 +124,13 @@ namespace x {
     }
 
     void Game::OnResize(u32 width, u32 height) const {
+        // Update engine volatiles
         for (const auto& v : mVolatiles) {
+            if (v) { v->OnResize(width, height); }
+        }
+
+        // Update scene volatiles
+        for (const auto& v : GetActiveScene()->GetVolatiles()) {
             if (v) { v->OnResize(width, height); }
         }
     }
@@ -276,7 +282,7 @@ namespace x {
 
     void Game::TransitionScene(const str& name) {
         if (name.empty() || mScenes.empty()) {
-            X_LOG_WARN("Attempted to load blank or non-existent scene")
+            X_LOG_ERROR("Attempted to load blank or non-existent scene")
             return;
         }
 
@@ -290,25 +296,30 @@ namespace x {
             return;
         }
 
-        mActiveScene->RegisterVolatiles(mVolatiles);
+        mActiveScene->RegisterVolatiles();
         mActiveScene->Update(0.0f);
     }
 
     void Game::TransitionScene(const SceneDescriptor& scene) {
         if (!scene.IsValid()) {
-            X_LOG_WARN("Attempted to load blank scene")
+            X_LOG_ERROR("Attempted to load blank scene")
             return;
         }
 
         mActiveScene.reset();
         mActiveScene = make_unique<Scene>(mRenderContext, mScriptEngine);
         mActiveScene->Load(scene);
-        mActiveScene->RegisterVolatiles(mVolatiles);
+        mActiveScene->RegisterVolatiles();
         mActiveScene->Update(0.0f);
     }
 
     void Game::Resize(u32 width, u32 height) const {
         OnResize(width, height);
+    }
+
+    void Game::Reset() {
+        mActiveScene->Reset();
+        mVolatiles.clear();
     }
 
     Scene* Game::GetActiveScene() const {

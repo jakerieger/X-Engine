@@ -4,6 +4,7 @@
 
 #include "Common/Types.hpp"
 #include "ArenaAllocator.hpp"
+#include "EntityId.hpp"
 #include "RenderContext.hpp"
 
 namespace x {
@@ -169,7 +170,7 @@ namespace x {
         }
 
         [[nodiscard]] bool Valid() const {
-            return (mManager != nullptr) && (mData != nullptr) && (mId != 0);
+            return (mManager != nullptr) && (mData != nullptr) && (mId != 0) && (EntityId {mId}.Valid());
         }
     };
 }  // namespace x

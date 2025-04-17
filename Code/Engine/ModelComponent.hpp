@@ -8,13 +8,6 @@
 
 namespace x {
     class ModelComponent {
-        ResourceHandle<Model> mModelHandle;
-        shared_ptr<IMaterial> mMaterial;
-        bool mCastsShadows   = true;
-        bool mReceiveShadows = true;
-        u64 mModelId {0};
-        u64 mMaterialId {0};
-
     public:
         ModelComponent() = default;
 
@@ -85,5 +78,17 @@ namespace x {
         void Draw(RenderContext& context) const {
             if (mModelHandle.Valid()) { mModelHandle->Draw(context); }
         }
+
+        bool Valid() const {
+            return mModelHandle.Valid();
+        }
+
+    private:
+        ResourceHandle<Model> mModelHandle;
+        shared_ptr<IMaterial> mMaterial;
+        bool mCastsShadows   = true;
+        bool mReceiveShadows = true;
+        u64 mModelId {0};
+        u64 mMaterialId {0};
     };
 }  // namespace x

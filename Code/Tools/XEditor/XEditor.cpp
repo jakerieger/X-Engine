@@ -419,6 +419,9 @@ namespace x {
             // Buttons
             if (ImGui::Button("OK", {240, 0})) {
                 if (selectedComponent == "Model") {
+                    // TODO: Throws a rendering error if added to one entity while another entity's model component
+                    // already has a material set, but doesn't if you add multiple entities with model components before
+                    // setting any materials. Likely need to revisit how materials are being set/updated.
                     state.AddComponent<ModelComponent>(sSelectedEntity);
                 } else if (selectedComponent == "Behavior") {
                     state.AddComponent<BehaviorComponent>(sSelectedEntity);
@@ -1875,14 +1878,10 @@ namespace x {
     }
 
     void XEditor::OnOpenProject() {
-        const auto filter = "Project (*.xproj)|*.xproj|";
+        const auto filter  = "Project (*.xproj)|*.xproj|";
+        Path initDirectory = Platform::GetPlatformDirectory(Platform::kPlatformDir_Documents) / "XENGINE Projects";
         char filename[MAX_PATH];
-        if (Platform::OpenFileDialog(mHwnd,
-                                     GetInitialDirectory().CStr(),
-                                     filter,
-                                     "Open Project File",
-                                     filename,
-                                     MAX_PATH)) {
+        if (Platform::OpenFileDialog(mHwnd, initDirectory.CStr(), filter, "Open Project File", filename, MAX_PATH)) {
             // TODO: Make sure any previously loaded projects get properly unloaded or it'll just crash
             LoadProject(filename);
         }
@@ -2011,6 +2010,8 @@ namespace x {
     }
 
     void XEditor::LoadProject(const str& filename) {
+        if (mGame.IsInitialized()) { mGame.Reset(); }
+
         if (!mLoadedProject.FromFile(filename)) {
             Platform::ShowAlert(mHwnd,
                                 "Error loading project",

@@ -194,7 +194,7 @@ namespace x {
 
     void Scene::DrawOpaque() {
         for (const auto [model, transform] : mOpaqueObjects) {
-            if (model == nullptr) { continue; }
+            if (model == nullptr || !model->Valid()) { continue; }
             Matrix world    = transform->GetTransformMatrix();
             auto view       = mState.GetMainCamera()->GetViewMatrix();
             auto projection = mState.GetMainCamera()->GetProjectionMatrix();
@@ -238,8 +238,12 @@ namespace x {
         return mLoaded;
     }
 
-    void Scene::RegisterVolatiles(vector<Volatile*>& volatiles) {
-        volatiles.push_back(mState.GetMainCamera());
+    const vector<Volatile*>& Scene::GetVolatiles() {
+        return mVolatiles;
+    }
+
+    void Scene::RegisterVolatiles() {
+        mVolatiles.push_back(mState.GetMainCamera());
     }
 
     void Scene::LoadMaterial(const MaterialDescriptor& material, ModelComponent& modelComponent) {

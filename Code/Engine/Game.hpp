@@ -33,6 +33,7 @@ namespace x {
         void TransitionScene(const str& name);
         void TransitionScene(const SceneDescriptor& scene);
         void Resize(u32 width, u32 height) const;
+        void Reset();
 
         X_NODISCARD Scene* GetActiveScene() const;
         X_NODISCARD bool SceneValid() const;
