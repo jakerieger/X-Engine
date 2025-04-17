@@ -1,3 +1,3 @@
 # XPak
 
-X Engine asset packing tool
+XENGINE asset packing tool

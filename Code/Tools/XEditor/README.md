@@ -1,3 +1,3 @@
 # XEditor
 
-X Engine primary editor and game authoring tool
+XEN's primary editor and game authoring tool

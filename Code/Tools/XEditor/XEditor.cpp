@@ -1023,7 +1023,7 @@ namespace x {
 
     void XEditor::View_EntityProperties() {
         static const ImTextureID selectAssetIcon =
-          (ImTextureID)(mTextureManager.GetTexture("ScaleIcon").value().mShaderResourceView.Get());
+          (ImTextureID)(mTextureManager.GetTexture("SelectAssetIcon").value().mShaderResourceView.Get());
         static AssetDescriptor selectedAsset {};
 
         ImGui::Begin("Properties");
@@ -1210,6 +1210,10 @@ namespace x {
                 if (behavior) {
                     Gui::SpacingY(10.0f);
                     if (ImGui::CollapsingHeader("Behavior##properties", ImGuiTreeNodeFlags_DefaultOpen)) {
+                        if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+                            // TODO: Context menu for removing components
+                        }
+
                         ImGui::Text("Script (Asset):");
                         ImGui::SameLine(kLabelWidth);
                         ImGui::SetNextItemWidth(size.x - kLabelWidth);
@@ -1218,30 +1222,29 @@ namespace x {
                           std::ranges::find_if(mAssetDescriptors, [&behavior](const AssetDescriptor& asset) {
                               return asset.mId == behavior->GetScriptId();
                           });
-                        if (scriptAsset != mAssetDescriptors.end()) {
-                            auto UpdateScript = [this, &scriptAsset](const AssetDescriptor& descriptor) {
+                        const bool foundScript = scriptAsset != mAssetDescriptors.end();
+
+                        auto UpdateScript = [this, &scriptAsset, &foundScript](const AssetDescriptor& descriptor) {
+                            if (foundScript) {
                                 const auto oldId = scriptAsset->mId;
                                 if (oldId == descriptor.mId) { return; }
-
-                                // TODO: Implement
-
-                                X_LOG_DEBUG("Old script ID: %llu", oldId);
-                                X_LOG_DEBUG("New script ID: %llu", descriptor.mId);
-                            };
-
-                            static char buffer[256] {0};
-                            const auto currentValue = Path(scriptAsset->mFilename).Filename();
-                            std::strcpy(buffer, currentValue.c_str());
-
-                            if (Gui::AssetDropTarget("##script_drop_target",
-                                                     buffer,
-                                                     sizeof(buffer),
-                                                     selectAssetIcon,
-                                                     X_DROP_TARGET_SCRIPT,
-                                                     UpdateScript)) {
-                                mSelectAssetOpen   = true;
-                                mSelectAssetFilter = kAssetType_Script;
                             }
+
+                            // TODO: Implement UpdateScript
+                        };
+
+                        static char scriptBuffer[256] {0};
+                        const auto currentScript = foundScript ? Path(scriptAsset->mFilename).Filename() : "None";
+                        std::strcpy(scriptBuffer, currentScript.c_str());
+
+                        if (Gui::AssetDropTarget("##script_drop_target",
+                                                 scriptBuffer,
+                                                 sizeof(scriptBuffer),
+                                                 selectAssetIcon,
+                                                 X_DROP_TARGET_SCRIPT,
+                                                 UpdateScript)) {
+                            mSelectAssetOpen   = true;
+                            mSelectAssetFilter = kAssetType_Script;
                         }
                     }
                 }
@@ -2292,11 +2295,17 @@ namespace x {
             X_LOG_ERROR("Failed to load Stop icon");
             return false;
         }
-        // result = mTextureManager.LoadFromMemoryCompressed(SELECTASSETICON_BYTES, 24, 24, 4, "SelectAssetIcon");
-        // if (!result) {
-        //     X_LOG_ERROR("Failed to load Stop icon");
-        //     return false;
-        // }
+
+        result = mTextureManager.LoadFromMemoryCompressed(SELECTASSETICON_BYTES,
+                                                          SELECTASSETICON_COMPRESSED_SIZE,
+                                                          SELECTASSETICON_WIDTH,
+                                                          SELECTASSETICON_HEIGHT,
+                                                          4,
+                                                          "SelectAssetIcon");
+        if (!result) {
+            X_LOG_ERROR("Failed to load Stop icon");
+            return false;
+        }
 
         result = mTextureManager.LoadFromMemoryCompressed(ABOUT_BANNER_BYTES,
                                                           ABOUT_BANNER_COMPRESSED_SIZE,
