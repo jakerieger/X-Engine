@@ -38,7 +38,7 @@ namespace x {
         DXGI_FORMAT mFormat;
         D3D11_VIEWPORT mViewport {};
         RenderContext& mContext;
-        u32 mWidth, mHeight;
+        u32 mWidth = 1, mHeight = 1;
         f32 mClearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
         ComPtr<ID3D11Texture2D> mRenderTarget;
         ComPtr<ID3D11RenderTargetView> mRenderTargetView;
