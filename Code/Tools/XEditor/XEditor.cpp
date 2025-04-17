@@ -345,14 +345,14 @@ namespace x {
 #pragma region Editor Modals
     void XEditor::Modal_SaveSceneAs() {
         const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, {0.5f, 0.5f});
         if (ImGui::BeginPopupModal("Save Scene As", &mSaveSceneAsOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
             ImGui::SetNextItemWidth(408.0f);
             ImGui::InputText("##scene_name_as", EditorState::CurrentSceneName, sizeof(EditorState::CurrentSceneName));
 
-            ImGui::Dummy(ImVec2(0, 2));
+            ImGui::Dummy({0, 2});
 
-            if (ImGui::Button("OK", ImVec2(200, 0))) {
+            if (ImGui::Button("OK", {200, 0})) {
                 if (EditorState::CurrentSceneName[0] != '\0' || strcmp(EditorState::CurrentSceneName, "") == 0) {
                     OnSaveScene(EditorState::CurrentSceneName);
                     mSaveSceneAsOpen = false;
@@ -361,7 +361,7 @@ namespace x {
             }
             ImGui::SetItemDefaultFocus();
             ImGui::SameLine();
-            if (ImGui::Button("Cancel", ImVec2(200, 0))) {
+            if (ImGui::Button("Cancel", {200, 0})) {
                 mSaveSceneAsOpen = false;
                 ImGui::CloseCurrentPopup();
             }
@@ -381,7 +381,7 @@ namespace x {
         static constexpr f32 itemHeight = 48.0f;
 
         const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, {0.5f, 0.5f});
         i32 availableComponents {0};
         if (ImGui::BeginPopupModal("Add Component", &mAddComponentOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
             for (const auto& [name, description] : components) {
@@ -401,23 +401,21 @@ namespace x {
                                                    description.c_str(),
                                                    selectedComponent == name,
                                                    true,
-                                                   ImVec2(0, itemHeight))) {
+                                                   {0, itemHeight})) {
                         selectedComponent = name;
                     }
-                    ImGui::Dummy(ImVec2(0, 2.f));
+                    ImGui::Dummy({0, 2.f});
                 }
             }
 
             if (availableComponents == 0) {
                 const ImVec2 size = ImGui::GetContentRegionAvail();
-                Gui::CenteredText("No components available", ImGui::GetCursorScreenPos(), ImVec2(size.x, 48));
+                Gui::CenteredText("No components available", ImGui::GetCursorScreenPos(), {size.x, 48});
             }
 
             // Buttons
-            if (ImGui::Button("OK", ImVec2(240, 0))) {
+            if (ImGui::Button("OK", {240, 0})) {
                 if (selectedComponent == "Model") {
-                    // TODO: This will require a lot more work than simply adding the component since it's tied into
-                    // the render system
                     state.AddComponent<ModelComponent>(sSelectedEntity);
                 } else if (selectedComponent == "Behavior") {
                     state.AddComponent<BehaviorComponent>(sSelectedEntity);
@@ -428,7 +426,7 @@ namespace x {
             }
             ImGui::SetItemDefaultFocus();
             ImGui::SameLine();
-            if (ImGui::Button("Cancel", ImVec2(240, 0))) {
+            if (ImGui::Button("Cancel", {240, 0})) {
                 mAddComponentOpen = false;
                 ImGui::CloseCurrentPopup();
             }
@@ -453,18 +451,18 @@ namespace x {
                                                std::to_string(desc.mId).c_str(),
                                                desc.mId == selectedAssetId,
                                                0,
-                                               ImVec2(408, 48))) {
+                                               {408, 48})) {
                     selectedAssetId = desc.mId;
                 }
             }
 
             // OK and Cancel buttons
-            if (ImGui::Button("OK", ImVec2(200, 0))) {
+            if (ImGui::Button("OK", {200, 0})) {
                 mSelectAssetOpen = false;
                 ImGui::CloseCurrentPopup();
             }
             ImGui::SameLine();
-            if (ImGui::Button("Cancel", ImVec2(200, 0))) {
+            if (ImGui::Button("Cancel", {200, 0})) {
                 mSelectAssetOpen = false;
                 ImGui::CloseCurrentPopup();
             }
@@ -475,19 +473,19 @@ namespace x {
 
     void XEditor::Modal_About() {
         const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, {0.5f, 0.5f});
         if (ImGui::BeginPopupModal("About", &mAboutOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
             const auto banner = mTextureManager.GetTexture("AboutBanner");
-            ImGui::Image(SrvToTextureId(banner->mShaderResourceView.Get()), ImVec2(800, 300));
+            ImGui::Image(SrvToTextureId(banner->mShaderResourceView.Get()), {800, 300});
             ImGui::EndPopup();
         }
     }
 
     void XEditor::Modal_NewProject() {
         const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, {0.5f, 0.5f});
         ImGui::SetNextWindowSize({600, 0});
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(20.0f, 20.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {20.0f, 20.0f});
 
         static char nameBuffer[256] {0};
         static char locationBuffer[512] {0};
@@ -595,7 +593,7 @@ namespace x {
         char nameBuffer[256] {0};
 
         const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, {0.5f, 0.5f});
         if (ImGui::BeginPopupModal("Create Material", &mCreateMaterialOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
             ImGui::Text("Material Type");
             ImGui::SetNextItemWidth(408);
@@ -605,13 +603,13 @@ namespace x {
             ImGui::SetNextItemWidth(408);
             ImGui::InputText("##material_name", nameBuffer, sizeof(nameBuffer));
 
-            if (ImGui::Button("OK", ImVec2(200, 0))) {
+            if (ImGui::Button("OK", {200, 0})) {
                 mCreateMaterialOpen = false;
                 ImGui::CloseCurrentPopup();
             }
             ImGui::SetItemDefaultFocus();
             ImGui::SameLine();
-            if (ImGui::Button("Cancel", ImVec2(200, 0))) {
+            if (ImGui::Button("Cancel", {200, 0})) {
                 mCreateMaterialOpen = false;
                 ImGui::CloseCurrentPopup();
             }
@@ -622,7 +620,7 @@ namespace x {
 
     void XEditor::Modal_SelectScene() {
         const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, {0.5f, 0.5f});
         if (ImGui::BeginPopupModal("Select Scene", &mSceneSelectorOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
             static str selectedScene;
 
@@ -636,15 +634,15 @@ namespace x {
                                                description.c_str(),
                                                selectedScene == name,
                                                ImGuiSelectableFlags_None,
-                                               ImVec2(0, 48))) {
+                                               {0, 48})) {
                     selectedScene = name;
                 }
                 index++;
-                ImGui::Dummy(ImVec2(0, 2.f));
+                ImGui::Dummy({0, 2.f});
             }
 
             // Buttons
-            if (ImGui::Button("OK", ImVec2(200, 0))) {
+            if (ImGui::Button("OK", {200, 0})) {
                 if (!selectedScene.empty()) { OnLoadScene(selectedScene); }
 
                 mSceneSelectorOpen = false;
@@ -652,7 +650,7 @@ namespace x {
             }
             ImGui::SetItemDefaultFocus();
             ImGui::SameLine();
-            if (ImGui::Button("Cancel", ImVec2(200, 0))) {
+            if (ImGui::Button("Cancel", {200, 0})) {
                 mSceneSelectorOpen = false;
                 ImGui::CloseCurrentPopup();
             }
@@ -767,11 +765,11 @@ namespace x {
                                                   ImGuiWindowFlags_NoSavedSettings |       // Don't save position/size
                                                   ImGuiWindowFlags_NoBringToFrontOnFocus;  // Don't change z-order
 
-        ImGui::SetNextWindowPos(ImVec2(0, menuBarHeight));
-        ImGui::SetNextWindowSize(ImVec2(ImGui::GetMainViewport()->Size.x, kToolbarHeight));
+        ImGui::SetNextWindowPos({0, menuBarHeight});
+        ImGui::SetNextWindowSize({ImGui::GetMainViewport()->Size.x, kToolbarHeight});
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2, 2));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {2, 2});
 
         const ImVec4 background = ImGui::GetStyleColorVec4(ImGuiCol_MenuBarBg);
         ImGui::PushStyleColor(ImGuiCol_WindowBg, background);
@@ -781,7 +779,7 @@ namespace x {
             const auto pauseIcon = SrvToTextureId(mTextureManager.GetTexture("PauseIcon")->mShaderResourceView.Get());
             const auto stopIcon  = SrvToTextureId(mTextureManager.GetTexture("StopIcon")->mShaderResourceView.Get());
 
-            static constexpr auto btnSize = ImVec2(24, 24);
+            static constexpr ImVec2 btnSize = {24, 24};
 
             // Move the next 3 buttons to the window center
             // Total width is (24*3) + (2*3) or (72) + (6) or 78
@@ -885,7 +883,7 @@ namespace x {
 
         ImVec2 size = ImGui::GetMainViewport()->Size;
         ImGui::SetNextWindowSize({size.x, size.y - yOffset});
-        ImGui::SetNextWindowPos(ImVec2(0, yOffset));
+        ImGui::SetNextWindowPos({0, yOffset});
 
         const f32 yHalfway      = (size.y - yOffset) / 2.0f;
         const f32 buttonSize    = 220.0f;
@@ -928,15 +926,15 @@ namespace x {
 
                 ImGui::PushFont(mFonts["display_20"]);
 
-                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(buttonSpacing, 4.0f));
+                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {buttonSpacing, 4.0f});
                 ImGui::SetCursorPos(buttonCursorPos);
-                if (Gui::BorderedButton("New Project", ImVec2(buttonSize, buttonSize))) { mNewProjectOpen = true; }
+                if (Gui::BorderedButton("New Project", {buttonSize, buttonSize})) { mNewProjectOpen = true; }
                 ImGui::SameLine();
 
-                if (Gui::BorderedButton("Open Project", ImVec2(buttonSize, buttonSize))) { OnOpenProject(); }
+                if (Gui::BorderedButton("Open Project", {buttonSize, buttonSize})) { OnOpenProject(); }
                 ImGui::SameLine();
 
-                if (Gui::BorderedButton("Settings", ImVec2(buttonSize, buttonSize))) {}
+                if (Gui::BorderedButton("Settings", {buttonSize, buttonSize})) {}
                 ImGui::PopStyleVar();
 
                 ImGui::PopFont();
@@ -962,7 +960,7 @@ namespace x {
         constexpr f32 heightAdjustment = 4.0f;
         const f32 listHeight           = windowSize.y - totalButtonArea - heightAdjustment;
 
-        ImGui::BeginChild("##entities_scroll_list", ImVec2(windowSize.x, listHeight), true);
+        ImGui::BeginChild("##entities_scroll_list", {windowSize.x, listHeight}, true);
         {
             if (mGame.IsInitialized() && GetCurrentScene()->Loaded()) {
                 for (auto& [id, name] : GetEntities()) {
@@ -972,13 +970,13 @@ namespace x {
         }
         ImGui::EndChild();
 
-        ImGui::Dummy(ImVec2(0, buttonPadding));
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(buttonPadding, buttonPadding));
+        ImGui::Dummy({0, buttonPadding});
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {buttonPadding, buttonPadding});
         const ImVec2 remainingSpace = ImGui::GetContentRegionAvail();
 
         static char entityNameBuffer[256] {0};
         static bool openAddEntityPopup {false};
-        if (ImGui::Button("Add Entity", ImVec2(remainingSpace.x, buttonHeight))) {
+        if (ImGui::Button("Add Entity", {remainingSpace.x, buttonHeight})) {
             memset(entityNameBuffer,
                    0,
                    sizeof(entityNameBuffer));  // probably unnecessary since we initialized with null
@@ -996,7 +994,7 @@ namespace x {
                                                        ImGuiInputTextFlags_EnterReturnsTrue);
             ImGui::PopItemWidth();
             ImGui::Separator();
-            if (ImGui::Button("OK", ImVec2(150, 0)) || enterPressed) {
+            if (ImGui::Button("OK", {150, 0}) || enterPressed) {
                 if (strlen(entityNameBuffer) > 0) {
                     ImGui::CloseCurrentPopup();
                     OnAddEntity(entityNameBuffer);
@@ -1005,7 +1003,7 @@ namespace x {
 
             ImGui::SameLine();
 
-            if (ImGui::Button("Cancel", ImVec2(150, 0))) { ImGui::CloseCurrentPopup(); }
+            if (ImGui::Button("Cancel", {150, 0})) { ImGui::CloseCurrentPopup(); }
 
             ImGui::EndPopup();
         }
@@ -1298,11 +1296,11 @@ namespace x {
                 }
             }
 
-            ImGui::Dummy(ImVec2(0, 2.f));
+            ImGui::Dummy({0, 2.f});
             ImGui::Separator();
-            ImGui::Dummy(ImVec2(0, 2.f));
+            ImGui::Dummy({0, 2.f});
 
-            if (ImGui::Button("Add Component##button", ImVec2(size.x, 0))) { mAddComponentOpen = true; }
+            if (ImGui::Button("Add Component##button", {size.x, 0})) { mAddComponentOpen = true; }
         }
         ImGui::End();
 
@@ -1314,7 +1312,7 @@ namespace x {
     }
 
     void XEditor::View_Viewport() {
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
         ImGui::Begin("Viewport");
         {
             const ImVec2 contentSize = ImGui::GetContentRegionAvail();
@@ -1340,7 +1338,7 @@ namespace x {
     }
 
     void XEditor::View_AssetBrowser() {
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});
         ImGui::Begin("Assets");
         {
             // Assets don't get loaded until the game is initialized (which happens when the project is loaded, but not
@@ -1365,10 +1363,10 @@ namespace x {
                 const f32 thumbnailSize = cellWidth * 0.9f;                    // 90% of cell width for the image
                 const f32 padding       = (cellWidth - thumbnailSize) / 2.0f;  // Equal padding on both sides
 
-                ImGui::Dummy(ImVec2(0, padding * 2));
+                ImGui::Dummy({0, padding * 2});
 
-                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4.0f, 4.0f));
-                if (ImGui::BeginChild("##GridScrollRegion", ImVec2(0, 0), false)) {
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {4.0f, 4.0f});
+                if (ImGui::BeginChild("##GridScrollRegion", {0, 0}, false)) {
                     // Calculate number of rows needed
                     i32 itemCount = CAST<i32>(assets.size());
                     i32 rowCount  = CAST<i32>((itemCount + columnsCount - 1) / columnsCount);  // Ceiling division
@@ -1395,12 +1393,12 @@ namespace x {
                             ImGui::BeginGroup();
 
                             // Create a selectable that fits the cell size
-                            ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
-                            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
+                            ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, {0.5f, 0.5f});
+                            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {0.0f, 0.0f});
                             if (ImGui::Selectable("##cell",
                                                   sSelectedAsset == itemIndex,
                                                   0,
-                                                  ImVec2(cellWidth, thumbnailSize + 25))) {
+                                                  {cellWidth, thumbnailSize + 25})) {
                                 // Handle selection
                                 sSelectedAsset  = itemIndex;
                                 auto descriptor = mAssetDescriptors.at(sSelectedAsset);
@@ -1448,8 +1446,8 @@ namespace x {
 
                                 ImGui::GetWindowDrawList()->AddImage(
                                   SrvToTextureId(thumbnail->mShaderResourceView.Get()),
-                                  ImVec2(imageStartX, imageStartY),
-                                  ImVec2(imageStartX + thumbnailSize, imageStartY + thumbnailSize));
+                                  {imageStartX, imageStartY},
+                                  {imageStartX + thumbnailSize, imageStartY + thumbnailSize});
                             } else {
                                 ID3D11ShaderResourceView* iconSrv {nullptr};
 
@@ -1485,8 +1483,8 @@ namespace x {
 
                                 ImGui::GetWindowDrawList()->AddImage(
                                   SrvToTextureId(iconSrv),
-                                  ImVec2(imageStartX, imageStartY),
-                                  ImVec2(imageStartX + thumbnailSize, imageStartY + thumbnailSize));
+                                  {imageStartX, imageStartY},
+                                  {imageStartX + thumbnailSize, imageStartY + thumbnailSize});
                             }
 
                             // Add text below the image (centered)
@@ -1494,7 +1492,7 @@ namespace x {
                             f32 textStartX = imageStartX + (thumbnailSize - textWidth) * 0.5f;
                             f32 textStartY = imageStartY + thumbnailSize + 4;  // 4 pixels below the image
 
-                            ImGui::GetWindowDrawList()->AddText(ImVec2(textStartX, textStartY),
+                            ImGui::GetWindowDrawList()->AddText({textStartX, textStartY},
                                                                 ImGui::GetColorU32(ImGuiCol_Text),
                                                                 itemName.c_str());
 
@@ -1561,7 +1559,7 @@ namespace x {
             ImGui::SameLine();
             ImGui::Checkbox("Debug", &showDebug);
 
-            ImGui::BeginChild("ScrollingRegion", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
+            ImGui::BeginChild("ScrollingRegion", {0, 0}, false, ImGuiWindowFlags_HorizontalScrollbar);
 
             // Display logs
             std::lock_guard<std::mutex> lock(logger.GetBufferMutex());
@@ -1582,7 +1580,7 @@ namespace x {
             // Auto-scroll to bottom
             if (autoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) { ImGui::SetScrollHereY(1.0f); }
 
-            ImGui::Dummy(ImVec2(0, 4));
+            ImGui::Dummy({0, 4});
 
             ImGui::EndChild();
         }
@@ -1646,11 +1644,11 @@ namespace x {
                                                  ImGuiWindowFlags_NoSavedSettings |       // Don't save position/size
                                                  ImGuiWindowFlags_NoBringToFrontOnFocus;  // Don't change z-order
 
-        ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetMainViewport()->Size.y - kStatusBarHeight));
-        ImGui::SetNextWindowSize(ImVec2(ImGui::GetMainViewport()->Size.x, kStatusBarHeight));
+        ImGui::SetNextWindowPos({0, ImGui::GetMainViewport()->Size.y - kStatusBarHeight});
+        ImGui::SetNextWindowSize({ImGui::GetMainViewport()->Size.x, kStatusBarHeight});
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2, 2));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {2, 2});
 
         const ImVec4 background = ImGui::GetStyleColorVec4(ImGuiCol_MenuBarBg);
         ImGui::PushStyleColor(ImGuiCol_WindowBg, background);
@@ -2067,8 +2065,8 @@ namespace x {
         const auto* imguiViewport          = ImGui::GetWindowViewport();
         constexpr ImGuiDockNodeFlags flags = ImGuiDockNodeFlags_PassthruCentralNode;
 
-        ImGui::SetNextWindowPos(ImVec2(0, yOffset));
-        ImGui::SetNextWindowSize(ImVec2(imguiViewport->Size.x, imguiViewport->Size.y - yOffset - kStatusBarHeight));
+        ImGui::SetNextWindowPos({0, yOffset});
+        ImGui::SetNextWindowSize({imguiViewport->Size.x, imguiViewport->Size.y - yOffset - kStatusBarHeight});
         ImGui::SetNextWindowViewport(imguiViewport->ID);
 
         constexpr ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
@@ -2078,11 +2076,11 @@ namespace x {
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});
 
         if (ImGui::Begin("DockSpace", nullptr, windowFlags)) {
             const ImGuiID dockspaceId = ImGui::GetID("Editor::DockSpace");
-            ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), flags);
+            ImGui::DockSpace(dockspaceId, {0.0f, 0.0f}, flags);
 
             if (!mDockspaceSetup) {
                 mDockspaceSetup = true;
