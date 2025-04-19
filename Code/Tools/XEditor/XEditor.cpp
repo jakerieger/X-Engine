@@ -1786,7 +1786,8 @@ namespace x {
         X_ASSERT(sceneRoot.Exists())
 
         // Check whether we're overwriting the current scene or saving as new scene
-        const str name = sceneName.empty() ? GetCurrentScene()->GetName() : sceneName;
+        const bool overwriting = !sceneName.empty();
+        const str name         = overwriting ? sceneName : GetCurrentScene()->GetName();
 
         // Parse the current scene state in the editor to a descriptor file
         SceneDescriptor descriptor {};
@@ -1799,9 +1800,8 @@ namespace x {
         SceneParser::WriteToFile(descriptor, scenePath);
         X_ASSERT(scenePath.Exists())
 
-        // Generate asset descriptor if it doesn't already exist
-        const Path assetDescPath = contentRoot / (name + ".scene.xasset");
-        if (!assetDescPath.Exists()) {
+        // If we're saving this as a new scene asset, we need to generate its descriptor file
+        if (!overwriting) {
             if (!AssetGenerator::GenerateAsset(scenePath, kAssetType_Scene, contentRoot)) {
                 X_LOG_ERROR("Failed to generate scene asset descriptor");
                 return;
@@ -1878,7 +1878,6 @@ namespace x {
             }
         }
 
-        AssetManager::ReloadAssets();
         ReloadAssetCache();
         mGame.ReloadSceneCache();
         GenerateAssetThumbnails();
@@ -1960,8 +1959,10 @@ namespace x {
                 return;
             }
 
-            AssetManager::LoadAssets(rootContentDir.Parent());
-            ReloadAssetCache();
+            // AssetManager::LoadAssets(rootContentDir.Parent());
+            // I might need to pass the rootContentDir.Parent, we'll see if disabling the above line affects anything,
+            // or if I can just do a full reload and be fine
+            ReloadAssetCache(true);
         }
     }
 #pragma endregion
@@ -2070,10 +2071,11 @@ namespace x {
 
         return kAssetType_Invalid;
     }
-
-    void XEditor::ReloadAssetCache() {
+    
+    void XEditor::ReloadAssetCache(bool fullReload) {
         if (mLoadedProject.mLoaded && mGame.IsInitialized()) {
             mAssetDescriptors.clear();
+            if (fullReload) AssetManager::ReloadAssets();  // Update asset cache internally
             mAssetDescriptors = AssetManager::GetAssetDescriptors();
         }
     }

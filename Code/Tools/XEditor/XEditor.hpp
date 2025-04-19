@@ -163,7 +163,10 @@ namespace x {
         Path GetInitialDirectory() const;
         /// @brief Returns the AssetType based on the given filename/extension
         static AssetType GetAssetTypeFromFile(const Path& path);
-        void ReloadAssetCache();
+
+        /// @brief Reloads the editor's asset cache. If `fullReload` is true,
+        /// this will tell the engine to do a cache reload internally as well.
+        void ReloadAssetCache(bool fullReload = false);
 
         // ImGui-specific functions
         bool LoadEditorIcons();
