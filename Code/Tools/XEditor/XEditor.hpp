@@ -78,7 +78,6 @@ namespace x {
         // UI / ImGui
         ImFont* mDefaultFont {nullptr};
         MeshPreviewer mMeshPreviewer;
-        Path mLoadedScenePath {};
         Path mProjectRoot {};
         TextureManager mTextureManager;
         bool mDockspaceSetup {false};
@@ -148,7 +147,7 @@ namespace x {
         void OnLoadScene(const str& selectedScene);
         void OnOpenProject();
         void OnResetWindow();
-        void OnSaveScene(const char* name = nullptr);
+        void OnSaveScene(const str& sceneName = "");
         void OnSelectedMeshAsset(const AssetDescriptor& descriptor);
         bool OnCreateProject(const char* name, const char* location, const char* engineVersion);
 

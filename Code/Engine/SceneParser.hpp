@@ -84,6 +84,6 @@ namespace x {
         static void Parse(const str& filename, SceneDescriptor& descriptor);
         static void Parse(std::span<const u8> data, SceneDescriptor& descriptor);
         static void StateToDescriptor(const SceneState& state, SceneDescriptor& descriptor, const str& sceneName);
-        static void WriteToFile(const SceneDescriptor& descriptor, const str& filename);
+        static void WriteToFile(const SceneDescriptor& descriptor, const Path &filename);
     };
 }  // namespace x

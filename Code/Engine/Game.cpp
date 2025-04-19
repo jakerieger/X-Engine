@@ -60,6 +60,7 @@ namespace x {
     void Game::ReloadSceneCache() {
         // Find and load all of our scene descriptor
         mScenes.clear();
+        AssetManager::ReloadAssets();
         const auto sceneIds = AssetManager::GetScenes();
         for (const auto& scene : sceneIds) {
             auto sceneData = AssetManager::GetAssetData(scene);

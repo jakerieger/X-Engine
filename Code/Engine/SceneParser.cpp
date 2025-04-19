@@ -96,7 +96,7 @@ namespace x {
         }
     }
 
-    void SceneParser::WriteToFile(const SceneDescriptor& descriptor, const str& filename) {
+    void SceneParser::WriteToFile(const SceneDescriptor& descriptor, const Path& filename) {
         YAML::Emitter out;
         out << YAML::BeginMap;
         {
@@ -107,20 +107,6 @@ namespace x {
             // World
             {
                 out << YAML::Key << "world" << YAML::BeginMap;
-
-                // ============================== Camera ==============================//
-                // auto& camera = descriptor.mWorld.mCamera;
-                // out << YAML::Key << "camera" << YAML::BeginMap;
-                // out << YAML::Key << "position" << YAML::Value << YAML::Flow;
-                // EmitFloat3(out, camera.mPosition);
-                // out << YAML::Key << "eye" << YAML::Value << YAML::Flow;
-                // EmitFloat3(out, camera.mLookAt);
-                // out << YAML::Key << "fovY" << YAML::Value << camera.mFovY;
-                // out << YAML::Key << "nearZ" << YAML::Value << camera.mNearZ;
-                // out << YAML::Key << "farZ" << YAML::Value << camera.mFarZ;
-                // out << YAML::EndMap;
-                // ====================================================================//
-
                 // ============================== Lights ==============================//
                 auto& sun = descriptor.mWorld.mLights.mSun;
                 out << YAML::Key << "lights" << YAML::BeginMap;
@@ -159,7 +145,7 @@ namespace x {
 
             // Entities
             {
-                out << YAML::Key << "entities" << YAML::BeginSeq;
+                out << YAML::Key << "entities" << YAML::Value << YAML::BeginSeq;
 
                 for (auto& entity : descriptor.mEntities) {
                     out << YAML::BeginMap;
@@ -225,7 +211,7 @@ namespace x {
         }
         out << YAML::EndMap;
 
-        FileWriter::WriteAllText(Path(filename), out.c_str());
+        FileWriter::WriteAllText(filename, out.c_str());
     }
 
     void ParseWorld(const YAML::Node& world, SceneDescriptor& descriptor) {

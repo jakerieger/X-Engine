@@ -73,3 +73,5 @@ inline constexpr size_t operator"" _GIGABYTES(unsigned long long n) {
 #define X_CACHE_ALIGNED __declspec(align(64))
 
 #define X_NODISCARD [[nodiscard]]
+
+#define X_CSTR_EMPTY(val) std::strcmp(val, "") == 0

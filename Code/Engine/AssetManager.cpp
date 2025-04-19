@@ -60,6 +60,7 @@ namespace x {
     }
 
     void AssetManager::ReloadAssets() {
+        mAssets.clear();
         LoadAssets(mWorkingDirectory);
     }
 

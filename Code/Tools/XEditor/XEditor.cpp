@@ -352,7 +352,9 @@ namespace x {
             ImGui::Dummy({0, 2});
 
             if (ImGui::Button("OK", {200, 0})) {
-                if (EditorState::CurrentSceneName[0] != '\0' || strcmp(EditorState::CurrentSceneName, "") == 0) {
+                // If the name isn't empty and is different from the previous name, save the scene
+                if (!X_CSTR_EMPTY(EditorState::CurrentSceneName) &&
+                    std::strcmp(EditorState::CurrentSceneName, GetCurrentScene()->GetName().c_str()) != 0) {
                     OnSaveScene(EditorState::CurrentSceneName);
                     mSaveSceneAsOpen = false;
                     ImGui::CloseCurrentPopup();
@@ -385,6 +387,8 @@ namespace x {
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, {0.5f, 0.5f});
         i32 availableComponents {0};
         if (ImGui::BeginPopupModal("Add Component", &mAddComponentOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
+            if (ImGui::IsWindowAppearing()) { selectedComponent = ""; }
+
             for (const auto& [name, description] : components) {
                 bool available {true};
 
@@ -682,15 +686,7 @@ namespace x {
                 if (ImGui::MenuItem("Open Scene", "Ctrl+Shift+O", false, mLoadedProject.mLoaded)) {
                     mSceneSelectorOpen = true;
                 }
-                if (ImGui::MenuItem("Save Scene", "Ctrl+S")) {
-                    // const bool confirmed =
-                    //   Platform::ShowAlert(mHwnd,
-                    //                       "Save Scene",
-                    //                       "You are about to overwrite the current scene. Do you wish to continue?",
-                    //                       Platform::AlertSeverity::Question);
-                    // if (confirmed == IDYES) {  }
-                    OnSaveScene();
-                }
+                if (ImGui::MenuItem("Save Scene", "Ctrl+S")) { OnSaveScene(); }
                 if (ImGui::MenuItem("Save Scene As", "Ctrl+Shift+S")) { mSaveSceneAsOpen = true; }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Exit", "Alt+F4")) { this->Quit(); }
@@ -855,7 +851,7 @@ namespace x {
                     ImGui::Text("Intensity:");
                     ImGui::SameLine(kLabelWidth);
                     ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::InputFloat("##sun_intensity", &sun.mIntensity, 0.1f, 1.0f, "%.1f");
+                    ImGui::InputFloat("##sun_intensity", &sun.mIntensity, 0.0f, 0.0f, "%.1f");
 
                     ImGui::Text("Color:");
                     ImGui::SameLine(kLabelWidth);
@@ -1253,7 +1249,7 @@ namespace x {
                 static f32 nearZ {0.01f};
                 static f32 farZ {1000.0f};
                 static bool orthographic {false};
-                static Float2 viewport {100.0f, 100.0f};
+                static Float2 viewport {32.0f, 16.0f};
 
                 if (camera) {
                     fovDegrees   = camera->GetFOVDegrees();
@@ -1265,21 +1261,6 @@ namespace x {
 
                     Gui::SpacingY(10.0f);
                     if (ImGui::CollapsingHeader("Camera##properties", ImGuiTreeNodeFlags_DefaultOpen)) {
-                        ImGui::Text("FOV:");
-                        ImGui::SameLine(kLabelWidth);
-                        ImGui::SetNextItemWidth(size.x - kLabelWidth);
-                        ImGui::InputFloat("##fov_properties", &fovDegrees, 1.0f, 5.0f, "%.1f");
-
-                        ImGui::Text("Near Plane:");
-                        ImGui::SameLine(kLabelWidth);
-                        ImGui::SetNextItemWidth(size.x - kLabelWidth);
-                        ImGui::InputFloat("##nearz_properties", &nearZ, 0.1f, 1.0f, "%.2f");
-
-                        ImGui::Text("Far Plane:");
-                        ImGui::SameLine(kLabelWidth);
-                        ImGui::SetNextItemWidth(size.x - kLabelWidth);
-                        ImGui::InputFloat("##farz_properties", &farZ, 0.1f, 1.0f, "%.2f");
-
                         ImGui::Text("Orthographic:");
                         ImGui::SameLine(kLabelWidth);
                         ImGui::SetNextItemWidth(size.x - kLabelWidth);
@@ -1297,7 +1278,21 @@ namespace x {
                                                    FLT_MAX,
                                                    "%.1f",
                                                    1.0f);
+                        } else {
+                            ImGui::Text("FOV:");
+                            ImGui::SameLine(kLabelWidth);
+                            ImGui::SetNextItemWidth(size.x - kLabelWidth);
+                            ImGui::InputFloat("##fov_properties", &fovDegrees, 0.0f, 0.0f, "%.1f");
                         }
+                        ImGui::Text("Near Plane:");
+                        ImGui::SameLine(kLabelWidth);
+                        ImGui::SetNextItemWidth(size.x - kLabelWidth);
+                        ImGui::InputFloat("##nearz_properties", &nearZ, 0.0f, 0.0f, "%.2f");
+
+                        ImGui::Text("Far Plane:");
+                        ImGui::SameLine(kLabelWidth);
+                        ImGui::SetNextItemWidth(size.x - kLabelWidth);
+                        ImGui::InputFloat("##farz_properties", &farZ, 0.0f, 0.0f, "%.2f");
                     }
 
                     camera->SetFOVDegrees(fovDegrees);
@@ -1770,7 +1765,7 @@ namespace x {
         emptyScene.mEntities.push_back(mainCamera);
 
         const Path sceneFile = contentRoot / "Scenes" / "Empty.scene";
-        SceneParser::WriteToFile(emptyScene, sceneFile.Str());
+        SceneParser::WriteToFile(emptyScene, sceneFile);
         X_ASSERT(sceneFile.Exists())
 
         // Generate asset descriptors
@@ -1783,29 +1778,40 @@ namespace x {
         return true;
     }
 
-    void XEditor::OnSaveScene(const char* name) {
-        const auto* scene = GetCurrentScene();
-        SceneDescriptor descriptor;
-        SceneParser::StateToDescriptor(scene->GetState(), descriptor, name == nullptr ? scene->GetName() : name);
-        if (descriptor.IsValid()) {
-            if (name == nullptr) {
-                SceneParser::WriteToFile(descriptor, mLoadedScenePath.Str());
-            } else {
-                const str sceneFileName = str(name) + ".scene";
-                const auto scenePath    = Path(mLoadedProject.mContentDirectory) / "Scenes" / sceneFileName;
-                SceneParser::WriteToFile(descriptor, scenePath.Str());
-                AssetGenerator::GenerateAsset(scenePath, kAssetType_Scene, Path(mLoadedProject.mContentDirectory));
-            }
+    // TODO: Refactor this system as well as the asset/scene loading to make this more robust
+    void XEditor::OnSaveScene(const str& sceneName) {
+        const auto contentRoot = Path(mLoadedProject.mContentDirectory);
+        const Path sceneRoot   = contentRoot / "Scenes";
+        X_ASSERT(contentRoot.Exists())
+        X_ASSERT(sceneRoot.Exists())
 
-            ReloadAssetCache();
-            mGame.ReloadSceneCache();
-            OnLoadScene(name);
-        } else {
-            Platform::ShowAlert(mHwnd,
-                                "Error saving scene",
-                                "Unable to parse scene state to descriptor.",
-                                Platform::AlertSeverity::Error);
+        // Check whether we're overwriting the current scene or saving as new scene
+        const str name = sceneName.empty() ? GetCurrentScene()->GetName() : sceneName;
+
+        // Parse the current scene state in the editor to a descriptor file
+        SceneDescriptor descriptor {};
+        SceneParser::StateToDescriptor(GetSceneState(), descriptor, name);
+        X_ASSERT(descriptor.IsValid())
+
+        // Scenes are saved to <Project>/<Content>/Scenes/<Name>.scene
+        const Path scenePath = sceneRoot / (name + ".scene");
+        // Write scene descriptor to file
+        SceneParser::WriteToFile(descriptor, scenePath);
+        X_ASSERT(scenePath.Exists())
+
+        // Generate asset descriptor if it doesn't already exist
+        const Path assetDescPath = contentRoot / (name + ".scene.xasset");
+        if (!assetDescPath.Exists()) {
+            if (!AssetGenerator::GenerateAsset(scenePath, kAssetType_Scene, contentRoot)) {
+                X_LOG_ERROR("Failed to generate scene asset descriptor");
+                return;
+            }
         }
+
+        // Reload editor caches
+        ReloadAssetCache();
+        mGame.ReloadSceneCache();
+        OnLoadScene(name);
     }
 
     void XEditor::OnAddEntity(const str& name) const {
