@@ -1328,7 +1328,6 @@ namespace x {
                                            "%.3f",
                                            1.0f);
                     transform->SetScale(EditorState::TransformScale);
-
                     transform->Update();
                 }
 
@@ -1528,6 +1527,7 @@ namespace x {
                     camera->SetOrthographic(orthographic);
                     camera->SetWidth(viewport.x);
                     camera->SetHeight(viewport.y);
+                    camera->SetPosition(transform->GetPosition());
                 }
             }
 

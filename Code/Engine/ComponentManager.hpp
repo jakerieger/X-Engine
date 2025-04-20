@@ -18,11 +18,27 @@ namespace x {
         struct ComponentView {
             EntityId entity;
             T& component;
+
+            operator T&() {
+                return component;
+            }
+
+            operator T*() {
+                return &component;
+            }
         };
 
         struct ConstComponentView {
             EntityId entity;
             const T& component;
+
+            operator const T&() const {
+                return component;
+            }
+
+            operator const T*() const {
+                return &component;
+            }
         };
 
         class Iterator {
@@ -36,6 +52,10 @@ namespace x {
 
             ComponentView operator*() const {
                 return {mEntities[mIndex], mComponents[mIndex]};
+            }
+
+            T* operator->() const {
+                return &mComponents[mIndex];
             }
 
             Iterator& operator++() {
@@ -63,6 +83,10 @@ namespace x {
 
             ConstComponentView operator*() const {
                 return {mEntities[mIndex], mComponents[mIndex]};
+            }
+
+            const T* operator->() const {
+                return &mComponents[mIndex];
             }
 
             ConstIterator& operator++() {
@@ -100,6 +124,14 @@ namespace x {
             Iterator end() const {
                 return mManager.EndMutable();
             }
+
+            size_t size() const {
+                return mManager.size();
+            }
+
+            bool empty() const {
+                return mManager.empty();
+            }
         };
 
         MutableView GetMutable() {
@@ -112,6 +144,14 @@ namespace x {
 
         ConstIterator end() const {
             return ConstIterator(mComponents, mIndexToEntity, mComponents.size());
+        }
+
+        size_t size() const {
+            return mComponents.size();
+        }
+
+        bool empty() const {
+            return mComponents.empty();
         }
 
         ComponentView AddComponent(EntityId entity) {

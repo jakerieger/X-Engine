@@ -53,9 +53,11 @@ namespace x {
         void SaveSettings() const;
     };
 
+    struct EditorState {};
+
     class XEditor final : public IWindow {
     public:
-        // Using `this->` to denote members of parent Window class
+        // Using `this->` to denote members of parent Window class.
         // Window will initialize `mContext` and since its constructor gets called before our subclass initializes its
         // members, we can use `mContext` as inputs to our Editor member variable constructors.
         XEditor()

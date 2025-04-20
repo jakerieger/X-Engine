@@ -106,11 +106,12 @@ int main(int argc, char* argv[]) {
         }
 
         bytesStream << "\n};\n\n";
-        bytesStream << "static const size_t " + originalSizeIdentifier + " = " + std::to_string(originalSize) + ";\n\n";
-        bytesStream << "static const size_t " + compressedSizeIdentifier + " = " +
+        bytesStream << "static constexpr size_t " + originalSizeIdentifier + " = " + std::to_string(originalSize) +
+                         ";\n\n";
+        bytesStream << "static constexpr size_t " + compressedSizeIdentifier + " = " +
                          std::to_string(compressedBytes.size()) + ";\n\n";
-        bytesStream << "static const int " + identifier + "_WIDTH = " + std::to_string(width) + ";\n\n";
-        bytesStream << "static const int " + identifier + "_HEIGHT = " + std::to_string(height) + ";\n\n";
+        bytesStream << "static constexpr int " + identifier + "_WIDTH = " + std::to_string(width) + ";\n\n";
+        bytesStream << "static constexpr int " + identifier + "_HEIGHT = " + std::to_string(height) + ";\n\n";
 
         bytesStream
           << "//=========================================================================================//\n";

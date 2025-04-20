@@ -154,30 +154,36 @@ namespace x {
                 if (waterMaterial) { waterMaterial->SetWaveTime(sceneTime); }
             }
 
-            if (cameraComponent) { cameraComponent->SetPosition(transformComponent->GetPosition()); }
+            if (cameraComponent) {
+                // TODO: This doesn't update in real-time in the editor
+                cameraComponent->SetPosition(transformComponent->GetPosition());
+            }
         }
 
         // Calculate LVP
         // TODO: I only need to update this if either the light direction or the screen size changes; this can be
         // optimized!
-        const auto lvp                             = CalculateLightViewProjection(mState.GetLightState().mSun,
-                                                      5.0f,  // TODO: this needs tweaking depending on the light height
-                                                      mState.GetMainCamera()->GetAspectRatio(),
-                                                      mState.GetMainCamera()->GetNearPlane(),
-                                                      mState.GetMainCamera()->GetFarPlane());
-        mState.GetLightState().mSun.mLightViewProj = XMMatrixTranspose(lvp);
+        if (mState.GetMainCamera()) {
+            const auto lvp =
+              CalculateLightViewProjection(mState.GetLightState().mSun,
+                                           5.0f,  // TODO: this needs tweaking depending on the light height
+                                           mState.GetMainCamera()->GetAspectRatio(),
+                                           mState.GetMainCamera()->GetNearPlane(),
+                                           mState.GetMainCamera()->GetFarPlane());
+            mState.GetLightState().mSun.mLightViewProj = XMMatrixTranspose(lvp);
 
-        // Sort transparent objects by distance from camera
-        if (mTransparentObjects.size() > 1) {
-            const auto cameraPos = mState.GetMainCamera()->GetPosition();
-            std::ranges::sort(mTransparentObjects,
-                              [cameraPos](const ModelTransformPair& lhs, const ModelTransformPair& rhs) {
-                                  const auto& lhsTransform = lhs.second;
-                                  const auto& rhsTransform = rhs.second;
-                                  const f32 lhsDist        = DistanceSquared(cameraPos, lhsTransform->GetPosition());
-                                  const f32 rhsDist        = DistanceSquared(cameraPos, rhsTransform->GetPosition());
-                                  return lhsDist > rhsDist;
-                              });
+            // Sort transparent objects by distance from camera
+            if (mTransparentObjects.size() > 1) {
+                const auto cameraPos = mState.GetMainCamera()->GetPosition();
+                std::ranges::sort(mTransparentObjects,
+                                  [cameraPos](const ModelTransformPair& lhs, const ModelTransformPair& rhs) {
+                                      const auto& lhsTransform = lhs.second;
+                                      const auto& rhsTransform = rhs.second;
+                                      const f32 lhsDist = DistanceSquared(cameraPos, lhsTransform->GetPosition());
+                                      const f32 rhsDist = DistanceSquared(cameraPos, rhsTransform->GetPosition());
+                                      return lhsDist > rhsDist;
+                                  });
+            }
         }
     }
 
@@ -193,6 +199,9 @@ namespace x {
     }
 
     void Scene::DrawOpaque() {
+        // Draw nothing if no camera is found
+        if (!mState.GetMainCamera()) { return; }
+
         for (const auto [model, transform] : mOpaqueObjects) {
             if (model == nullptr || !model->Valid()) { continue; }
             Matrix world    = transform->GetTransformMatrix();
@@ -206,6 +215,9 @@ namespace x {
     }
 
     void Scene::DrawTransparent() {
+        // Draw nothing if no camera is found
+        if (!mState.GetMainCamera()) { return; }
+
         for (const auto [model, transform] : mTransparentObjects) {
             if (model == nullptr) { continue; }
             Matrix world    = transform->GetTransformMatrix();

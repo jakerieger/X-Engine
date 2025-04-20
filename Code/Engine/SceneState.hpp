@@ -30,8 +30,9 @@ namespace x {
         SceneState() = default;
 
         EntityId CreateEntity(const str& name) {
-            for (const auto& entityName : mEntities | std::views::values) {
-                if (entityName == name) { return EntityId {}; }
+            // if name already exists in entity map
+            for (const auto& [id, entityName] : mEntities) {
+                if (entityName == name) { return id; }
             }
 
             const auto newId  = ++mNextId;
@@ -46,6 +47,8 @@ namespace x {
             mBehaviors.RemoveComponent(entity);
             mCameras.RemoveComponent(entity);
             mEntities.erase(entity);
+
+            // TODO: Find next available camera component to make main camera
         }
 
         EntityId GetFirstEntity() const {
@@ -68,7 +71,6 @@ namespace x {
             mEntities   = other.mEntities;
             mNextId     = other.mNextId;
             mLights     = other.mLights;
-            mMainCamera = other.mMainCamera;
         }
 
         SceneState& operator=(const SceneState& other) {
@@ -78,29 +80,23 @@ namespace x {
             mEntities   = other.mEntities;
             mNextId     = other.mNextId;
             mLights     = other.mLights;
-            mMainCamera = other.mMainCamera;
             return *this;
         }
 
         SceneState(SceneState&& other) noexcept
-            : mNextId(other.mNextId), mEntities(std::move(other.mEntities)), mMainCamera(other.mMainCamera),
-              mLights(std::move(other.mLights)), mTransforms(std::move(other.mTransforms)),
-              mModels(std::move(other.mModels)), mBehaviors(std::move(other.mBehaviors)),
-              mCameras(std::move(other.mCameras)) {
-            other.mMainCamera = nullptr;
-        }
+            : mNextId(other.mNextId), mEntities(std::move(other.mEntities)), mLights(std::move(other.mLights)),
+              mTransforms(std::move(other.mTransforms)), mModels(std::move(other.mModels)),
+              mBehaviors(std::move(other.mBehaviors)), mCameras(std::move(other.mCameras)) {}
 
         SceneState& operator=(SceneState&& other) noexcept {
             if (this != &other) {
-                mNextId           = other.mNextId;
-                mEntities         = std::move(other.mEntities);
-                mLights           = std::move(other.mLights);
-                mMainCamera       = other.mMainCamera;
-                other.mMainCamera = nullptr;
-                mTransforms       = std::move(other.mTransforms);
-                mModels           = std::move(other.mModels);
-                mBehaviors        = std::move(other.mBehaviors);
-                mCameras          = std::move(other.mCameras);
+                mNextId     = other.mNextId;
+                mEntities   = std::move(other.mEntities);
+                mLights     = std::move(other.mLights);
+                mTransforms = std::move(other.mTransforms);
+                mModels     = std::move(other.mModels);
+                mBehaviors  = std::move(other.mBehaviors);
+                mCameras    = std::move(other.mCameras);
             }
             return *this;
         };
@@ -133,16 +129,7 @@ namespace x {
             if constexpr (Same<T, TransformComponent>) { return mTransforms.AddComponent(entity).component; }
             if constexpr (Same<T, ModelComponent>) { return mModels.AddComponent(entity).component; }
             if constexpr (Same<T, BehaviorComponent>) { return mBehaviors.AddComponent(entity).component; }
-            if constexpr (Same<T, CameraComponent>) {
-                auto& camera = mCameras.AddComponent(entity).component;
-                if (!mMainCamera) {
-                    // If no camera has been added to the scene yet, make this our main camera
-                    // The highest ranking camera in the scene hierarchy is always the main camera
-                    // by default, although (TODO) the ability to change this should be added
-                    mMainCamera = &camera;
-                }
-                return camera;
-            }
+            if constexpr (Same<T, CameraComponent>) { return mCameras.AddComponent(entity).component; }
         }
 
         template<typename T>
@@ -179,19 +166,24 @@ namespace x {
         }
 
         X_NODISCARD CameraComponent* GetMainCamera() {
-            if (!mMainCamera) { X_LOG_WARN("Main camera nullptr"); }
-            return mMainCamera;
+            if (mCameras.empty()) {
+                X_LOG_WARN("No main camera");
+                return nullptr;
+            }
+            return *(mCameras.BeginMutable());
         }
 
-        X_NODISCARD CameraComponent* GetMainCamera() const {
-            if (!mMainCamera) { X_LOG_WARN("Main camera nullptr"); }
-            return mMainCamera;
+        X_NODISCARD const CameraComponent* GetMainCamera() const {
+            if (mCameras.empty()) {
+                X_LOG_WARN("No main camera");
+                return nullptr;
+            }
+            return *(mCameras.begin());
         }
 
         void Reset() {
             mEntities.clear();
             mNextId     = 0;
-            mMainCamera = nullptr;
             mLights     = {};
             mTransforms = {};
             mModels     = {};
@@ -203,9 +195,7 @@ namespace x {
 
     private:
         u64 mNextId = 0;
-        std::map<EntityId, std::string> mEntities;
-
-        CameraComponent* mMainCamera {nullptr};
+        std::map<EntityId, str> mEntities;
         LightState mLights;
 
         // Component managers
