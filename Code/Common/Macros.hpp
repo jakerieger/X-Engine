@@ -44,10 +44,10 @@ inline constexpr size_t operator"" _GIGABYTES(unsigned long long n) {
 #define X_CONCAT(a, b) a##b
 
 #define X_BIT(x) (1ULL << (x))
-#define X_SETBIT(x, bit) ((x) |= BIT(bit))
-#define X_CLEARBIT(x, bit) ((x) &= ~BIT(bit))
-#define X_TOGGLEBIT(x, bit) ((x) ^= BIT(bit))
-#define X_CHECKBIT(x, bit) (!!((x) & BIT(bit)))
+#define X_SETBIT(x, bit) ((x) |= X_BIT(bit))
+#define X_CLEARBIT(x, bit) ((x) &= ~X_BIT(bit))
+#define X_TOGGLEBIT(x, bit) ((x) ^= X_BIT(bit))
+#define X_CHECKBIT(x, bit) (!!((x) & X_BIT(bit)))
 
 #define X_MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define X_MAX(a, b) (((a) > (b)) ? (a) : (b))

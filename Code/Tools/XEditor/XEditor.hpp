@@ -5,8 +5,10 @@
 #pragma once
 
 #include <imgui.h>
+#include <imgui_internal.h>
 
 #include "MeshPreviewer.hpp"
+#include "ShortcutManager.hpp"
 #include "TextureManager.hpp"
 #include "Common/Types.hpp"
 #include "Engine/Window.hpp"
@@ -53,8 +55,6 @@ namespace x {
         void SaveSettings() const;
     };
 
-    struct EditorState {};
-
     class XEditor final : public IWindow {
     public:
         // Using `this->` to denote members of parent Window class.
@@ -84,6 +84,7 @@ namespace x {
         bool mDockspaceSetup {false};
         unordered_map<str, ImFont*> mFonts;
         DeferredActionQueue mPostRenderQueue;
+        ShortcutManager mShortcutManager;
 
         // Engine API
         Game mGame;
@@ -128,21 +129,23 @@ namespace x {
         AssetType mSelectAssetFilter {kAssetType_Invalid};
         bool mAboutOpen {false};
         bool mAddComponentOpen {false};
+        bool mAddEntityOpen {false};
         bool mCreateMaterialOpen {false};
         bool mNewProjectOpen {false};
+        bool mProjectSettingsOpen {false};
         bool mSaveSceneAsOpen {false};
         bool mSceneSelectorOpen {false};
         bool mSelectAssetOpen {false};
-        bool mAddEntityOpen {false};
 
         void Modal_About();
         void Modal_AddComponent();
+        void Modal_AddEntity();
         void Modal_CreateMaterial();
         void Modal_NewProject();
+        void Modal_ProjectSettings();
         void Modal_SaveSceneAs();
         void Modal_SelectAsset();
         void Modal_SelectScene();
-        void Modal_AddEntity();
 
         // Button/menu actions
         void OnAddEntity(const str& name) const;
@@ -177,5 +180,6 @@ namespace x {
         bool LoadEditorIcons();
         void GenerateAssetThumbnails();
         void SetupDockspace(const f32 yOffset);
+        void RegisterEditorShortcuts();
     };
 }  // namespace x

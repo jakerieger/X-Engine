@@ -44,4 +44,12 @@ namespace x {
         const float zSqr = (v2.z - v1.z) * (v2.z - v1.z);
         return xSqr + ySqr + zSqr;
     }
+
+    inline bool operator==(const Float3& lhs, const Float3& rhs) {
+        return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
+    }
+
+    inline bool operator!=(const Float3& lhs, const Float3& rhs) {
+        return !(lhs == rhs);
+    }
 }  // namespace x

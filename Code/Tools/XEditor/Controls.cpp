@@ -118,7 +118,13 @@ namespace x::Gui {
         // Add button on the same line
         ImGui::SameLine();
         const auto btnId         = std::format("{}_button", label);
-        const bool buttonPressed = ImGui::ImageButton(btnId.c_str(), btnIcon, ImVec2(inputHeight - 8, inputHeight - 8));
+        const bool buttonPressed = ImGui::ImageButton(btnId.c_str(),
+                                                      btnIcon,
+                                                      ImVec2(inputHeight - 8, inputHeight - 8),
+                                                      kUV_0,
+                                                      kUV_1,
+                                                      Colors::Transparent.ToImVec4(),
+                                                      Colors::White75.ToImVec4());
 
         // End the group
         ImGui::EndGroup();

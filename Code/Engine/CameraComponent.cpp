@@ -185,6 +185,7 @@ namespace x {
     }
 
     void CameraComponent::RecalculateViewMatrix() {
+        if (mPosition == mLookAt) { return; }
         mViewMatrix = XMMatrixLookAtLH(XMLoadFloat3(&mPosition), XMLoadFloat3(&mLookAt), XMLoadFloat3(&mUp));
     }
 

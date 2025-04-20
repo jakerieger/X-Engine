@@ -23,6 +23,7 @@ add_executable(XEditor WIN32
     ${EDITOR_DIR}/TextureManager.cpp
     ${EDITOR_DIR}/TextureManager.hpp
     ${EDITOR_DIR}/ToolbarIcons.h
+    ${EDITOR_DIR}/ShortcutManager.hpp
     ${EDITOR_DIR}/WelcomeScreenIcons.h
     ${EDITOR_DIR}/XEditor.cpp
     ${EDITOR_DIR}/XEditor.hpp

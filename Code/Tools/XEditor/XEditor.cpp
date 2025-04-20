@@ -14,7 +14,7 @@
 #include <JetBrainsMono.h>
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
-#include <imgui_internal.h>
+// #include <imgui_internal.h>
 #include <yaml-cpp/yaml.h>
 
 #include "XEditor.hpp"
@@ -237,7 +237,7 @@ namespace x {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_NavEnableKeyboard;
 
         io.IniFilename = nullptr;  // Disable ui config for now
 
@@ -273,6 +273,8 @@ namespace x {
         if (!mSettings.LoadSettings()) { mSettings.SaveSettings(); }
         mTheme.LoadTheme(mSettings.mTheme);
         mTheme.Apply();
+
+        RegisterEditorShortcuts();
     }
 
     void XEditor::OnResize(u32 width, u32 height) {
@@ -287,6 +289,7 @@ namespace x {
 
     void XEditor::OnUpdate() {
         // mGame.Update(false);
+        mShortcutManager.ProcessShortcuts();
     }
 
     void XEditor::OnRender() {
@@ -643,6 +646,67 @@ namespace x {
         ImGui::PopStyleVar();
     }
 
+    void XEditor::Modal_ProjectSettings() {
+        const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, {0.5f, 0.5f});
+        ImGui::SetNextWindowSize({800, 600}, ImGuiCond_Appearing);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {10.0f, 10.0f});
+
+        static str selectedCategory = "General";
+        vector<str> categories      = {"General", "Audio", "Assets", "Physics", "Rendering"};
+
+        if (ImGui::BeginPopupModal("Project Settings",
+                                   &mProjectSettingsOpen,
+                                   ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize)) {
+            {
+                Gui::ScopedFont font(mFonts["display_26"]);
+                ImGui::Text("Project Settings");
+            }
+            ImGui::Separator();
+            Gui::SpacingY(10.0f);
+
+            // Settings categories
+            {
+                if (ImGui::BeginChild("##settings_categories", {240.0f, 600.0f - 44.0f})) {
+                    for (const auto& category : categories) {
+                        const bool selected = selectedCategory == category;
+                        if (ImGui::Selectable(category.c_str(), selected)) { selectedCategory = category; }
+                    }
+                    ImGui::EndChild();
+                }
+            }
+            ImGui::SameLine();
+            // Category options
+            {
+                if (ImGui::BeginChild("##category_options", {800.0f - 240.0f - 10.0f, 600.0f - 44.0f})) {
+                    ImGui::EndChild();
+                }
+            }
+
+            Gui::SpacingY(10.0f);
+            constexpr f32 cancelButtonWidth = 100;
+            constexpr f32 saveButtonWidth   = 140;
+            constexpr f32 buttonHeight      = 24;
+            const f32 itemSpacing           = ImGui::GetStyle().ItemSpacing.x * 2;
+            const f32 offset = ImGui::GetContentRegionAvail().x - (cancelButtonWidth + saveButtonWidth + itemSpacing);
+
+            Gui::SpacingX(offset);
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel##project_settings", {cancelButtonWidth, buttonHeight})) {
+                mProjectSettingsOpen = false;
+                //
+            }
+            ImGui::SameLine();
+            if (Gui::PrimaryButton("Save##project_settings", {saveButtonWidth, buttonHeight})) {
+                mProjectSettingsOpen = false;
+                //
+            }
+
+            ImGui::EndPopup();
+        }
+        ImGui::PopStyleVar();
+    }
+
     void XEditor::Modal_CreateMaterial() {
         static i32 selectedType            = 0;
         static const char* materialTypes[] = {"Standard Lit", "Basic Lit"};
@@ -816,7 +880,7 @@ namespace x {
                     if (ImGui::MenuItem("Undo", "Ctrl+Z")) {}
                     if (ImGui::MenuItem("Redo", "Ctrl+Y")) {}
                     ImGui::Separator();
-                    if (ImGui::MenuItem("Project Settings", "Shift+Alt+S")) {}
+                    if (ImGui::MenuItem("Project Settings", "Ctrl+Alt+S")) { mProjectSettingsOpen = true; }
                     ImGui::EndMenu();
                 }
                 if (ImGui::BeginMenu("Assets")) {
@@ -1529,11 +1593,16 @@ namespace x {
                     camera->SetHeight(viewport.y);
                     camera->SetPosition(transform->GetPosition());
                 }
+
+                Gui::SpacingY(10.0f);
+
+                if (ImGui::Button("Add Component##button", {size.x, 0})) { mAddComponentOpen = true; }
+            } else {
+                {
+                    Gui::ScopedFont font(mFonts["display_20"]);
+                    ImGui::Text("No entity selected");
+                }
             }
-
-            Gui::SpacingY(10.0f);
-
-            if (ImGui::Button("Add Component##button", {size.x, 0})) { mAddComponentOpen = true; }
         }
         ImGui::End();
     }
@@ -1885,6 +1954,9 @@ namespace x {
 
         if (mCreateMaterialOpen) { ImGui::OpenPopup("Create Material"); }
         Modal_CreateMaterial();
+
+        if (mProjectSettingsOpen) { ImGui::OpenPopup("Project Settings"); }
+        Modal_ProjectSettings();
 
         // View_EntityProperties
         if (mAddComponentOpen) { ImGui::OpenPopup("Add Component"); }
@@ -2666,5 +2738,21 @@ namespace x {
 
         return true;
     }
+
+    void XEditor::RegisterEditorShortcuts() {
+        mShortcutManager.RegisterShortcut(ImGuiKey_N, kModifier_Ctrl, [this]() { mNewProjectOpen = true; });
+        mShortcutManager.RegisterShortcut(ImGuiKey_O, kModifier_Ctrl, [this]() { OnOpenProject(); });
+        mShortcutManager.RegisterShortcut(ImGuiKey_O, kModifier_Ctrl | kModifier_Shift, [this]() {
+            mSceneSelectorOpen = true;
+        });
+        mShortcutManager.RegisterShortcut(ImGuiKey_S, kModifier_Ctrl, [this]() { OnSaveScene(); });
+        mShortcutManager.RegisterShortcut(ImGuiKey_S, kModifier_Ctrl | kModifier_Shift, [this]() {
+            mSaveSceneAsOpen = true;
+        });
+        mShortcutManager.RegisterShortcut(ImGuiKey_S, kModifier_Ctrl | kModifier_Alt, [this]() {
+            mProjectSettingsOpen = true;
+        });
+    }
+
 #pragma endregion
 }  // namespace x
