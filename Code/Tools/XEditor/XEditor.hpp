@@ -67,9 +67,7 @@ namespace x {
         void OnResize(u32 width, u32 height) override;
         void OnShutdown() override;
         void OnUpdate() override;
-
         void OnRender() override;
-
         LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) override;
 
         static bool HasSession();
@@ -103,6 +101,7 @@ namespace x {
         void View_Log();
         void View_MainMenu();
         void View_Material();
+        void View_Modals();
         void View_PostProcessing();
         void View_SceneSettings();
         void View_StartupScreen(f32 yOffset);
@@ -130,6 +129,7 @@ namespace x {
         bool mSaveSceneAsOpen {false};
         bool mSceneSelectorOpen {false};
         bool mSelectAssetOpen {false};
+        bool mAddEntityOpen {false};
 
         void Modal_About();
         void Modal_AddComponent();
@@ -138,6 +138,7 @@ namespace x {
         void Modal_SaveSceneAs();
         void Modal_SelectAsset();
         void Modal_SelectScene();
+        void Modal_AddEntity();
 
         // Button/menu actions
         void OnAddEntity(const str& name) const;

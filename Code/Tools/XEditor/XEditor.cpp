@@ -322,6 +322,8 @@ namespace x {
             View_StartupScreen(menuBarHeight);
         }
 
+        View_Modals();
+
         ImGui::PopFont();
 
         mWindowViewport->AttachViewport();
@@ -345,11 +347,24 @@ namespace x {
     void XEditor::Modal_SaveSceneAs() {
         const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, {0.5f, 0.5f});
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {10.0f, 10.0f});
         if (ImGui::BeginPopupModal("Save Scene As", &mSaveSceneAsOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
+            {
+                Gui::ScopedFont font(mFonts["display_26"]);
+                ImGui::Text("Save scene as");
+            }
+            {
+                Gui::ScopedColorVars colors({{ImGuiCol_Separator, Color("#4e4e4e").ToImVec4()}});
+                ImGui::Separator();
+            }
+
+            Gui::SpacingY(10.0f);
+
             ImGui::SetNextItemWidth(408.0f);
             ImGui::InputText("##scene_name_as", EditorState::CurrentSceneName, sizeof(EditorState::CurrentSceneName));
 
-            ImGui::Dummy({0, 2});
+            Gui::SpacingY(10.0f);
 
             if (ImGui::Button("OK", {200, 0})) {
                 // If the name isn't empty and is different from the previous name, save the scene
@@ -368,6 +383,7 @@ namespace x {
             }
             ImGui::EndPopup();
         }
+        ImGui::PopStyleVar();
     }
 
     void XEditor::Modal_AddComponent() {
@@ -386,8 +402,20 @@ namespace x {
         const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, {0.5f, 0.5f});
         i32 availableComponents {0};
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {10.0f, 10.0f});
         if (ImGui::BeginPopupModal("Add Component", &mAddComponentOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
             if (ImGui::IsWindowAppearing()) { selectedComponent = ""; }
+
+            {
+                Gui::ScopedFont font(mFonts["display_26"]);
+                ImGui::Text("Add a component");
+            }
+            {
+                Gui::ScopedColorVars colors({{ImGuiCol_Separator, Color("#4e4e4e").ToImVec4()}});
+                ImGui::Separator();
+            }
+
+            Gui::SpacingY(10.0f);
 
             for (const auto& [name, description] : components) {
                 bool available {true};
@@ -420,6 +448,8 @@ namespace x {
                 Gui::CenteredText("No components available", ImGui::GetCursorScreenPos(), {size.x, 48});
             }
 
+            Gui::SpacingY(10.0f);
+
             // Buttons
             if (ImGui::Button("OK", {240, 0})) {
                 if (selectedComponent == "Model") {
@@ -444,10 +474,23 @@ namespace x {
             }
             ImGui::EndPopup();
         }
+        ImGui::PopStyleVar();
     }
 
     void XEditor::Modal_SelectAsset() {
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {10.0f, 10.0f});
         if (ImGui::BeginPopupModal("Select Asset", &mSelectAssetOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
+            {
+                Gui::ScopedFont font(mFonts["display_26"]);
+                ImGui::Text("Select asset");
+            }
+            {
+                Gui::ScopedColorVars colors({{ImGuiCol_Separator, Color("#4e4e4e").ToImVec4()}});
+                ImGui::Separator();
+            }
+
+            Gui::SpacingY(10.0f);
+
             // Collect all available assets of the current filter type
             vector<AssetDescriptor> availableAssets;
             std::ranges::copy_if(
@@ -468,6 +511,8 @@ namespace x {
                 }
             }
 
+            Gui::SpacingY(10.0f);
+
             // OK and Cancel buttons
             if (ImGui::Button("OK", {200, 0})) {
                 mSelectAssetOpen = false;
@@ -481,6 +526,7 @@ namespace x {
 
             ImGui::EndPopup();
         }
+        ImGui::PopStyleVar();
     }
 
     void XEditor::Modal_About() {
@@ -524,7 +570,7 @@ namespace x {
                 ImGui::Text("Create a new project");
             }
             {
-                Gui::ScopedColorVars colors({{ImGuiCol_Separator, Color("#5e5e5e").ToImVec4()}});
+                Gui::ScopedColorVars colors({{ImGuiCol_Separator, Color("#4e4e4e").ToImVec4()}});
                 ImGui::Separator();
             }
 
@@ -608,7 +654,19 @@ namespace x {
 
         const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, {0.5f, 0.5f});
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {10.0f, 10.0f});
         if (ImGui::BeginPopupModal("Create Material", &mCreateMaterialOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
+            {
+                Gui::ScopedFont font(mFonts["display_26"]);
+                ImGui::Text("Create a new material");
+            }
+            {
+                Gui::ScopedColorVars colors({{ImGuiCol_Separator, Color("#4e4e4e").ToImVec4()}});
+                ImGui::Separator();
+            }
+
+            Gui::SpacingY(10.0f);
+
             ImGui::Text("Material Type");
             ImGui::SetNextItemWidth(408);
             if (ImGui::Combo("##material_type_combo", &selectedType, materialTypes, std::size(materialTypes))) {
@@ -617,25 +675,37 @@ namespace x {
             ImGui::SetNextItemWidth(408);
             ImGui::InputText("##material_name", nameBuffer, sizeof(nameBuffer));
 
+            Gui::SpacingY(10.0f);
+
             if (ImGui::Button("OK", {200, 0})) {
                 mCreateMaterialOpen = false;
-                ImGui::CloseCurrentPopup();
+                if (!mShowMaterial) { mShowMaterial = true; }
             }
             ImGui::SetItemDefaultFocus();
             ImGui::SameLine();
-            if (ImGui::Button("Cancel", {200, 0})) {
-                mCreateMaterialOpen = false;
-                ImGui::CloseCurrentPopup();
-            }
+            if (ImGui::Button("Cancel", {200, 0})) { mCreateMaterialOpen = false; }
 
             ImGui::EndPopup();
         }
+        ImGui::PopStyleVar();
     }
 
     void XEditor::Modal_SelectScene() {
         const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, {0.5f, 0.5f});
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {10.0f, 10.0f});
         if (ImGui::BeginPopupModal("Select Scene", &mSceneSelectorOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
+            {
+                Gui::ScopedFont font(mFonts["display_26"]);
+                ImGui::Text("Select scene");
+            }
+            {
+                Gui::ScopedColorVars colors({{ImGuiCol_Separator, Color("#4e4e4e").ToImVec4()}});
+                ImGui::Separator();
+            }
+
+            Gui::SpacingY(10.0f);
+
             static str selectedScene;
 
             u32 index {0};
@@ -655,6 +725,8 @@ namespace x {
                 ImGui::Dummy({0, 2.f});
             }
 
+            Gui::SpacingY(10.0f);
+
             // Buttons
             if (ImGui::Button("OK", {200, 0})) {
                 if (!selectedScene.empty()) { OnLoadScene(selectedScene); }
@@ -670,96 +742,127 @@ namespace x {
             }
             ImGui::EndPopup();
         }
+        ImGui::PopStyleVar();
+    }
+
+    void XEditor::Modal_AddEntity() {
+        static char entityName[256] {0};
+
+        if (ImGui::BeginPopupModal("Add New Entity", &mAddEntityOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
+            if (ImGui::IsWindowAppearing()) {
+                const auto numEntities = GetEntities().size();
+                const str name         = std::format("Entity{}", numEntities + 1);
+                std::strcpy(entityName, name.c_str());
+            }
+
+            {
+                Gui::ScopedFont font(mFonts["display_26"]);
+                ImGui::Text("Add a new entity");
+            }
+            {
+                Gui::ScopedColorVars colors({{ImGuiCol_Separator, Color("#4e4e4e").ToImVec4()}});
+                ImGui::Separator();
+            }
+
+            Gui::SpacingY(10.0f);
+
+            ImGui::Text("Name:");
+            ImGui::PushItemWidth(408.0f);
+            const bool enterPressed = ImGui::InputText("##new_entity_name",
+                                                       entityName,
+                                                       sizeof(entityName),
+                                                       ImGuiInputTextFlags_EnterReturnsTrue);
+            ImGui::PopItemWidth();
+            ImGui::Separator();
+
+            Gui::SpacingY(10.0f);
+
+            if (ImGui::Button("OK", {200, 0}) || enterPressed) {
+                if (std::strlen(entityName) > 0) {
+                    OnAddEntity(entityName);
+                    mAddEntityOpen = false;
+                }
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Cancel", {200, 0})) { mAddEntityOpen = false; }
+
+            ImGui::EndPopup();
+        }
     }
 #pragma endregion
 
 #pragma region Editor Views
     void XEditor::View_MainMenu() {
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        ImGui::PushStyleColor(ImGuiCol_Text, mTheme.mTextPrimary.ToImVec4());
-
-        if (ImGui::BeginMainMenuBar()) {
-            if (ImGui::BeginMenu("File")) {
-                if (ImGui::MenuItem("New Project", "Ctrl+N")) { mNewProjectOpen = true; }
-                if (ImGui::MenuItem("Open Project", "Ctrl+O")) { OnOpenProject(); }
-                ImGui::Separator();
-                if (ImGui::MenuItem("Open Scene", "Ctrl+Shift+O", false, mLoadedProject.mLoaded)) {
-                    mSceneSelectorOpen = true;
-                }
-                if (ImGui::MenuItem("Save Scene", "Ctrl+S")) { OnSaveScene(); }
-                if (ImGui::MenuItem("Save Scene As", "Ctrl+Shift+S")) { mSaveSceneAsOpen = true; }
-                ImGui::Separator();
-                if (ImGui::MenuItem("Exit", "Alt+F4")) { this->Quit(); }
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("Edit")) {
-                if (ImGui::MenuItem("Undo", "Ctrl+Z")) {}
-                if (ImGui::MenuItem("Redo", "Ctrl+Y")) {}
-                ImGui::Separator();
-                if (ImGui::MenuItem("Project Settings", "Shift+Alt+S")) {}
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("Assets")) {
-                if (ImGui::BeginMenu("Create")) {
-                    if (ImGui::MenuItem("Material")) {
-                        mCreateMaterialOpen = true;
-                        if (!mShowMaterial) { mShowMaterial = true; }
+        {
+            Gui::ScopedStyleVars styles({{ImGuiStyleVar_WindowBorderSize, 0.0f}});
+            Gui::ScopedColorVars colors({{ImGuiCol_Text, mTheme.mTextPrimary.ToImVec4()},
+                                         {ImGuiCol_PopupBg, mTheme.mInputBackground.ToImVec4()}});
+            if (ImGui::BeginMainMenuBar()) {
+                if (ImGui::BeginMenu("File")) {
+                    if (ImGui::MenuItem("New Project", "Ctrl+N")) { mNewProjectOpen = true; }
+                    if (ImGui::MenuItem("Open Project", "Ctrl+O")) { OnOpenProject(); }
+                    ImGui::Separator();
+                    if (ImGui::MenuItem("New Scene", "Ctrl+Shift+N", false, mLoadedProject.mLoaded)) {}
+                    if (ImGui::MenuItem("Open Scene", "Ctrl+Shift+O", false, mLoadedProject.mLoaded)) {
+                        mSceneSelectorOpen = true;
                     }
-                    if (ImGui::MenuItem("Script")) {}
-                    if (ImGui::MenuItem("Texture")) {}
+                    if (ImGui::MenuItem("Save Scene", "Ctrl+S", false, mLoadedProject.mLoaded)) { OnSaveScene(); }
+                    if (ImGui::MenuItem("Save Scene As", "Ctrl+Shift+S", false, mLoadedProject.mLoaded)) {
+                        mSaveSceneAsOpen = true;
+                    }
+                    ImGui::Separator();
+                    if (ImGui::MenuItem("Exit", "Alt+F4")) { this->Quit(); }
                     ImGui::EndMenu();
                 }
-                ImGui::Separator();
-                if (ImGui::MenuItem("Import Asset")) { OnImportAsset(); }
-                if (ImGui::MenuItem("Import Engine Content")) { OnImportEngineContent(); }
+                if (ImGui::BeginMenu("Edit")) {
+                    if (ImGui::MenuItem("Undo", "Ctrl+Z")) {}
+                    if (ImGui::MenuItem("Redo", "Ctrl+Y")) {}
+                    ImGui::Separator();
+                    if (ImGui::MenuItem("Project Settings", "Shift+Alt+S")) {}
+                    ImGui::EndMenu();
+                }
+                if (ImGui::BeginMenu("Assets")) {
+                    if (ImGui::BeginMenu("Create")) {
+                        if (ImGui::MenuItem("Material")) { mCreateMaterialOpen = true; }
+                        if (ImGui::MenuItem("Script")) {}
+                        if (ImGui::MenuItem("Texture")) {}
+                        ImGui::EndMenu();
+                    }
+                    ImGui::Separator();
+                    if (ImGui::MenuItem("Import Asset")) { OnImportAsset(); }
+                    if (ImGui::MenuItem("Import Engine Content")) { OnImportEngineContent(); }
 
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("View")) {
-                if (ImGui::MenuItem("Scene")) { mShowSceneSettings = !mShowSceneSettings; }
-                if (ImGui::MenuItem("Entities")) { mShowEntities = !mShowEntities; }
-                if (ImGui::MenuItem("Properties")) { mShowEntityProperties = !mShowEntityProperties; }
-                if (ImGui::MenuItem("Viewport")) { mShowViewport = !mShowViewport; }
-                if (ImGui::MenuItem("Asset Browser")) { mShowAssetBrowser = !mShowAssetBrowser; }
-                if (ImGui::MenuItem("Log")) { mShowLog = !mShowLog; }
-                if (ImGui::MenuItem("Asset Preview")) { mShowAssetPreview = !mShowAssetPreview; }
-                if (ImGui::MenuItem("Post Processing")) { mShowPostProcessing = !mShowPostProcessing; }
-                if (ImGui::MenuItem("Material")) { mShowMaterial = !mShowMaterial; }
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("Window")) {
-                if (ImGui::BeginMenu("Layouts")) {
-                    // TODO: Add default layouts here
-                    if (ImGui::MenuItem("Reset")) { OnResetWindow(); }
                     ImGui::EndMenu();
                 }
-                ImGui::EndMenu();
+                if (ImGui::BeginMenu("View")) {
+                    if (ImGui::MenuItem("Scene")) { mShowSceneSettings = !mShowSceneSettings; }
+                    if (ImGui::MenuItem("Entities")) { mShowEntities = !mShowEntities; }
+                    if (ImGui::MenuItem("Properties")) { mShowEntityProperties = !mShowEntityProperties; }
+                    if (ImGui::MenuItem("Viewport")) { mShowViewport = !mShowViewport; }
+                    if (ImGui::MenuItem("Asset Browser")) { mShowAssetBrowser = !mShowAssetBrowser; }
+                    if (ImGui::MenuItem("Log")) { mShowLog = !mShowLog; }
+                    if (ImGui::MenuItem("Asset Preview")) { mShowAssetPreview = !mShowAssetPreview; }
+                    if (ImGui::MenuItem("Post Processing")) { mShowPostProcessing = !mShowPostProcessing; }
+                    if (ImGui::MenuItem("Material")) { mShowMaterial = !mShowMaterial; }
+                    ImGui::EndMenu();
+                }
+                if (ImGui::BeginMenu("Window")) {
+                    if (ImGui::BeginMenu("Layouts")) {
+                        // TODO: Add default layouts here
+                        if (ImGui::MenuItem("Reset")) { OnResetWindow(); }
+                        ImGui::EndMenu();
+                    }
+                    ImGui::EndMenu();
+                }
+                if (ImGui::BeginMenu("Help")) {
+                    if (ImGui::MenuItem("About")) { mAboutOpen = true; }
+                    ImGui::EndMenu();
+                }
+                ImGui::EndMainMenuBar();
             }
-            if (ImGui::BeginMenu("Help")) {
-                if (ImGui::MenuItem("About")) { mAboutOpen = true; }
-                ImGui::EndMenu();
-            }
-            ImGui::EndMainMenuBar();
         }
-
-        ImGui::PopStyleVar();
-        ImGui::PopStyleColor();
-
-        if (mSceneSelectorOpen) { ImGui::OpenPopup("Select Scene"); }
-        Modal_SelectScene();
-
-        if (mSaveSceneAsOpen) { ImGui::OpenPopup("Save Scene As"); }
-        Modal_SaveSceneAs();
-
-        if (mAboutOpen) { ImGui::OpenPopup("About"); }
-        Modal_About();
-
-        // TODO: This will render twice when on the welcome screen, disabled for now
-        // if (mNewProjectOpen) { ImGui::OpenPopup("New Project"); }
-        // Modal_NewProject();
-
-        if (mCreateMaterialOpen) { ImGui::OpenPopup("Create Material"); }
-        Modal_CreateMaterial();
     }
 
     void XEditor::View_Toolbar(const f32 menuBarHeight) {
@@ -838,12 +941,16 @@ namespace x {
 
                 const f32 width = ImGui::GetContentRegionAvail().x;
 
-                if (ImGui::CollapsingHeader("World", ImGuiTreeNodeFlags_DefaultOpen)) {
-                    // Sun
-                    auto& sun = state.GetLightState().mSun;
-                    ImGui::Text("Sun");
-                    ImGui::Spacing();
+                {
+                    Gui::ScopedFont font(mFonts["display_20"]);
+                    ImGui::Text("World");
+                }
 
+                Gui::SpacingY(8.0f);
+
+                // Sun
+                if (ImGui::CollapsingHeader("Sun", ImGuiTreeNodeFlags_DefaultOpen)) {
+                    auto& sun = state.GetLightState().mSun;
                     ImGui::Text("Enabled:");
                     ImGui::SameLine(kLabelWidth);
                     ImGui::Checkbox("##sun_enabled", (bool*)&sun.mEnabled);
@@ -874,8 +981,6 @@ namespace x {
                     ImGui::SetNextItemWidth(width - kLabelWidth);
                     ImGui::Checkbox("##sun_casts_shadows", (bool*)&sun.mCastsShadows);
                 }
-            } else {
-                ImGui::Text("No scene loaded. Go to \"File->Open Scene\" to load a scene.");
             }
         }
         ImGui::End();
@@ -947,74 +1052,42 @@ namespace x {
             }
             ImGui::End();
         }
-
-        if (mNewProjectOpen) {
-            ImGui::OpenPopup("New Project");
-            Modal_NewProject();
-        }
     }
 
     void XEditor::View_Entities() {
         ImGui::Begin("Entities");
-        const ImVec2 windowSize = ImGui::GetContentRegionAvail();
-
-        // Define sizes with adjustment for borders and scrollbar appearance
-        constexpr f32 buttonHeight    = 24.0f;
-        constexpr f32 buttonPadding   = 4.0f;
-        constexpr f32 totalButtonArea = buttonHeight + (buttonPadding * 2);
-        // Add a small adjustment factor to prevent scrollbar appearance
-        constexpr f32 heightAdjustment = 4.0f;
-        const f32 listHeight           = windowSize.y - totalButtonArea - heightAdjustment;
-
-        ImGui::BeginChild("##entities_scroll_list", {windowSize.x, listHeight}, true);
         {
-            if (mGame.IsInitialized() && GetCurrentScene()->Loaded()) {
-                for (auto& [id, name] : GetEntities()) {
-                    if (ImGui::Selectable(name.c_str(), id == sSelectedEntity)) { sSelectedEntity = id; }
+            const ImVec2 windowSize = ImGui::GetContentRegionAvail();
+
+            // Define sizes with adjustment for borders and scrollbar appearance
+            constexpr f32 buttonHeight    = 24.0f;
+            constexpr f32 buttonPadding   = 4.0f;
+            constexpr f32 totalButtonArea = buttonHeight + (buttonPadding * 2);
+            // Add a small adjustment factor to prevent scrollbar appearances
+            constexpr f32 heightAdjustment = 4.0f;
+            const f32 listHeight           = windowSize.y - totalButtonArea - heightAdjustment;
+
+            ImGui::BeginChild("##entities_scroll_list", {windowSize.x, listHeight}, true);
+            {
+                if (mGame.IsInitialized() && GetCurrentScene()->Loaded()) {
+                    for (auto& [id, name] : GetEntities()) {
+                        if (ImGui::Selectable(name.c_str(), id == sSelectedEntity)) { sSelectedEntity = id; }
+                    }
                 }
             }
+            ImGui::EndChild();
+
+            ImGui::Dummy({0, buttonPadding});
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {buttonPadding, buttonPadding});
+            const ImVec2 remainingSpace = ImGui::GetContentRegionAvail();
+
+            if (ImGui::Button("Add Entity", {remainingSpace.x, buttonHeight})) { mAddEntityOpen = true; }
+            ImGui::PopStyleVar();
         }
-        ImGui::EndChild();
-
-        ImGui::Dummy({0, buttonPadding});
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {buttonPadding, buttonPadding});
-        const ImVec2 remainingSpace = ImGui::GetContentRegionAvail();
-
-        static char entityNameBuffer[256] {0};
-        static bool openAddEntityPopup {false};
-        if (ImGui::Button("Add Entity", {remainingSpace.x, buttonHeight})) {
-            memset(entityNameBuffer,
-                   0,
-                   sizeof(entityNameBuffer));  // probably unnecessary since we initialized with null
-            ImGui::OpenPopup("Add New Entity");
-            openAddEntityPopup = true;
-        }
-        ImGui::PopStyleVar();
-
-        if (ImGui::BeginPopupModal("Add New Entity", &openAddEntityPopup, ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImGui::Text("Entity name:");
-            ImGui::PushItemWidth(300.0f);
-            const bool enterPressed = ImGui::InputText("##new_entity_name",
-                                                       entityNameBuffer,
-                                                       sizeof(entityNameBuffer),
-                                                       ImGuiInputTextFlags_EnterReturnsTrue);
-            ImGui::PopItemWidth();
-            ImGui::Separator();
-            if (ImGui::Button("OK", {150, 0}) || enterPressed) {
-                if (strlen(entityNameBuffer) > 0) {
-                    ImGui::CloseCurrentPopup();
-                    OnAddEntity(entityNameBuffer);
-                }
-            }
-
-            ImGui::SameLine();
-
-            if (ImGui::Button("Cancel", {150, 0})) { ImGui::CloseCurrentPopup(); }
-
-            ImGui::EndPopup();
-        }
-
         ImGui::End();
+
+        if (mAddEntityOpen) { ImGui::OpenPopup("Add New Entity"); }
+        Modal_AddEntity();
     }
 
     void XEditor::View_EntityProperties() {
@@ -1311,12 +1384,6 @@ namespace x {
             if (ImGui::Button("Add Component##button", {size.x, 0})) { mAddComponentOpen = true; }
         }
         ImGui::End();
-
-        if (mAddComponentOpen) { ImGui::OpenPopup("Add Component"); }
-        if (mSelectAssetOpen) { ImGui::OpenPopup("Select Asset"); }
-
-        Modal_AddComponent();
-        Modal_SelectAsset();
     }
 
     void XEditor::View_Viewport() {
@@ -1633,7 +1700,14 @@ namespace x {
 
     void XEditor::View_PostProcessing() {
         ImGui::Begin("Post Processing");
-        {}
+        {
+            {
+                Gui::ScopedFont font(mFonts["display_20"]);
+                ImGui::Text("Post Processing");
+            }
+
+            Gui::SpacingY(8.0f);
+        }
         ImGui::End();
     }
 
@@ -1641,6 +1715,31 @@ namespace x {
         ImGui::Begin("Material");
         {}
         ImGui::End();
+    }
+
+    void XEditor::View_Modals() {
+        // View_MainMenu
+        if (mSceneSelectorOpen) { ImGui::OpenPopup("Select Scene"); }
+        Modal_SelectScene();
+
+        if (mSaveSceneAsOpen) { ImGui::OpenPopup("Save Scene As"); }
+        Modal_SaveSceneAs();
+
+        if (mAboutOpen) { ImGui::OpenPopup("About"); }
+        Modal_About();
+
+        if (mNewProjectOpen) { ImGui::OpenPopup("New Project"); }
+        Modal_NewProject();
+
+        if (mCreateMaterialOpen) { ImGui::OpenPopup("Create Material"); }
+        Modal_CreateMaterial();
+
+        // View_EntityProperties
+        if (mAddComponentOpen) { ImGui::OpenPopup("Add Component"); }
+        Modal_AddComponent();
+
+        if (mSelectAssetOpen) { ImGui::OpenPopup("Select Asset"); }
+        Modal_SelectAsset();
     }
 
     void XEditor::View_StatusBar() {
@@ -2071,7 +2170,7 @@ namespace x {
 
         return kAssetType_Invalid;
     }
-    
+
     void XEditor::ReloadAssetCache(bool fullReload) {
         if (mLoadedProject.mLoaded && mGame.IsInitialized()) {
             mAssetDescriptors.clear();
