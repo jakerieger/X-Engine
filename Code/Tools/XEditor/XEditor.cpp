@@ -884,6 +884,7 @@ namespace x {
             static constexpr ImVec2 btnSize = {24, 24};
 
             // Calculate offset in order to center all the buttons
+            // Honestly, most of this is guess work. It appears centered to me, but it's probably not *exactly* centered
             const ImVec2 toolbarSize   = ImGui::GetContentRegionAvail();
             constexpr int numButtons   = 12;  // 3 groups of 4
             constexpr f32 buttonsWidth = btnSize.x * numButtons;
