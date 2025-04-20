@@ -883,6 +883,119 @@ namespace x {
         if (ImGui::Begin("##Toolbar", nullptr, toolbarFlags)) {
             static constexpr ImVec2 btnSize = {24, 24};
 
+            // Calculate offset in order to center all the buttons
+            const ImVec2 toolbarSize   = ImGui::GetContentRegionAvail();
+            constexpr int numButtons   = 12;  // 3 groups of 4
+            constexpr f32 buttonsWidth = btnSize.x * numButtons;
+            const f32 buttonsSpacing =
+              ((numButtons + 8) * ImGui::GetStyle().ItemSpacing.x) + (ImGui::GetStyle().WindowPadding.x * 2);
+            const f32 totalButtonsWidth =
+              buttonsWidth + buttonsSpacing + 120.0f;  // 40 comes from the two 20 unit spacers
+            const f32 centerX       = toolbarSize.x / 2.0f;
+            const f32 buttonsCenter = totalButtonsWidth / 2.0f;
+            const f32 offset        = centerX - buttonsCenter;
+
+            Gui::SpacingX(offset);
+            ImGui::SameLine();
+
+            // VIEWPORT/EDITOR ACTIONS
+            {
+                const auto undoIcon = (ImTextureID)(mTextureManager.GetTexture("UndoIcon")->mShaderResourceView.Get());
+                const auto redoIcon = (ImTextureID)(mTextureManager.GetTexture("RedoIcon")->mShaderResourceView.Get());
+                const auto gridToggleIcon =
+                  (ImTextureID)(mTextureManager.GetTexture("GridToggleIcon")->mShaderResourceView.Get());
+                const auto focusSelectedIcon =
+                  (ImTextureID)(mTextureManager.GetTexture("FocusSelectedIcon")->mShaderResourceView.Get());
+
+                ImGui::ImageButton("##undo_btn",
+                                   undoIcon,
+                                   btnSize,
+                                   Gui::kUV_0,
+                                   Gui::kUV_1,
+                                   Colors::Transparent.ToImVec4(),
+                                   ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
+                ImGui::SameLine();
+
+                ImGui::ImageButton("##redo_btn",
+                                   redoIcon,
+                                   btnSize,
+                                   Gui::kUV_0,
+                                   Gui::kUV_1,
+                                   Colors::Transparent.ToImVec4(),
+                                   ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
+                ImGui::SameLine();
+
+                ImGui::ImageButton("##grid_toggle_btn",
+                                   gridToggleIcon,
+                                   btnSize,
+                                   Gui::kUV_0,
+                                   Gui::kUV_1,
+                                   Colors::Transparent.ToImVec4(),
+                                   ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
+                ImGui::SameLine();
+
+                ImGui::ImageButton("##focus_selected_btn",
+                                   focusSelectedIcon,
+                                   btnSize,
+                                   Gui::kUV_0,
+                                   Gui::kUV_1,
+                                   Colors::Transparent.ToImVec4(),
+                                   ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
+            }
+
+            ImGui::SameLine();
+            Gui::SpacingX(20.0f);
+            ImGui::SameLine();
+
+            // GAME PLAY-MODE BUTTONS (PLAY, PAUSE, STOP, DETACH)
+            {
+                const auto playIcon = (ImTextureID)(mTextureManager.GetTexture("PlayIcon")->mShaderResourceView.Get());
+                const auto pauseIcon =
+                  (ImTextureID)(mTextureManager.GetTexture("PauseIcon")->mShaderResourceView.Get());
+                const auto stopIcon = (ImTextureID)(mTextureManager.GetTexture("StopIcon")->mShaderResourceView.Get());
+                const auto playWindowedIcon =
+                  (ImTextureID)(mTextureManager.GetTexture("PlayWindowedIcon")->mShaderResourceView.Get());
+
+                ImGui::ImageButton("##play_btn",
+                                   playIcon,
+                                   btnSize,
+                                   Gui::kUV_0,
+                                   Gui::kUV_1,
+                                   Colors::Transparent.ToImVec4(),
+                                   ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
+                ImGui::SameLine();
+
+                ImGui::ImageButton("##pause_btn",
+                                   pauseIcon,
+                                   btnSize,
+                                   Gui::kUV_0,
+                                   Gui::kUV_1,
+                                   Colors::Transparent.ToImVec4(),
+                                   ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
+                ImGui::SameLine();
+
+                ImGui::ImageButton("##stop_btn",
+                                   stopIcon,
+                                   btnSize,
+                                   Gui::kUV_0,
+                                   Gui::kUV_1,
+                                   Colors::Transparent.ToImVec4(),
+                                   ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
+                ImGui::SameLine();
+
+                ImGui::ImageButton("##play_win_btn",
+                                   playWindowedIcon,
+                                   btnSize,
+                                   Gui::kUV_0,
+                                   Gui::kUV_1,
+                                   Colors::Transparent.ToImVec4(),
+                                   ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
+            }
+
+            ImGui::SameLine();
+            Gui::SpacingX(20.0f);
+            ImGui::SameLine();
+
             // SELECT MODE TOOLBAR GROUP
             {
                 static int currentSelectMode {0};
@@ -900,54 +1013,6 @@ namespace x {
                                            {cursorIcon, moveIcon, rotateIcon, scaleIcon})) {
                     // Select mode has changed
                 }
-            }
-
-            ImGui::SameLine();
-
-            // GAME PLAY-MODE BUTTONS (PLAY, PAUSE, STOP, DETACH)
-            {
-                const auto playIcon = (ImTextureID)(mTextureManager.GetTexture("PlayIcon")->mShaderResourceView.Get());
-                const auto pauseIcon =
-                  (ImTextureID)(mTextureManager.GetTexture("PauseIcon")->mShaderResourceView.Get());
-                const auto stopIcon = (ImTextureID)(mTextureManager.GetTexture("StopIcon")->mShaderResourceView.Get());
-                const auto playWindowedIcon =
-                  (ImTextureID)(mTextureManager.GetTexture("PlayWindowedIcon")->mShaderResourceView.Get());
-
-                ImGui::ImageButton("##play_btn",
-                                   playIcon,
-                                   btnSize,
-                                   {0, 0},
-                                   {1, 1},
-                                   ImVec4(0, 0, 0, 0),
-                                   ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
-                ImGui::SameLine();
-
-                ImGui::ImageButton("##pause_btn",
-                                   pauseIcon,
-                                   btnSize,
-                                   {0, 0},
-                                   {1, 1},
-                                   ImVec4(0, 0, 0, 0),
-                                   ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
-                ImGui::SameLine();
-
-                ImGui::ImageButton("##stop_btn",
-                                   stopIcon,
-                                   btnSize,
-                                   {0, 0},
-                                   {1, 1},
-                                   ImVec4(0, 0, 0, 0),
-                                   ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
-                ImGui::SameLine();
-
-                ImGui::ImageButton("##play_win_btn",
-                                   playWindowedIcon,
-                                   btnSize,
-                                   {0, 0},
-                                   {1, 1},
-                                   ImVec4(0, 0, 0, 0),
-                                   ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
-                ImGui::SameLine();
             }
 
             ImGui::End();
@@ -2462,6 +2527,29 @@ namespace x {
             X_LOG_ERROR("Failed to load Undo icon");
             return false;
         }
+
+        result = mTextureManager.LoadFromMemoryCompressed(GRIDTOGGLE_BYTES,
+                                                          GRIDTOGGLE_COMPRESSED_SIZE,
+                                                          GRIDTOGGLE_WIDTH,
+                                                          GRIDTOGGLE_HEIGHT,
+                                                          4,
+                                                          "GridToggleIcon");
+        if (!result) {
+            X_LOG_ERROR("Failed to load GridToggle icon");
+            return false;
+        }
+
+        result = mTextureManager.LoadFromMemoryCompressed(FOCUSSELECTED_BYTES,
+                                                          FOCUSSELECTED_COMPRESSED_SIZE,
+                                                          FOCUSSELECTED_WIDTH,
+                                                          FOCUSSELECTED_HEIGHT,
+                                                          4,
+                                                          "FocusSelectedIcon");
+        if (!result) {
+            X_LOG_ERROR("Failed to load FocusSelected icon");
+            return false;
+        }
+
         result = mTextureManager.LoadFromMemoryCompressed(ROTATEICON_BYTES,
                                                           ROTATEICON_COMPRESSED_SIZE,
                                                           ROTATEICON_WIDTH,
@@ -2510,7 +2598,7 @@ namespace x {
                                                           4,
                                                           "SelectAssetIcon");
         if (!result) {
-            X_LOG_ERROR("Failed to load Stop icon");
+            X_LOG_ERROR("Failed to load SelectAsset icon");
             return false;
         }
 

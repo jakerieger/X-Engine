@@ -69,6 +69,7 @@ namespace x {
     }
 
     Color::Color(const f32* color) {
+        if (color == nullptr) { throw std::invalid_argument("Invalid color ptr, nullptr"); }
         mRed   = color[0];
         mGreen = color[1];
         mBlue  = color[2];

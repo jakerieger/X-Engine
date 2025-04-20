@@ -11,7 +11,7 @@
 
 namespace x {
     /// @brief Encapsulation for representing colors across the engine and its tools. Unifies ImGui, DirectX, and other
-    /// API color usage and provides tons of utility for manipulation and blending.
+    /// API color usage and provides utilities for manipulation and blending.
     class Color {
     public:
         Color() = default;
