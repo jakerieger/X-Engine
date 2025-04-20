@@ -22,7 +22,7 @@ BEGIN
         BLOCK "040904E4" // U.S. English in Windows ANSI
         BEGIN
             VALUE "CompanyName",      "Jake Rieger"
-            VALUE "FileDescription",   "X Editor"
+            VALUE "FileDescription",   "XEditor"
             VALUE "FileVersion",       "1.0.0.0"
             VALUE "InternalName",      "XEditor"
             VALUE "LegalCopyright",    "Copyright © 2025 Jake Rieger"

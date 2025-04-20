@@ -49,4 +49,9 @@ namespace x::Gui {
     void SpacingY(const f32 space);
 
     void SpacingX(const f32 space);
+
+    bool PrimaryButton(const char* label, const ImVec2& size);
+
+    bool
+    ToggleButtonGroup(const char* label, const ImVec2& buttonSize, int* selected, const vector<ImTextureID>& icons);
 }  // namespace x::Gui

@@ -43,6 +43,9 @@ inline ImVec2 operator/(const ImVec2& lhs, const float scalar) {
 }
 
 namespace x::Gui {
+    inline constexpr ImVec2 kUV_0 = {0, 0};
+    inline constexpr ImVec2 kUV_1 = {1, 1};
+
     class ScopedStyleVars {
         using StyleVarPair = std::pair<ImGuiStyleVar_, int>;
 

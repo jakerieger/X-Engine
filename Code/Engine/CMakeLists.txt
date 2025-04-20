@@ -23,12 +23,15 @@ add_library(x STATIC
     ${ENGINE_DIR}/CameraComponent.hpp
     ${ENGINE_DIR}/Clock.cpp
     ${ENGINE_DIR}/Clock.hpp
+    ${ENGINE_DIR}/Color.cpp
+    ${ENGINE_DIR}/Color.hpp
     ${ENGINE_DIR}/ColorGradeEffect.cpp
     ${ENGINE_DIR}/ColorGradeEffect.hpp
     ${ENGINE_DIR}/ComponentManager.hpp
     ${ENGINE_DIR}/ComputeEffect.hpp
     ${ENGINE_DIR}/D3D.hpp
     ${ENGINE_DIR}/DebugUI.hpp
+    ${ENGINE_DIR}/DeferredActionQueue.hpp
     ${ENGINE_DIR}/DevConsole.cpp
     ${ENGINE_DIR}/DevConsole.hpp
     ${ENGINE_DIR}/EngineCommon.hpp

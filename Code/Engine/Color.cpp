@@ -7,7 +7,7 @@
 #include <iomanip>
 #include <sstream>
 #include "Color.hpp"
-#include "Common/Templates.hpp"
+#include "../Common/Templates.hpp"
 
 namespace x {
     Color::Color(f32 v, f32 a) {
@@ -52,6 +52,27 @@ namespace x {
         mGreen = g / 255.0f;
         mBlue  = b / 255.0f;
         mAlpha = a / 255.0f;
+    }
+
+    Color::Color(const ImVec4& color) {
+        mRed   = color.x;
+        mGreen = color.y;
+        mBlue  = color.z;
+        mAlpha = color.w;
+    }
+
+    Color::Color(const XMFLOAT4& color) {
+        mRed   = color.x;
+        mGreen = color.y;
+        mBlue  = color.z;
+        mAlpha = color.w;
+    }
+
+    Color::Color(const f32* color) {
+        mRed   = color[0];
+        mGreen = color[1];
+        mBlue  = color[2];
+        mAlpha = color[3];
     }
 
     Color::Color(const Color& other)

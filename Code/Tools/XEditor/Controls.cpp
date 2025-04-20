@@ -6,7 +6,7 @@
 #include <imgui_internal.h>
 #include "Controls.hpp"
 
-#include "Color.hpp"
+#include "../../Engine/Color.hpp"
 #include "ImGuiHelpers.hpp"
 #include "Common/FileDialogs.hpp"
 #include "Common/Types.hpp"
@@ -148,9 +148,9 @@ namespace x::Gui {
             ImGui::PushID(label);
             ImGui::PushMultiItemsWidths(components, ImGui::CalcItemWidth());
 
-            const ImU32 R = Color("#ed4918").ToU32_ABGR();
-            const ImU32 G = Color("#a3eb34").ToU32_ABGR();
-            const ImU32 B = Color("#4292fc").ToU32_ABGR();
+            const ImU32 R = Color("#EB3751").ToU32_ABGR();
+            const ImU32 G = Color("#83CB10").ToU32_ABGR();
+            const ImU32 B = Color("#2F85E6").ToU32_ABGR();
 
             for (int i = 0; i < components; ++i) {
                 static const ImU32 colors[] = {R, G, B, 0xBBFFFFFF};
@@ -184,8 +184,8 @@ namespace x::Gui {
     bool BorderedButton(const char* label, const ImVec2& size) {
         // Define colors
         const ImVec4 normalColorBorder  = Color("#353535").ToImVec4();
-        const ImVec4 hoveredColorBorder = Color("#FF00E5").ToImVec4();
-        const ImVec4 activeColorBorder  = Color("#FF00E5").ToImVec4();
+        const ImVec4 hoveredColorBorder = Color("#24B7DE").ToImVec4();
+        const ImVec4 activeColorBorder  = Color("#24B7DE").ToImVec4();
 
         ImGui::PushStyleColor(ImGuiCol_Border, normalColorBorder);
 
@@ -269,5 +269,75 @@ namespace x::Gui {
 
     void SpacingX(const f32 space) {
         ImGui::Dummy(ImVec2(space, 0));
+    }
+
+    bool PrimaryButton(const char* label, const ImVec2& size) {
+        const Color buttonColor("#1a97b8");
+        Gui::ScopedColorVars colors({{ImGuiCol_Button, buttonColor.ToImVec4()},
+                                     {ImGuiCol_ButtonActive, buttonColor.WithAlpha(0.67f).ToImVec4()},
+                                     {ImGuiCol_ButtonHovered, buttonColor.WithAlpha(0.8f).ToImVec4()},
+                                     {ImGuiCol_Text, Color(1.0f, 1.0f).ToImVec4()}});
+        const bool result = ImGui::Button(label, size);
+        return result;
+    }
+
+    bool
+    ToggleButtonGroup(const char* label, const ImVec2& buttonSize, int* selected, const vector<ImTextureID>& icons) {
+        const int previouslySelected = *selected;
+
+        const auto* colors = ImGui::GetStyle().Colors;
+        const Color borderNormal(colors[ImGuiCol_Separator]);
+        const Color borderHovered(colors[ImGuiCol_SeparatorActive]);
+        const Color borderSelected(borderHovered);
+
+        auto ToggleButton = [&](const int index, const ImTextureID icon) {
+            const bool isSelected = (*selected == index);
+
+            if (isSelected) {
+                ImGui::PushStyleColor(ImGuiCol_Button, colors[ImGuiCol_ButtonActive]);
+                ImGui::PushStyleColor(ImGuiCol_Border, borderSelected.ToImVec4());
+            } else {
+                ImGui::PushStyleColor(ImGuiCol_Button, colors[ImGuiCol_Button]);
+                ImGui::PushStyleColor(ImGuiCol_Border, borderNormal.ToImVec4());
+            }
+
+            ImGui::PushStyleVar(ImGuiCol_ChildBg, 1.0f);
+
+            // Create the image button
+            char btnId[16];
+            sprintf(btnId, "##btn%d", index);
+
+            const ImVec4 iconTint = isSelected ? Colors::White.ToImVec4() : colors[ImGuiCol_CheckMark];
+            if (ImGui::ImageButton(btnId, icon, buttonSize, kUV_0, kUV_1, Colors::Transparent.ToImVec4(), iconTint)) {
+                *selected = index;
+            }
+
+            ImGui::PopStyleVar();
+            ImGui::PopStyleColor(2);
+
+            if (isSelected) {
+                ImGui::GetWindowDrawList()->AddRect(ImGui::GetItemRectMin(),
+                                                    ImGui::GetItemRectMax(),
+                                                    borderHovered.ToU32_ABGR(),
+                                                    ImGui::GetStyle().FrameRounding,
+                                                    0,
+                                                    1.0f);
+            }
+        };
+
+        ImGui::PushID(label);
+        ImGui::BeginGroup();
+        for (int i = 0; i < icons.size(); i++) {
+            ToggleButton(i, icons[i]);
+
+            // Add spacing between buttons except after the last one
+            if (i < icons.size() - 1) {
+                ImGui::SameLine(0, 4.0f);  // 4 pixels spacing between buttons
+            }
+        }
+        ImGui::EndGroup();
+        ImGui::PopID();
+
+        return previouslySelected != *selected;
     }
 }  // namespace x::Gui

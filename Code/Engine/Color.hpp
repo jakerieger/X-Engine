@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <imgui.h>         // For ImGui color types
-#include "Engine/D3D.hpp"  // For DirectX color types
+#include <imgui.h>
+#include "D3D.hpp"
 #include "Common/Types.hpp"
 #include "Common/Macros.hpp"
 
@@ -21,6 +21,9 @@ namespace x {
         explicit Color(u32 color);
         explicit Color(const str& hex);
         explicit Color(u8 r, u8 g, u8 b, u8 a = 255);
+        explicit Color(const ImVec4& color);
+        explicit Color(const XMFLOAT4& color);
+        explicit Color(const f32* color);
 
         Color(const Color& other);
         Color& operator=(const Color& other);
@@ -83,6 +86,27 @@ namespace x {
         static u32 FloatToU32(f32 v);
         static f32 U32ToFloat(u32 v);
     };
+
+    namespace Colors {
+        static Color White {1.0f, 1.0f, 1.0f};
+        static Color Black {0.0f, 0.0f, 0.0f};
+        static Color Red {1.0f, 0.0f, 0.0f};
+        static Color Green {0.0f, 1.0f, 0.0f};
+        static Color Blue {0.0f, 0.0f, 1.0f};
+        static Color Yellow {1.0f, 1.0f, 0.0f};
+        static Color Magenta {1.0f, 0.0f, 1.0f};
+        static Color Cyan {0.0f, 1.0f, 1.0f};
+        static Color LightGrey {0.75f, 0.75f, 0.75f};
+        static Color Grey {0.5f, 0.5f, 0.5f};
+        static Color DarkGrey {0.25f, 0.25f, 0.25f};
+        static Color White25 {1.0f, 1.0f, 1.0f, 0.25f};
+        static Color White50 {1.0f, 1.0f, 1.0f, 0.5f};
+        static Color White75 {1.0f, 1.0f, 1.0f, 0.75f};
+        static Color Black25 {0.0f, 0.0f, 0.0f, 0.25f};
+        static Color Black50 {0.0f, 0.0f, 0.0f, 0.5f};
+        static Color Black75 {0.0f, 0.0f, 0.0f, 0.75f};
+        static Color Transparent {0.0f, 0.0f};
+    }  // namespace Colors
 }  // namespace x
 
 #ifndef X_COLOR_HASH_SPECIALIZATION

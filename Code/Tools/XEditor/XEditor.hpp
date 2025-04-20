@@ -12,7 +12,8 @@
 #include "Engine/Window.hpp"
 #include "Engine/Game.hpp"
 #include "XPak/ProjectDescriptor.hpp"
-#include "Color.hpp"
+#include "Engine/Color.hpp"
+#include "Engine/DeferredActionQueue.hpp"
 
 namespace x {
     struct EditorSession {
@@ -80,6 +81,7 @@ namespace x {
         TextureManager mTextureManager;
         bool mDockspaceSetup {false};
         unordered_map<str, ImFont*> mFonts;
+        DeferredActionQueue mPostRenderQueue;
 
         // Engine API
         Game mGame;

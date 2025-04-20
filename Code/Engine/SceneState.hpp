@@ -44,7 +44,13 @@ namespace x {
             mTransforms.RemoveComponent(entity);
             mModels.RemoveComponent(entity);
             mBehaviors.RemoveComponent(entity);
+            mCameras.RemoveComponent(entity);
             mEntities.erase(entity);
+        }
+
+        EntityId GetFirstEntity() const {
+            if (mEntities.empty()) { return EntityId::Invalid(); }
+            return mEntities.begin()->first;
         }
 
         const std::map<EntityId, str>& GetEntities() const {

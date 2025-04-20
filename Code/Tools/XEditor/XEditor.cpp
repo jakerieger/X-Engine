@@ -179,7 +179,7 @@ namespace x {
         colors[ImGuiCol_ScrollbarGrab]         = mIcon.ToImVec4();
         colors[ImGuiCol_SeparatorActive]       = mSelected.ToImVec4();
         colors[ImGuiCol_SeparatorHovered]      = mSelected.ToImVec4();
-        colors[ImGuiCol_Separator]             = mWindowBackground.ToImVec4();
+        colors[ImGuiCol_Separator]             = Color("#4e4e4e").ToImVec4();
         colors[ImGuiCol_SliderGrabActive]      = mIcon.ToImVec4();
         colors[ImGuiCol_SliderGrab]            = mIcon.ToImVec4();
         colors[ImGuiCol_TabActive]             = mHeaderBackground.ToImVec4();
@@ -265,7 +265,7 @@ namespace x {
         ImGui_ImplDX11_Init(mContext.GetDevice(), mContext.GetDeviceContext());
 
         mWindowViewport->SetClearColor(0.05f, 0.05f, 0.05f, 1.0f);  // Editor background nearly black by default
-        mSceneViewport.SetClearColor(Colors::Gray);                 // Viewport background grey by default
+        mSceneViewport.SetClearColor(DirectX::Colors::Gray);        // Viewport background grey by default
         // Resize to 1x1 initially so D3D creation code doesn't fail (0x0 invalid resource size)
         mSceneViewport.Resize(1, 1);
 
@@ -331,6 +331,9 @@ namespace x {
         ImGui::Render();
 
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
+        // Execute all the actions that needed to be deferred until rendering has completed
+        if (!mPostRenderQueue.IsEmpty()) { mPostRenderQueue.Execute(); }
     }
 
     LRESULT XEditor::MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -366,7 +369,7 @@ namespace x {
 
             Gui::SpacingY(10.0f);
 
-            if (ImGui::Button("OK", {200, 0})) {
+            if (Gui::PrimaryButton("OK", {200, 0})) {
                 // If the name isn't empty and is different from the previous name, save the scene
                 if (!X_CSTR_EMPTY(EditorState::CurrentSceneName) &&
                     std::strcmp(EditorState::CurrentSceneName, GetCurrentScene()->GetName().c_str()) != 0) {
@@ -451,7 +454,7 @@ namespace x {
             Gui::SpacingY(10.0f);
 
             // Buttons
-            if (ImGui::Button("OK", {240, 0})) {
+            if (Gui::PrimaryButton("OK", {240, 0})) {
                 if (selectedComponent == "Model") {
                     // TODO: Throws a rendering error if added to one entity while another entity's model component
                     // already has a material set, but doesn't if you add multiple entities with model components before
@@ -514,7 +517,7 @@ namespace x {
             Gui::SpacingY(10.0f);
 
             // OK and Cancel buttons
-            if (ImGui::Button("OK", {200, 0})) {
+            if (Gui::PrimaryButton("OK", {200, 0})) {
                 mSelectAssetOpen = false;
                 ImGui::CloseCurrentPopup();
             }
@@ -629,16 +632,9 @@ namespace x {
                 //
             }
             ImGui::SameLine();
-            {
-                const Color buttonColor("#1a97b8");
-                Gui::ScopedColorVars colors({{ImGuiCol_Button, buttonColor.ToImVec4()},
-                                             {ImGuiCol_ButtonActive, buttonColor.WithAlpha(0.67f).ToImVec4()},
-                                             {ImGuiCol_ButtonHovered, buttonColor.WithAlpha(0.8f).ToImVec4()},
-                                             {ImGuiCol_Text, Color(1.0f, 1.0f).ToImVec4()}});
-                if (ImGui::Button("Create Project##new_project", {createButtonWidth, buttonHeight})) {
-                    if (OnCreateProject(nameBuffer, locationBuffer, engineVersions[selectedVersion])) {
-                        mNewProjectOpen = false;
-                    }
+            if (Gui::PrimaryButton("Create Project##new_project", {createButtonWidth, buttonHeight})) {
+                if (OnCreateProject(nameBuffer, locationBuffer, engineVersions[selectedVersion])) {
+                    mNewProjectOpen = false;
                 }
             }
 
@@ -677,7 +673,7 @@ namespace x {
 
             Gui::SpacingY(10.0f);
 
-            if (ImGui::Button("OK", {200, 0})) {
+            if (Gui::PrimaryButton("OK", {200, 0})) {
                 mCreateMaterialOpen = false;
                 if (!mShowMaterial) { mShowMaterial = true; }
             }
@@ -728,7 +724,7 @@ namespace x {
             Gui::SpacingY(10.0f);
 
             // Buttons
-            if (ImGui::Button("OK", {200, 0})) {
+            if (Gui::PrimaryButton("OK", {200, 0})) {
                 if (!selectedScene.empty()) { OnLoadScene(selectedScene); }
 
                 mSceneSelectorOpen = false;
@@ -777,7 +773,7 @@ namespace x {
 
             Gui::SpacingY(10.0f);
 
-            if (ImGui::Button("OK", {200, 0}) || enterPressed) {
+            if (Gui::PrimaryButton("OK", {200, 0}) || enterPressed) {
                 if (std::strlen(entityName) > 0) {
                     OnAddEntity(entityName);
                     mAddEntityOpen = false;
@@ -882,54 +878,82 @@ namespace x {
 
         const ImVec4 background = ImGui::GetStyleColorVec4(ImGuiCol_MenuBarBg);
         ImGui::PushStyleColor(ImGuiCol_WindowBg, background);
+        ImGui::PushStyleColor(ImGuiCol_Button, {0, 0, 0, 0});
 
         if (ImGui::Begin("##Toolbar", nullptr, toolbarFlags)) {
-            const auto playIcon  = (ImTextureID)(mTextureManager.GetTexture("PlayIcon")->mShaderResourceView.Get());
-            const auto pauseIcon = (ImTextureID)(mTextureManager.GetTexture("PauseIcon")->mShaderResourceView.Get());
-            const auto stopIcon  = (ImTextureID)(mTextureManager.GetTexture("StopIcon")->mShaderResourceView.Get());
-
             static constexpr ImVec2 btnSize = {24, 24};
 
-            // Move the next 3 buttons to the window center
-            // Total width is (24*3) + (2*3) or (72) + (6) or 78
+            // SELECT MODE TOOLBAR GROUP
+            {
+                static int currentSelectMode {0};
+                const auto cursorIcon =
+                  (ImTextureID)(mTextureManager.GetTexture("SelectIcon")->mShaderResourceView.Get());
+                const auto moveIcon = (ImTextureID)(mTextureManager.GetTexture("MoveIcon")->mShaderResourceView.Get());
+                const auto rotateIcon =
+                  (ImTextureID)(mTextureManager.GetTexture("RotateIcon")->mShaderResourceView.Get());
+                const auto scaleIcon =
+                  (ImTextureID)(mTextureManager.GetTexture("ScaleIcon")->mShaderResourceView.Get());
 
-            auto windowWidth        = ImGui::GetWindowWidth();
-            auto middleButtonsWidth = (btnSize.x * 3) + 40;  // Calculated the '+ 40' using photoshop, no clue how it's
-                                                             // derived, but I'll be damned if it ain't centered
-            auto xOffset = (windowWidth / 2) - (middleButtonsWidth / 2);
+                if (Gui::ToggleButtonGroup("##select_modes",
+                                           btnSize,
+                                           &currentSelectMode,
+                                           {cursorIcon, moveIcon, rotateIcon, scaleIcon})) {
+                    // Select mode has changed
+                }
+            }
 
-            ImGui::SameLine(xOffset);
+            ImGui::SameLine();
 
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-            ImGui::ImageButton("##play_btn",
-                               playIcon,
-                               btnSize,
-                               {0, 0},
-                               {1, 1},
-                               ImVec4(0, 0, 0, 0),
-                               ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
-            ImGui::SameLine();  // 4
-            ImGui::ImageButton("##pause_btn",
-                               pauseIcon,
-                               btnSize,
-                               {0, 0},
-                               {1, 1},
-                               ImVec4(0, 0, 0, 0),
-                               ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
-            ImGui::SameLine();  // 4
-            ImGui::ImageButton("##stop_btn",
-                               stopIcon,
-                               btnSize,
-                               {0, 0},
-                               {1, 1},
-                               ImVec4(0, 0, 0, 0),
-                               ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
-            ImGui::PopStyleColor();
+            // GAME PLAY-MODE BUTTONS (PLAY, PAUSE, STOP, DETACH)
+            {
+                const auto playIcon = (ImTextureID)(mTextureManager.GetTexture("PlayIcon")->mShaderResourceView.Get());
+                const auto pauseIcon =
+                  (ImTextureID)(mTextureManager.GetTexture("PauseIcon")->mShaderResourceView.Get());
+                const auto stopIcon = (ImTextureID)(mTextureManager.GetTexture("StopIcon")->mShaderResourceView.Get());
+                const auto playWindowedIcon =
+                  (ImTextureID)(mTextureManager.GetTexture("PlayWindowedIcon")->mShaderResourceView.Get());
+
+                ImGui::ImageButton("##play_btn",
+                                   playIcon,
+                                   btnSize,
+                                   {0, 0},
+                                   {1, 1},
+                                   ImVec4(0, 0, 0, 0),
+                                   ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
+                ImGui::SameLine();
+
+                ImGui::ImageButton("##pause_btn",
+                                   pauseIcon,
+                                   btnSize,
+                                   {0, 0},
+                                   {1, 1},
+                                   ImVec4(0, 0, 0, 0),
+                                   ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
+                ImGui::SameLine();
+
+                ImGui::ImageButton("##stop_btn",
+                                   stopIcon,
+                                   btnSize,
+                                   {0, 0},
+                                   {1, 1},
+                                   ImVec4(0, 0, 0, 0),
+                                   ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
+                ImGui::SameLine();
+
+                ImGui::ImageButton("##play_win_btn",
+                                   playWindowedIcon,
+                                   btnSize,
+                                   {0, 0},
+                                   {1, 1},
+                                   ImVec4(0, 0, 0, 0),
+                                   ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
+                ImGui::SameLine();
+            }
 
             ImGui::End();
         }
 
-        ImGui::PopStyleColor();
+        ImGui::PopStyleColor(2);
         ImGui::PopStyleVar(2);
     }
 
@@ -1055,6 +1079,8 @@ namespace x {
     }
 
     void XEditor::View_Entities() {
+        static bool renameEntity {false};
+
         ImGui::Begin("Entities");
         {
             const ImVec2 windowSize = ImGui::GetContentRegionAvail();
@@ -1071,10 +1097,30 @@ namespace x {
             {
                 if (mGame.IsInitialized() && GetCurrentScene()->Loaded()) {
                     for (auto& [id, name] : GetEntities()) {
-                        if (ImGui::Selectable(name.c_str(), id == sSelectedEntity)) { sSelectedEntity = id; }
+                        bool isSelected = id == sSelectedEntity;
+                        if (ImGui::Selectable(name.c_str(), isSelected)) { sSelectedEntity = id; }
+
+                        if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+                            sSelectedEntity = id;
+                            ImGui::OpenPopup("entity_context_menu");
+                        }
                     }
                 }
             }
+
+            if (ImGui::BeginPopup("entity_context_menu")) {
+                ImGui::Text("Entity: %s", GetEntities()[sSelectedEntity].c_str());
+                ImGui::Separator();
+                if (ImGui::MenuItem("Rename")) { renameEntity = true; }
+                if (ImGui::MenuItem("Delete")) {
+                    GetSceneState().DestroyEntity(sSelectedEntity);
+                    sSelectedEntity = GetSceneState().GetFirstEntity();
+                    GetCurrentScene()->Update(0.0f);
+                }
+
+                ImGui::EndPopup();
+            }
+
             ImGui::EndChild();
 
             ImGui::Dummy({0, buttonPadding});
@@ -1086,8 +1132,50 @@ namespace x {
         }
         ImGui::End();
 
-        if (mAddEntityOpen) { ImGui::OpenPopup("Add New Entity"); }
-        Modal_AddEntity();
+        if (renameEntity) { ImGui::OpenPopup("Rename Entity"); }
+
+        const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, {0.5f, 0.5f});
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {10.0f, 10.0f});
+
+        static char entityName[256] {0};
+        if (ImGui::BeginPopupModal("Rename Entity",
+                                   &renameEntity,
+                                   ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize)) {
+            if (ImGui::IsWindowAppearing()) { std::strcpy(entityName, GetEntities()[sSelectedEntity].c_str()); }
+
+            {
+                Gui::ScopedFont font(mFonts["display_26"]);
+                ImGui::Text("Rename");
+            }
+            ImGui::Separator();
+
+            Gui::SpacingY(10.0f);
+
+            ImGui::Text("Name:");
+            ImGui::PushItemWidth(408.0f);
+            const bool enterPressed = ImGui::InputText("##rename_entity_name",
+                                                       entityName,
+                                                       sizeof(entityName),
+                                                       ImGuiInputTextFlags_EnterReturnsTrue);
+            ImGui::PopItemWidth();
+
+            Gui::SpacingY(10.0f);
+
+            if (Gui::PrimaryButton("OK", {200, 0}) || enterPressed) {
+                if (std::strlen(entityName) > 0) {
+                    // TODO: Rename entity
+                    renameEntity = false;
+                }
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Cancel", {200, 0})) { renameEntity = false; }
+
+            ImGui::EndPopup();
+        }
+        ImGui::PopStyleVar();
     }
 
     void XEditor::View_EntityProperties() {
@@ -1377,9 +1465,7 @@ namespace x {
                 }
             }
 
-            ImGui::Dummy({0, 2.f});
-            ImGui::Separator();
-            ImGui::Dummy({0, 2.f});
+            Gui::SpacingY(10.0f);
 
             if (ImGui::Button("Add Component##button", {size.x, 0})) { mAddComponentOpen = true; }
         }
@@ -1740,6 +1826,10 @@ namespace x {
 
         if (mSelectAssetOpen) { ImGui::OpenPopup("Select Asset"); }
         Modal_SelectAsset();
+
+        // View_Entities
+        if (mAddEntityOpen) { ImGui::OpenPopup("Add New Entity"); }
+        Modal_AddEntity();
     }
 
     void XEditor::View_StatusBar() {
@@ -2340,6 +2430,16 @@ namespace x {
                                                           "PlayIcon");
         if (!result) {
             X_LOG_ERROR("Failed to load Play icon");
+            return false;
+        }
+        result = mTextureManager.LoadFromMemoryCompressed(PLAYWINDOWEDICON_BYTES,
+                                                          PLAYWINDOWEDICON_COMPRESSED_SIZE,
+                                                          PLAYWINDOWEDICON_WIDTH,
+                                                          PLAYWINDOWEDICON_HEIGHT,
+                                                          4,
+                                                          "PlayWindowedIcon");
+        if (!result) {
+            X_LOG_ERROR("Failed to load PlayWindowed icon");
             return false;
         }
         result = mTextureManager.LoadFromMemoryCompressed(REDOICON_BYTES,

@@ -15,8 +15,6 @@ add_executable(XEditor WIN32
     ${CODE_DIR}/Tools/XPak/Compression.hpp
     ${CODE_DIR}/Tools/XPak/Compression.cpp
     ${EDITOR_DIR}/AssetBrowserIcons.h
-    ${EDITOR_DIR}/Color.cpp
-    ${EDITOR_DIR}/Color.hpp
     ${EDITOR_DIR}/Controls.cpp
     ${EDITOR_DIR}/Controls.hpp
     ${EDITOR_DIR}/ImGuiHelpers.hpp
