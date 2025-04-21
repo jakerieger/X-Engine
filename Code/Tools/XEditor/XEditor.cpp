@@ -838,7 +838,6 @@ namespace x {
                                                        sizeof(entityName),
                                                        ImGuiInputTextFlags_EnterReturnsTrue);
             ImGui::PopItemWidth();
-            ImGui::Separator();
 
             Gui::SpacingY(10.0f);
 
@@ -1141,6 +1140,16 @@ namespace x {
                     ImGui::SameLine(kLabelWidth);
                     ImGui::SetNextItemWidth(width - kLabelWidth);
                     ImGui::Checkbox("##sun_casts_shadows", (bool*)&sun.mCastsShadows);
+                }
+
+                Gui::SpacingY(8.0f);
+
+                static f32 skyColor[3] {0, 0, 0};
+                if (ImGui::CollapsingHeader("Sky", ImGuiTreeNodeFlags_DefaultOpen)) {
+                    ImGui::Text("Color:");
+                    ImGui::SameLine(kLabelWidth);
+                    ImGui::SetNextItemWidth(width - kLabelWidth);
+                    ImGui::ColorEdit3("##sky_color", skyColor);
                 }
             }
         }

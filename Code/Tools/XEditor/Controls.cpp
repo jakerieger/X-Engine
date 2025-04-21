@@ -77,7 +77,7 @@ namespace x::Gui {
         window->DrawList->AddText(ImVec2(header_x, header_y), ImGui::GetColorU32(ImGuiCol_Text), header);
 
         // Use a slightly different color for the subheader (slightly muted)
-        window->DrawList->AddText(ImVec2(subheader_x, subheader_y), ImU32(0xFF555555), subheader);
+        window->DrawList->AddText(ImVec2(subheader_x, subheader_y), ImU32(0xFF666666), subheader);
 
         return pressed;
     }

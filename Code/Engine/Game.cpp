@@ -274,8 +274,6 @@ namespace x {
               const auto scenePath  = "Scenes\\" + sceneName + ".xscn";
               TransitionScene(scenePath);
           });
-
-        X_LOG_DEBUG("Initialized engine")
     }
 
     void Game::TransitionScene(const str& name) {
