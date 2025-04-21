@@ -509,9 +509,12 @@ namespace x {
             // Assets list
             static u64 selectedAssetId {0};
             for (const auto& desc : availableAssets) {
+                const str filename = Path(desc.mFilename).Filename();
+                const str path     = desc.mFilename;
+
                 if (Gui::SelectableWithHeaders(std::format("##{}_asset_select", desc.mId).c_str(),
-                                               desc.mFilename.c_str(),
-                                               std::to_string(desc.mId).c_str(),
+                                               filename.c_str(),
+                                               path.c_str(),
                                                desc.mId == selectedAssetId,
                                                0,
                                                {408, 48})) {
@@ -1213,7 +1216,7 @@ namespace x {
     }
 
     void XEditor::View_Entities() {
-        static bool renameEntity {false};
+        static bool showRenameEntity {false};
 
         ImGui::Begin("Entities");
         {
@@ -1245,7 +1248,7 @@ namespace x {
             if (ImGui::BeginPopup("entity_context_menu")) {
                 ImGui::Text("Entity: %s", GetEntities()[sSelectedEntity].c_str());
                 ImGui::Separator();
-                if (ImGui::MenuItem("Rename")) { renameEntity = true; }
+                if (ImGui::MenuItem("Rename")) { showRenameEntity = true; }
                 if (ImGui::MenuItem("Delete")) {
                     GetSceneState().DestroyEntity(sSelectedEntity);
                     sSelectedEntity = GetSceneState().GetFirstEntity();
@@ -1266,7 +1269,7 @@ namespace x {
         }
         ImGui::End();
 
-        if (renameEntity) { ImGui::OpenPopup("Rename Entity"); }
+        if (showRenameEntity) { ImGui::OpenPopup("Rename Entity"); }
 
         const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, {0.5f, 0.5f});
@@ -1274,7 +1277,7 @@ namespace x {
 
         static char entityName[256] {0};
         if (ImGui::BeginPopupModal("Rename Entity",
-                                   &renameEntity,
+                                   &showRenameEntity,
                                    ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize)) {
             if (ImGui::IsWindowAppearing()) { std::strcpy(entityName, GetEntities()[sSelectedEntity].c_str()); }
 
@@ -1298,14 +1301,14 @@ namespace x {
 
             if (Gui::PrimaryButton("OK", {200, 0}) || enterPressed) {
                 if (std::strlen(entityName) > 0) {
-                    // TODO: Rename entity
-                    renameEntity = false;
+                    GetSceneState().RenameEntity(sSelectedEntity, entityName);
+                    showRenameEntity = false;
                 }
             }
 
             ImGui::SameLine();
 
-            if (ImGui::Button("Cancel", {200, 0})) { renameEntity = false; }
+            if (ImGui::Button("Cancel", {200, 0})) { showRenameEntity = false; }
 
             ImGui::EndPopup();
         }
@@ -1638,7 +1641,7 @@ namespace x {
     }
 
     void XEditor::View_AssetBrowser() {
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {10.0f, 10.0f});
         ImGui::Begin("Assets");
         {
             // Assets don't get loaded until the game is initialized (which happens when the project is loaded, but not
@@ -1663,9 +1666,8 @@ namespace x {
                 const f32 thumbnailSize = cellWidth * 0.9f;                    // 90% of cell width for the image
                 const f32 padding       = (cellWidth - thumbnailSize) / 2.0f;  // Equal padding on both sides
 
-                ImGui::Dummy({0, padding * 2});
-
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {4.0f, 4.0f});
+                Gui::ScopedColorVars colors({{ImGuiCol_ChildBg, mTheme.mWindowBackground.ToImVec4()}});
                 if (ImGui::BeginChild("##GridScrollRegion", {0, 0}, false)) {
                     // Calculate number of rows needed
                     i32 itemCount = CAST<i32>(assets.size());
@@ -1819,7 +1821,7 @@ namespace x {
     }
 
     void XEditor::View_Log() {
-        static bool showInfo {false};
+        static bool showInfo {true};
         static bool showWarn {true};
         static bool showError {true};
         static bool showFatal {true};

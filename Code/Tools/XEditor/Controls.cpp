@@ -74,12 +74,10 @@ namespace x::Gui {
         const float subheader_y = header_y + label_size_header.y + style.ItemSpacing.y;
 
         // Render the header and subheader
-        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_Text));
         window->DrawList->AddText(ImVec2(header_x, header_y), ImGui::GetColorU32(ImGuiCol_Text), header);
 
         // Use a slightly different color for the subheader (slightly muted)
-        window->DrawList->AddText(ImVec2(subheader_x, subheader_y), ImU32(0xFF999999), subheader);
-        ImGui::PopStyleColor();
+        window->DrawList->AddText(ImVec2(subheader_x, subheader_y), ImU32(0xFF555555), subheader);
 
         return pressed;
     }
