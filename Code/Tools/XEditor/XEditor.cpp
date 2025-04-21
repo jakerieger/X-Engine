@@ -459,13 +459,12 @@ namespace x {
             // Buttons
             if (Gui::PrimaryButton("OK", {240, 0})) {
                 if (selectedComponent == "Model") {
-                    // TODO: Throws a rendering error if added to one entity while another entity's model component
-                    // already has a material set, but doesn't if you add multiple entities with model components before
-                    // setting any materials. Likely need to revisit how materials are being set/updated.
                     auto& model = state.AddComponent<ModelComponent>(sSelectedEntity);
                     model.SetModelId(0);
                     model.SetMaterialId(0);
-                    GetCurrentScene()->Update(0.0f);  // Fixes the bug for some reason ?
+                    // Fixes the bug for some reason ?
+                    // Just fucking call Scene::Update any time I run in to a bug now I guess, always seems to fix it
+                    GetCurrentScene()->Update(0.0f);
                 } else if (selectedComponent == "Behavior") {
                     state.AddComponent<BehaviorComponent>(sSelectedEntity);
                 } else if (selectedComponent == "Camera") {
@@ -2483,6 +2482,7 @@ namespace x {
             X_LOG_ERROR("Failed to load Audio icon");
             return false;
         }
+
         result = mTextureManager.LoadFromMemoryCompressed(MATERIALICON_BYTES,
                                                           MATERIALICON_COMPRESSED_SIZE,
                                                           MATERIALICON_WIDTH,
@@ -2493,6 +2493,7 @@ namespace x {
             X_LOG_ERROR("Failed to load Material icon");
             return false;
         }
+
         result = mTextureManager.LoadFromMemoryCompressed(MESHICON_BYTES,
                                                           MESHICON_COMPRESSED_SIZE,
                                                           MESHICON_WIDTH,
@@ -2503,6 +2504,7 @@ namespace x {
             X_LOG_ERROR("Failed to load Mesh icon");
             return false;
         }
+
         result = mTextureManager.LoadFromMemoryCompressed(SCENEICON_BYTES,
                                                           SCENEICON_COMPRESSED_SIZE,
                                                           SCENEICON_WIDTH,
@@ -2513,6 +2515,7 @@ namespace x {
             X_LOG_ERROR("Failed to load Scene icon");
             return false;
         }
+
         result = mTextureManager.LoadFromMemoryCompressed(SCRIPTICON_BYTES,
                                                           SCRIPTICON_COMPRESSED_SIZE,
                                                           SCRIPTICON_WIDTH,
@@ -2523,6 +2526,7 @@ namespace x {
             X_LOG_ERROR("Failed to load Script icon");
             return false;
         }
+
         result = mTextureManager.LoadFromMemoryCompressed(FOLDERICON_BYTES,
                                                           FOLDERICON_COMPRESSED_SIZE,
                                                           FOLDERICON_WIDTH,
@@ -2533,6 +2537,7 @@ namespace x {
             X_LOG_ERROR("Failed to load Folder icon");
             return false;
         }
+
         result = mTextureManager.LoadFromMemoryCompressed(FOLDERICONEMPTY_BYTES,
                                                           FOLDERICONEMPTY_COMPRESSED_SIZE,
                                                           FOLDERICONEMPTY_WIDTH,
@@ -2555,6 +2560,7 @@ namespace x {
             X_LOG_ERROR("Failed to load Move icon");
             return false;
         }
+
         result = mTextureManager.LoadFromMemoryCompressed(PAUSEICON_BYTES,
                                                           PAUSEICON_COMPRESSED_SIZE,
                                                           PAUSEICON_WIDTH,
@@ -2565,6 +2571,7 @@ namespace x {
             X_LOG_ERROR("Failed to load Pause icon");
             return false;
         }
+
         result = mTextureManager.LoadFromMemoryCompressed(PLAYICON_BYTES,
                                                           PLAYICON_COMPRESSED_SIZE,
                                                           PLAYICON_WIDTH,
@@ -2575,6 +2582,7 @@ namespace x {
             X_LOG_ERROR("Failed to load Play icon");
             return false;
         }
+
         result = mTextureManager.LoadFromMemoryCompressed(PLAYWINDOWEDICON_BYTES,
                                                           PLAYWINDOWEDICON_COMPRESSED_SIZE,
                                                           PLAYWINDOWEDICON_WIDTH,
@@ -2585,6 +2593,7 @@ namespace x {
             X_LOG_ERROR("Failed to load PlayWindowed icon");
             return false;
         }
+
         result = mTextureManager.LoadFromMemoryCompressed(REDOICON_BYTES,
                                                           REDOICON_COMPRESSED_SIZE,
                                                           REDOICON_WIDTH,
@@ -2595,6 +2604,7 @@ namespace x {
             X_LOG_ERROR("Failed to load Redo icon");
             return false;
         }
+
         result = mTextureManager.LoadFromMemoryCompressed(UNDOICON_BYTES,
                                                           UNDOICON_COMPRESSED_SIZE,
                                                           UNDOICON_WIDTH,
@@ -2638,6 +2648,7 @@ namespace x {
             X_LOG_ERROR("Failed to load Rotate icon");
             return false;
         }
+
         result = mTextureManager.LoadFromMemoryCompressed(SCALEICON_BYTES,
                                                           SCALEICON_COMPRESSED_SIZE,
                                                           SCALEICON_WIDTH,
@@ -2648,6 +2659,7 @@ namespace x {
             X_LOG_ERROR("Failed to load Scale icon");
             return false;
         }
+
         result = mTextureManager.LoadFromMemoryCompressed(SELECTICON_BYTES,
                                                           SELECTICON_COMPRESSED_SIZE,
                                                           SELECTICON_WIDTH,
@@ -2658,6 +2670,7 @@ namespace x {
             X_LOG_ERROR("Failed to load Select icon");
             return false;
         }
+
         result = mTextureManager.LoadFromMemoryCompressed(STOPICON_BYTES,
                                                           STOPICON_COMPRESSED_SIZE,
                                                           STOPICON_WIDTH,
@@ -2724,6 +2737,7 @@ namespace x {
             X_LOG_ERROR("Failed to load ControllerIcon");
             return false;
         }
+
         result = mTextureManager.LoadFromMemoryCompressed(FOLDER_OUTLINE_BYTES,
                                                           FOLDER_OUTLINE_COMPRESSED_SIZE,
                                                           FOLDER_OUTLINE_WIDTH,
@@ -2734,6 +2748,7 @@ namespace x {
             X_LOG_ERROR("Failed to load FolderOutlineIcon");
             return false;
         }
+
         result =
           mTextureManager.LoadFromMemoryCompressed(COG_BYTES, COG_COMPRESSED_SIZE, COG_WIDTH, COG_HEIGHT, 4, "CogIcon");
         if (!result) {
