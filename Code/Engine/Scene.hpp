@@ -32,9 +32,7 @@ namespace x {
         X_NODISCARD ResourceManager& GetResourceManager();
         X_NODISCARD const str& GetName() const;
         X_NODISCARD bool Loaded() const;
-        X_NODISCARD const vector<Volatile*>& GetVolatiles();
 
-        void RegisterVolatiles();
         shared_ptr<IMaterial> LoadMaterial(const MaterialDescriptor& material);
 
     private:
@@ -46,7 +44,6 @@ namespace x {
         str mName;
         str mDescription;
         bool mLoaded {false};
-        vector<Volatile*> mVolatiles;
 
         using ModelTransformPair = std::pair<const ModelComponent*, const TransformComponent*>;
         vector<ModelTransformPair> mOpaqueObjects;

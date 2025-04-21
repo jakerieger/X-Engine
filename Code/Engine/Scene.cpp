@@ -154,10 +154,7 @@ namespace x {
                 if (waterMaterial) { waterMaterial->SetWaveTime(sceneTime); }
             }
 
-            if (cameraComponent) {
-                // TODO: This doesn't update in real-time in the editor
-                cameraComponent->SetPosition(transformComponent->GetPosition());
-            }
+            if (cameraComponent) { cameraComponent->SetPosition(transformComponent->GetPosition()); }
         }
 
         // Calculate LVP
@@ -219,7 +216,7 @@ namespace x {
         if (!mState.GetMainCamera()) { return; }
 
         for (const auto [model, transform] : mTransparentObjects) {
-            if (model == nullptr) { continue; }
+            if (model == nullptr || !model->Valid()) { continue; }
             Matrix world    = transform->GetTransformMatrix();
             auto view       = mState.GetMainCamera()->GetViewMatrix();
             auto projection = mState.GetMainCamera()->GetProjectionMatrix();
@@ -250,18 +247,8 @@ namespace x {
         return mLoaded;
     }
 
-    const vector<Volatile*>& Scene::GetVolatiles() {
-        return mVolatiles;
-    }
-
-    void Scene::RegisterVolatiles() {
-        mVolatiles.push_back(mState.GetMainCamera());
-    }
-
     void Scene::LoadMaterial(const MaterialDescriptor& material, ModelComponent& modelComponent) {
         if (material.mBaseMaterial == "PBR") {
-            // TODO: Move the base materials to somewhere in static memory so they aren't being created for every single
-            // material instance.
             const auto mat = make_shared<PBRMaterial>(mContext, material.mTransparent);
             modelComponent.SetMaterial(mat);
 

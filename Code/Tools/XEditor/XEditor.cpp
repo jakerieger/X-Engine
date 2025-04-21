@@ -462,7 +462,10 @@ namespace x {
                     // TODO: Throws a rendering error if added to one entity while another entity's model component
                     // already has a material set, but doesn't if you add multiple entities with model components before
                     // setting any materials. Likely need to revisit how materials are being set/updated.
-                    state.AddComponent<ModelComponent>(sSelectedEntity);
+                    auto& model = state.AddComponent<ModelComponent>(sSelectedEntity);
+                    model.SetModelId(0);
+                    model.SetMaterialId(0);
+                    GetCurrentScene()->Update(0.0f);  // Fixes the bug for some reason ?
                 } else if (selectedComponent == "Behavior") {
                     state.AddComponent<BehaviorComponent>(sSelectedEntity);
                 } else if (selectedComponent == "Camera") {
@@ -1121,14 +1124,16 @@ namespace x {
 
                     ImGui::Text("Direction:");
                     ImGui::SameLine(kLabelWidth);
-                    Gui::DragFloatNColored("##sun_direction",
-                                           (f32*)&sun.mDirection,
-                                           3,
-                                           0.01f,
-                                           0.01f,
-                                           1.0f,
-                                           "%.3f",
-                                           1.0f);
+                    if (Gui::DragFloatNColored("##sun_direction",
+                                               (f32*)&sun.mDirection,
+                                               3,
+                                               0.01f,
+                                               0.01f,
+                                               1.0f,
+                                               "%.3f",
+                                               1.0f)) {
+                        GetCurrentScene()->Update(0.0f);
+                    }
 
                     ImGui::Text("Casts Shadows:");
                     ImGui::SameLine(kLabelWidth);

@@ -70,13 +70,15 @@ namespace x {
                   const TransformMatrices& transforms,
                   const LightState& lights,
                   const Float3& eyePosition) const {
-            if (mMaterial.get() != nullptr) { mMaterial->Bind(transforms, lights, eyePosition); }
-            if (mModelHandle.Valid()) { mModelHandle->Draw(context); }
-            if (mMaterial.get() != nullptr) { mMaterial->Unbind(); }
+            if (mModelId == 0 || mMaterialId == 0 || !mModelHandle.Valid()) { return; }
+            
+            mMaterial->Bind(transforms, lights, eyePosition);
+            mModelHandle->Draw(context);
+            mMaterial->Unbind();
         }
 
         void Draw(RenderContext& context) const {
-            if (mModelHandle.Valid()) { mModelHandle->Draw(context); }
+            if (mModelHandle.Valid() && mModelId != 0) { mModelHandle->Draw(context); }
         }
 
         bool Valid() const {

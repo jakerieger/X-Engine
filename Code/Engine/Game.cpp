@@ -130,10 +130,7 @@ namespace x {
             if (v) { v->OnResize(width, height); }
         }
 
-        // Update scene volatiles
-        for (const auto& v : GetActiveScene()->GetVolatiles()) {
-            if (v) { v->OnResize(width, height); }
-        }
+        if (auto* camera = GetActiveScene()->GetState().GetMainCamera(); camera) { camera->OnResize(width, height); }
     }
 
     void Game::OnKeyDown(u32 key) {
@@ -297,7 +294,6 @@ namespace x {
             return;
         }
 
-        mActiveScene->RegisterVolatiles();
         mActiveScene->Update(0.0f);
     }
 
@@ -310,7 +306,6 @@ namespace x {
         mActiveScene.reset();
         mActiveScene = make_unique<Scene>(mRenderContext, mScriptEngine);
         mActiveScene->Load(scene);
-        mActiveScene->RegisterVolatiles();
         mActiveScene->Update(0.0f);
     }
 
