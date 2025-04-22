@@ -70,6 +70,9 @@ namespace x {
         void OnResize(u32 width, u32 height) override;
         void OnShutdown() override;
         void OnUpdate() override;
+
+        void View_Alerts();
+
         void OnRender() override;
         LRESULT MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) override;
 

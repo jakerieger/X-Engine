@@ -148,18 +148,8 @@ namespace x {
         ctx->OMSetDepthStencilState(mDepthStencilState.Get(), 0);
     }
 
-    void Viewport::SetClearColor(f32 r, f32 g, f32 b, f32 a) {
-        mClearColor[0] = r;
-        mClearColor[1] = g;
-        mClearColor[2] = b;
-        mClearColor[3] = a;
-    }
-
-    void Viewport::SetClearColor(XMVECTORF32 color) {
-        mClearColor[0] = color[0];
-        mClearColor[1] = color[1];
-        mClearColor[2] = color[2];
-        mClearColor[3] = color[3];
+    void Viewport::SetClearColor(const Color& color) {
+        color.ToFloatArray(mClearColor);
     }
 
     ComPtr<ID3D11RenderTargetView> const& Viewport::GetRenderTargetView() {

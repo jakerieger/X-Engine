@@ -15,7 +15,7 @@ namespace x {
     class MeshPreviewer {
     public:
         explicit MeshPreviewer(RenderContext& context) : mContext(context), mViewport(context) {
-            mViewport.SetClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+            mViewport.SetClearColor(Colors::DarkGrey);
             mLightState.mSun.mEnabled   = true;
             mLightState.mSun.mDirection = Float4(0.5f, 0.5f, -0.5f, 1.f);
             mCamera.SetPosition(XMVectorSet(0, 2, -6, 0));
@@ -25,6 +25,8 @@ namespace x {
             if (mMaterial.get() == nullptr) { mMaterial = make_shared<BasicLitMaterial>(mContext); }
             mCurrentModel = std::move(model);
             mCurrentModel->SetMaterial(mMaterial);
+            mCurrentModel->SetMaterialId(1);
+            mCurrentModel->SetModelId(1);
         }
 
         ID3D11ShaderResourceView* Render(ImVec2 viewportSize) {

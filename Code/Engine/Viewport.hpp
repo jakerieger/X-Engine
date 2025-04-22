@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "Color.hpp"
 #include "Common/Types.hpp"
 #include "D3D.hpp"
 #include "RenderContext.hpp"
@@ -23,8 +24,7 @@ namespace x {
         void ClearAll(f32 depth = 1.0f, u8 stencil = 0) const;
         void BindRenderTarget() const;
 
-        void SetClearColor(f32 r, f32 g, f32 b, f32 a);
-        void SetClearColor(XMVECTORF32 color);
+        void SetClearColor(const Color& color);
 
         X_NODISCARD ComPtr<ID3D11RenderTargetView> const& GetRenderTargetView();
         X_NODISCARD ComPtr<ID3D11DepthStencilView> const& GetDepthStencilView();

@@ -264,8 +264,8 @@ namespace x {
         ImGui_ImplWin32_Init(mHwnd);
         ImGui_ImplDX11_Init(mContext.GetDevice(), mContext.GetDeviceContext());
 
-        mWindowViewport->SetClearColor(0.05f, 0.05f, 0.05f, 1.0f);  // Editor background nearly black by default
-        mSceneViewport.SetClearColor(DirectX::Colors::Gray);        // Viewport background grey by default
+        mWindowViewport->SetClearColor(Colors::Black);  // Editor background nearly black by default
+        mSceneViewport.SetClearColor(Colors::Grey);     // Viewport background grey by default
         // Resize to 1x1 initially so D3D creation code doesn't fail (0x0 invalid resource size)
         mSceneViewport.Resize(1, 1);
 
@@ -290,6 +290,27 @@ namespace x {
     void XEditor::OnUpdate() {
         // mGame.Update(false);
         mShortcutManager.ProcessShortcuts();
+    }
+
+    void XEditor::View_Alerts() {
+        if (mAlertDialogOpen) {
+            ImGui::OpenPopup("##alert");
+            mAlertDialogOpen = false;
+        }
+
+        const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, {0.5f, 0.5f});
+        // ImGui::SetNextWindowSize({600, 0}, ImGuiCond_Appearing);
+        if (ImGui::BeginPopupModal("##alert", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::Text("%s", mAlertMessage);
+
+            if (ImGui::Button("OK", ImVec2(120, 0))) {
+                ImGui::CloseCurrentPopup();
+                mAlertDialogOpen = false;
+            }
+
+            ImGui::EndPopup();
+        }
     }
 
     void XEditor::OnRender() {
@@ -326,17 +347,7 @@ namespace x {
         }
 
         View_Modals();
-
-        if (ImGui::BeginPopupModal("##alert", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImGui::TextWrapped("%s", mAlertMessage);
-
-            if (ImGui::Button("OK", ImVec2(120, 0))) {
-                ImGui::CloseCurrentPopup();
-                mAlertDialogOpen = false;
-            }
-
-            ImGui::EndPopup();
-        }
+        View_Alerts();
 
         ImGui::PopFont();
 
@@ -1180,7 +1191,11 @@ namespace x {
                     ImGui::Text("Color:");
                     ImGui::SameLine(kLabelWidth);
                     ImGui::SetNextItemWidth(width - kLabelWidth);
-                    ImGui::ColorEdit3("##sky_color", skyColor);
+                    if (ImGui::ColorEdit3("##sky_color", skyColor)) {
+                        // TODO: This isn't doing anything ??
+                        // mSceneViewport.SetClearColor(skyColor[0], skyColor[1], skyColor[2], 1.0f);
+                        GetCurrentScene()->Update(0.0f);
+                    }
                 }
             }
         }
@@ -2818,7 +2833,6 @@ namespace x {
         std::strcpy(mAlertMessage, message.c_str());
         mAlertSeverity   = severity;
         mAlertDialogOpen = true;
-        ImGui::OpenPopup("##alert");
     }
 
 #pragma endregion
