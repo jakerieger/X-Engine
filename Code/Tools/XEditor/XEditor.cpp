@@ -327,6 +327,17 @@ namespace x {
 
         View_Modals();
 
+        if (ImGui::BeginPopupModal("##alert", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::TextWrapped("%s", mAlertMessage);
+
+            if (ImGui::Button("OK", ImVec2(120, 0))) {
+                ImGui::CloseCurrentPopup();
+                mAlertDialogOpen = false;
+            }
+
+            ImGui::EndPopup();
+        }
+
         ImGui::PopFont();
 
         mWindowViewport->AttachViewport();
@@ -557,8 +568,9 @@ namespace x {
         ImGui::SetNextWindowSize({600, 0});
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {20.0f, 20.0f});
 
+        constexpr size_t locationSize = 512;
         static char nameBuffer[256] {0};
-        static char locationBuffer[512] {0};
+        static char locationBuffer[locationSize] {0};
         static str projectRoot;
 
         const char* engineVersions[] = {"XENGINE 1.0.0"};
@@ -623,7 +635,24 @@ namespace x {
                              std::size(locationBuffer),
                              ImGuiInputTextFlags_ReadOnly);
             ImGui::SameLine();
-            if (ImGui::Button("##select_location", {selectLocationButtonWidth, 0})) {}
+
+            const ImTextureID folderIcon = mTextureManager.GetTextureID("OpenFolderIcon");
+            if (ImGui::ImageButton("##select_location",
+                                   folderIcon,
+                                   {16, 16},
+                                   Gui::kUV_0,
+                                   Gui::kUV_1,
+                                   Colors::Transparent.ToImVec4(),
+                                   Colors::White75.ToImVec4())) {
+                char path[locationSize] {0};
+                if (Platform::SelectFolderDialog(mHwnd, "Select Project Directory", path, locationSize)) {
+                    std::memset(nameBuffer,
+                                0,
+                                std::size(nameBuffer));  // Clear name buffer to avoid issues with string concat
+                    std::strncpy(locationBuffer, path, locationSize);
+                    projectRoot = path;
+                }
+            }
 
             Gui::SpacingY(20.0f);
 
@@ -862,7 +891,8 @@ namespace x {
         {
             Gui::ScopedStyleVars styles({{ImGuiStyleVar_WindowBorderSize, 0.0f}});
             Gui::ScopedColorVars colors({{ImGuiCol_Text, mTheme.mTextPrimary.ToImVec4()},
-                                         {ImGuiCol_PopupBg, mTheme.mInputBackground.ToImVec4()}});
+                                         {ImGuiCol_PopupBg, mTheme.mInputBackground.ToImVec4()},
+                                         {ImGuiCol_Separator, Colors::White.WithAlpha(0.1f).ToImVec4()}});
             if (ImGui::BeginMainMenuBar()) {
                 if (ImGui::BeginMenu("File")) {
                     if (ImGui::MenuItem("New Project", "Ctrl+N")) { mNewProjectOpen = true; }
@@ -885,6 +915,7 @@ namespace x {
                     if (ImGui::MenuItem("Redo", "Ctrl+Y")) {}
                     ImGui::Separator();
                     if (ImGui::MenuItem("Project Settings", "Ctrl+Alt+S")) { mProjectSettingsOpen = true; }
+                    if (ImGui::MenuItem("Preferences", "Ctrl+Alt+P")) {}
                     ImGui::EndMenu();
                 }
                 if (ImGui::BeginMenu("Assets")) {
@@ -2184,23 +2215,17 @@ namespace x {
     void XEditor::OnImportEngineContent() {
         const Path contentSrc = Path::Current() / "EngineContent";
         if (!contentSrc.Exists()) {
-            Platform::ShowAlert(mHwnd,
-                                "Error",
-                                str("Unable to load engine content, directory missing: " + contentSrc.Str()).c_str(),
-                                Platform::AlertSeverity::Error);
+            ShowAlert(str("Unable to load engine content, directory missing: " + contentSrc.Str()), Error);
         }
 
         const Path contentDest = mProjectRoot / "Content" / "EngineContent";
         if (contentDest.Exists()) {
-            Platform::ShowAlert(mHwnd,
-                                "XEditor",
-                                "Engine content has already been imported.",
-                                Platform::AlertSeverity::Info);
+            ShowAlert("Engine content has already been imported.", Info);
             return;
         }
 
         if (!contentSrc.CopyDirectory(contentDest)) {
-            Platform::ShowAlert(mHwnd, "Error", "Unable to copy engine content", Platform::AlertSeverity::Error);
+            ShowAlert("Unable to copy engine content", Error);
             return;
         }
 
@@ -2224,15 +2249,15 @@ namespace x {
         mGame.ReloadSceneCache();
         GenerateAssetThumbnails();
 
-        Platform::ShowAlert(mHwnd, "XEditor", "Engine content has been imported", Platform::AlertSeverity::Info);
+        ShowAlert("Engine content has been imported", Info);
     }
 
     void XEditor::OnOpenProject() {
         const auto filter  = "Project (*.xproj)|*.xproj|";
         Path initDirectory = Platform::GetPlatformDirectory(Platform::kPlatformDir_Documents) / "XENGINE Projects";
+        if (!initDirectory.Exists()) { initDirectory = initDirectory.Parent(); }
         char filename[MAX_PATH];
         if (Platform::OpenFileDialog(mHwnd, initDirectory.CStr(), filter, "Open Project File", filename, MAX_PATH)) {
-            // TODO: Make sure any previously loaded projects get properly unloaded or it'll just crash
             LoadProject(filename);
         }
     }
@@ -2336,11 +2361,7 @@ namespace x {
                     auto textureFile      = Path(mLoadedProject.mContentDirectory) / asset.mFilename;
                     const auto loadResult = mTextureManager.LoadFromDDSFile(textureFile, std::to_string(asset.mId));
                     if (!loadResult) {
-                        Platform::ShowAlert(
-                          mHwnd,
-                          "Error loading texture",
-                          ("Failed to load texture asset with id " + std::to_string(asset.mId)).c_str(),
-                          Platform::AlertSeverity::Error);
+                        ShowAlert("Failed to load texture asset with id " + std::to_string(asset.mId), Error);
                     }
                 } break;
                 // Descriptors just use icon files
@@ -2365,10 +2386,7 @@ namespace x {
         if (mGame.IsInitialized()) { mGame.Reset(); }
 
         if (!mLoadedProject.FromFile(filename)) {
-            Platform::ShowAlert(mHwnd,
-                                "Error loading project",
-                                "An error occurred when parsing the selected project file.",
-                                Platform::AlertSeverity::Error);
+            ShowAlert("An error occurred when parsing the selected project file.", Error);
             return;
         }
 
@@ -2704,6 +2722,17 @@ namespace x {
             return false;
         }
 
+        result = mTextureManager.LoadFromMemoryCompressed(OPENFOLDER_BYTES,
+                                                          OPENFOLDER_COMPRESSED_SIZE,
+                                                          OPENFOLDER_WIDTH,
+                                                          OPENFOLDER_HEIGHT,
+                                                          4,
+                                                          "OpenFolderIcon");
+        if (!result) {
+            X_LOG_ERROR("Failed to load OpenFolder icon");
+            return false;
+        }
+
         result = mTextureManager.LoadFromMemoryCompressed(ABOUT_BANNER_BYTES,
                                                           ABOUT_BANNER_COMPRESSED_SIZE,
                                                           ABOUT_BANNER_WIDTH,
@@ -2783,6 +2812,13 @@ namespace x {
         mShortcutManager.RegisterShortcut(ImGuiKey_S, kModifier_Ctrl | kModifier_Alt, [this]() {
             mProjectSettingsOpen = true;
         });
+    }
+
+    void XEditor::ShowAlert(const str& message, AlertSeverity severity) {
+        std::strcpy(mAlertMessage, message.c_str());
+        mAlertSeverity   = severity;
+        mAlertDialogOpen = true;
+        ImGui::OpenPopup("##alert");
     }
 
 #pragma endregion

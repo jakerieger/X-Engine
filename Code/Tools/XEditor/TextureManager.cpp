@@ -87,4 +87,10 @@ namespace x {
         if (!mTextures.contains(name)) { return std::nullopt; }
         return mTextures[name];
     }
+
+    ImTextureID TextureManager::GetTextureID(const str& name) {
+        const auto textureData = GetTexture(name);
+        if (!textureData) { return 0; }
+        return (ImTextureID)textureData->mShaderResourceView.Get();
+    }
 }  // namespace x

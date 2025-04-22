@@ -64,7 +64,8 @@ namespace x {
 
     bool IWindow::Initialize() {
         // Initialize window
-        const auto hr = ::CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+        const auto hr =
+          ::CoInitializeEx(nullptr, COINIT_MULTITHREADED | COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
         if (FAILED(hr)) {
             X_LOG_ERROR("CoInitializeEx failed, hr = 0x%x", hr);
             return false;

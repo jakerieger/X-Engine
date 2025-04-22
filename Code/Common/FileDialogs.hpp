@@ -10,7 +10,6 @@
 namespace Platform {
     bool OpenFileDialog(
       HWND owner, const char* initialDir, const char* filter, const char* title, char* outPath, size_t outPathSize);
-
     bool SaveFileDialog(HWND owner,
                         const char* initialDir,
                         const char* filter,
@@ -18,13 +17,5 @@ namespace Platform {
                         const char* defaultExt,
                         char* outPath,
                         size_t outPathSize);
-
-    enum class AlertSeverity {
-        Info,
-        Warning,
-        Error,
-        Question,
-    };
-
-    int ShowAlert(HWND owner, const char* title, const char* message, AlertSeverity severity);
+    bool SelectFolderDialog(HWND owner, const char* title, char* outPath, size_t outPathSize);
 }  // namespace Platform

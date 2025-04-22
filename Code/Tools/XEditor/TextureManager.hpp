@@ -7,6 +7,7 @@
 #include "Common/Types.hpp"
 #include "Engine/D3D.hpp"
 #include "Engine/RenderContext.hpp"
+#include <imgui.h>
 
 namespace x {
     struct TextureData {
@@ -24,7 +25,9 @@ namespace x {
         bool LoadFromMemoryCompressed(
           const u8* data, const size_t compressedSize, u32 width, u32 height, u32 channels, const str& name);
         bool LoadFromDDSFile(const Path& ddsFile, const str& name);
+
         std::optional<TextureData> GetTexture(const str& name);
+        ImTextureID GetTextureID(const str& name);
 
     private:
         RenderContext& mContext;

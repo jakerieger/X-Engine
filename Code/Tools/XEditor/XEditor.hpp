@@ -137,6 +137,11 @@ namespace x {
         bool mSceneSelectorOpen {false};
         bool mSelectAssetOpen {false};
 
+        // Alert dialogs
+        char mAlertMessage[1024] {0};
+        enum AlertSeverity { Info, Warning, Error } mAlertSeverity {Info};
+        bool mAlertDialogOpen {false};
+
         void Modal_About();
         void Modal_AddComponent();
         void Modal_AddEntity();
@@ -181,5 +186,6 @@ namespace x {
         void GenerateAssetThumbnails();
         void SetupDockspace(const f32 yOffset);
         void RegisterEditorShortcuts();
+        void ShowAlert(const str& message, AlertSeverity severity);
     };
 }  // namespace x
