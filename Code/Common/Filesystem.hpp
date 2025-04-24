@@ -162,6 +162,7 @@ namespace x {
         X_NODISCARD const char* CStr() const;
         X_NODISCARD str Filename() const;
         X_NODISCARD Path RelativeTo(const Path& basePath) const;
+        X_NODISCARD str BaseName() const;
 
         X_NODISCARD bool operator==(const Path& other) const;
 

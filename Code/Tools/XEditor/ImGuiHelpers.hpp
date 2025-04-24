@@ -92,4 +92,8 @@ namespace x::Gui {
             ImGui::PopFont();
         }
     };
+
+    inline f32 CalcOffset(const f32 offset) {
+        return ImGui::GetContentRegionAvail().x - offset;
+    }
 }  // namespace x::Gui

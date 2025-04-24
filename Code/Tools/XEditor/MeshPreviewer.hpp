@@ -14,11 +14,16 @@
 namespace x {
     class MeshPreviewer {
     public:
-        explicit MeshPreviewer(RenderContext& context) : mContext(context), mViewport(context) {
-            mViewport.SetClearColor(Colors::DarkGrey);
+        explicit MeshPreviewer(RenderContext& context, const Color& clearColor = Colors::Black)
+            : mContext(context), mViewport(context) {
+            mViewport.SetClearColor(clearColor);
             mLightState.mSun.mEnabled   = true;
             mLightState.mSun.mDirection = Float4(0.5f, 0.5f, -0.5f, 1.f);
             mCamera.SetPosition(XMVectorSet(0, 2, -6, 0));
+        }
+
+        void SetClearColor(const Color& color) {
+            mViewport.SetClearColor(color);
         }
 
         void SetModel(unique_ptr<ModelComponent> model) {

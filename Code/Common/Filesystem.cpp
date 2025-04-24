@@ -384,6 +384,11 @@ namespace x {
         return Path(relativePath);
     }
 
+    str Path::BaseName() const {
+        const str filename = Filename();
+        return filename.substr(0, filename.find_last_of('.'));  // remove ext
+    }
+
     bool Path::operator==(const Path& other) const {
         return path == other.path;
     }

@@ -274,6 +274,8 @@ namespace x {
         mTheme.LoadTheme(mSettings.mTheme);
         mTheme.Apply();
 
+        mMeshPreviewer.SetClearColor(mTheme.mWindowBackground);
+
         RegisterEditorShortcuts();
     }
 
@@ -1952,11 +1954,19 @@ namespace x {
                 auto assetTypeStr = asset.GetTypeString();
                 assetTypeStr[0]   = std::toupper(assetTypeStr[0]);
 
-                ImGui::Text("Source: %s", asset.mFilename.c_str());
-                ImGui::Text("ID: %llu", asset.mId);
-                ImGui::Text("Type: %s", assetTypeStr.c_str());
+                const str filename  = Path(asset.mFilename).BaseName();
+                const str assetText = std::format("{} ({})", filename, assetTypeStr);
+
+                ImGui::Text(assetText.c_str());
+                constexpr f32 buttonWidth = 60.0f;
+                ImGui::SameLine(Gui::CalcOffset(buttonWidth));
+                if (ImGui::Button("Open", {buttonWidth, 0})) {
+                    // Open asset in its corresponding software
+                }
+
+                Gui::SpacingY(8.0f);
                 ImGui::Separator();
-                ImGui::Separator();
+                Gui::SpacingY(8.0f);
 
                 const AssetType assetType = asset.GetTypeFromId();
                 if (assetType == kAssetType_Texture) {
