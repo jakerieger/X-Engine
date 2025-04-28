@@ -10,13 +10,15 @@
 // You can Ctrl+F with "View_" or "Modal_" to match functions for those UI elements. Event handlers for UI input actions
 // begin with "On", i.e. "OnSaveProject", and can be found the way.
 
+// Vendor includes
 #include <Inter.h>
 #include <JetBrainsMono.h>
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
-// #include <imgui_internal.h>
+#include <imgui_internal.h>
 #include <yaml-cpp/yaml.h>
 
+// Local includes
 #include "XEditor.hpp"
 #include "Res/resource.h"
 #include "Controls.hpp"
@@ -27,12 +29,11 @@
 #include "Engine/EngineCommon.hpp"
 #include "XPak/AssetGenerator.hpp"
 
-#pragma region Embedded Resources
+// Embedded resources
 #include "AssetBrowserIcons.h"
 #include "ToolbarIcons.h"
 #include "Logos.h"
 #include "WelcomeScreenIcons.h"
-#pragma endregion
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -492,7 +493,9 @@ namespace x {
                 } else if (selectedComponent == "Behavior") {
                     state.AddComponent<BehaviorComponent>(sSelectedEntity);
                 } else if (selectedComponent == "Camera") {
-                    state.AddComponent<CameraComponent>(sSelectedEntity);
+                    const auto* transform = state.GetComponent<TransformComponent>(sSelectedEntity);
+                    X_ASSERT(transform);
+                    state.AddComponent<CameraComponent>(sSelectedEntity, transform);
                 }
 
                 mAddComponentOpen = false;
@@ -1523,9 +1526,6 @@ namespace x {
                               model->SetMaterial(mat);
                               model->SetMaterialId(descriptor.mId);
 
-                              // TODO: You currently can't create more than one entity with a model component or
-                              // Material->Bind throws
-
                               GetCurrentScene()->Update(0.0f);
                           };
 
@@ -1655,7 +1655,7 @@ namespace x {
                     camera->SetOrthographic(orthographic);
                     camera->SetWidth(viewport.x);
                     camera->SetHeight(viewport.y);
-                    camera->SetPosition(transform->GetPosition());
+                    camera->Update();
                 }
 
                 Gui::SpacingY(10.0f);
@@ -2292,6 +2292,7 @@ namespace x {
         std::strcpy(EditorState::CurrentSceneName, selectedScene.c_str());
         this->SetWindowTitle(std::format("XEditor | {}", selectedScene));
         sSelectedEntity = GetEntities().begin()->first;
+        GetCurrentScene()->Update(0.0f);
     }
 
     void XEditor::OnImportAsset() {

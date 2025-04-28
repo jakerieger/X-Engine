@@ -123,13 +123,22 @@ namespace x {
             return nullptr;
         }
 
-        template<typename T>
+        template<typename T, typename... Args>
             requires IsValidComponent<T>
-        T& AddComponent(EntityId entity) {
-            if constexpr (Same<T, TransformComponent>) { return mTransforms.AddComponent(entity).component; }
-            if constexpr (Same<T, ModelComponent>) { return mModels.AddComponent(entity).component; }
-            if constexpr (Same<T, BehaviorComponent>) { return mBehaviors.AddComponent(entity).component; }
-            if constexpr (Same<T, CameraComponent>) { return mCameras.AddComponent(entity).component; }
+        T& AddComponent(EntityId entity, Args&&... args) {
+            if constexpr (Same<T, TransformComponent>) {
+                return mTransforms.AddComponent(entity, std::forward<Args>(args)...).component;
+            }
+            if constexpr (Same<T, ModelComponent>) {
+                return mModels.AddComponent(entity, std::forward<Args>(args)...).component;
+            }
+            if constexpr (Same<T, BehaviorComponent>) {
+                return mBehaviors.AddComponent(entity, std::forward<Args>(args)...).component;
+            }
+            if constexpr (Same<T, CameraComponent>) {
+                static_assert(sizeof...(args) > 0, "CameraComponent requires initialization arguments (transform ptr)");
+                return mCameras.AddComponent(entity, std::forward<Args>(args)...).component;
+            }
         }
 
         template<typename T>

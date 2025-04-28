@@ -51,7 +51,7 @@ inline constexpr size_t operator"" _GIGABYTES(unsigned long long n) {
 
 #define X_MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define X_MAX(a, b) (((a) > (b)) ? (a) : (b))
-#define X_CLAMP(value, min, max) (MIN(MAX(value, min), max))
+#define X_CLAMP(value, min, max) (X_MIN(X_MAX(value, min), max))
 
 #define X_ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
@@ -75,3 +75,5 @@ inline constexpr size_t operator"" _GIGABYTES(unsigned long long n) {
 #define X_NODISCARD [[nodiscard]]
 
 #define X_CSTR_EMPTY(val) std::strcmp(val, "") == 0
+
+#define X_STRCMP(a, b) std::strcmp(a, b) == 0

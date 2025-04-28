@@ -13,33 +13,9 @@
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace x {
-    void Game::Update(bool paused) {
+    void Game::Update() {
         mClock.Tick();
-
-        if ((!mIsPaused || !mIsFocused) && !paused) {
-            auto* camera = mActiveScene->GetState().GetMainCamera();
-
-            if (mMouse.IsCaptured()) {
-                const auto deltaX = mInput.GetMouseDeltaX();
-                const auto deltaY = mInput.GetMouseDeltaY();
-
-                if (deltaX != 0.0f || deltaY != 0.0f) {
-                    constexpr f32 mouseSensitivity = 0.001f;
-                    const auto deltaYaw            = deltaX * mouseSensitivity;
-                    const auto deltaPitch          = deltaY * mouseSensitivity;
-                    camera->Rotate(deltaPitch, deltaYaw);
-                }
-
-                mInput.ResetMouseDeltas();
-            }
-
-            if (mInput.GetKeyDown(KeyCode::D)) { camera->MoveRight(0.1f); }
-            if (mInput.GetKeyDown(KeyCode::A)) { camera->MoveRight(-0.1f); }
-            if (mInput.GetKeyDown(KeyCode::W)) { camera->MoveForward(0.1f); }
-            if (mInput.GetKeyDown(KeyCode::S)) { camera->MoveForward(-0.1f); }
-
-            mActiveScene->Update(CAST<f32>(mClock.GetDeltaTime()));
-        }
+        if (!mIsPaused || !mIsFocused) { GetActiveScene()->Update(mClock.GetDeltaTime()); }
     }
 
     void Game::RenderDepthOnly(const SceneState& state) const {

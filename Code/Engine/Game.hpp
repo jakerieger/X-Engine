@@ -28,12 +28,14 @@ namespace x {
 
         void Initialize(IWindow* window, Viewport* viewport, const Path& workingDir = Path::Current());
         void Shutdown();
-        void Update(bool paused = false);
+        void Update();
         void RenderFrame() const;
         void TransitionScene(const str& name);
         void TransitionScene(const SceneDescriptor& scene);
         void Resize(u32 width, u32 height) const;
         void Reset();
+        void Pause();
+        void Resume();
 
         X_NODISCARD Scene* GetActiveScene() const;
         X_NODISCARD bool SceneValid() const;
@@ -63,9 +65,6 @@ namespace x {
         Mouse mMouse;
         IWindow* mWindow;
         SceneMap mScenes;
-
-        void Pause();
-        void Resume();
 
         void InitializeEngine();
 

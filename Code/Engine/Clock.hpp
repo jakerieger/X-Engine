@@ -18,7 +18,8 @@ namespace x {
         Clock();
         void Tick();
 
-        f64 GetDeltaTime() const;
+        f64 GetDeltaTimePrecise() const;
+        f32 GetDeltaTime() const;
         f64 GetTotalTime() const;
         f64 GetFramesPerSecond() const;
         u64 GetRawCounter() const;

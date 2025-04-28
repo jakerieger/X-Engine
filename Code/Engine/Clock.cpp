@@ -31,8 +31,12 @@ namespace x {
         mLastTime = currentTime;
     }
 
-    f64 Clock::GetDeltaTime() const {
+    f64 Clock::GetDeltaTimePrecise() const {
         return mDeltaTime;
+    }
+
+    f32 Clock::GetDeltaTime() const {
+        return CAST<f32>(mDeltaTime);
     }
 
     f64 Clock::GetTotalTime() const {

@@ -47,7 +47,7 @@ namespace x::Gui {
     inline constexpr ImVec2 kUV_1 = {1, 1};
 
     class ScopedStyleVars {
-        using StyleVarPair = std::pair<ImGuiStyleVar_, int>;
+        using StyleVarPair = std::pair<ImGuiStyleVar_, f32>;
 
     public:
         explicit ScopedStyleVars(const vector<StyleVarPair>& vars) : mVars(vars) {

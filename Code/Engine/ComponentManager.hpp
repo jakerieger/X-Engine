@@ -154,9 +154,10 @@ namespace x {
             return mComponents.empty();
         }
 
-        ComponentView AddComponent(EntityId entity) {
+        template<typename... Args>
+        ComponentView AddComponent(EntityId entity, Args&&... args) {
             const size_t newIndex = mComponents.size();
-            mComponents.emplace_back();
+            mComponents.emplace_back(std::forward<Args>(args)...);
             mEntityToIndex[entity] = newIndex;
             mIndexToEntity.push_back(entity);
             return {entity, mComponents.back()};

@@ -34,11 +34,11 @@ namespace x {
             const EntityId newEntity = mState.CreateEntity(entity.mName);
 
             // Create and attach components
-            auto transformDescriptor = entity.mTransform;
+            auto transform           = entity.mTransform;
             auto& transformComponent = mState.AddComponent<TransformComponent>(newEntity);
-            transformComponent.SetPosition(transformDescriptor.mPosition);
-            transformComponent.SetRotation(transformDescriptor.mRotation);
-            transformComponent.SetScale(transformDescriptor.mScale);
+            transformComponent.SetPosition(transform.mPosition);
+            transformComponent.SetRotation(transform.mRotation);
+            transformComponent.SetScale(transform.mScale);
             transformComponent.Update();
 
             if (entity.mModel.has_value()) {
@@ -75,7 +75,7 @@ namespace x {
 
             if (entity.mCamera.has_value()) {
                 auto& camera          = entity.mCamera.value();
-                auto& cameraComponent = mState.AddComponent<CameraComponent>(newEntity);
+                auto& cameraComponent = mState.AddComponent<CameraComponent>(newEntity, &transformComponent);
                 cameraComponent.SetFOVDegrees(camera.mFOV)
                   .SetClipPlanes(camera.mNearZ, camera.mFarZ)
                   .SetOrthographic(camera.mOrthographic)
@@ -85,6 +85,7 @@ namespace x {
 
         mInitialState = mState;  // Cache init state so scene can be reset
         mName         = descriptor.mName;
+        mDescription  = descriptor.mDescription;
         mLoaded       = true;
 
         Awake();
@@ -132,6 +133,9 @@ namespace x {
             auto* modelComponent          = mState.GetComponentMutable<ModelComponent>(entityId);
             auto* cameraComponent         = mState.GetComponentMutable<CameraComponent>(entityId);
 
+            X_ASSERT(transformComponent)  // ALL entities should have a transform component. If It's missing, something
+                                          // else went wrong
+
             if (behaviorComponent) {
                 BehaviorEntity entity(name, transformComponent);
                 mScriptEngine.CallUpdateBehavior(name, deltaTime, entity);
@@ -154,7 +158,8 @@ namespace x {
                 if (waterMaterial) { waterMaterial->SetWaveTime(sceneTime); }
             }
 
-            if (cameraComponent) { cameraComponent->SetPosition(transformComponent->GetPosition()); }
+            // Update the camera AFTER the transform component has been updated
+            if (cameraComponent) { cameraComponent->Update(); }
         }
 
         // Calculate LVP
@@ -277,6 +282,8 @@ namespace x {
         }
     }
 
+    // Still not sure why this has to be done via the Scene class. I feel like material loading should be independent of
+    // the current scene.
     shared_ptr<IMaterial> Scene::LoadMaterial(const MaterialDescriptor& material) {
         if (material.mBaseMaterial == "PBR") {
             const auto mat = make_shared<PBRMaterial>(mContext, material.mTransparent);

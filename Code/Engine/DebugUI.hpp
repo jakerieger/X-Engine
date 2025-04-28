@@ -129,7 +129,7 @@ namespace x {
             ImGui::Text("Frame Info");
             ImGui::Text("==========");
 
-            auto frameTime = std::format("Frame time : {:.2f}ms", clock.GetDeltaTime() * 1000.0f);
+            auto frameTime = std::format("Frame time : {:.2f}ms", clock.GetDeltaTimePrecise() * 1000.0f);
             auto frameRate = std::format("Frame rate : {:.0f} FPS", clock.GetFramesPerSecond());
             // auto drawCalls = std::format("Draw Calls : {}", frameInfo.drawCallsPerFrame);
             // auto triangles = std::format("Triangles  : {}", frameInfo.numTriangles);

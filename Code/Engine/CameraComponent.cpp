@@ -5,15 +5,11 @@
 #include "CameraComponent.hpp"
 
 namespace x {
-    CameraComponent::CameraComponent() {
+    CameraComponent::CameraComponent(const TransformComponent* transform) : mTransform(transform) {
+        X_ASSERT((transform) && (mTransform));  // I'll need more robust checks but this will work for now
+        UpdateVectors();
         RecalculateViewMatrix();
         RecalculateProjectionMatrix();
-    }
-
-    CameraComponent& CameraComponent::SetPosition(const Float3& position) {
-        mPosition = position;
-        RecalculateViewMatrix();
-        return *this;
     }
 
     CameraComponent& CameraComponent::SetFOVDegrees(const f32 deg) {
@@ -82,7 +78,11 @@ namespace x {
     }
 
     Float3 CameraComponent::GetPosition() const {
-        return mPosition;
+        return mTransform->GetPosition();
+    }
+
+    Float3 CameraComponent::GetRotation() const {
+        return mTransform->GetRotation();
     }
 
     f32 CameraComponent::GetFOVRadians() const {
@@ -127,6 +127,10 @@ namespace x {
         height = mHeight;
     }
 
+    const TransformComponent* CameraComponent::GetTransform() const {
+        return mTransform;
+    }
+
     Matrix CameraComponent::GetViewMatrix() const {
         return mViewMatrix;
     }
@@ -135,21 +139,59 @@ namespace x {
         return mProjectionMatrix;
     }
 
-    void CameraComponent::Rotate(f32 deltaPitch, f32 deltaYaw) {
-        mRotation.x += deltaPitch;
-        mRotation.y += deltaYaw;
+    Float3 CameraComponent::GetLookAtVector() const {
+        return mLookAt;
+    }
 
-        constexpr f32 maxPitch = XM_PIDIV2 - 0.01f;  // clamp pitch to prevent flipping
-        mRotation.x            = std::max(-maxPitch, std::min(maxPitch, mRotation.x));
+    Float3 CameraComponent::GetForwardVector() const {
+        return mForward;
+    }
 
-        // Keep yaw in [0, 2PI] range
-        if (mRotation.y > XM_2PI) {
-            mRotation.y -= XM_2PI;
-        } else if (mRotation.y < 0.0f) {
-            mRotation.y += XM_2PI;
+    Float3 CameraComponent::GetRightVector() const {
+        return mRight;
+    }
+
+    Float3 CameraComponent::GetUpVector() const {
+        return mUp;
+    }
+
+    void CameraComponent::Update() {
+        UpdateVectors();
+        RecalculateViewMatrix();
+    }
+
+    void CameraComponent::OnResize(u32 width, u32 height) {
+        mAspectRatio = (f32)width / (f32)height;
+        RecalculateProjectionMatrix();
+    }
+
+    void CameraComponent::RecalculateViewMatrix() {
+        const Float3 position = mTransform->GetPosition();
+        if (position.x == mLookAt.x && position.y == mLookAt.y && position.z == mLookAt.z) { return; }
+        mViewMatrix = XMMatrixLookAtLH(XMLoadFloat3(&position), XMLoadFloat3(&mLookAt), XMLoadFloat3(&mUp));
+    }
+
+    void CameraComponent::RecalculateProjectionMatrix() {
+        mProjectionMatrix = mOrthographic ? XMMatrixOrthographicLH(mWidth, mHeight, mNearZ, mFarZ)
+                                          : XMMatrixPerspectiveFovLH(mFOV, mAspectRatio, mNearZ, mFarZ);
+    }
+
+    void CameraComponent::UpdateVectors() {
+        if (!mTransform) {
+            X_LOG_WARN("CameraComponent::UpdateVectors: Transform is null");
+            return;
         }
 
-        const Matrix rotationMatrix    = XMMatrixRotationRollPitchYaw(mRotation.x, mRotation.y, 0.0f);
+        const Float3 rotation = mTransform->GetRotation();
+        // const Matrix rotationMatrix = XMMatrixRotationRollPitchYaw(XMConvertToRadians(rotation.x),
+        //                                                            XMConvertToDegrees(rotation.y),
+        //                                                            XMConvertToDegrees(rotation.z));
+        // TODO: Rotates extremely fast currently
+        // This kind of fixes it but the rotation values are clearly not in degrees or radians. Rotation axes also
+        // remain aligned when rotated instead of being relative to world(?) space. It works, but there's lots of
+        // stuff to investigate here...
+        const Matrix rotationMatrix = XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z);
+
         const VectorSet defaultForward = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
         const VectorSet defaultRight   = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
         const VectorSet defaultUp      = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
@@ -161,36 +203,8 @@ namespace x {
         XMStoreFloat3(&mForward, forward);
         XMStoreFloat3(&mRight, right);
         XMStoreFloat3(&mUp, up);
-        XMStoreFloat3(&mLookAt, XMVectorAdd(XMLoadFloat3(&mPosition), forward));
 
-        RecalculateViewMatrix();
-    }
-
-    void CameraComponent::MoveForward(f32 distance) {
-        XMStoreFloat3(&mPosition, XMVectorScale(XMLoadFloat3(&mForward), distance));
-        XMStoreFloat3(&mLookAt, XMVectorAdd(XMLoadFloat3(&mPosition), XMLoadFloat3(&mForward)));
-        RecalculateViewMatrix();
-    }
-
-    void CameraComponent::MoveRight(f32 distance) {
-        XMStoreFloat3(&mPosition,
-                      XMVectorAdd(XMLoadFloat3(&mPosition), XMVectorScale(XMLoadFloat3(&mRight), distance)));
-        XMStoreFloat3(&mLookAt, XMVectorAdd(XMLoadFloat3(&mPosition), XMLoadFloat3(&mForward)));
-        RecalculateViewMatrix();
-    }
-
-    void CameraComponent::OnResize(u32 width, u32 height) {
-        mAspectRatio = (f32)width / (f32)height;
-        RecalculateProjectionMatrix();
-    }
-
-    void CameraComponent::RecalculateViewMatrix() {
-        if (mPosition == mLookAt) { return; }
-        mViewMatrix = XMMatrixLookAtLH(XMLoadFloat3(&mPosition), XMLoadFloat3(&mLookAt), XMLoadFloat3(&mUp));
-    }
-
-    void CameraComponent::RecalculateProjectionMatrix() {
-        mProjectionMatrix = mOrthographic ? XMMatrixOrthographicLH(mWidth, mHeight, mNearZ, mFarZ)
-                                          : XMMatrixPerspectiveFovLH(mFOV, mAspectRatio, mNearZ, mFarZ);
+        const Float3 position = mTransform->GetPosition();
+        XMStoreFloat3(&mLookAt, XMVectorAdd(XMLoadFloat3(&position), XMLoadFloat3(&mForward)));
     }
 }  // namespace x

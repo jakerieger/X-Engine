@@ -160,7 +160,7 @@ namespace x::Gui {
                 static const ImU32 colors[] = {R, G, B, 0xBBFFFFFF};
 
                 ImGui::PushID(i);
-                valueChanged |= ImGui::DragFloat("##v", &v[i], vSpeed, vMin, vMax, format, power);
+                valueChanged |= ImGui::DragFloat("##v", &v[i], vSpeed, vMin, vMax, format, 0);
 
                 const ImVec2 min      = ImGui::GetItemRectMin();
                 const ImVec2 max      = ImGui::GetItemRectMax();
