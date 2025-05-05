@@ -8,6 +8,7 @@
 #include <rapidxml.hpp>
 #include "Types.hpp"
 #include "Engine/Color.hpp"
+#include "Engine/EngineCommon.hpp"
 #include "Engine/Math.hpp"
 
 namespace rapidxml {
@@ -44,23 +45,45 @@ namespace rapidxml {
 namespace x::XML {
     inline bool ReadFile(const Path& filename, rapidxml::xml_document<>& doc) {
         if (!filename.Exists()) return false;
-        auto bytes = FileReader::ReadAllBytes(filename);
-        if (bytes.empty()) return false;
-        bytes.push_back('\0');
+        str xml;
         try {
-            doc.parse<0>(RCAST<char*>(&bytes[0]));
+            xml = FileReader::ReadAllText(filename);
+            if (xml.empty()) return false;
+
+            const auto buffer = new char[xml.size() + 1];
+            std::memcpy(buffer, xml.c_str(), xml.size() + 1);
+            doc.parse<rapidxml::parse_non_destructive | rapidxml::parse_normalize_whitespace |
+                      rapidxml::parse_validate_closing_tags>(buffer);
+
             return true;
-        } catch (...) { return false; }
+        } catch (const rapidxml::parse_error& e) {
+            X_LOG_ERROR("%s", e.what());
+            return false;
+        } catch (const std::exception& e) {
+            X_LOG_ERROR("%s", e.what());
+            return false;
+        } catch (...) {
+            X_LOG_ERROR("Unknown error occurred");
+            return false;
+        }
     }
 
     inline bool ReadBytes(std::span<const u8> data, rapidxml::xml_document<>& doc) {
         if (data.empty()) return false;
         vector<u8> bytes(data.begin(), data.end());
-        bytes.push_back('\0');
         try {
             doc.parse<0>(RCAST<char*>(&bytes[0]));
             return true;
-        } catch (...) { return false; }
+        } catch (const rapidxml::parse_error& e) {
+            X_LOG_ERROR("%s", e.what());
+            return false;
+        } catch (const std::exception& e) {
+            X_LOG_ERROR("%s", e.what());
+            return false;
+        } catch (...) {
+            X_LOG_ERROR("Unknown error occurred");
+            return false;
+        }
     }
 
     inline bool WriteFile(const Path& filename, const rapidxml::xml_document<>& doc) {
@@ -91,6 +114,10 @@ namespace x::XML {
     }
 
 #pragma region Attribute Getters
+    inline str GetAttrStr(const rapidxml::xml_attribute<>* attr) {
+        return str(attr->value(), attr->value_size());
+    }
+
     inline f32 GetAttrFloat(const rapidxml::xml_attribute<>* attr) {
         return attr ? std::stof(attr->value()) : 0.0f;
     }
@@ -132,10 +159,20 @@ namespace x::XML {
 #pragma endregion
 
 #pragma region Node Value Getters
+    inline str GetNodeStr(const rapidxml::xml_node<>* node) {
+        if (node) { return str(node->value(), node->value_size()); }
+        return {};
+    }
+
+    inline str GetNodeStr(const rapidxml::xml_node<>* parent, const char* childName) {
+        const rapidxml::xml_node<>* child = parent->first_node(childName);
+        return GetNodeStr(child);
+    }
+
     inline bool GetNodeBool(const rapidxml::xml_node<>* parent, const char* childName) {
         const rapidxml::xml_node<>* child = parent->first_node(childName);
         if (!child || !child->value()) return false;
-        return X_STRCMP(child->value(), "true");
+        return X_STRCMP(GetNodeStr(child).c_str(), "true");
     }
 
     inline f32 GetNodeF32(const rapidxml::xml_node<>* parent, const char* childName) {

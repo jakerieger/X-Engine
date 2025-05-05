@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
     generate->add_option("asset_file", genArgs.mAssetFile, "Asset source file")->required(true);
     generate->add_option("-t,--type", genArgs.mAssetType, "Asset type (texture, mesh, material, etc.)");
 
-    auto* dumpTable = app.add_subcommand("dump", "Dumppak file table contents");
+    auto* dumpTable = app.add_subcommand("dump", "Dump pak file table contents");
     DumpArgs dumpArgs;
     dumpTable->add_option("pak_file", dumpArgs.mPakFile, "Pak file to dump")->required(true);
 
@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
         }
 
         ProjectDescriptor projectDescriptor;
-        projectDescriptor.FromFile(project.Str());
+        projectDescriptor.FromFile(project);
 
         auto createResult = XPak::Create(projectDescriptor);
         if (!createResult.has_value()) {

@@ -109,7 +109,7 @@ public:
             std::lock_guard<std::mutex> lock(mBufferMutex);
             mLogEntries[mCurrentEntry] = {.message = msg, .timestamp = timestamp, .severity = severity};
             mCurrentEntry              = (mCurrentEntry + 1) % kMaxEntries;
-            mTotalEntries              = std::min(mTotalEntries + 1, kMaxEntries);
+            mTotalEntries              = X_MIN(mTotalEntries + 1, kMaxEntries);
         }
 
         if (severity == X_LOG_SEVERITY_FATAL) { std::abort(); }

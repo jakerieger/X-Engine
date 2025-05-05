@@ -129,12 +129,12 @@ namespace x {
 
     Color Color::Brightness(f32 factor) const {
         // Clamp factor to prevent extreme values
-        factor = std::max(0.0f, factor);
+        factor = X_MIN(0.0f, factor);
 
         return {
-          std::min(1.0f, mRed * factor),
-          std::min(1.0f, mGreen * factor),
-          std::min(1.0f, mBlue * factor),
+          X_MIN(1.0f, mRed * factor),
+          X_MIN(1.0f, mGreen * factor),
+          X_MIN(1.0f, mBlue * factor),
           mAlpha,
         };
     }
@@ -153,14 +153,14 @@ namespace x {
     Color Color::Saturate(f32 factor) const {
         f32 h, s, v;
         ToHSV(h, s, v);
-        s = std::min(1.0f, s * factor);
+        s = X_MIN(1.0f, s * factor);
         return FromHSV(h, s, v, mAlpha);
     }
 
     Color Color::Desaturate(f32 factor) const {
         f32 h, s, v;
         ToHSV(h, s, v);
-        s = std::min(0.0f, s / factor);
+        s = X_MIN(0.0f, s / factor);
         return FromHSV(h, s, v, mAlpha);
     }
 
@@ -207,8 +207,8 @@ namespace x {
     }
 
     void Color::ToHSV(f32& h, f32& s, f32& v) const {
-        const f32 max   = std::max(std::max(mRed, mGreen), mBlue);
-        const f32 min   = std::min(std::min(mRed, mGreen), mBlue);
+        const f32 max   = X_MAX(X_MAX(mRed, mGreen), mBlue);
+        const f32 min   = X_MIN(X_MIN(mRed, mGreen), mBlue);
         const f32 delta = max - min;
 
         v = max;
@@ -360,7 +360,7 @@ namespace x {
             if (b == 1.0f) {
                 return 1.0f;
             } else {
-                return std::min(1.0f, a / (1.0f - b));
+                return X_MIN(1.0f, a / (1.0f - b));
             }
         };
 
@@ -375,7 +375,7 @@ namespace x {
             if (b == 0.0f) {
                 return 0.0f;
             } else {
-                return 1.0f - std::min(1.0f, (1.0f - a) / b);
+                return 1.0f - X_MIN(1.0f, (1.0f - a) / b);
             }
         };
 

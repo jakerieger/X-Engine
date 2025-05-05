@@ -7,8 +7,8 @@
 namespace x {
     bool Viewport::Resize(u32 width, u32 height, bool attachToBackBuffer) {
         // Width and height can never be zero
-        width  = (u32)std::max(1, (i32)width);
-        height = (u32)std::max(1, (i32)height);
+        width  = (u32)X_MAX(1, (i32)width);
+        height = (u32)X_MAX(1, (i32)height);
 
         mWidth  = width;
         mHeight = height;

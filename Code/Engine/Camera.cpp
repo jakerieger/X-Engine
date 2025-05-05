@@ -17,7 +17,7 @@ namespace x {
         mRotation.y += deltaYaw;
 
         constexpr f32 maxPitch = XM_PIDIV2 - 0.01f;  // clamp pitch to prevent flipping
-        mRotation.x            = std::max(-maxPitch, std::min(maxPitch, mRotation.x));
+        mRotation.x            = X_MAX(-maxPitch, X_MIN(maxPitch, mRotation.x));
 
         // Keep yaw in [0, 2PI] range
         if (mRotation.y > XM_2PI) {

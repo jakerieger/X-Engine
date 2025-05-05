@@ -20,6 +20,8 @@ add_library(xpak STATIC
 )
 
 add_executable(xpakc
+    ${CODE_DIR}/Engine/Color.cpp
+    ${CODE_DIR}/Engine/Color.hpp
     ${XPAK_DIR}/main.cpp
 )
 
@@ -28,14 +30,12 @@ target_include_directories(xpak PRIVATE
 )
 
 target_link_libraries(xpak PRIVATE
-    yaml-cpp
     ${BROTLI_LIBS}
     luajit
 )
 
 target_link_libraries(xpakc PRIVATE
     xpak
-    yaml-cpp
     ${BROTLI_LIBS}
     CLI11
 )

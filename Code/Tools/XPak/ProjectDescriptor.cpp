@@ -14,13 +14,15 @@ namespace x {
 
         const auto projectNode = doc.first_node("Project");
         if (!projectNode) return false;
-        const auto projectName = projectNode->first_attribute("name")->value();
-        X_ASSERT(!(X_CSTR_EMPTY(projectName)))
 
-        mName             = projectName;
-        mEngineVersion    = std::stof(projectNode->first_node("EngineVersion")->value());
-        mContentDirectory = projectNode->first_node("ContentDirectory")->value();
-        mStartupScene     = projectNode->first_node("StartupScene")->value();
+        mName          = XML::GetAttrStr(projectNode->first_attribute("name"));
+        mEngineVersion = XML::GetNodeF32(projectNode, "EngineVersion");
+
+        const auto projectRoot = filename.Parent();
+        const auto contentPath = projectRoot / XML::GetNodeStr(projectNode, "ContentDirectory");
+
+        mContentDirectory = contentPath.Str();
+        mStartupScene     = XML::GetNodeStr(projectNode, "StartupScene");
 
         return true;
     }
