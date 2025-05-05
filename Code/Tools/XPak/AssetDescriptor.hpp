@@ -4,8 +4,9 @@
 
 #pragma once
 
-#include <yaml-cpp/yaml.h>
 #include "Common/Types.hpp"
+#include "Common/Filesystem.hpp"
+#include "Common/XML.hpp"
 
 namespace x {
     using AssetType                                = u8;
@@ -23,58 +24,15 @@ namespace x {
         u64 mId;
         str mFilename;
 
-        bool FromFile(const str& filename) {
-            YAML::Node root       = YAML::LoadFile(filename);
-            const auto& assetNode = root["asset"];
-            if (!assetNode.IsDefined()) { return false; }
+        bool FromFile(const Path& filename);
 
-            mId = assetNode["id"].as<u64>();
-
-            mFilename = assetNode["source"].as<str>();
-            if (mFilename.empty()) { return false; }
-
-            return true;
-        }
-
-        AssetType GetTypeFromId() const {
-            return GetTypeFromId(mId);
-        }
-
-        str GetTypeString() const {
-            return GetTypeString(GetTypeFromId());
-        }
-
-        AssetId GetBaseId() const {
-            return mId & kAssetIdBitmask;
-        }
+        AssetType GetTypeFromId() const;
+        str GetTypeString() const;
+        AssetId GetBaseId() const;
 
         // Returns just the ID bits from the asset ID, omitting the type bits
-        static AssetId GetBaseId(AssetId id) {
-            return id & kAssetIdBitmask;
-        }
-
-        static AssetType GetTypeFromId(AssetId id) {
-            const AssetType type = CAST<u8>(id >> 56);
-            return type;
-        }
-
-        static str GetTypeString(AssetType type) {
-            switch (type) {
-                case kAssetType_Texture:
-                    return "texture";
-                case kAssetType_Mesh:
-                    return "mesh";
-                case kAssetType_Audio:
-                    return "audio";
-                case kAssetType_Material:
-                    return "material";
-                case kAssetType_Scene:
-                    return "scene";
-                case kAssetType_Script:
-                    return "script";
-                default:
-                    return "invalid";
-            }
-        }
+        static AssetId GetBaseId(AssetId id);
+        static AssetType GetTypeFromId(AssetId id);
+        static str GetTypeString(AssetType type);
     };
 }  // namespace x

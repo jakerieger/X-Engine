@@ -26,7 +26,7 @@ namespace x {
         const auto& sunDescriptor = descriptor.mWorld.mLights.mSun;
         sun.mEnabled              = sunDescriptor.mEnabled;
         sun.mIntensity            = sunDescriptor.mIntensity;
-        sun.mColor                = {sunDescriptor.mColor.x, sunDescriptor.mColor.y, sunDescriptor.mColor.z, 1.0f};
+        sun.mColor        = {sunDescriptor.mColor.R(), sunDescriptor.mColor.G(), sunDescriptor.mColor.B(), 1.0f};
         sun.mDirection    = {sunDescriptor.mDirection.x, sunDescriptor.mDirection.y, sunDescriptor.mDirection.z, 0.0f};
         sun.mCastsShadows = sunDescriptor.mCastsShadows;
 
@@ -59,8 +59,8 @@ namespace x {
                 // Load material
                 const auto materialBytes = AssetManager::GetAssetData(model.mMaterialId);
                 if (!materialBytes.has_value()) { X_LOG_FATAL("Failed to load material resource"); }
-                MaterialDescriptor matDesc = MaterialParser::Parse(*materialBytes);
-                LoadMaterial(matDesc, modelComponent);
+                MaterialDescriptor matDesc {};
+                if (MaterialParser::Parse(*materialBytes, matDesc)) { LoadMaterial(matDesc, modelComponent); }
             }
 
             if (entity.mBehavior.has_value()) {

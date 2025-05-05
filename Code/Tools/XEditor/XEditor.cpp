@@ -16,13 +16,13 @@
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
 #include <imgui_internal.h>
-#include <yaml-cpp/yaml.h>
 
 // Local includes
 #include "XEditor.hpp"
 #include "Res/resource.h"
 #include "Controls.hpp"
 #include "ImGuiHelpers.hpp"
+#include "Common/XML.hpp"
 #include "Common/FileDialogs.hpp"
 #include "Common/WindowsHelpers.hpp"
 #include "Engine/SceneParser.hpp"
@@ -1520,7 +1520,7 @@ namespace x {
 
                               const auto assetBytes = AssetManager::GetAssetData(descriptor.mId);
                               X_ASSERT(assetBytes.has_value())
-                              const MaterialDescriptor desc = MaterialParser::Parse(*assetBytes);
+                              const MaterialDescriptor desc = MaterialParser::Parse(*assetBytes, TODO);
                               const auto mat                = GetCurrentScene()->LoadMaterial(desc);
                               X_ASSERT(mat.get() != nullptr)
                               model->SetMaterial(mat);
@@ -2410,15 +2410,16 @@ namespace x {
 
     void XEditor::LoadProject(const str& filename) {
         if (mGame.IsInitialized()) { mGame.Reset(); }
+        const auto projectFile = Path(filename);
 
-        if (!mLoadedProject.FromFile(filename)) {
+        if (!mLoadedProject.FromFile(projectFile)) {
             ShowAlert("An error occurred when parsing the selected project file.", Error);
             return;
         }
 
         mEditorResources.Clear();
-        mProjectRoot              = Path(filename).Parent();
-        mSession.mLastProjectPath = Path(filename);
+        mProjectRoot              = projectFile.Parent();
+        mSession.mLastProjectPath = projectFile;
         mSession.SaveSession();
         mGame.Initialize(this, &mSceneViewport, mProjectRoot);
         ReloadAssetCache();

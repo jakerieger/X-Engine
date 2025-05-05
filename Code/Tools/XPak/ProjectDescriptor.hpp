@@ -5,10 +5,8 @@
 #pragma once
 
 #include <format>
-
 #include "Common/Types.hpp"
 #include "Common/Filesystem.hpp"
-#include <yaml-cpp/yaml.h>
 
 namespace x {
     struct ProjectDescriptor {
@@ -18,7 +16,7 @@ namespace x {
         str mStartupScene;
         bool mLoaded {false};
 
-        bool FromFile(const str& filename);
+        bool FromFile(const Path& filename);
         bool ToFile(const Path& filename) const;
         std::string ToString() const;
     };

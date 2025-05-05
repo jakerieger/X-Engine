@@ -3,42 +3,65 @@
 //
 
 #include "MaterialParser.hpp"
-#include <yaml-cpp/yaml.h>
+#include "Common/XML.hpp"
 
 namespace x {
-    static MaterialDescriptor ParseFromNode(const YAML::Node& node) {
-        MaterialDescriptor material;
-        material.mName         = node["name"].as<str>();
-        material.mBaseMaterial = node["baseMaterial"].as<str>();
-        material.mTransparent  = node["transparent"].as<bool>();
+    static bool ParseDoc(const rapidxml::xml_document<>& doc, MaterialDescriptor& descriptor) {
+        const auto materialNode = doc.first_node("Material");
+        if (materialNode) {
+            const char* name = materialNode->first_attribute("name")->value();
+            X_ASSERT(X_CSTR_EMPTY(name))
+            descriptor.mName = name;
 
-        if (const auto& textures = node["textures"]; textures.IsDefined() && textures.size() > 0) {
-            for (const auto& texture : textures) {
-                TextureDescriptor textureDescriptor;
-                textureDescriptor.mName = texture["name"].as<str>();
+            const char* baseMaterial = materialNode->first_attribute("base")->value();
+            X_ASSERT(X_CSTR_EMPTY(baseMaterial))
+            descriptor.mBaseMaterial = baseMaterial;
 
-                // yaml-cpp was having trouble parsing some IDs as uint64's
-                // Turns out this was because I was forgetting to add a newline to the yaml file
-                // I'm gonna keep this anyways as its more error-tolerant
-                auto idStr       = texture["asset"].as<str>();
-                const auto idVal = std::stoull(idStr, nullptr, 10);
+            const auto transparentAttr = materialNode->first_attribute("transparent");
+            const bool transparent     = XML::GetAttrBool(transparentAttr);
+            descriptor.mTransparent    = transparent;
 
-                textureDescriptor.mAssetId = idVal;
-                material.mTextures.push_back(textureDescriptor);
+            // TODO: Process properties here when I get around to implementing them
+            // const auto propsNode = materialNode->first_node("Properties");
+
+            const auto texturesNode = materialNode->first_node("Textures");
+            if (texturesNode) {
+                for (const rapidxml::xml_node<>* texture = texturesNode->first_node("Texture"); texture;
+                     texture                             = texture->next_sibling()) {
+                    const char* texName = texture->first_attribute("name")->value();
+                    X_ASSERT(X_CSTR_EMPTY(texName))
+
+                    const auto* assetAttr = texture->first_attribute("asset");
+                    const u64 texId       = std::stoull(assetAttr->value());
+                    X_ASSERT(texId != 0)
+
+                    TextureDescriptor texDesc;
+                    texDesc.mName    = texName;
+                    texDesc.mAssetId = texId;
+                    descriptor.mTextures.push_back(texDesc);
+                }
             }
+
+            return true;
         }
-
-        return material;
+        return false;
     }
 
-    MaterialDescriptor MaterialParser::Parse(const str& filename) {
-        const YAML::Node root = YAML::LoadFile(filename);
-        return ParseFromNode(root);
+    bool MaterialParser::Parse(const Path& filename, MaterialDescriptor& descriptor) {
+        if (!filename.Exists()) return false;
+        rapidxml::xml_document<> doc;
+        if (XML::ReadFile(filename, doc)) { return ParseDoc(doc, descriptor); }
+        return false;
     }
 
-    MaterialDescriptor MaterialParser::Parse(std::span<const u8> data) {
-        const auto content    = RCAST<const char*>(data.data());
-        const YAML::Node root = YAML::Load(content);
-        return ParseFromNode(root);
+    bool MaterialParser::Parse(std::span<const u8> data, MaterialDescriptor& descriptor) {
+        if (data.empty()) return false;
+        rapidxml::xml_document<> doc;
+        vector<u8> buffer(data.begin(), data.end());
+        buffer.push_back('\0');
+        try {
+            doc.parse<0>(RCAST<char*>(&buffer[0]));
+            return ParseDoc(doc, descriptor);
+        } catch (...) { return false; }
     }
 }  // namespace x

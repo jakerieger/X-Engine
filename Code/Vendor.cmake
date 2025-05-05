@@ -22,6 +22,13 @@ set(STB_SOURCES
     ${VENDOR_DIR}/stb_image.cpp
 )
 
+set(RAPIDXML_INCLUDE
+    ${VENDOR_DIR}/rapidxml.hpp
+    ${VENDOR_DIR}/rapidxml_iterators.hpp
+    ${VENDOR_DIR}/rapidxml_print.hpp
+    ${VENDOR_DIR}/rapidxml_utils.hpp
+)
+
 set(VENDOR_INCLUDE
     ${VENDOR_DIR}
 )

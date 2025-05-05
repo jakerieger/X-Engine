@@ -85,7 +85,7 @@ namespace x {
         for (const Path& file : contentDir.Entries()) {
             if (file.IsFile() && file.HasExtension() && file.Extension() == "xasset") {
                 AssetDescriptor descriptor;
-                if (!descriptor.FromFile(file.Str())) {
+                if (!descriptor.FromFile(file)) {
                     X_LOG_ERROR("AssetManager::LoadAssets - Failed to load asset descriptor '%s'", file.CStr());
                     return false;
                 }

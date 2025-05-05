@@ -2,9 +2,10 @@
 // Created: 3/2/2025.
 //
 
-#include "AssetGenerator.hpp"
 #include <random>
-#include <yaml-cpp/yaml.h>
+#include "AssetGenerator.hpp"
+#include "Common/XML.hpp"
+#include <rapidxml_print.hpp>  // For formatting output
 
 namespace x {
     u64 AssetGenerator::GenerateBaseId() {
@@ -24,25 +25,21 @@ namespace x {
 
     // TODO: Add flags to the asset file, for example streamable or compressed
     bool AssetGenerator::GenerateAsset(const Path& assetFile, AssetType type, const Path& outputDir) {
-        const auto id = GenerateId(type);
+        using namespace rapidxml;
+        xml_document<> doc;
 
-        YAML::Emitter out;
-        out << YAML::BeginMap;
-        out << YAML::Key << "asset";
-        out << YAML::Value << YAML::BeginMap;
-        out << YAML::Key << "id" << YAML::Value << id;
-        out << YAML::Key << "source" << YAML::Value << assetFile.RelativeTo(outputDir).Str();
-        out << YAML::EndMap;
+        // Create root asset node
+        const auto id         = GenerateId(type);
+        xml_node<>* assetNode = doc.allocate_node(node_element, "Asset");
+        assetNode->append_attribute(doc.allocate_attribute("id", X_TOCSTR(id)));
+        doc.append_node(assetNode);
+
+        // Add source node
+        const char* sourcePath = assetFile.CStr();
+        xml_node<>* sourceNode = doc.allocate_node(node_element, "Source", sourcePath);
+        assetNode->append_node(sourceNode);
 
         const auto descriptorFile = outputDir / (assetFile.Filename() + ".xasset");
-        const auto writeResult    = FileWriter::WriteAllText(descriptorFile, out.c_str());
-
-        if (writeResult) {
-            printf("Generated Asset:\n  ID: %llu\n  Source: %s\n\n", id, assetFile.Filename().c_str());
-        } else {
-            printf("Failed to generate Asset:\n  ID: %llu\n\n", id);
-        }
-
-        return writeResult;
+        return XML::WriteFile(descriptorFile, doc);
     }
 }  // namespace x

@@ -18,7 +18,7 @@ namespace x {
             if (file.IsFile()) {
                 if (file.Extension() == "xasset") {
                     AssetDescriptor asset;
-                    const auto result = asset.FromFile(file.Str());
+                    const auto result = asset.FromFile(file);
                     if (!result) {
                         printf("Failed to load asset '%s'\n", file.CStr());
                         continue;

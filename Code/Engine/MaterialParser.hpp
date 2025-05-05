@@ -5,8 +5,8 @@
 #pragma once
 
 #include <span>
-
 #include "Common/Types.hpp"
+#include "Common/Filesystem.hpp"
 
 namespace x {
     struct TextureDescriptor {
@@ -23,7 +23,7 @@ namespace x {
 
     class MaterialParser {
     public:
-        static MaterialDescriptor Parse(const str& filename);
-        static MaterialDescriptor Parse(std::span<const u8> data);
+        static bool Parse(const Path& filename, MaterialDescriptor& descriptor);
+        static bool Parse(std::span<const u8> data, MaterialDescriptor& descriptor);
     };
 }  // namespace x

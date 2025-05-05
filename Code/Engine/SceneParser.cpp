@@ -1,45 +1,333 @@
 #include "SceneParser.hpp"
-#include <yaml-cpp/yaml.h>
-
 #include "EngineCommon.hpp"
+#include "Common/XML.hpp"
 
 namespace x {
-    static void ParseWorld(const YAML::Node& world, SceneDescriptor& descriptor);
-    static void ParseEntities(const YAML::Node& entities, SceneDescriptor& descriptor);
-    static Float3 ParseFloat3(const YAML::Node& node);
-    static void EmitFloat3(YAML::Emitter& emitter, const Float3& vector);
-
-    static void ParseFromNode(const YAML::Node& scene, SceneDescriptor& descriptor) {
-        const auto name = scene["name"].as<str>();
-        const auto desc = scene["description"].as<str>();
-
-        descriptor.mName        = name;
-        descriptor.mDescription = desc;
-
-        ParseWorld(scene["world"], descriptor);
-
-        if (const auto entities = scene["entities"]; entities.IsDefined() && entities.size() > 0) {
-            ParseEntities(entities, descriptor);
+    static bool ParseWorld(SceneDescriptor& descriptor, const rapidxml::xml_node<>* worldNode) {
+        const auto lightsNode = worldNode->first_node("Lights");
+        if (!lightsNode) {
+            X_LOG_ERROR("Scene->World->Lights node not found");
+            return false;
         }
+
+        const auto sunNode = lightsNode->first_node("Sun");
+        if (!sunNode) {
+            X_LOG_ERROR("Scene->World->Lights->Sun node not found");
+            return false;
+        }
+
+        // Sun properties
+        const bool sunEnabled     = XML::GetNodeBool(sunNode, "Enabled");
+        const f32 sunIntensity    = XML::GetNodeF32(sunNode, "Intensity");
+        const Color sunColor      = XML::GetAttrColor(sunNode->first_node("Color"));
+        const Float3 sunDirection = XML::GetAttrFloat3(sunNode->first_node("Direction"));
+        const bool sunShadows     = XML::GetNodeBool(sunNode, "CastsShadows");
+
+        auto& sunDesc         = descriptor.mWorld.mLights.mSun;
+        sunDesc.mEnabled      = sunEnabled;
+        sunDesc.mIntensity    = sunIntensity;
+        sunDesc.mColor        = sunColor;
+        sunDesc.mDirection    = sunDirection;
+        sunDesc.mCastsShadows = sunShadows;
+
+        // TODO: PointLights, AreaLights, SpotLights
+        {}
+
+        // Sky properties
+        const auto skyNode = worldNode->first_node("Sky");
+        if (!skyNode) {
+            X_LOG_ERROR("Scene->World->Sky node not found");
+            return false;
+        }
+
+        auto& skyDesc     = descriptor.mWorld.mSky;
+        skyDesc.mSkyColor = XML::GetAttrColor(skyNode->first_node("Color"));
+
+        return true;
     }
 
-    void SceneParser::Parse(const str& filename, SceneDescriptor& descriptor) {
-        const YAML::Node scene = YAML::LoadFile(filename);
-        ParseFromNode(scene, descriptor);
+    static bool ParseEntities(SceneDescriptor& descriptor, const rapidxml::xml_node<>* entitiesNode) {
+        auto& entitiesVec = descriptor.mEntities;
+
+        for (const auto* entity = entitiesNode->first_node("Entity"); entity; entity = entity->next_sibling()) {
+            EntityDescriptor entityDesc {};
+
+            entityDesc.mId   = std::stoull(entity->first_attribute("id")->value());
+            entityDesc.mName = entity->first_attribute("name")->value();
+
+            // Components
+            const auto* componentsNode = entity->first_node("Components");
+            if (!componentsNode) {
+                X_LOG_ERROR("Scene->Entities->Entity->Components node not found");
+                return false;
+            }
+
+            const auto* transformNode = componentsNode->first_node("Transform");
+            if (!transformNode) {
+                X_LOG_ERROR("Scene->Entities->Entity->Components->Transform node not found");
+                return false;
+            }
+
+            // Parse transform node
+            const Float3 position = XML::GetAttrFloat3(transformNode->first_node("Position"));
+            const Float3 rotation = XML::GetAttrFloat3(transformNode->first_node("Rotation"));
+            const Float3 scale    = XML::GetAttrFloat3(transformNode->first_node("Scale"));
+            entityDesc.mTransform = TransformDescriptor {
+              .mPosition = position,
+              .mRotation = rotation,
+              .mScale    = scale,
+            };
+
+            // Parse model node
+            const auto* modelNode = componentsNode->first_node("Model");
+            if (modelNode) {
+                entityDesc.mModel = ModelDescriptor {
+                  .mMeshId         = XML::GetAttrId(modelNode->first_node("Mesh")),
+                  .mMaterialId     = XML::GetAttrId(modelNode->first_node("Material")),
+                  .mCastsShadows   = XML::GetNodeBool(modelNode, "CastsShadows"),
+                  .mReceiveShadows = XML::GetNodeBool(modelNode, "ReceiveShadows"),
+                };
+            }
+
+            // Parse camera node
+            const auto* cameraNode = componentsNode->first_node("Camera");
+            if (cameraNode) {
+                entityDesc.mCamera = CameraDescriptor {
+                  .mFOV          = XML::GetNodeF32(cameraNode, "FOV"),
+                  .mNearZ        = XML::GetNodeF32(cameraNode, "NearZ"),
+                  .mFarZ         = XML::GetNodeF32(cameraNode, "FarZ"),
+                  .mOrthographic = XML::GetNodeBool(cameraNode, "Orthographic"),
+                  .mWidth        = XML::GetNodeF32(cameraNode, "Width"),
+                  .mHeight       = XML::GetNodeF32(cameraNode, "Height"),
+                };
+            }
+
+            // Parse behavior node
+            const auto* behaviorNode = componentsNode->first_node("Behavior");
+            if (behaviorNode) {
+                entityDesc.mBehavior = BehaviorDescriptor {
+                  .mScriptId = XML::GetAttrId(behaviorNode->first_node("Script")),
+                };
+            }
+
+            entitiesVec.push_back(entityDesc);
+        }
+
+        return true;
     }
 
-    void SceneParser::Parse(std::span<const u8> data, SceneDescriptor& descriptor) {
-        const auto sceneContent = RCAST<const char*>(data.data());
-        const YAML::Node scene  = YAML::Load(sceneContent);
-        ParseFromNode(scene, descriptor);
+    static bool ParseDoc(const rapidxml::xml_document<>& doc, SceneDescriptor& descriptor) {
+        const auto sceneNode = doc.first_node("Scene");
+        if (!sceneNode) {
+            X_LOG_ERROR("Scene node not found");
+            return false;
+        }
+        const char* sceneName   = sceneNode->first_attribute("name")->value();
+        const char* sceneDesc   = sceneNode->first_attribute("description")->value();
+        descriptor.mName        = sceneName;
+        descriptor.mDescription = sceneDesc;
+
+        // Parse World
+        const auto worldNode = sceneNode->first_node("World");
+        if (!worldNode) {
+            X_LOG_ERROR("Scene->World node not found");
+            return false;
+        }
+        const bool worldResult = ParseWorld(descriptor, worldNode);
+
+        // Parse Entities
+        const auto entitiesNode = sceneNode->first_node("Entities");
+        if (!entitiesNode) {
+            X_LOG_ERROR("Scene->Entities node not found");
+            return false;
+        }
+        const bool entitiesResult = ParseEntities(descriptor, entitiesNode);
+
+        return (worldResult && entitiesResult);
     }
 
-    void SceneParser::StateToDescriptor(const SceneState& state, SceneDescriptor& descriptor, const str& sceneName) {
+    bool SceneParser::Parse(const Path& filename, SceneDescriptor& descriptor) {
+        using namespace rapidxml;
+        xml_document<> doc;
+        if (!XML::ReadFile(filename, doc)) return false;
+        return ParseDoc(doc, descriptor);
+    }
+
+    bool SceneParser::Parse(std::span<const u8> data, SceneDescriptor& descriptor) {
+        using namespace rapidxml;
+        xml_document<> doc;
+        if (!XML::ReadBytes(data, doc)) return false;
+        return ParseDoc(doc, descriptor);
+    }
+
+    bool SceneParser::WriteToFile(const SceneDescriptor& descriptor, const Path& filename) {
+        using namespace rapidxml;
+        xml_document<> doc;
+
+        // Root "Scene" node
+        xml_node<>* sceneNode = doc.allocate_node(node_element, "Scene");
+        sceneNode->append_attribute(doc.allocate_attribute("name", descriptor.mName.c_str()));
+        sceneNode->append_attribute(doc.allocate_attribute("description", descriptor.mDescription.c_str()));
+        doc.append_node(sceneNode);
+
+        // "World" node
+        {
+            xml_node<>* worldNode = doc.allocate_node(node_element, "World");
+            sceneNode->append_node(worldNode);
+
+            xml_node<>* lightsNode = doc.allocate_node(node_element, "Lights");
+            worldNode->append_node(lightsNode);
+
+            xml_node<>* sunNode = doc.allocate_node(node_element, "Sun");
+            // Sun
+            {
+                const auto& sun = descriptor.mWorld.mLights.mSun;
+
+                xml_node<>* sunEnabledNode =
+                  doc.allocate_node(node_element, "Enabled", sun.mEnabled ? "true" : "false");
+                sunNode->append_node(sunEnabledNode);
+
+                xml_node<>* sunIntensityNode = doc.allocate_node(node_element, "Intensity", X_TOCSTR(sun.mIntensity));
+                sunNode->append_node(sunIntensityNode);
+
+                xml_node<>* sunColorNode = XML::MakeColorNode("Color", sun.mColor, doc);
+                sunNode->append_node(sunColorNode);
+
+                xml_node<>* sunDirectionNode = XML::MakeFloat3Node("Direction", sun.mDirection, doc);
+                sunNode->append_node(sunDirectionNode);
+
+                xml_node<>* sunShadowsNode =
+                  doc.allocate_node(node_element, "CastsShadows", sun.mCastsShadows ? "true" : "false");
+                sunNode->append_node(sunShadowsNode);
+            }
+            lightsNode->append_node(sunNode);
+
+            xml_node<>* pointLightsNode = doc.allocate_node(node_element, "PointLights");
+            lightsNode->append_node(pointLightsNode);
+
+            xml_node<>* areaLightsNode = doc.allocate_node(node_element, "AreaLights");
+            lightsNode->append_node(areaLightsNode);
+
+            xml_node<>* spotLightsNode = doc.allocate_node(node_element, "SpotLights");
+            lightsNode->append_node(spotLightsNode);
+
+            xml_node<>* skyNode = doc.allocate_node(node_element, "Sky");
+            // Sky
+            {
+                const auto& sky          = descriptor.mWorld.mSky;
+                xml_node<>* skyColorNode = XML::MakeColorNode("Color", sky.mSkyColor, doc);
+                skyNode->append_node(skyColorNode);
+            }
+            worldNode->append_node(skyNode);
+        }
+
+        // "Entities" node
+        {
+            xml_node<>* entitiesNode = doc.allocate_node(node_element, "Entities");
+
+            for (const auto& entity : descriptor.mEntities) {
+                xml_node<>* entityNode = doc.allocate_node(node_element, "Entity");
+                entityNode->append_attribute(doc.allocate_attribute("id", X_TOCSTR(entity.mId)));
+                entityNode->append_attribute(doc.allocate_attribute("name", entity.mName.c_str()));
+
+                xml_node<>* componentsNode = doc.allocate_node(node_element, "Components");
+
+                // Transform
+                {
+                    auto& transform           = entity.mTransform;
+                    xml_node<>* transformNode = doc.allocate_node(node_element, "Transform");
+
+                    xml_node<>* positionNode = XML::MakeFloat3Node("Position", transform.mPosition, doc);
+                    transformNode->append_node(positionNode);
+
+                    xml_node<>* rotationNode = XML::MakeFloat3Node("Rotation", transform.mRotation, doc);
+                    transformNode->append_node(rotationNode);
+
+                    xml_node<>* scaleNode = XML::MakeFloat3Node("Scale", transform.mScale, doc);
+                    transformNode->append_node(scaleNode);
+
+                    componentsNode->append_node(transformNode);
+                }
+
+                // Model
+                if (entity.mModel.has_value()) {
+                    auto& model           = entity.mModel.value();
+                    xml_node<>* modelNode = doc.allocate_node(node_element, "Model");
+
+                    xml_node<>* meshNode = doc.allocate_node(node_element, "Mesh");
+                    meshNode->append_attribute(doc.allocate_attribute("id", X_TOCSTR(model.mMeshId)));
+                    modelNode->append_node(meshNode);
+
+                    xml_node<>* materialNode = doc.allocate_node(node_element, "Material");
+                    materialNode->append_attribute(doc.allocate_attribute("id", X_TOCSTR(model.mMaterialId)));
+                    modelNode->append_node(materialNode);
+
+                    xml_node<>* castsShadowsNode =
+                      doc.allocate_node(node_element, "CastsShadows", model.mCastsShadows ? "true" : "false");
+                    modelNode->append_node(castsShadowsNode);
+
+                    xml_node<>* receivesShadowsNode =
+                      doc.allocate_node(node_element, "ReceiveShadows", model.mReceiveShadows ? "true" : "false");
+                    modelNode->append_node(receivesShadowsNode);
+
+                    componentsNode->append_node(modelNode);
+                }
+
+                // Camera
+                if (entity.mCamera.has_value()) {
+                    auto& camera           = entity.mCamera.value();
+                    xml_node<>* cameraNode = doc.allocate_node(node_element, "Camera");
+
+                    xml_node<>* fovNode = doc.allocate_node(node_element, "FOV", X_TOCSTR(camera.mFOV));
+                    cameraNode->append_node(fovNode);
+
+                    xml_node<>* nearZNode = doc.allocate_node(node_element, "NearZ", X_TOCSTR(camera.mNearZ));
+                    cameraNode->append_node(nearZNode);
+
+                    xml_node<>* farZNode = doc.allocate_node(node_element, "FarZ", X_TOCSTR(camera.mFarZ));
+                    cameraNode->append_node(farZNode);
+
+                    xml_node<>* orthographicNode =
+                      doc.allocate_node(node_element, "Orthographic", camera.mOrthographic ? "true" : "false");
+                    cameraNode->append_node(orthographicNode);
+
+                    xml_node<>* widthNode = doc.allocate_node(node_element, "Width", X_TOCSTR(camera.mWidth));
+                    cameraNode->append_node(widthNode);
+
+                    xml_node<>* heightNode = doc.allocate_node(node_element, "Height", X_TOCSTR(camera.mHeight));
+                    cameraNode->append_node(heightNode);
+
+                    componentsNode->append_node(cameraNode);
+                }
+
+                // Behavior
+                if (entity.mBehavior.has_value()) {
+                    auto& behavior           = entity.mBehavior.value();
+                    xml_node<>* behaviorNode = doc.allocate_node(node_element, "Behavior");
+
+                    xml_node<>* scriptNode = doc.allocate_node(node_element, "Script");
+                    scriptNode->append_attribute(doc.allocate_attribute("id", X_TOCSTR(behavior.mScriptId)));
+                    behaviorNode->append_node(scriptNode);
+
+                    componentsNode->append_node(behaviorNode);
+                }
+
+                entityNode->append_node(componentsNode);
+                entitiesNode->append_node(entityNode);
+            }
+
+            sceneNode->append_node(entitiesNode);
+        }
+
+        return XML::WriteFile(filename, doc);
+    }
+
+    bool SceneParser::StateToDescriptor(const SceneState& state, SceneDescriptor& descriptor, const str& sceneName) {
         descriptor.mName = sceneName;
 
         const auto& sun = state.GetLightState().mSun;
         SunDescriptor sunDescriptor;
-        sunDescriptor.mColor           = Float3(sun.mColor.x, sun.mColor.y, sun.mColor.z);
+        sunDescriptor.mColor           = Color(sun.mColor.x, sun.mColor.y, sun.mColor.z);
         sunDescriptor.mDirection       = Float3(sun.mDirection.x, sun.mDirection.y, sun.mDirection.z);
         sunDescriptor.mEnabled         = sun.mEnabled;
         sunDescriptor.mIntensity       = sun.mIntensity;
@@ -65,248 +353,34 @@ namespace x {
             }
 
             if (model) {
-                ModelDescriptor modelDescriptor;
-                modelDescriptor.mMeshId         = model->GetModelId();
-                modelDescriptor.mMaterialId     = model->GetMaterialId();
-                modelDescriptor.mCastsShadows   = model->GetCastsShadows();
-                modelDescriptor.mReceiveShadows = model->GetReceiveShadows();
-                entityDescriptor.mModel         = modelDescriptor;
+                entityDescriptor.mModel = ModelDescriptor {
+                  .mMeshId         = model->GetModelId(),
+                  .mMaterialId     = model->GetMaterialId(),
+                  .mCastsShadows   = model->GetCastsShadows(),
+                  .mReceiveShadows = model->GetReceiveShadows(),
+                };
             }
 
             if (behavior) {
-                BehaviorDescriptor behaviorDescriptor;
-                behaviorDescriptor.mScriptId = behavior->GetScriptId();
-                entityDescriptor.mBehavior   = behaviorDescriptor;
+                entityDescriptor.mBehavior = BehaviorDescriptor {
+                  .mScriptId = behavior->GetScriptId(),
+                };
             }
 
             if (camera) {
-                CameraDescriptor cameraDescriptor;
-                cameraDescriptor.mFOV          = camera->GetFOVDegrees();
-                cameraDescriptor.mNearZ        = camera->GetNearPlane();
-                cameraDescriptor.mFarZ         = camera->GetFarPlane();
-                cameraDescriptor.mOrthographic = camera->GetOrthographic();
-                if (cameraDescriptor.mOrthographic) {
-                    cameraDescriptor.mWidth  = camera->GetWidth();
-                    cameraDescriptor.mHeight = camera->GetHeight();
-                }
-                entityDescriptor.mCamera = cameraDescriptor;
+                entityDescriptor.mCamera = CameraDescriptor {
+                  .mFOV          = camera->GetFOVDegrees(),
+                  .mNearZ        = camera->GetNearPlane(),
+                  .mFarZ         = camera->GetFarPlane(),
+                  .mOrthographic = camera->GetOrthographic(),
+                  .mWidth        = camera->GetWidth(),
+                  .mHeight       = camera->GetHeight(),
+                };
             }
 
             descriptor.mEntities.push_back(entityDescriptor);
         }
-    }
 
-    void SceneParser::WriteToFile(const SceneDescriptor& descriptor, const Path& filename) {
-        YAML::Emitter out;
-        out << YAML::BeginMap;
-        {
-            out << YAML::Key << "version" << YAML::Value << "1.0";
-            out << YAML::Key << "name" << YAML::Value << descriptor.mName;
-            out << YAML::Key << "description" << YAML::Value << descriptor.mDescription;
-
-            // World
-            {
-                out << YAML::Key << "world" << YAML::BeginMap;
-                // ============================== Lights ==============================//
-                auto& sun = descriptor.mWorld.mLights.mSun;
-                out << YAML::Key << "lights" << YAML::BeginMap;
-
-                // Sun
-                out << YAML::Key << "sun" << YAML::BeginMap;
-                out << YAML::Key << "enabled" << YAML::Value << sun.mEnabled;
-                out << YAML::Key << "intensity" << YAML::Value << sun.mIntensity;
-                out << YAML::Key << "color" << YAML::Value << YAML::Flow;
-                EmitFloat3(out, sun.mColor);
-                out << YAML::Key << "direction" << YAML::Value << YAML::Flow;
-                EmitFloat3(out, sun.mDirection);
-                out << YAML::Key << "castsShadows" << YAML::Value << sun.mCastsShadows;
-                out << YAML::EndMap;
-
-                // Point lights
-                auto& pointLights = descriptor.mWorld.mLights.mPointLights;
-                out << YAML::Key << "pointLights" << YAML::BeginSeq;
-                out << YAML::EndSeq;
-
-                // Area lights
-                auto& areaLights = descriptor.mWorld.mLights.mAreaLights;
-                out << YAML::Key << "areaLights" << YAML::BeginSeq;
-                out << YAML::EndSeq;
-
-                // Spotlights
-                auto& spotLights = descriptor.mWorld.mLights.mSpotLights;
-                out << YAML::Key << "spotLights" << YAML::BeginSeq;
-                out << YAML::EndSeq;
-
-                out << YAML::EndMap;
-                // ====================================================================//
-
-                out << YAML::EndMap;
-            }
-
-            // Entities
-            {
-                out << YAML::Key << "entities" << YAML::Value << YAML::BeginSeq;
-
-                for (auto& entity : descriptor.mEntities) {
-                    out << YAML::BeginMap;
-                    out << YAML::Key << "id" << YAML::Value << entity.mId;
-                    out << YAML::Key << "name" << YAML::Value << entity.mName;
-
-                    // Components
-                    out << YAML::Key << "components";
-                    out << YAML::Value << YAML::BeginMap;
-
-                    // Transform
-                    out << YAML::Key << "transform" << YAML::Value << YAML::BeginMap;
-                    {
-                        auto& transform = entity.mTransform;
-                        out << YAML::Key << "position" << YAML::Flow;
-                        EmitFloat3(out, transform.mPosition);
-                        out << YAML::Key << "rotation" << YAML::Flow;
-                        EmitFloat3(out, transform.mRotation);
-                        out << YAML::Key << "scale" << YAML::Flow;
-                        EmitFloat3(out, transform.mScale);
-                    }
-                    out << YAML::EndMap;
-
-                    // Model
-                    if (entity.mModel.has_value()) {
-                        auto& model = entity.mModel.value();
-                        out << YAML::Key << "model" << YAML::Value << YAML::BeginMap;
-                        out << YAML::Key << "mesh" << YAML::Value << model.mMeshId;
-                        out << YAML::Key << "material" << YAML::Value << model.mMaterialId;
-                        out << YAML::Key << "castsShadows" << YAML::Value << model.mCastsShadows;
-                        out << YAML::Key << "receiveShadows" << YAML::Value << model.mReceiveShadows;
-                        out << YAML::EndMap;
-                    }
-
-                    // Behavior
-                    if (entity.mBehavior.has_value()) {
-                        auto& behavior = entity.mBehavior.value();
-                        out << YAML::Key << "behavior" << YAML::Value << YAML::BeginMap;
-                        out << YAML::Key << "script" << YAML::Value << behavior.mScriptId;
-                        out << YAML::EndMap;
-                    }
-
-                    if (entity.mCamera.has_value()) {
-                        auto& camera = entity.mCamera.value();
-                        out << YAML::Key << "camera" << YAML::Value << YAML::BeginMap;
-                        out << YAML::Key << "fov" << YAML::Value << camera.mFOV;
-                        out << YAML::Key << "nearZ" << YAML::Value << camera.mNearZ;
-                        out << YAML::Key << "farZ" << YAML::Value << camera.mFarZ;
-                        out << YAML::Key << "orthographic" << YAML::Value << camera.mOrthographic;
-                        if (camera.mOrthographic) {
-                            out << YAML::Key << "width" << YAML::Value << camera.mWidth;
-                            out << YAML::Key << "height" << YAML::Value << camera.mHeight;
-                        }
-                    }
-
-                    out << YAML::EndMap;  // components
-
-                    out << YAML::EndMap;  // entity
-                }
-
-                out << YAML::EndSeq;
-            }
-        }
-        out << YAML::EndMap;
-
-        FileWriter::WriteAllText(filename, out.c_str());
-    }
-
-    void ParseWorld(const YAML::Node& world, SceneDescriptor& descriptor) {
-        // YAML::Node cameraNode = world["camera"];
-        //
-        // descriptor.mWorld.mCamera.mPosition = ParseFloat3(cameraNode["position"]);
-        // descriptor.mWorld.mCamera.mLookAt   = ParseFloat3(cameraNode["eye"]);
-        // descriptor.mWorld.mCamera.mFovY     = cameraNode["fovY"].as<f32>();
-        // descriptor.mWorld.mCamera.mNearZ    = cameraNode["nearZ"].as<f32>();
-        // descriptor.mWorld.mCamera.mFarZ     = cameraNode["farZ"].as<f32>();
-
-        YAML::Node lightNode = world["lights"];
-        YAML::Node sunNode   = lightNode["sun"];
-
-        descriptor.mWorld.mLights.mSun.mEnabled      = sunNode["enabled"].as<bool>();
-        descriptor.mWorld.mLights.mSun.mIntensity    = sunNode["intensity"].as<f32>();
-        descriptor.mWorld.mLights.mSun.mColor        = ParseFloat3(sunNode["color"]);
-        descriptor.mWorld.mLights.mSun.mDirection    = ParseFloat3(sunNode["direction"]);
-        descriptor.mWorld.mLights.mSun.mCastsShadows = sunNode["castsShadows"].as<bool>();
-    }
-
-    void ParseEntities(const YAML::Node& entities, SceneDescriptor& descriptor) {
-        auto& entitiesArray = descriptor.mEntities;
-
-        for (const auto& entity : entities) {
-            EntityDescriptor entityDescriptor {};
-            entityDescriptor.mId   = entity["id"].as<u64>();
-            const auto name        = entity["name"].as<str>();
-            entityDescriptor.mName = name;
-
-            YAML::Node componentsNode = entity["components"];
-
-            YAML::Node transformNode = componentsNode["transform"];
-            TransformDescriptor transformDescriptor {};
-            transformDescriptor.mPosition = ParseFloat3(transformNode["position"]);
-            transformDescriptor.mRotation = ParseFloat3(transformNode["rotation"]);
-            transformDescriptor.mScale    = ParseFloat3(transformNode["scale"]);
-
-            entityDescriptor.mTransform = transformDescriptor;
-
-            YAML::Node modelNode = componentsNode["model"];
-            if (modelNode.IsDefined()) {
-                ModelDescriptor modelDescriptor {};
-                modelDescriptor.mMeshId         = modelNode["mesh"].as<u64>();
-                modelDescriptor.mMaterialId     = modelNode["material"].as<u64>();
-                modelDescriptor.mCastsShadows   = modelNode["castsShadows"].as<bool>();
-                modelDescriptor.mReceiveShadows = modelNode["receiveShadows"].as<bool>();
-
-                descriptor.mAssetIds.push_back(modelDescriptor.mMeshId);
-                descriptor.mAssetIds.push_back(modelDescriptor.mMaterialId);
-
-                entityDescriptor.mModel = modelDescriptor;
-            }
-
-            YAML::Node behaviorNode = componentsNode["behavior"];
-            if (behaviorNode.IsDefined()) {
-                BehaviorDescriptor behaviorDescriptor {};
-                behaviorDescriptor.mScriptId = behaviorNode["script"].as<u64>();
-
-                descriptor.mAssetIds.push_back(behaviorDescriptor.mScriptId);
-
-                entityDescriptor.mBehavior = behaviorDescriptor;
-            }
-
-            YAML::Node cameraNode = componentsNode["camera"];
-            if (cameraNode.IsDefined()) {
-                CameraDescriptor cameraDescriptor {};
-                cameraDescriptor.mFOV          = cameraNode["fov"].as<f32>();
-                cameraDescriptor.mNearZ        = cameraNode["nearZ"].as<f32>();
-                cameraDescriptor.mFarZ         = cameraNode["farZ"].as<f32>();
-                cameraDescriptor.mOrthographic = cameraNode["orthographic"].as<bool>();
-                if (cameraDescriptor.mOrthographic) {
-                    if (cameraNode["width"].IsDefined()) { cameraDescriptor.mWidth = cameraNode["width"].as<f32>(); }
-                    if (cameraNode["height"].IsDefined()) { cameraDescriptor.mHeight = cameraNode["height"].as<f32>(); }
-                }
-
-                entityDescriptor.mCamera = cameraDescriptor;
-            }
-
-            entitiesArray.push_back(entityDescriptor);
-        }
-    }
-
-    Float3 ParseFloat3(const YAML::Node& node) {
-        if (node.IsSequence() && node.size() == 3) {
-            return {node[0].as<f32>(), node[1].as<f32>(), node[2].as<f32>()};
-        } else {
-            X_LOG_ERROR("Failed to parse float3 in scene descriptor.")
-            return {std::numeric_limits<f32>::max(), std::numeric_limits<f32>::max(), std::numeric_limits<f32>::max()};
-        }
-    }
-
-    void EmitFloat3(YAML::Emitter& emitter, const Float3& vector) {
-        emitter << YAML::BeginSeq;
-        emitter << vector.x << vector.y << vector.z;
-        emitter << YAML::EndSeq;
+        return true;
     }
 }  // namespace x

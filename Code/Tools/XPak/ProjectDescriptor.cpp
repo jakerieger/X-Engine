@@ -3,43 +3,50 @@
 //
 
 #include "ProjectDescriptor.hpp"
+#include "Common/XML.hpp"
 
 namespace x {
-    bool ProjectDescriptor::FromFile(const str& filename) {
-        YAML::Node root         = YAML::LoadFile(filename);
-        const auto& projectNode = root["project"];
-        if (!projectNode.IsDefined()) { return false; }
+    bool ProjectDescriptor::FromFile(const Path& filename) {
+        if (!filename.Exists()) return false;
 
-        mName          = projectNode["name"].as<str>();
-        mEngineVersion = projectNode["engineVersion"].as<f32>();
+        rapidxml::xml_document<> doc;
+        if (!XML::ReadFile(filename, doc)) return false;
 
-        const auto projectDir = Path(filename).Parent();
+        const auto projectNode = doc.first_node("Project");
+        if (!projectNode) return false;
+        const auto projectName = projectNode->first_attribute("name")->value();
+        X_ASSERT(!(X_CSTR_EMPTY(projectName)))
 
-        // Get directories relative to the project directory
-        // .xproj file should sit at root of file structure
-        mContentDirectory = projectDir.Join(projectNode["contentDirectory"].as<str>()).Str();
+        mName             = projectName;
+        mEngineVersion    = std::stof(projectNode->first_node("EngineVersion")->value());
+        mContentDirectory = projectNode->first_node("ContentDirectory")->value();
+        mStartupScene     = projectNode->first_node("StartupScene")->value();
 
-        mStartupScene = projectNode["startupScene"].as<str>();
-
-        mLoaded = true;
         return true;
     }
 
     bool ProjectDescriptor::ToFile(const Path& filename) const {
-        YAML::Emitter out;
+        using namespace rapidxml;
+        xml_document<> doc;
 
-        out << YAML::BeginMap;
-        out << YAML::Key << "project" << YAML::Value << YAML::BeginMap;
+        xml_node<>* projectNode = doc.allocate_node(node_element, "Project");
+        projectNode->append_attribute(doc.allocate_attribute("name", mName.c_str()));
+        doc.append_node(projectNode);
+
+        // Project node
         {
-            out << YAML::Key << "name" << YAML::Value << mName;
-            out << YAML::Key << "engineVersion" << YAML::Value << mEngineVersion;
-            out << YAML::Key << "contentDirectory" << YAML::Value << mContentDirectory;
-            out << YAML::Key << "startupScene" << YAML::Value << mStartupScene;
-        }
-        out << YAML::EndMap;
-        out << YAML::EndMap;
+            xml_node<>* engVersionNode = doc.allocate_node(node_element, "EngineVersion", X_TOCSTR(mEngineVersion));
+            projectNode->append_node(engVersionNode);
 
-        return FileWriter::WriteAllText(filename, out.c_str());
+            xml_node<>* contentDirectoryNode =
+              doc.allocate_node(node_element, "ContentDirectory", mContentDirectory.c_str());
+            projectNode->append_node(contentDirectoryNode);
+
+            xml_node<>* startupSceneNode = doc.allocate_node(node_element, "StartupScene", mStartupScene.c_str());
+            projectNode->append_node(startupSceneNode);
+        }
+
+        return XML::WriteFile(filename, doc);
     }
 
     std::string ProjectDescriptor::ToString() const {

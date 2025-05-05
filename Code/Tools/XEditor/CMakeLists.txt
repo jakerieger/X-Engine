@@ -12,6 +12,7 @@ add_executable(XEditor WIN32
     ${APP_RES}
     ${COMMON_SOURCES}
     ${IMGUI_SOURCES}
+    ${RAPIDXML_INCLUDE}
     ${TOOLS_DIR}/XPak/Compression.hpp
     ${TOOLS_DIR}/XPak/Compression.cpp
     ${EDITOR_DIR}/AssetBrowserIcons.h

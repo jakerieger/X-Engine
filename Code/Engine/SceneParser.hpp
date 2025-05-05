@@ -2,6 +2,7 @@
 
 #include <span>
 
+#include "Color.hpp"
 #include "Math.hpp"
 #include "Common/Types.hpp"
 #include "SceneState.hpp"
@@ -19,7 +20,7 @@ namespace x {
     struct SunDescriptor {
         bool mEnabled;
         f32 mIntensity;
-        Float3 mColor;
+        Color mColor;
         Float3 mDirection;
         bool mCastsShadows;
     };
@@ -63,12 +64,17 @@ namespace x {
         std::optional<CameraDescriptor> mCamera {std::nullopt};
     };
 
+    struct SkyDescriptor {
+        Color mSkyColor;
+    };
+
     struct SceneDescriptor {
         str mName;
         str mDescription;
 
         struct {
             LightDescriptor mLights;
+            SkyDescriptor mSky;
         } mWorld;
 
         vector<EntityDescriptor> mEntities;
@@ -81,9 +87,9 @@ namespace x {
 
     class SceneParser {
     public:
-        static void Parse(const str& filename, SceneDescriptor& descriptor);
-        static void Parse(std::span<const u8> data, SceneDescriptor& descriptor);
-        static void StateToDescriptor(const SceneState& state, SceneDescriptor& descriptor, const str& sceneName);
-        static void WriteToFile(const SceneDescriptor& descriptor, const Path &filename);
+        static bool Parse(const Path& filename, SceneDescriptor& descriptor);
+        static bool Parse(std::span<const u8> data, SceneDescriptor& descriptor);
+        static bool StateToDescriptor(const SceneState& state, SceneDescriptor& descriptor, const str& sceneName);
+        static bool WriteToFile(const SceneDescriptor& descriptor, const Path& filename);
     };
 }  // namespace x
