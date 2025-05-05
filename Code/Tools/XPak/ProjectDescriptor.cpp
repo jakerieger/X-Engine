@@ -23,6 +23,7 @@ namespace x {
 
         mContentDirectory = contentPath.Str();
         mStartupScene     = XML::GetNodeStr(projectNode, "StartupScene");
+        mLoaded           = true;
 
         return true;
     }

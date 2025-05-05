@@ -78,4 +78,5 @@ inline constexpr size_t operator"" _GIGABYTES(unsigned long long n) {
 
 #define X_STRCMP(a, b) std::strcmp(a, b) == 0
 
+#define X_TOSTR(val) std::to_string(val)
 #define X_TOCSTR(val) std::to_string(val).c_str()

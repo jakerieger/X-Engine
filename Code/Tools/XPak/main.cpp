@@ -24,6 +24,7 @@ struct UnpackArgs {
 };
 
 struct GenAssetArgs {
+    str mOutputDir;
     str mAssetFile;
     str mAssetType;
 };
@@ -48,6 +49,7 @@ int main(int argc, char* argv[]) {
     auto* generate = app.add_subcommand("generate", "Generates asset descriptor file for given source asset");
     GenAssetArgs genArgs;
     generate->add_option("asset_file", genArgs.mAssetFile, "Asset source file")->required(true);
+    generate->add_option("-o,--output_dir", genArgs.mOutputDir, "Descriptor output directory")->required(true);
     generate->add_option("-t,--type", genArgs.mAssetType, "Asset type (texture, mesh, material, etc.)");
 
     auto* dumpTable = app.add_subcommand("dump", "Dump pak file table contents");
@@ -154,7 +156,7 @@ int main(int argc, char* argv[]) {
             return 0;
         }
 
-        if (!AssetGenerator::GenerateAsset(sourceFile, assetType, Path::Current())) {
+        if (!AssetGenerator::GenerateAsset(sourceFile, assetType, Path(genArgs.mOutputDir))) {
             std::cerr << "Could not generate asset" << std::endl;
             return EXIT_FAILURE;
         }

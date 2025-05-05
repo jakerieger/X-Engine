@@ -31,12 +31,13 @@ namespace x {
         // Create root asset node
         const auto id         = GenerateId(type);
         xml_node<>* assetNode = doc.allocate_node(node_element, "Asset");
-        assetNode->append_attribute(doc.allocate_attribute("id", X_TOCSTR(id)));
+        const auto idStr      = X_TOSTR(id);
+        assetNode->append_attribute(doc.allocate_attribute("id", idStr.c_str()));
         doc.append_node(assetNode);
 
         // Add source node
-        const char* sourcePath = assetFile.CStr();
-        xml_node<>* sourceNode = doc.allocate_node(node_element, "Source", sourcePath);
+        const auto sourcePath  = assetFile.RelativeTo(outputDir).Str();
+        xml_node<>* sourceNode = doc.allocate_node(node_element, "Source", sourcePath.c_str());
         assetNode->append_node(sourceNode);
 
         const auto descriptorFile = outputDir / (assetFile.Filename() + ".xasset");
