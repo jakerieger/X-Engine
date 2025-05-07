@@ -8,6 +8,8 @@ It boasts a modest forward renderer, entity component system, fully integrated e
 
 Entity behavior and scripting is handled by a JIT-compiled Lua runtime (thanks to LuaJIT), and the engine core itself is quite lightweight and modular, compiling to a small static library that can be linked to any Windows C++ application one wishes.
 
+> I'm currently working on the CMake package system in order to make using this with external projects much simpler. Everything seems to be working except for exporting LuaJIT, which has a custom build process. Once this is sorted out, a section on installation will be added to this readme.
+
 ## Modules
 
 ### X

@@ -1,4 +1,4 @@
-project(SpaceGame)
+project(XENGINE)
 
 set(XPAK_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/XPak)
@@ -18,6 +18,7 @@ add_library(xpak STATIC
     ${XPAK_DIR}/ScriptCompiler.hpp
     ${XPAK_DIR}/ScriptCompiler.cpp
 )
+add_library(X::Pak ALIAS xpak)
 
 add_executable(xpakc
     ${CODE_DIR}/Engine/Color.cpp
@@ -25,11 +26,16 @@ add_executable(xpakc
     ${XPAK_DIR}/main.cpp
 )
 
-target_include_directories(xpak PRIVATE
+target_include_directories(xpak
+    PUBLIC
+    $<BUILD_INTERFACE:${CODE_DIR}>
+    $<INSTALL_INTERFACE:include>
+    PRIVATE
     ${LUAJIT_INCLUDES}
 )
 
-target_link_libraries(xpak PRIVATE
+target_link_libraries(xpak
+    PRIVATE
     ${BROTLI_LIBS}
     luajit
 )

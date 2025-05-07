@@ -1524,7 +1524,6 @@ namespace x {
                               MaterialDescriptor desc;
                               if (!MaterialParser::Parse(*assetBytes, desc)) { return; }
                               const auto mat = GetCurrentScene()->LoadMaterial(desc);
-                              // TODO: Materials are returning nullptr now
                               X_ASSERT(mat.get() != nullptr)
                               model->SetMaterial(mat);
                               model->SetMaterialId(descriptor.mId);

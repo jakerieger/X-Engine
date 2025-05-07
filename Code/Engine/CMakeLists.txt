@@ -1,4 +1,4 @@
-project(SpaceGame)
+project(XENGINE)
 
 set(ENGINE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -107,6 +107,7 @@ add_library(x STATIC
     ${ENGINE_DIR}/Window.cpp
     ${ENGINE_DIR}/Window.hpp
 )
+add_library(X::Engine ALIAS x)
 
 message("${CMAKE_SOURCE_DIR}")
 
@@ -115,6 +116,14 @@ set(DX_LIBS
     dxgi.lib
     d3dcompiler.lib
     dxguid.lib
+)
+
+target_include_directories(x PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CODE_DIR}>
+    $<BUILD_INTERFACE:${CODE_DIR}/Tools>
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/Engine/Shaders/Header>
+    $<INSTALL_INTERFACE:include/XENGINE>
 )
 
 target_link_libraries(x
@@ -126,7 +135,7 @@ target_link_libraries(x
     yaml-cpp
     ${BROTLI_LIBS}
     DirectXTex
-    xpak
+    X::Pak
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -138,8 +147,3 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "Dist")
 endif ()
 
 target_compile_definitions(x PRIVATE ${WINDOWS_COMPILE_DEFS} LUA_JIT)
-
-target_include_directories(x PUBLIC
-    ${CODE_DIR}/Tools
-    ${CMAKE_SOURCE_DIR}/Engine/Shaders/Header
-)

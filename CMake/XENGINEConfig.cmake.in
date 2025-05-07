@@ -1,0 +1,28 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(OpenMP REQUIRED)
+
+# Set paths
+set_and_check(XENGINE_LIBRARY_DIR "${PACKAGE_PREFIX_DIR}/lib")
+set_and_check(XENGINE_INCLUDE_DIR "${PACKAGE_PREFIX_DIR}/include")
+
+# IMPORTANT: Skip finding external dependencies, since they're already included in our export
+# DO NOT use find_dependency() for libraries that are part of our XENGINETargets export
+
+# Include our targets file which should include all dependencies
+include("${CMAKE_CURRENT_LIST_DIR}/XENGINETargets.cmake")
+
+# Validation check
+if(TARGET X::x AND TARGET X::xpak)
+    set(XENGINE_FOUND TRUE)
+else()
+    set(XENGINE_FOUND FALSE)
+if(NOT TARGET X::x)
+    message(STATUS "X::x target not found")
+endif()
+if(NOT TARGET X::xpak)
+    message(STATUS "X::xpak target not found")
+endif()
+    message(FATAL_ERROR "XENGINE targets not properly exported")
+endif()
