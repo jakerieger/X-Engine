@@ -41,6 +41,7 @@ namespace x {
         assetNode->append_node(sourceNode);
 
         const auto descriptorFile = outputDir / (assetFile.Filename() + ".xasset");
+
         return XML::WriteFile(descriptorFile, doc);
     }
 }  // namespace x

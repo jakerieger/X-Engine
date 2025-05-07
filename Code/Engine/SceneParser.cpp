@@ -193,8 +193,7 @@ namespace x {
                   doc.allocate_node(node_element, "Enabled", sun.mEnabled ? "true" : "false");
                 sunNode->append_node(sunEnabledNode);
 
-                xml_node<>* sunIntensityNode =
-                  doc.allocate_node(node_element, "Intensity", X_TOSTR(sun.mIntensity).c_str());
+                auto* sunIntensityNode = XML::MakeNumericNode("Intensity", sun.mIntensity, doc);
                 sunNode->append_node(sunIntensityNode);
 
                 xml_node<>* sunColorNode = XML::MakeColorNode("Color", sun.mColor, doc);
@@ -234,7 +233,7 @@ namespace x {
 
             for (const auto& entity : descriptor.mEntities) {
                 xml_node<>* entityNode = doc.allocate_node(node_element, "Entity");
-                entityNode->append_attribute(doc.allocate_attribute("id", X_TOSTR(entity.mId).c_str()));
+                entityNode->append_attribute(XML::MakeNumericAttr("id", entity.mId, doc));
                 entityNode->append_attribute(doc.allocate_attribute("name", entity.mName.c_str()));
 
                 xml_node<>* componentsNode = doc.allocate_node(node_element, "Components");
@@ -262,11 +261,11 @@ namespace x {
                     xml_node<>* modelNode = doc.allocate_node(node_element, "Model");
 
                     xml_node<>* meshNode = doc.allocate_node(node_element, "Mesh");
-                    meshNode->append_attribute(doc.allocate_attribute("id", X_TOSTR(model.mMeshId).c_str()));
+                    meshNode->append_attribute(XML::MakeNumericAttr("id", model.mMeshId, doc));
                     modelNode->append_node(meshNode);
 
                     xml_node<>* materialNode = doc.allocate_node(node_element, "Material");
-                    materialNode->append_attribute(doc.allocate_attribute("id", X_TOSTR(model.mMaterialId).c_str()));
+                    materialNode->append_attribute(XML::MakeNumericAttr("id", model.mMaterialId, doc));
                     modelNode->append_node(materialNode);
 
                     xml_node<>* castsShadowsNode =
@@ -285,23 +284,23 @@ namespace x {
                     auto& camera           = entity.mCamera.value();
                     xml_node<>* cameraNode = doc.allocate_node(node_element, "Camera");
 
-                    xml_node<>* fovNode = doc.allocate_node(node_element, "FOV", X_TOSTR(camera.mFOV).c_str());
+                    auto* fovNode = XML::MakeNumericNode("FOV", camera.mFOV, doc);
                     cameraNode->append_node(fovNode);
 
-                    xml_node<>* nearZNode = doc.allocate_node(node_element, "NearZ", X_TOSTR(camera.mNearZ).c_str());
+                    xml_node<>* nearZNode = XML::MakeNumericNode("NearZ", camera.mNearZ, doc);
                     cameraNode->append_node(nearZNode);
 
-                    xml_node<>* farZNode = doc.allocate_node(node_element, "FarZ", X_TOSTR(camera.mFarZ).c_str());
+                    xml_node<>* farZNode = XML::MakeNumericNode("FarZ", camera.mFarZ, doc);
                     cameraNode->append_node(farZNode);
 
                     xml_node<>* orthographicNode =
                       doc.allocate_node(node_element, "Orthographic", camera.mOrthographic ? "true" : "false");
                     cameraNode->append_node(orthographicNode);
 
-                    xml_node<>* widthNode = doc.allocate_node(node_element, "Width", X_TOSTR(camera.mWidth).c_str());
+                    xml_node<>* widthNode = XML::MakeNumericNode("Width", camera.mWidth, doc);
                     cameraNode->append_node(widthNode);
 
-                    xml_node<>* heightNode = doc.allocate_node(node_element, "Height", X_TOSTR(camera.mHeight).c_str());
+                    xml_node<>* heightNode = XML::MakeNumericNode("Height", camera.mHeight, doc);
                     cameraNode->append_node(heightNode);
 
                     componentsNode->append_node(cameraNode);
@@ -313,7 +312,7 @@ namespace x {
                     xml_node<>* behaviorNode = doc.allocate_node(node_element, "Behavior");
 
                     xml_node<>* scriptNode = doc.allocate_node(node_element, "Script");
-                    scriptNode->append_attribute(doc.allocate_attribute("id", X_TOSTR(behavior.mScriptId).c_str()));
+                    scriptNode->append_attribute(XML::MakeNumericAttr("id", behavior.mScriptId, doc));
                     behaviorNode->append_node(scriptNode);
 
                     componentsNode->append_node(behaviorNode);
@@ -331,6 +330,7 @@ namespace x {
 
     bool SceneParser::StateToDescriptor(const SceneState& state, SceneDescriptor& descriptor, const str& sceneName) {
         descriptor.mName = sceneName;
+        // TODO: Add description to save as dialog and this function
 
         const auto& sun = state.GetLightState().mSun;
         SunDescriptor sunDescriptor;

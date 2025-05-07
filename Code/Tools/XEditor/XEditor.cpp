@@ -2186,23 +2186,29 @@ namespace x {
         X_ASSERT(sceneRoot.Exists())
 
         // Check whether we're overwriting the current scene or saving as new scene
-        const bool overwriting = !sceneName.empty();
-        const str name         = overwriting ? sceneName : GetCurrentScene()->GetName();
+        const bool overwriting = sceneName.empty();
+        const str name         = overwriting ? GetCurrentScene()->GetName() : sceneName;
 
         // Parse the current scene state in the editor to a descriptor file
         SceneDescriptor descriptor {};
-        SceneParser::StateToDescriptor(GetSceneState(), descriptor, name);
+        if (!SceneParser::StateToDescriptor(GetSceneState(), descriptor, name)) {
+            X_LOG_ERROR("Failed to parse state to descriptor");
+            return;
+        }
         X_ASSERT(descriptor.IsValid())
 
         // Scenes are saved to <Project>/<Content>/Scenes/<Name>.scene
         const Path scenePath = sceneRoot / (name + ".scene");
         // Write scene descriptor to file
-        SceneParser::WriteToFile(descriptor, scenePath);
-        X_ASSERT(scenePath.Exists())
+        if (!SceneParser::WriteToFile(descriptor, scenePath)) {
+            X_LOG_ERROR("Failed to write scene to file")
+            return;
+        }
 
         // If we're saving this as a new scene asset, we need to generate its descriptor file
         if (!overwriting) {
-            if (!AssetGenerator::GenerateAsset(scenePath, kAssetType_Scene, contentRoot)) {
+            const bool generateResult = AssetGenerator::GenerateAsset(scenePath, kAssetType_Scene, contentRoot);
+            if (!generateResult) {
                 X_LOG_ERROR("Failed to generate scene asset descriptor");
                 return;
             }

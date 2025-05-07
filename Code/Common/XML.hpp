@@ -91,28 +91,47 @@ namespace x::XML {
 
     inline bool WriteFile(const Path& filename, const rapidxml::xml_document<>& doc) {
         try {
-            std::ofstream file(filename.CStr());
-            if (!file.is_open()) return false;
-            file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-            file << doc;
-            file.close();
+            str xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+            rapidxml::print(std::back_inserter(xml), doc);
+            FileWriter::WriteAllText(filename, xml);
             return true;
         } catch (...) { return false; }
     }
 
+    template<typename T>
+        requires std::is_arithmetic_v<T>
+    inline rapidxml::xml_node<>* MakeNumericNode(const char* name,
+                                                 const T& value,
+                                                 rapidxml::xml_document<>& doc,
+                                                 const rapidxml::node_type type = rapidxml::node_element) {
+        const str valueStr = std::to_string(value);
+        rapidxml::xml_node<>* node =
+          doc.allocate_node(type, doc.allocate_string(name), doc.allocate_string(valueStr.c_str()));
+        return node;
+    }
+
+    template<typename T>
+        requires std::is_arithmetic_v<T>
+    inline rapidxml::xml_attribute<>* MakeNumericAttr(const char* name, const T& value, rapidxml::xml_document<>& doc) {
+        const str valueStr = std::to_string(value);
+        rapidxml::xml_attribute<>* attr =
+          doc.allocate_attribute(doc.allocate_string(name), doc.allocate_string(valueStr.c_str()));
+        return attr;
+    }
+
     inline rapidxml::xml_node<>* MakeFloat3Node(const char* name, const Float3& value, rapidxml::xml_document<>& doc) {
         rapidxml::xml_node<>* node = doc.allocate_node(rapidxml::node_element, name);
-        node->append_attribute(doc.allocate_attribute("x", X_TOSTR(value.x).c_str()));
-        node->append_attribute(doc.allocate_attribute("y", X_TOSTR(value.y).c_str()));
-        node->append_attribute(doc.allocate_attribute("z", X_TOSTR(value.z).c_str()));
+        node->append_attribute(MakeNumericAttr("x", value.x, doc));
+        node->append_attribute(MakeNumericAttr("y", value.y, doc));
+        node->append_attribute(MakeNumericAttr("z", value.z, doc));
         return node;
     }
 
     inline rapidxml::xml_node<>* MakeColorNode(const char* name, const Color& value, rapidxml::xml_document<>& doc) {
         rapidxml::xml_node<>* node = doc.allocate_node(rapidxml::node_element, name);
-        node->append_attribute(doc.allocate_attribute("r", X_TOSTR(value.R()).c_str()));
-        node->append_attribute(doc.allocate_attribute("g", X_TOSTR(value.G()).c_str()));
-        node->append_attribute(doc.allocate_attribute("b", X_TOSTR(value.B()).c_str()));
+        node->append_attribute(MakeNumericAttr("r", value.R(), doc));
+        node->append_attribute(MakeNumericAttr("g", value.G(), doc));
+        node->append_attribute(MakeNumericAttr("b", value.B(), doc));
         return node;
     }
 
