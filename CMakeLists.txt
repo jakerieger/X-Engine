@@ -52,7 +52,7 @@ if (WIN32)
         COMPATIBILITY SameMajorVersion
     )
 
-    # Configure the config file
+    # Configure the config file (lol)
     configure_package_config_file(
         "${CMAKE_DIR}/XENGINEConfig.cmake.in"
         "${CMAKE_CURRENT_BINARY_DIR}/XENGINEConfig.cmake"
@@ -97,7 +97,7 @@ if (WIN32)
         INCLUDES DESTINATION ${XENGINE_INSTALL_INCLUDEDIR}
     )
 
-    # install LuaJIT
+    # Install LuaJIT
     install_luajit(${XENGINE_INSTALL_LIBDIR} ${XENGINE_INSTALL_INCLUDEDIR})
 
     # Export targets for installation
@@ -114,6 +114,13 @@ if (WIN32)
         "${CMAKE_CURRENT_BINARY_DIR}/XENGINEConfig.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/XENGINEConfigVersion.cmake"
         DESTINATION ${XENGINE_INSTALL_CMAKEDIR}
+    )
+
+    # Install licenses file
+    install(
+        FILES
+        "${CMAKE_SOURCE_DIR}/LICENSES.txt"
+        DESTINATION ${XENGINE_INSTALL_LIBDIR}/../ # install root
     )
 else ()
     message(FATAL_ERROR "Project only supports Windows.")
