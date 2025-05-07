@@ -4,6 +4,8 @@
 
 **XEN**GINE (or XEN for short) is a custom 3D game engine built for Windows from the ground up as both a learning project and fully functional toolsuite for developing games.
 
+It started its life as a project for learning DirectX 11 and slowly expanded into a fully featured game engine. Now its development continues under the goal of creating a toolsuite capable of developing real games.
+
 It boasts a modest forward renderer, entity component system, fully integrated editor, and an asset management system for packing and shipping game content.
 
 Entity behavior and scripting is handled by a JIT-compiled Lua runtime (thanks to LuaJIT), and the engine core itself is quite lightweight and modular, compiling to a small static library that can be linked to any Windows C++ application one wishes.
