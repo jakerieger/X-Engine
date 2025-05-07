@@ -1,19 +1,27 @@
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
+
+# DO NOT use find_dependency() for libraries that are part of XENGINETargets exports
 find_dependency(OpenMP REQUIRED)
 
-# Set paths
 set_and_check(XENGINE_LIBRARY_DIR "${PACKAGE_PREFIX_DIR}/lib")
 set_and_check(XENGINE_INCLUDE_DIR "${PACKAGE_PREFIX_DIR}/include")
 
-# IMPORTANT: Skip finding external dependencies, since they're already included in our export
-# DO NOT use find_dependency() for libraries that are part of our XENGINETargets export
+set(XENGINE_IMGUI_INC ${XENGINE_INCLUDE_DIR}/XENGINE/Vendor/imgui)
 
-# Include our targets file which should include all dependencies
+if(NOT TARGET luajit)
+    add_library(luajit STATIC IMPORTED)
+    set_target_properties(luajit PROPERTIES
+        IMPORTED_LOCATION "${XENGINE_LIBRARY_DIR}/lua51.lib"
+        INTERFACE_INCLUDE_DIRECTORIES "${XENGINE_INCLUDE_DIR}/XENGINE/luajit"
+    )
+endif()
+
+# IMPORTANT: Skip finding external dependencies, since they're already included in the export
+
 include("${CMAKE_CURRENT_LIST_DIR}/XENGINETargets.cmake")
 
-# Validation check
 if(TARGET X::x AND TARGET X::xpak)
     set(XENGINE_FOUND TRUE)
 else()

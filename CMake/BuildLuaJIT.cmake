@@ -42,6 +42,25 @@ function(build_luajit)
 
     # make include dir available to calling scope
     set(LUAJIT_INCLUDES "${luajit_SOURCE_DIR}/src" PARENT_SCOPE)
+    set(LUAJIT_SOURCE_DIR "${luajit_SOURCE_DIR}" PARENT_SCOPE)
+    set(LUAJIT_LIBRARY "${luajit_SOURCE_DIR}/src/lua51.lib" PARENT_SCOPE)
+endfunction()
+
+function(install_luajit install_lib_dir install_include_dir)
+    FetchContent_GetProperties(luajit)
+
+    # Install LuaJIT library
+    install(
+        FILES "${luajit_SOURCE_DIR}/src/lua51.lib"
+        DESTINATION ${install_lib_dir}
+    )
+
+    # Install LuaJIT headers
+    install(
+        DIRECTORY "${luajit_SOURCE_DIR}/src/"
+        DESTINATION ${install_include_dir}/XENGINE/luajit
+        FILES_MATCHING PATTERN "*.h"
+    )
 endfunction()
 
 cmake_policy(POP)

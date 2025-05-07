@@ -8,8 +8,6 @@ It boasts a modest forward renderer, entity component system, fully integrated e
 
 Entity behavior and scripting is handled by a JIT-compiled Lua runtime (thanks to LuaJIT), and the engine core itself is quite lightweight and modular, compiling to a small static library that can be linked to any Windows C++ application one wishes.
 
-> I'm currently working on the CMake package system in order to make using this with external projects much simpler. Everything seems to be working except for exporting LuaJIT, which has a custom build process. Once this is sorted out, a section on installation will be added to this readme.
-
 ## Modules
 
 ### X
@@ -41,3 +39,50 @@ and unpacking or parsing pak files for debugging purposes.
 so they can be easily embedded in other GUI tools such as XEditor. It uses Brotli for compression.
 
 > Its source can be found in [Code/Tools/ResPak](Code/Tools/ResPak).
+
+
+## Installing
+
+While no installers are provided at the moment, the libraries can be installed and used in external CMake
+projects via `FindPackage()`.
+
+Simply run the following command from the current build target's output directory (i.e. `~/XENGINE/build/Debug`):
+```bash
+$ cmake --install .
+```
+
+This will default to installing XENGINE in `C:\Program Files (x86)\XENGINE`. All you need to do now in order to use it
+is to add the following to your external project's `CMakeLists.txt`:
+```cmake
+# Make sure C++20 is enabled!
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# If you installed to the default directory, this is all you need.
+# If you installed to a custom directory, you'll need to add the `PATHS` arg and provide the location:
+# find_package(XENGINE REQUIRED PATHS C:/XENGINE) for example
+find_package(XENGINE REQUIRED)
+
+add_executable(your_project ...)
+
+# Link against the core engine and XPak (required for asset processing)
+target_link_libraries(your_project PRIVATE X::x X::xpak)
+```
+
+Now you can use XENGINE in your own project code:
+
+```c++
+#include <XENGINE/Engine/Window.hpp>
+
+class GameWindow final : public x::IWindow {
+public:
+    GameWindow(const x::str &title, int width, int height, WORD windowIcon)
+        : IWindow(title, width, height, windowIcon) {
+    }
+};
+
+int main() {
+    GameWindow game("MyGame", 800, 600 ,0);
+    return game.Run();
+}
+```

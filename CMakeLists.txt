@@ -97,6 +97,9 @@ if (WIN32)
         INCLUDES DESTINATION ${XENGINE_INSTALL_INCLUDEDIR}
     )
 
+    # install LuaJIT
+    install_luajit(${XENGINE_INSTALL_LIBDIR} ${XENGINE_INSTALL_INCLUDEDIR})
+
     # Export targets for installation
     install(
         EXPORT XENGINETargets
