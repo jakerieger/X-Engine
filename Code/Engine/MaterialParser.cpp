@@ -9,13 +9,8 @@ namespace x {
     static bool ParseDoc(const rapidxml::xml_document<>& doc, MaterialDescriptor& descriptor) {
         const auto materialNode = doc.first_node("Material");
         if (materialNode) {
-            const char* name = materialNode->first_attribute("name")->value();
-            X_ASSERT(X_CSTR_EMPTY(name))
-            descriptor.mName = name;
-
-            const char* baseMaterial = materialNode->first_attribute("base")->value();
-            X_ASSERT(X_CSTR_EMPTY(baseMaterial))
-            descriptor.mBaseMaterial = baseMaterial;
+            descriptor.mName         = XML::GetAttrStr(materialNode->first_attribute("name"));
+            descriptor.mBaseMaterial = XML::GetAttrStr(materialNode->first_attribute("base"));
 
             const auto transparentAttr = materialNode->first_attribute("transparent");
             const bool transparent     = XML::GetAttrBool(transparentAttr);
@@ -28,17 +23,8 @@ namespace x {
             if (texturesNode) {
                 for (const rapidxml::xml_node<>* texture = texturesNode->first_node("Texture"); texture;
                      texture                             = texture->next_sibling()) {
-                    const char* texName = texture->first_attribute("name")->value();
-                    X_ASSERT(X_CSTR_EMPTY(texName))
-
-                    const auto* assetAttr = texture->first_attribute("asset");
-                    const u64 texId       = std::stoull(assetAttr->value());
-                    X_ASSERT(texId != 0)
-
-                    TextureDescriptor texDesc;
-                    texDesc.mName    = texName;
-                    texDesc.mAssetId = texId;
-                    descriptor.mTextures.push_back(texDesc);
+                    descriptor.mTextures.emplace_back(XML::GetAttrStr(texture->first_attribute("name")),
+                                                      std::stoull(texture->first_attribute("asset")->value()));
                 }
             }
 

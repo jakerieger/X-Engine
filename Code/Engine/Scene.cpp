@@ -285,7 +285,7 @@ namespace x {
     // Still not sure why this has to be done via the Scene class. I feel like material loading should be independent of
     // the current scene.
     shared_ptr<IMaterial> Scene::LoadMaterial(const MaterialDescriptor& material) {
-        if (material.mBaseMaterial == "PBR") {
+        if (material.mBaseMaterial == "Lit") {
             const auto mat = make_shared<PBRMaterial>(mContext, material.mTransparent);
 
             for (const auto& texture : material.mTextures) {

@@ -16,6 +16,7 @@
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
 #include <imgui_internal.h>
+#include <yaml-cpp/yaml.h>
 
 // Local includes
 #include "XEditor.hpp"
@@ -1520,8 +1521,10 @@ namespace x {
 
                               const auto assetBytes = AssetManager::GetAssetData(descriptor.mId);
                               X_ASSERT(assetBytes.has_value())
-                              const MaterialDescriptor desc = MaterialParser::Parse(*assetBytes, TODO);
-                              const auto mat                = GetCurrentScene()->LoadMaterial(desc);
+                              MaterialDescriptor desc;
+                              if (!MaterialParser::Parse(*assetBytes, desc)) { return; }
+                              const auto mat = GetCurrentScene()->LoadMaterial(desc);
+                              // TODO: Materials are returning nullptr now
                               X_ASSERT(mat.get() != nullptr)
                               model->SetMaterial(mat);
                               model->SetMaterialId(descriptor.mId);
@@ -2288,11 +2291,14 @@ namespace x {
     }
 
     void XEditor::OnLoadScene(const str& selectedScene) {
-        mGame.TransitionScene(selectedScene);
-        std::strcpy(EditorState::CurrentSceneName, selectedScene.c_str());
-        this->SetWindowTitle(std::format("XEditor | {}", selectedScene));
-        sSelectedEntity = GetEntities().begin()->first;
-        GetCurrentScene()->Update(0.0f);
+        if (mGame.TransitionScene(selectedScene)) {
+            std::strcpy(EditorState::CurrentSceneName, selectedScene.c_str());
+            this->SetWindowTitle(std::format("XEditor | {}", selectedScene));
+            sSelectedEntity = GetEntities().begin()->first;
+            GetCurrentScene()->Update(0.0f);
+        } else {
+            ShowAlert("Failed to load scene: " + selectedScene, Error);
+        }
     }
 
     void XEditor::OnImportAsset() {

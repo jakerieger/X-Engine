@@ -38,7 +38,8 @@ namespace x {
 
         // Project node
         {
-            xml_node<>* engVersionNode = doc.allocate_node(node_element, "EngineVersion", X_TOCSTR(mEngineVersion));
+            xml_node<>* engVersionNode =
+              doc.allocate_node(node_element, "EngineVersion", X_TOSTR(mEngineVersion).c_str());
             projectNode->append_node(engVersionNode);
 
             xml_node<>* contentDirectoryNode =

@@ -30,7 +30,8 @@ namespace x {
         void Shutdown();
         void Update();
         void RenderFrame() const;
-        void TransitionScene(const str& name);
+
+        bool TransitionScene(const str& name);
         void TransitionScene(const SceneDescriptor& scene);
         void Resize(u32 width, u32 height) const;
         void Reset();

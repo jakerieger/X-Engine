@@ -175,18 +175,12 @@ namespace x {
         }
 
         X_NODISCARD CameraComponent* GetMainCamera() {
-            if (mCameras.empty()) {
-                X_LOG_WARN("No main camera");
-                return nullptr;
-            }
+            if (mCameras.empty()) { return nullptr; }
             return *(mCameras.BeginMutable());
         }
 
         X_NODISCARD const CameraComponent* GetMainCamera() const {
-            if (mCameras.empty()) {
-                X_LOG_WARN("No main camera");
-                return nullptr;
-            }
+            if (mCameras.empty()) { return nullptr; }
             return *(mCameras.begin());
         }
 

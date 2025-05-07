@@ -57,10 +57,10 @@ namespace x::XML {
 
             return true;
         } catch (const rapidxml::parse_error& e) {
-            X_LOG_ERROR("%s", e.what());
+            X_LOG_ERROR("XML Parse Error: %s", e.what());
             return false;
         } catch (const std::exception& e) {
-            X_LOG_ERROR("%s", e.what());
+            X_LOG_ERROR("Exception: %s", e.what());
             return false;
         } catch (...) {
             X_LOG_ERROR("Unknown error occurred");
@@ -68,17 +68,20 @@ namespace x::XML {
         }
     }
 
-    inline bool ReadBytes(std::span<const u8> data, rapidxml::xml_document<>& doc) {
-        if (data.empty()) return false;
-        vector<u8> bytes(data.begin(), data.end());
+    /// @brief Parse XML from byte array. Data MUST be null-terminated or parsing will fail.
+    inline bool ReadBytes(char* data, size_t dataSize, rapidxml::xml_document<>& doc) {
+        if (dataSize <= 0) return false;
+
         try {
-            doc.parse<0>(RCAST<char*>(&bytes[0]));
+            doc.parse<rapidxml::parse_non_destructive | rapidxml::parse_normalize_whitespace |
+                      rapidxml::parse_validate_closing_tags>(data);
+
             return true;
         } catch (const rapidxml::parse_error& e) {
-            X_LOG_ERROR("%s", e.what());
+            X_LOG_ERROR("XML Parse Error: %s", e.what());
             return false;
         } catch (const std::exception& e) {
-            X_LOG_ERROR("%s", e.what());
+            X_LOG_ERROR("Exception: %s", e.what());
             return false;
         } catch (...) {
             X_LOG_ERROR("Unknown error occurred");
@@ -99,17 +102,17 @@ namespace x::XML {
 
     inline rapidxml::xml_node<>* MakeFloat3Node(const char* name, const Float3& value, rapidxml::xml_document<>& doc) {
         rapidxml::xml_node<>* node = doc.allocate_node(rapidxml::node_element, name);
-        node->append_attribute(doc.allocate_attribute("x", X_TOCSTR(value.x)));
-        node->append_attribute(doc.allocate_attribute("y", X_TOCSTR(value.y)));
-        node->append_attribute(doc.allocate_attribute("z", X_TOCSTR(value.z)));
+        node->append_attribute(doc.allocate_attribute("x", X_TOSTR(value.x).c_str()));
+        node->append_attribute(doc.allocate_attribute("y", X_TOSTR(value.y).c_str()));
+        node->append_attribute(doc.allocate_attribute("z", X_TOSTR(value.z).c_str()));
         return node;
     }
 
     inline rapidxml::xml_node<>* MakeColorNode(const char* name, const Color& value, rapidxml::xml_document<>& doc) {
         rapidxml::xml_node<>* node = doc.allocate_node(rapidxml::node_element, name);
-        node->append_attribute(doc.allocate_attribute("r", X_TOCSTR(value.R())));
-        node->append_attribute(doc.allocate_attribute("g", X_TOCSTR(value.G())));
-        node->append_attribute(doc.allocate_attribute("b", X_TOCSTR(value.B())));
+        node->append_attribute(doc.allocate_attribute("r", X_TOSTR(value.R()).c_str()));
+        node->append_attribute(doc.allocate_attribute("g", X_TOSTR(value.G()).c_str()));
+        node->append_attribute(doc.allocate_attribute("b", X_TOSTR(value.B()).c_str()));
         return node;
     }
 

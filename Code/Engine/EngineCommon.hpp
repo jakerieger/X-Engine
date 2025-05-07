@@ -29,8 +29,6 @@
         return dynamic_cast<T*>(this);                                                                                 \
     }
 
-#define X_NODISCARD [[nodiscard]]
-
 #define X_ARRAY_W_SIZE(arr) (arr), sizeof((arr))
 
 #if defined(X_DIST)

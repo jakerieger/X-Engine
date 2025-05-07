@@ -252,10 +252,10 @@ namespace x {
           });
     }
 
-    void Game::TransitionScene(const str& name) {
+    bool Game::TransitionScene(const str& name) {
         if (name.empty() || mScenes.empty()) {
             X_LOG_ERROR("Attempted to load blank or non-existent scene")
-            return;
+            return false;
         }
 
         mActiveScene.reset();
@@ -264,11 +264,12 @@ namespace x {
         if (const auto it = mScenes.find(name); it != mScenes.end()) {
             mActiveScene->Load(it->second);
         } else {
-            X_LOG_WARN("Scene not found in scene cache. Engine may not have loaded it yet.")
-            return;
+            X_LOG_ERROR("Scene not found in scene cache. Engine may not have loaded it yet.")
+            return false;
         }
 
         mActiveScene->Update(0.0f);
+        return true;
     }
 
     void Game::TransitionScene(const SceneDescriptor& scene) {
