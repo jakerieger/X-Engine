@@ -303,7 +303,7 @@ namespace x {
 
     Path Path::Parent() const {
         const size_t lastSeparator = mPath.find_last_of(PATH_SEPARATOR);
-        if (lastSeparator == std::string::npos || lastSeparator == 0) { return Path(std::to_string(PATH_SEPARATOR)); }
+        if (lastSeparator == std::string::npos || lastSeparator == 0) { return Path(X_TOSTR(PATH_SEPARATOR)); }
         return Path(mPath.substr(0, lastSeparator));
     }
 

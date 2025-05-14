@@ -821,7 +821,7 @@ namespace x {
 
             u32 index {0};
             for (const auto& [name, desc] : mGame.GetSceneMap()) {
-                str id          = "##" + std::to_string(index) + "scene_select";  // ex. ##0_select_scene
+                str id          = "##" + X_TOSTR(index) + "scene_select";  // ex. ##0_select_scene
                 str description = desc.mDescription;
                 if (description.length() > 50) { description = description.substr(0, 50) + "..."; }
                 if (Gui::SelectableWithHeaders(id.c_str(),
@@ -1802,7 +1802,7 @@ namespace x {
                             if (itemName.length() > 8) { itemName = itemName.substr(0, 10) + "..."; }
 
                             if (asset.GetTypeFromId() == kAssetType_Texture) {
-                                auto thumbnail = mTextureManager.GetTexture(std::to_string(asset.mId));
+                                auto thumbnail = mTextureManager.GetTexture(X_TOSTR(asset.mId));
                                 X_ASSERT(thumbnail.has_value());
 
                                 ImGui::GetWindowDrawList()->AddImage(
@@ -1973,7 +1973,7 @@ namespace x {
                 const AssetType assetType = asset.GetTypeFromId();
                 if (assetType == kAssetType_Texture) {
                     const auto preview =
-                      (ImTextureID)(mTextureManager.GetTexture(std::to_string(asset.mId))->mShaderResourceView.Get());
+                      (ImTextureID)(mTextureManager.GetTexture(X_TOSTR(asset.mId))->mShaderResourceView.Get());
                     ImVec2 regionSize = ImGui::GetContentRegionAvail();
                     regionSize.y      = regionSize.x;
                     ImGui::Image(preview, regionSize);
@@ -2396,9 +2396,9 @@ namespace x {
                 // Texture thumbnails
                 case kAssetType_Texture: {
                     auto textureFile      = Path(mLoadedProject.mContentDirectory) / asset.mFilename;
-                    const auto loadResult = mTextureManager.LoadFromDDSFile(textureFile, std::to_string(asset.mId));
+                    const auto loadResult = mTextureManager.LoadFromDDSFile(textureFile, X_TOSTR(asset.mId));
                     if (!loadResult) {
-                        ShowAlert("Failed to load texture asset with id " + std::to_string(asset.mId), Error);
+                        ShowAlert("Failed to load texture asset with id " + X_TOSTR(asset.mId), Error);
                     }
                 } break;
                 // Descriptors just use icon files

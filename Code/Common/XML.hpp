@@ -104,7 +104,7 @@ namespace x::XML {
                                                  const T& value,
                                                  rapidxml::xml_document<>& doc,
                                                  const rapidxml::node_type type = rapidxml::node_element) {
-        const str valueStr = std::to_string(value);
+        const str valueStr = X_TOSTR(value);
         rapidxml::xml_node<>* node =
           doc.allocate_node(type, doc.allocate_string(name), doc.allocate_string(valueStr.c_str()));
         return node;
@@ -113,7 +113,7 @@ namespace x::XML {
     template<typename T>
         requires std::is_arithmetic_v<T>
     inline rapidxml::xml_attribute<>* MakeNumericAttr(const char* name, const T& value, rapidxml::xml_document<>& doc) {
-        const str valueStr = std::to_string(value);
+        const str valueStr = X_TOSTR(value);
         rapidxml::xml_attribute<>* attr =
           doc.allocate_attribute(doc.allocate_string(name), doc.allocate_string(valueStr.c_str()));
         return attr;

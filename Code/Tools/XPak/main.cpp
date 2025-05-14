@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
         }
 
         for (const auto& [id, asset] : assetTable) {
-            auto assetName  = std::to_string(id) + ".bin";
+            auto assetName  = X_TOSTR(id) + ".bin";
             auto outputFile = Path(outputDir / assetName);
             auto assetData  = XPak::FetchAssetData(pakFile, asset);
             if (assetData.size() == 0) {

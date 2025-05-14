@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
         bytesStream
           << "//=========================================================================================//\n";
         bytesStream << "// " + identifier + "\n";
-        bytesStream << "// Width: " + std::to_string(width) + ", Height: " + std::to_string(height) + "\n";
+        bytesStream << "// Width: " + X_TOSTR(width) + ", Height: " + X_TOSTR(height) + "\n";
         bytesStream
           << "//=========================================================================================//\n";
         bytesStream << "static const unsigned char " + bytesIdentifier + "[] = {\n    ";
@@ -106,12 +106,12 @@ int main(int argc, char* argv[]) {
         }
 
         bytesStream << "\n};\n\n";
-        bytesStream << "static constexpr size_t " + originalSizeIdentifier + " = " + std::to_string(originalSize) +
+        bytesStream << "static constexpr size_t " + originalSizeIdentifier + " = " + X_TOSTR(originalSize) +
                          ";\n\n";
         bytesStream << "static constexpr size_t " + compressedSizeIdentifier + " = " +
-                         std::to_string(compressedBytes.size()) + ";\n\n";
-        bytesStream << "static constexpr int " + identifier + "_WIDTH = " + std::to_string(width) + ";\n\n";
-        bytesStream << "static constexpr int " + identifier + "_HEIGHT = " + std::to_string(height) + ";\n\n";
+                         X_TOSTR(compressedBytes.size()) + ";\n\n";
+        bytesStream << "static constexpr int " + identifier + "_WIDTH = " + X_TOSTR(width) + ";\n\n";
+        bytesStream << "static constexpr int " + identifier + "_HEIGHT = " + X_TOSTR(height) + ";\n\n";
 
         bytesStream
           << "//=========================================================================================//\n";

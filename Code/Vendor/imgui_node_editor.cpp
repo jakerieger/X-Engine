@@ -2800,7 +2800,7 @@ std::string ed::Settings::Serialize()
 
     auto serializeObjectId = [](ObjectId id)
     {
-        auto value = std::to_string(reinterpret_cast<uintptr_t>(id.AsPointer()));
+        auto value = X_TOSTR(reinterpret_cast<uintptr_t>(id.AsPointer()));
         switch (id.Type())
         {
             default:
