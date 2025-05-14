@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "Engine/D3D.hpp"
 #include "Engine/RenderContext.hpp"
 #include <imgui.h>

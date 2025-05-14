@@ -8,7 +8,7 @@
 #include "Input.hpp"
 #include "Mouse.hpp"
 #include "SceneState.hpp"
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "Common/Platform.hpp"
 #include "Volatile.hpp"
 #include "RenderSystem.hpp"

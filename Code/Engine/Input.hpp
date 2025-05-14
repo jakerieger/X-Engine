@@ -2,7 +2,7 @@
 
 #include <sol/state.hpp>
 
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "EngineCommon.hpp"
 #include "InputCodes.hpp"
 

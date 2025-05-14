@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "D3D.hpp"
 #include "EngineCommon.hpp"
 

@@ -8,7 +8,7 @@ set(COMMON_SOURCES
     ${CODE_DIR}/Common/Str.hpp
     ${CODE_DIR}/Common/Templates.hpp
     ${CODE_DIR}/Common/Timer.hpp
-    ${CODE_DIR}/Common/Types.hpp
+    ${CODE_DIR}/Common/Typedefs.hpp
     ${CODE_DIR}/Common/WindowsHelpers.cpp
     ${CODE_DIR}/Common/WindowsHelpers.hpp
     ${CODE_DIR}/Common/XML.hpp

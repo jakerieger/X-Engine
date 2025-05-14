@@ -40,7 +40,7 @@ namespace x {
                     tableEntry.mAssetId = asset.mId;
 
                     const auto filename  = file.Parent() / asset.mFilename;
-                    const auto assetData = FileReader::ReadAllBytes(filename);
+                    const auto assetData = FileReader::ReadBytes(filename);
                     XPakAssetEntry assetEntry;
 
                     if (assetType == kAssetType_Texture || assetType == kAssetType_Audio) {
@@ -53,7 +53,7 @@ namespace x {
                         tableEntry.mCompressedSize = tableEntry.mSize;
                     } else if (assetType == kAssetType_Script) {
                         // Scripts can get compiled to bytecode
-                        const str scriptSource    = FileReader::ReadAllText(filename);
+                        const str scriptSource    = FileReader::ReadText(filename);
                         vector<u8> scriptBytecode = ScriptCompiler::Compile(scriptSource, filename.Str());
                         if (scriptBytecode.size() == 0) {
                             printf("Failed to compile lua bytecode for script '%s'\n", filename.CStr());
@@ -301,7 +301,7 @@ namespace x {
     }
 
     AssetTable XPak::ReadPakTable(const Path& pakFile) {
-        auto pakBytes = FileReader::ReadAllBytes(pakFile);
+        auto pakBytes = FileReader::ReadBytes(pakFile);
         return ReadPakTable(pakBytes);
     }
 

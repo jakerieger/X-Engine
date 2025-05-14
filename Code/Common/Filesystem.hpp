@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include "Types.hpp"
+#include "Typedefs.hpp"
 #include "Macros.hpp"
 #include <fstream>
 #include <vector>
-#include <algorithm>
+#include <span>
 #include <future>
 
 #ifdef _WIN32
@@ -34,31 +34,31 @@ namespace x {
 
     class FileReader {
     public:
-        static std::vector<u8> ReadAllBytes(const Path& path);
-        static str ReadAllText(const Path& path);
-        static std::vector<str> ReadAllLines(const Path& path);
+        static std::vector<u8> ReadBytes(const Path& path);
+        static str ReadText(const Path& path);
+        static std::vector<str> ReadLines(const Path& path);
         static std::vector<u8> ReadBlock(const Path& path, size_t size, u64 offset = 0);
         static size_t QueryFileSize(const Path& path);
     };
 
     class FileWriter {
     public:
-        static bool WriteAllBytes(const Path& path, const std::vector<u8>& data);
-        static bool WriteAllText(const Path& path, const str& text);
-        static bool WriteAllLines(const Path& path, const std::vector<str>& lines);
-        static bool WriteBlock(const Path& path, const std::vector<u8>& data, u64 offset = 0);
+        static bool WriteBytes(const Path& path, const std::vector<u8>& data);
+        static bool WriteText(const Path& path, const str& text);
+        static bool WriteLines(const Path& path, const std::vector<str>& lines);
+        static bool WriteBlock(const Path& path, const std::span<const u8>& data, u64 offset = 0);
     };
 
     class AsyncFileReader {
     public:
-        static std::future<std::vector<u8>> ReadAllBytes(const Path& path);
-        static std::future<str> ReadAllText(const Path& path);
-        static std::future<std::vector<str>> ReadAllLines(const Path& path);
+        static std::future<std::vector<u8>> ReadBytes(const Path& path);
+        static std::future<str> ReadText(const Path& path);
+        static std::future<std::vector<str>> ReadLines(const Path& path);
         static std::future<std::vector<u8>> ReadBlock(const Path& path, size_t size, u64 offset = 0);
 
     private:
         template<typename Func>
-        static auto runAsync(Func&& func) -> std::future<decltype(func())> {
+        static auto RunAsync(Func&& func) -> std::future<decltype(func())> {
             using ReturnType = decltype(func());
             auto task        = std::make_shared<std::packaged_task<ReturnType()>>(std::forward<Func>(func));
             std::future<ReturnType> future = task->get_future();
@@ -69,14 +69,14 @@ namespace x {
 
     class AsyncFileWriter {
     public:
-        static std::future<bool> WriteAllBytes(const Path& path, const std::vector<u8>& data);
-        static std::future<bool> WriteAllText(const Path& path, const str& text);
-        static std::future<bool> WriteAllLines(const Path& path, const std::vector<str>& lines);
-        static std::future<bool> WriteBlock(const Path& path, const std::vector<u8>& data, u64 offset = 0);
+        static std::future<bool> WriteBytes(const Path& path, const std::vector<u8>& data);
+        static std::future<bool> WriteText(const Path& path, const str& text);
+        static std::future<bool> WriteLines(const Path& path, const std::vector<str>& lines);
+        static std::future<bool> WriteBlock(const Path& path, const std::span<const u8>& data, u64 offset = 0);
 
     private:
         template<typename Func>
-        static auto runAsync(Func&& func) -> std::future<decltype(func())> {
+        static auto RunAsync(Func&& func) -> std::future<decltype(func())> {
             using ReturnType = decltype(func());
             auto task        = std::make_shared<std::packaged_task<ReturnType()>>(std::forward<Func>(func));
             std::future<ReturnType> future = task->get_future();
@@ -96,19 +96,20 @@ namespace x {
         StreamReader(StreamReader&&) noexcept;
         StreamReader& operator=(StreamReader&&) noexcept;
 
-        bool Read(vector<u8>& data, size_t size);
-        bool ReadAll(vector<u8>& data);
+        bool Read(std::vector<u8>& data, size_t size);
+        bool ReadAll(std::vector<u8>& data);
         bool ReadLine(str& line);
 
-        bool IsOpen() const;
+        X_NODISCARD bool IsOpen() const;
+        X_NODISCARD size_t Size() const;
+
         bool Seek(u64 offset);
         u64 Position();
-        u64 Size() const;
         void Close();
 
     private:
-        std::ifstream _stream;
-        u64 _size = 0;
+        std::ifstream mStream;
+        size_t mSize = 0;
     };
 
     class StreamWriter {
@@ -122,8 +123,8 @@ namespace x {
         StreamWriter(StreamWriter&&) noexcept;
         StreamWriter& operator=(StreamWriter&&) noexcept;
 
-        bool Write(const vector<u8>& buffer);
-        bool Write(const vector<u8>& buffer, size_t size);
+        bool Write(const std::vector<u8>& buffer);
+        bool Write(const std::vector<u8>& buffer, size_t size);
         bool WriteLine(const str& line);
         bool Flush();
 
@@ -133,7 +134,7 @@ namespace x {
         void Close();
 
     private:
-        std::ofstream _stream;
+        std::ofstream mStream;
     };
 
     class DirectoryIterator;
@@ -142,7 +143,7 @@ namespace x {
     class Path {
     public:
         Path() = default;
-        explicit Path(const str& path) : path(Normalize(path)) {}
+        explicit Path(const str& path) : mPath(Normalize(path)) {}
         static Path Current();
 
         X_NODISCARD Path Parent() const;
@@ -157,14 +158,16 @@ namespace x {
         X_NODISCARD str Extension() const;
         X_NODISCARD Path ReplaceExtension(const str& ext) const;
         X_NODISCARD Path Join(const str& subPath) const;
-        X_NODISCARD Path operator/(const str& subPath) const;
+        Path& Join(const str& subPath);
         X_NODISCARD str Str() const;
         X_NODISCARD const char* CStr() const;
         X_NODISCARD str Filename() const;
         X_NODISCARD Path RelativeTo(const Path& basePath) const;
         X_NODISCARD str BaseName() const;
 
+        X_NODISCARD Path operator/(const str& subPath) const;
         X_NODISCARD bool operator==(const Path& other) const;
+        friend std::ostream& operator<<(std::ostream& os, const Path& path);
 
         X_NODISCARD bool Create() const;
         X_NODISCARD bool CreateAll() const;
@@ -174,7 +177,7 @@ namespace x {
         X_NODISCARD DirectoryEntries Entries() const;
 
     private:
-        str path;
+        str mPath;
         static str Join(const str& lhs, const str& rhs);
         static str Normalize(const str& rawPath);
     };

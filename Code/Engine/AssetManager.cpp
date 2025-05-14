@@ -34,12 +34,12 @@ namespace x {
             const auto type = AssetDescriptor::GetTypeFromId(id);
             if (type == kAssetType_Script) {
                 // Compile bytecode and return that
-                const auto scriptSource = FileReader::ReadAllText(fullPath);
+                const auto scriptSource = FileReader::ReadText(fullPath);
                 vector<u8> bytecode     = ScriptCompiler::Compile(scriptSource, fullPath.Str());
                 return bytecode;
             }
 
-            return FileReader::ReadAllBytes(fullPath);
+            return FileReader::ReadBytes(fullPath);
         } else {
             X_LOG_ERROR("AssetManager::GetAssetData - Not Found");
             return std::nullopt;

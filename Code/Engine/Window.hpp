@@ -6,7 +6,7 @@
 
 #include "EventEmitter.hpp"
 #include "Viewport.hpp"
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "Engine/EngineCommon.hpp"
 #include "Engine/RenderContext.hpp"
 

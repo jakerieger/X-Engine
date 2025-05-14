@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Common/Platform.hpp"
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 
 namespace x {
     class Clock {

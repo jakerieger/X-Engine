@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Types.hpp"
+#include "Typedefs.hpp"
 
 namespace x {
     namespace Math {

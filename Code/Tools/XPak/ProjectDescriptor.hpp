@@ -5,7 +5,7 @@
 #pragma once
 
 #include <format>
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "Common/Filesystem.hpp"
 
 namespace x {

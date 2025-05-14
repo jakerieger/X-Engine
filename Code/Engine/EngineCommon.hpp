@@ -152,14 +152,14 @@ private:
     std::mutex mBufferMutex {};
 
     Logger() : mLogFile(GetLogFileName(), std::ios::app) {
-        const auto dateTime  = DateTime::Now();
+        const auto dateTime  = x::DateTime::Now();
         const auto timestamp = dateTime.LocalString();
         const auto header    = std::format("-- Log opened at {} --\n", timestamp);
         mLogFile << header;
     }
 
     X_NODISCARD static std::string GetTimestamp() {
-        const auto dateTime = DateTime::Now();
+        const auto dateTime = x::DateTime::Now();
         return dateTime.LocalString();
     }
 

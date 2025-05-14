@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "Math.hpp"
 #include "Model.hpp"
 #include "Material.hpp"

@@ -4,7 +4,7 @@
 
 #include "Color.hpp"
 #include "Math.hpp"
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "SceneState.hpp"
 
 namespace x {

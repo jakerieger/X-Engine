@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Shader.hpp"
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "Math.hpp"
 
 namespace x {

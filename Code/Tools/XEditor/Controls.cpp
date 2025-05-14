@@ -9,7 +9,7 @@
 #include "../../Engine/Color.hpp"
 #include "ImGuiHelpers.hpp"
 #include "Common/FileDialogs.hpp"
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "Engine/EngineCommon.hpp"
 
 namespace x::Gui {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 
 namespace x {
     namespace KeyCode {

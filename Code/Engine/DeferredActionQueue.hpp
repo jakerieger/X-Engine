@@ -7,7 +7,7 @@
 #include <queue>
 #include <functional>
 #include "Common/Macros.hpp"
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 
 namespace x {
     class DeferredActionQueue {

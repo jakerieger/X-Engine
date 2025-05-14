@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "Shader.hpp"
 #include "Math.hpp"
 

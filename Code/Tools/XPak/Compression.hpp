@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include <span>
 #include <brotli/encode.h>
 

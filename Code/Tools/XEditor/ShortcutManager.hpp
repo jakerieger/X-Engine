@@ -6,7 +6,7 @@
 
 #include <functional>
 #include <imgui.h>
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "Common/Macros.hpp"
 
 namespace x {

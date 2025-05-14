@@ -5,7 +5,7 @@
 #pragma once
 
 #include "EngineCommon.hpp"
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "XPak/AssetDescriptor.hpp"
 
 #ifdef X_USE_PAK_FILE

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "SceneState.hpp"
 #include "TextureLoader.hpp"
 #include "ModelLoader.hpp"

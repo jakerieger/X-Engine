@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EngineCommon.hpp"
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 
 namespace x {
     /// @brief Heap-allocates a fixed size block of memory and returns a chunk of that memory when an allocation is

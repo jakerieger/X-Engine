@@ -8,7 +8,7 @@
 #include <map>
 #include <ranges>
 
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "EntityId.hpp"
 #include "ComponentManager.hpp"
 #include "Lights.hpp"

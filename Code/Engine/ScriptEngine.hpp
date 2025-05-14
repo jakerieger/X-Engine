@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EngineCommon.hpp"
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 
 #define SOL_ALL_SAFETIES_ON 1
 #include <sol/sol.hpp>

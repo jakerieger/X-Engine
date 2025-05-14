@@ -62,6 +62,7 @@ namespace x {
         if (opt.has_value()) { return *opt; }
         return T {};
     }
+}  // namespace x
 
 #define CAST static_cast
 #define CCAST const_cast
@@ -69,7 +70,6 @@ namespace x {
 #define RCAST reinterpret_cast
 
 #define CHECK_FLAG(bits, flag) (bits & flag) != 0
-}  // namespace x
 
 constexpr auto HLSL_TRUE  = 1U;
 constexpr auto HLSL_FALSE = 0U;

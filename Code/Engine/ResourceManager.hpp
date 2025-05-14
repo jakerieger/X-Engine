@@ -2,7 +2,7 @@
 
 #include <typeindex>
 
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "ArenaAllocator.hpp"
 #include "EntityId.hpp"
 #include "RenderContext.hpp"

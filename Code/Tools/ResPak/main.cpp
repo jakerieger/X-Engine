@@ -11,7 +11,7 @@
 #include <stb_image.h>
 #include <CLI/CLI.hpp>
 
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "Common/Filesystem.hpp"
 #include "Tools/XPak/Compression.hpp"  // For Brotli helpers
 

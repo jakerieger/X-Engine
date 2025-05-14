@@ -103,7 +103,7 @@ namespace x {
         out << YAML::Key << "last_project";
         out << YAML::Value << mLastProjectPath.Str();
         out << YAML::EndMap;
-        if (!FileWriter::WriteAllText(sessionFile, out.c_str())) { X_LOG_ERROR("Failed to save editor session"); }
+        if (!FileWriter::WriteText(sessionFile, out.c_str())) { X_LOG_ERROR("Failed to save editor session"); }
     }
 #pragma endregion
 
@@ -226,7 +226,7 @@ namespace x {
             out << YAML::Value << mTheme;
         }
         out << YAML::EndMap;
-        FileWriter::WriteAllText(settingsFile, out.c_str());
+        FileWriter::WriteText(settingsFile, out.c_str());
     }
 #pragma endregion
 

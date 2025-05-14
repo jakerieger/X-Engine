@@ -2,7 +2,7 @@
 
 #include "ComputeEffect.hpp"
 #include "D3D.hpp"
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 
 namespace x {
     class RenderContext;

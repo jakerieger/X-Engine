@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 
 namespace x {
     /// @brief Class trait signifying that this class needs to handle resizing when the window size changes.

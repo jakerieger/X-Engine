@@ -6,7 +6,7 @@
 
 #include <span>
 #include <rapidxml.hpp>
-#include "Types.hpp"
+#include "Typedefs.hpp"
 #include "Engine/Color.hpp"
 #include "Engine/EngineCommon.hpp"
 #include "Engine/Math.hpp"
@@ -47,7 +47,7 @@ namespace x::XML {
         if (!filename.Exists()) return false;
         str xml;
         try {
-            xml = FileReader::ReadAllText(filename);
+            xml = FileReader::ReadText(filename);
             if (xml.empty()) return false;
 
             const auto buffer = new char[xml.size() + 1];
@@ -93,7 +93,7 @@ namespace x::XML {
         try {
             str xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
             rapidxml::print(std::back_inserter(xml), doc);
-            FileWriter::WriteAllText(filename, xml);
+            FileWriter::WriteText(filename, xml);
             return true;
         } catch (...) { return false; }
     }

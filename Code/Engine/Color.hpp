@@ -6,7 +6,7 @@
 
 #include <imgui.h>
 #include "D3D.hpp"
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "Common/Macros.hpp"
 
 namespace x {

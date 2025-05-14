@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "AssetDescriptor.hpp"
 #include "Common/Filesystem.hpp"
 

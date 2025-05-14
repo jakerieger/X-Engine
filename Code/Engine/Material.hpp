@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Lights.hpp"
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "ResourceManager.hpp"
 #include "Shader.hpp"
 #include "TransformMatrices.hpp"

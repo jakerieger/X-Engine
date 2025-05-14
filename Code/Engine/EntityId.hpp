@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Resource.hpp"
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include <limits>
 
 namespace x {

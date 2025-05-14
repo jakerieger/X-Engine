@@ -9,12 +9,12 @@
 #include "MeshPreviewer.hpp"
 #include "ShortcutManager.hpp"
 #include "TextureManager.hpp"
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "Engine/Window.hpp"
 #include "Engine/Game.hpp"
-#include "XPak/ProjectDescriptor.hpp"
 #include "Engine/Color.hpp"
 #include "Engine/DeferredActionQueue.hpp"
+#include "XPak/ProjectDescriptor.hpp"
 
 namespace x {
     struct EditorSession {

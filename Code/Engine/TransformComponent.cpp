@@ -3,7 +3,7 @@
 //
 
 #include "TransformComponent.hpp"
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 
 namespace x {
     TransformComponent::TransformComponent()

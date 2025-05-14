@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
             return EXIT_FAILURE;
         }
 
-        FileWriter::WriteAllBytes(Path::Current() / packArgs.mPakName, pakFile);
+        FileWriter::WriteBytes(Path::Current() / packArgs.mPakName, pakFile);
     }
 
     else if (unpack->parsed()) {
@@ -116,7 +116,7 @@ int main(int argc, char* argv[]) {
                 std::cerr << "Could not fetch asset data from pak file" << std::endl;
                 return EXIT_FAILURE;
             }
-            FileWriter::WriteAllBytes(outputFile, assetData);
+            FileWriter::WriteBytes(outputFile, assetData);
         }
     }
 

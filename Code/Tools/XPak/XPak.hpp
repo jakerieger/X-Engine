@@ -41,7 +41,7 @@
 
 #include "AssetDescriptor.hpp"
 #include "ProjectDescriptor.hpp"
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 
 #define X_ARRAY_PADDING(sizeInBytes) unsigned char mPadding[sizeInBytes] {0};
 

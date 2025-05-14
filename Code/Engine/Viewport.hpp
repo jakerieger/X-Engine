@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Color.hpp"
-#include "Common/Types.hpp"
+#include "Common/Typedefs.hpp"
 #include "D3D.hpp"
 #include "RenderContext.hpp"
 

@@ -2,8 +2,8 @@
 // Created: 12/12/24.
 //
 
-#include <sstream>
 #include "Filesystem.hpp"
+#include <sstream>
 
 #ifdef _WIN32
     // Windows does not define the S_ISREG and S_ISDIR macros in stat.h, so we do.
@@ -25,7 +25,7 @@
 
 namespace x {
 #pragma region FileReader
-    std::vector<u8> FileReader::ReadAllBytes(const Path& path) {
+    std::vector<u8> FileReader::ReadBytes(const Path& path) {
         std::ifstream file(path.Str(), std::ios::binary | std::ios::ate);
         if (!file.is_open()) { return {}; }
         const std::streamsize fileSize = file.tellg();
@@ -36,7 +36,7 @@ namespace x {
         return bytes;
     }
 
-    str FileReader::ReadAllText(const Path& path) {
+    str FileReader::ReadText(const Path& path) {
         const std::ifstream file(path.Str());
         if (!file.is_open()) { return {}; }
         std::stringstream buffer;
@@ -44,7 +44,7 @@ namespace x {
         return buffer.str();
     }
 
-    std::vector<str> FileReader::ReadAllLines(const Path& path) {
+    std::vector<str> FileReader::ReadLines(const Path& path) {
         std::ifstream file(path.Str());
         std::vector<str> lines;
         if (!file.is_open()) { return {}; }
@@ -77,7 +77,7 @@ namespace x {
 #pragma endregion
 
 #pragma region FileWriter
-    bool FileWriter::WriteAllBytes(const Path& path, const std::vector<u8>& data) {
+    bool FileWriter::WriteBytes(const Path& path, const std::vector<u8>& data) {
         std::ofstream file(path.Str(), std::ios::binary | std::ios::trunc);
         // Overwrite existing file
         if (!file) return false;
@@ -85,7 +85,7 @@ namespace x {
         return file.good();
     }
 
-    bool FileWriter::WriteAllText(const Path& path, const str& text) {
+    bool FileWriter::WriteText(const Path& path, const str& text) {
         std::ofstream file(path.Str(), std::ios::out | std::ios::trunc);
         if (!file) return false;
         str outText = text;
@@ -96,7 +96,7 @@ namespace x {
         return file.good();
     }
 
-    bool FileWriter::WriteAllLines(const Path& path, const std::vector<str>& lines) {
+    bool FileWriter::WriteLines(const Path& path, const std::vector<str>& lines) {
         std::ofstream file(path.Str(), std::ios::out | std::ios::trunc);
         if (!file) return false;
         for (const auto& line : lines) {
@@ -106,57 +106,57 @@ namespace x {
         return file.good();
     }
 
-    bool FileWriter::WriteBlock(const Path& path, const std::vector<u8>& data, u64 offset) {
+    bool FileWriter::WriteBlock(const Path& path, const std::span<const u8>& data, u64 offset) {
         std::ofstream file(path.Str(),
                            std::ios::binary | std::ios::in | std::ios::out);  // Open in binary read/write mode
         if (!file) return false;
-        file.seekp(CAST<std::streampos>(offset), std::ios::beg);
+        file.seekp(CAST<std::streampos>((std::streamoff)offset), std::ios::beg);
         // seek to offset
         if (!file) return false;  // Failed to seek
         file.write(RCAST<const char*>(data.data()), CAST<std::streamsize>(data.size()));
         return file.good();
     }
 
-    std::future<std::vector<u8>> AsyncFileReader::ReadAllBytes(const Path& path) {
-        return runAsync([path]() { return FileReader::ReadAllBytes(path); });
+    std::future<std::vector<u8>> AsyncFileReader::ReadBytes(const Path& path) {
+        return RunAsync([path]() { return FileReader::ReadBytes(path); });
     }
 
-    std::future<str> AsyncFileReader::ReadAllText(const Path& path) {
-        return runAsync([path]() { return FileReader::ReadAllText(path); });
+    std::future<str> AsyncFileReader::ReadText(const Path& path) {
+        return RunAsync([path]() { return FileReader::ReadText(path); });
     }
 
-    std::future<std::vector<str>> AsyncFileReader::ReadAllLines(const Path& path) {
-        return runAsync([path]() { return FileReader::ReadAllLines(path); });
+    std::future<std::vector<str>> AsyncFileReader::ReadLines(const Path& path) {
+        return RunAsync([path]() { return FileReader::ReadLines(path); });
     }
 
     std::future<std::vector<u8>> AsyncFileReader::ReadBlock(const Path& path, size_t size, u64 offset) {
-        return runAsync([path, size, offset]() { return FileReader::ReadBlock(path, size, offset); });
+        return RunAsync([path, size, offset]() { return FileReader::ReadBlock(path, size, offset); });
     }
 
-    std::future<bool> AsyncFileWriter::WriteAllBytes(const Path& path, const std::vector<u8>& data) {
-        return runAsync([path, data]() { return FileWriter::WriteAllBytes(path, data); });
+    std::future<bool> AsyncFileWriter::WriteBytes(const Path& path, const std::vector<u8>& data) {
+        return RunAsync([path, data]() { return FileWriter::WriteBytes(path, data); });
     }
 
-    std::future<bool> AsyncFileWriter::WriteAllText(const Path& path, const str& text) {
-        return runAsync([path, text]() { return FileWriter::WriteAllText(path, text); });
+    std::future<bool> AsyncFileWriter::WriteText(const Path& path, const str& text) {
+        return RunAsync([path, text]() { return FileWriter::WriteText(path, text); });
     }
 
-    std::future<bool> AsyncFileWriter::WriteAllLines(const Path& path, const std::vector<str>& lines) {
-        return runAsync([path, lines]() { return FileWriter::WriteAllLines(path, lines); });
+    std::future<bool> AsyncFileWriter::WriteLines(const Path& path, const std::vector<str>& lines) {
+        return RunAsync([path, lines]() { return FileWriter::WriteLines(path, lines); });
     }
 
-    std::future<bool> AsyncFileWriter::WriteBlock(const Path& path, const std::vector<u8>& data, u64 offset) {
-        return runAsync([path, data, offset]() { return FileWriter::WriteBlock(path, data, offset); });
+    std::future<bool> AsyncFileWriter::WriteBlock(const Path& path, const std::span<const u8>& data, u64 offset) {
+        return RunAsync([path, data, offset]() { return FileWriter::WriteBlock(path, data, offset); });
     }
 #pragma endregion
 
 #pragma region Stream IO
-    StreamReader::StreamReader(const Path& path) : _stream(path.Str(), std::ios::binary | std::ios::ate) {
-        if (_stream.is_open()) {
-            _size = CAST<u64>(_stream.tellg());
-            _stream.seekg(0, std::ios::beg);
+    StreamReader::StreamReader(const Path& path) : mStream(path.Str(), std::ios::binary | std::ios::ate) {
+        if (mStream.is_open()) {
+            mSize = CAST<u64>(mStream.tellg());
+            mStream.seekg(0, std::ios::beg);
         } else {
-            _size = 0;
+            mSize = 0;
         }
     }
 
@@ -164,30 +164,30 @@ namespace x {
         Close();
     }
 
-    StreamReader::StreamReader(StreamReader&& other) noexcept : _stream(std::move(other._stream)), _size(other._size) {
-        other._size = 0;
+    StreamReader::StreamReader(StreamReader&& other) noexcept : mStream(std::move(other.mStream)), mSize(other.mSize) {
+        other.mSize = 0;
     }
 
     StreamReader& StreamReader::operator=(StreamReader&& other) noexcept {
         if (this != &other) {
             Close();
-            _stream     = std::move(other._stream);
-            _size       = other._size;
-            other._size = 0;
+            mStream     = std::move(other.mStream);
+            mSize       = other.mSize;
+            other.mSize = 0;
         }
         return *this;
     }
 
-    bool StreamReader::Read(vector<u8>& data, size_t size) {
+    bool StreamReader::Read(std::vector<u8>& data, size_t size) {
         if (!IsOpen() || size == 0) return false;
         const auto currentPos = Position();
-        if (currentPos + size > _size) { size = CAST<size_t>(_size - currentPos); }
+        if (currentPos + size > mSize) { size = CAST<size_t>(mSize - currentPos); }
         data.resize(size);
-        _stream.read(RCAST<char*>(data.data()), size);
-        return _stream.good();
+        mStream.read(RCAST<char*>(data.data()), (std::streamsize)size);
+        return mStream.good();
     }
 
-    bool StreamReader::ReadAll(vector<u8>& data) {
+    bool StreamReader::ReadAll(std::vector<u8>& data) {
         if (!IsOpen()) return false;
 
         const auto size = Size();
@@ -198,97 +198,97 @@ namespace x {
 
         Seek(0);
         data.resize(CAST<size_t>(size));
-        _stream.read(RCAST<char*>(data.data()), size);
-        return _stream.good();
+        mStream.read(RCAST<char*>(data.data()), (std::streamsize)size);
+        return mStream.good();
     }
 
     bool StreamReader::ReadLine(str& line) {
         if (!IsOpen()) return false;
-        return CAST<bool>(std::getline(_stream, line));
+        return CAST<bool>(std::getline(mStream, line));
     }
 
     bool StreamReader::IsOpen() const {
-        return _stream.is_open() && _stream.good();
+        return mStream.is_open() && mStream.good();
     }
 
     bool StreamReader::Seek(u64 offset) {
         if (!IsOpen()) return false;
-        _stream.seekg(offset);
-        return _stream.good();
+        mStream.seekg((std::streamoff)offset);
+        return mStream.good();
     }
 
     u64 StreamReader::Position() {
         if (!IsOpen()) return 0;
-        return CAST<u64>(_stream.tellg());
+        return CAST<u64>(mStream.tellg());
     }
 
-    u64 StreamReader::Size() const {
-        return _size;
+    size_t StreamReader::Size() const {
+        return mSize;
     }
 
     void StreamReader::Close() {
-        if (_stream.is_open()) { _stream.close(); }
+        if (mStream.is_open()) { mStream.close(); }
     }
 
     StreamWriter::StreamWriter(const Path& path, bool append)
-        : _stream(path.Str(), std::ios::binary | (append ? std::ios::app : std::ios::trunc)) {}
+        : mStream(path.Str(), std::ios::binary | (append ? std::ios::app : std::ios::trunc)) {}
 
     StreamWriter::~StreamWriter() {
         Close();
     }
 
-    StreamWriter::StreamWriter(StreamWriter&& other) noexcept : _stream(std::move(other._stream)) {}
+    StreamWriter::StreamWriter(StreamWriter&& other) noexcept : mStream(std::move(other.mStream)) {}
 
     StreamWriter& StreamWriter::operator=(StreamWriter&& other) noexcept {
         if (this != &other) {
             Close();
-            _stream = std::move(other._stream);
+            mStream = std::move(other.mStream);
         }
         return *this;
     }
 
-    bool StreamWriter::Write(const vector<u8>& buffer) {
+    bool StreamWriter::Write(const std::vector<u8>& buffer) {
         return Write(buffer, buffer.size());
     }
 
-    bool StreamWriter::Write(const vector<u8>& buffer, size_t size) {
+    bool StreamWriter::Write(const std::vector<u8>& buffer, size_t size) {
         if (!IsOpen() || size == 0) return false;
         if (size > buffer.size()) size = buffer.size();
-        _stream.write(RCAST<cstr>(buffer.data()), size);
-        return _stream.good();
+        mStream.write(RCAST<cstr>(buffer.data()), (std::streamsize)size);
+        return mStream.good();
     }
 
     bool StreamWriter::WriteLine(const str& line) {
         if (!IsOpen()) return false;
-        _stream << line << '\n';
-        return _stream.good();
+        mStream << line << '\n';
+        return mStream.good();
     }
 
     bool StreamWriter::Flush() {
         if (!IsOpen()) return false;
-        _stream.flush();
-        return _stream.good();
+        mStream.flush();
+        return mStream.good();
     }
 
     bool StreamWriter::IsOpen() const {
-        return _stream.is_open() && _stream.good();
+        return mStream.is_open() && mStream.good();
     }
 
     bool StreamWriter::Seek(u64 offset) {
         if (!IsOpen()) return false;
-        _stream.seekp(offset);
-        return _stream.good();
+        mStream.seekp((std::streamoff)offset);
+        return mStream.good();
     }
 
     u64 StreamWriter::Position() {
         if (!IsOpen()) return 0;
-        return CAST<u64>(_stream.tellp());
+        return CAST<u64>(mStream.tellp());
     }
 
     void StreamWriter::Close() {
-        if (_stream.is_open()) {
-            _stream.flush();
-            _stream.close();
+        if (mStream.is_open()) {
+            mStream.flush();
+            mStream.close();
         }
     }
 #pragma endregion
@@ -302,20 +302,20 @@ namespace x {
     }
 
     Path Path::Parent() const {
-        const size_t lastSeparator = path.find_last_of(PATH_SEPARATOR);
+        const size_t lastSeparator = mPath.find_last_of(PATH_SEPARATOR);
         if (lastSeparator == std::string::npos || lastSeparator == 0) { return Path(std::to_string(PATH_SEPARATOR)); }
-        return Path(path.substr(0, lastSeparator));
+        return Path(mPath.substr(0, lastSeparator));
     }
 
     bool Path::Exists() const {
         struct stat info {};
-        return stat(path.c_str(), &info) == 0;
+        return stat(mPath.c_str(), &info) == 0;
     }
 
     bool Path::IsFile() const {
         struct stat info {};
-        if (stat(path.c_str(), &info) != 0) {
-            std::perror(path.c_str());
+        if (stat(mPath.c_str(), &info) != 0) {
+            std::perror(mPath.c_str());
             return false;
         }
         return S_ISREG(info.st_mode);
@@ -323,51 +323,51 @@ namespace x {
 
     bool Path::IsDirectory() const {
         struct stat info {};
-        if (stat(path.c_str(), &info) != 0) {
-            std::perror(path.c_str());
+        if (stat(mPath.c_str(), &info) != 0) {
+            std::perror(mPath.c_str());
             return false;
         }
         return S_ISDIR(info.st_mode);
     }
 
     bool Path::HasExtension() const {
-        const size_t pos = path.find_last_of('.');
-        const size_t sep = path.find_last_of(PATH_SEPARATOR);
+        const size_t pos = mPath.find_last_of('.');
+        const size_t sep = mPath.find_last_of(PATH_SEPARATOR);
         return pos != str::npos && (sep == str::npos || pos > sep);
     }
 
     str Path::Extension() const {
         if (!HasExtension()) { return ""; }
-        return path.substr(path.find_last_of('.') + 1);
+        return mPath.substr(mPath.find_last_of('.') + 1);
     }
 
     Path Path::ReplaceExtension(const str& ext) const {
-        if (!HasExtension()) return Path(path + "." + ext);
-        return Path(path.substr(0, path.find_last_of('.')) + "." + ext);
+        if (!HasExtension()) return Path(mPath + "." + ext);
+        return Path(mPath.substr(0, mPath.find_last_of('.')) + "." + ext);
     }
 
     Path Path::Join(const str& subPath) const {
-        return Path(Join(path, subPath));
+        return Path(Join(mPath, subPath));
     }
 
     Path Path::operator/(const str& subPath) const {
-        return Path(Join(path, subPath));
+        return Path(Join(mPath, subPath));
     }
 
     str Path::Str() const {
-        return path;
+        return mPath;
     }
 
     const char* Path::CStr() const {
-        return path.c_str();
+        return mPath.c_str();
     }
 
     str Path::Filename() const {
-        size_t pos = path.rfind('\\');
-        if (pos != str::npos) { return path.substr(pos + 1); }
-        pos = path.rfind('/');
-        if (pos != str::npos) { return path.substr(pos + 1); }
-        return path;
+        size_t pos = mPath.rfind('\\');
+        if (pos != str::npos) { return mPath.substr(pos + 1); }
+        pos = mPath.rfind('/');
+        if (pos != str::npos) { return mPath.substr(pos + 1); }
+        return mPath;
     }
 
     Path Path::RelativeTo(const Path& basePath) const {
@@ -389,15 +389,20 @@ namespace x {
         return filename.substr(0, filename.find_last_of('.'));  // remove ext
     }
 
+    Path& Path::Join(const str& subPath) {
+        mPath = Join(Str(), subPath);
+        return *this;
+    }
+
     bool Path::operator==(const Path& other) const {
-        return path == other.path;
+        return mPath == other.mPath;
     }
 
     bool Path::Create() const {
         if (Exists()) return true;
 
 #ifdef _WIN32
-        if (!CreateDirectoryA(path.c_str(), nullptr)) {
+        if (!CreateDirectoryA(mPath.c_str(), nullptr)) {
             const DWORD error = GetLastError();
             if (error != ERROR_ALREADY_EXISTS) { return false; }
         }
@@ -412,7 +417,7 @@ namespace x {
     bool Path::CreateAll() const {
         if (Exists()) return true;
 
-        if (path != str(1, PATH_SEPARATOR)) {
+        if (mPath != str(1, PATH_SEPARATOR)) {
             Path parentPath = Parent();
             if (!parentPath.Exists()) {
                 if (!parentPath.CreateAll()) return false;
@@ -425,20 +430,20 @@ namespace x {
     bool Path::Copy(const Path& dest) const {
         X_ASSERT(IsFile());
         if (dest == *this) { return true; }
-        if (!::CopyFileA(path.c_str(), dest.path.c_str(), FALSE)) { return false; }
+        if (!::CopyFileA(mPath.c_str(), dest.mPath.c_str(), FALSE)) { return false; }
         return true;
     }
 
     bool Path::CopyDirectory(const Path& dest) const {
         X_ASSERT(IsDirectory());
 
-        const DWORD srcAttrs = ::GetFileAttributesA(path.c_str());
+        const DWORD srcAttrs = ::GetFileAttributesA(mPath.c_str());
         if (srcAttrs == INVALID_FILE_ATTRIBUTES) { return false; }
         if (!(srcAttrs & FILE_ATTRIBUTE_DIRECTORY)) { return false; }
 
         if (!::CreateDirectoryA(dest.CStr(), nullptr) && ::GetLastError() != ERROR_ALREADY_EXISTS) { return false; }
 
-        const str searchPattern = path + "\\*";
+        const str searchPattern = mPath + "\\*";
         WIN32_FIND_DATAA findData;
         const HANDLE hFind = ::FindFirstFileA(searchPattern.c_str(), &findData);
         if (hFind == INVALID_HANDLE_VALUE) { return false; }
@@ -600,6 +605,11 @@ namespace x {
 
     DirectoryIterator DirectoryEntries::end() {
         return DirectoryIterator();
+    }
+
+    std::ostream& operator<<(std::ostream& os, const Path& path) {
+        os << path.Str();
+        return os;
     }
 #pragma endregion
 }  // namespace x
