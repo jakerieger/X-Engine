@@ -6,7 +6,7 @@
 
 #include "TextureManager.hpp"
 #include "Common/Str.hpp"
-#include "XPak/Compression.hpp"
+#include "Tools/XPak/Compression.hpp"
 
 namespace x {
     bool TextureManager::LoadFromMemory(const u8* data, u32 width, u32 height, u32 channels, const str& name) {

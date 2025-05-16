@@ -5,7 +5,7 @@
 #pragma once
 
 #include <span>
-#include <rapidxml.hpp>
+#include "Vendor/rapidxml.hpp"
 #include "Typedefs.hpp"
 #include "Engine/Color.hpp"
 #include "Engine/EngineCommon.hpp"
@@ -40,7 +40,7 @@ namespace rapidxml {
     }  // namespace internal
 }  // namespace rapidxml
 
-#include <rapidxml_print.hpp>
+#include "Vendor/rapidxml_print.hpp"
 
 namespace x::XML {
     inline bool ReadFile(const Path& filename, rapidxml::xml_document<>& doc) {

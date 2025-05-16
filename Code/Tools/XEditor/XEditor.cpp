@@ -28,7 +28,7 @@
 #include "Common/WindowsHelpers.hpp"
 #include "Engine/SceneParser.hpp"
 #include "Engine/EngineCommon.hpp"
-#include "XPak/AssetGenerator.hpp"
+#include "Tools/XPak/AssetGenerator.hpp"
 
 // Embedded resources
 #include "AssetBrowserIcons.h"
@@ -1019,10 +1019,10 @@ namespace x {
             {
                 const auto undoIcon = (ImTextureID)(mTextureManager.GetTexture("UndoIcon")->mShaderResourceView.Get());
                 const auto redoIcon = (ImTextureID)(mTextureManager.GetTexture("RedoIcon")->mShaderResourceView.Get());
-                const auto gridToggleIcon =
-                  (ImTextureID)(mTextureManager.GetTexture("GridToggleIcon")->mShaderResourceView.Get());
-                const auto focusSelectedIcon =
-                  (ImTextureID)(mTextureManager.GetTexture("FocusSelectedIcon")->mShaderResourceView.Get());
+                const auto compileCodeIcon =
+                  (ImTextureID)(mTextureManager.GetTexture("CompileCodeIcon")->mShaderResourceView.Get());
+                const auto cleanCodeIcon =
+                  (ImTextureID)(mTextureManager.GetTexture("CleanCodeIcon")->mShaderResourceView.Get());
 
                 ImGui::ImageButton("##undo_btn",
                                    undoIcon,
@@ -1042,8 +1042,8 @@ namespace x {
                                    ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
                 ImGui::SameLine();
 
-                ImGui::ImageButton("##grid_toggle_btn",
-                                   gridToggleIcon,
+                ImGui::ImageButton("##compile_code_btn",
+                                   compileCodeIcon,
                                    btnSize,
                                    Gui::kUV_0,
                                    Gui::kUV_1,
@@ -1051,8 +1051,8 @@ namespace x {
                                    ImGui::GetStyleColorVec4(ImGuiCol_CheckMark));
                 ImGui::SameLine();
 
-                ImGui::ImageButton("##focus_selected_btn",
-                                   focusSelectedIcon,
+                ImGui::ImageButton("##clean_code_btn",
+                                   cleanCodeIcon,
                                    btnSize,
                                    Gui::kUV_0,
                                    Gui::kUV_1,
@@ -2397,9 +2397,7 @@ namespace x {
                 case kAssetType_Texture: {
                     auto textureFile      = Path(mLoadedProject.mContentDirectory) / asset.mFilename;
                     const auto loadResult = mTextureManager.LoadFromDDSFile(textureFile, X_TOSTR(asset.mId));
-                    if (!loadResult) {
-                        ShowAlert("Failed to load texture asset with id " + X_TOSTR(asset.mId), Error);
-                    }
+                    if (!loadResult) { ShowAlert("Failed to load texture asset with id " + X_TOSTR(asset.mId), Error); }
                 } break;
                 // Descriptors just use icon files
                 // TODO: Generate thumbnails for the rest of these
@@ -2533,308 +2531,69 @@ namespace x {
 
             ImGui::End();
         }
-
         ImGui::PopStyleVar(3);
     }
 
-    bool XEditor::LoadEditorIcons() {
+    void XEditor::LoadEditorIcons() {
+        auto Load = [&](const u8* data, size_t size, u32 width, u32 height, const char* name) {
+            const auto result = mTextureManager.LoadFromMemoryCompressed(data, size, width, height, 4, name);
+            if (!result) {
+                X_LOG_ERROR("Failed to load editor icon '%s'", name);
+                throw std::runtime_error("Failed to load editor icon '" + str(name) + "'");
+            }
+        };
+
+        // Toolbar Icons
+        Load(MOVEICON_BYTES, MOVEICON_COMPRESSED_SIZE, MOVEICON_WIDTH, MOVEICON_HEIGHT, "MoveIcon");
+        Load(PAUSEICON_BYTES, PAUSEICON_COMPRESSED_SIZE, PAUSEICON_WIDTH, PAUSEICON_HEIGHT, "PauseIcon");
+        Load(PLAYICON_BYTES, PLAYICON_COMPRESSED_SIZE, PLAYICON_WIDTH, PLAYICON_HEIGHT, "PlayIcon");
+        Load(PLAYWINDOWEDICON_BYTES,
+             PLAYWINDOWEDICON_COMPRESSED_SIZE,
+             PLAYWINDOWEDICON_WIDTH,
+             PLAYWINDOWEDICON_HEIGHT,
+             "PlayWindowedIcon");
+        Load(REDOICON_BYTES, REDOICON_COMPRESSED_SIZE, REDOICON_WIDTH, REDOICON_HEIGHT, "RedoIcon");
+        Load(UNDOICON_BYTES, UNDOICON_COMPRESSED_SIZE, UNDOICON_WIDTH, UNDOICON_HEIGHT, "UndoIcon");
+        Load(GRIDTOGGLE_BYTES, GRIDTOGGLE_COMPRESSED_SIZE, GRIDTOGGLE_WIDTH, GRIDTOGGLE_HEIGHT, "GridToggleIcon");
+        Load(FOCUSSELECTED_BYTES,
+             FOCUSSELECTED_COMPRESSED_SIZE,
+             FOCUSSELECTED_WIDTH,
+             FOCUSSELECTED_HEIGHT,
+             "FocusSelectedIcon");
+        Load(ROTATEICON_BYTES, ROTATEICON_COMPRESSED_SIZE, ROTATEICON_WIDTH, ROTATEICON_HEIGHT, "RotateIcon");
+        Load(SCALEICON_BYTES, SCALEICON_COMPRESSED_SIZE, SCALEICON_WIDTH, SCALEICON_HEIGHT, "ScaleIcon");
+        Load(SELECTICON_BYTES, SELECTICON_COMPRESSED_SIZE, SELECTICON_WIDTH, SELECTICON_HEIGHT, "SelectIcon");
+        Load(STOPICON_BYTES, STOPICON_COMPRESSED_SIZE, STOPICON_WIDTH, STOPICON_HEIGHT, "StopIcon");
+        Load(SELECTASSETICON_BYTES,
+             SELECTASSETICON_COMPRESSED_SIZE,
+             SELECTASSETICON_WIDTH,
+             SELECTASSETICON_HEIGHT,
+             "SelectAssetIcon");
+        Load(OPENFOLDER_BYTES, OPENFOLDER_COMPRESSED_SIZE, OPENFOLDER_WIDTH, OPENFOLDER_HEIGHT, "OpenFolderIcon");
+        Load(COMPILECODE_BYTES, COMPILECODE_COMPRESSED_SIZE, COMPILECODE_WIDTH, COMPILECODE_HEIGHT, "CompileCodeIcon");
+        Load(CLEANCODE_BYTES, CLEANCODE_COMPRESSED_SIZE, CLEANCODE_WIDTH, CLEANCODE_HEIGHT, "CleanCodeIcon");
+
         // Asset Browser Icons
-        auto result = mTextureManager.LoadFromMemoryCompressed(AUDIOICON_BYTES,
-                                                               AUDIOICON_COMPRESSED_SIZE,
-                                                               AUDIOICON_WIDTH,
-                                                               AUDIOICON_HEIGHT,
-                                                               4,
-                                                               "AudioIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load Audio icon");
-            return false;
-        }
+        Load(AUDIOICON_BYTES, AUDIOICON_COMPRESSED_SIZE, AUDIOICON_WIDTH, AUDIOICON_HEIGHT, "AudioIcon");
+        Load(MATERIALICON_BYTES, MATERIALICON_COMPRESSED_SIZE, MATERIALICON_WIDTH, MATERIALICON_HEIGHT, "MaterialIcon");
+        Load(MESHICON_BYTES, MESHICON_COMPRESSED_SIZE, MESHICON_WIDTH, MESHICON_HEIGHT, "MeshIcon");
+        Load(SCENEICON_BYTES, SCENEICON_COMPRESSED_SIZE, SCENEICON_WIDTH, SCENEICON_HEIGHT, "SceneIcon");
+        Load(SCRIPTICON_BYTES, SCRIPTICON_COMPRESSED_SIZE, SCRIPTICON_WIDTH, SCRIPTICON_HEIGHT, "ScriptIcon");
+        Load(FOLDERICON_BYTES, FOLDERICON_COMPRESSED_SIZE, FOLDERICON_WIDTH, FOLDERICON_HEIGHT, "FolderIcon");
+        Load(FOLDERICONEMPTY_BYTES,
+             FOLDERICONEMPTY_COMPRESSED_SIZE,
+             FOLDERICONEMPTY_WIDTH,
+             FOLDERICONEMPTY_HEIGHT,
+             "FolderEmptyIcon");
 
-        result = mTextureManager.LoadFromMemoryCompressed(MATERIALICON_BYTES,
-                                                          MATERIALICON_COMPRESSED_SIZE,
-                                                          MATERIALICON_WIDTH,
-                                                          MATERIALICON_HEIGHT,
-                                                          4,
-                                                          "MaterialIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load Material icon");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(MESHICON_BYTES,
-                                                          MESHICON_COMPRESSED_SIZE,
-                                                          MESHICON_WIDTH,
-                                                          MESHICON_HEIGHT,
-                                                          4,
-                                                          "MeshIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load Mesh icon");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(SCENEICON_BYTES,
-                                                          SCENEICON_COMPRESSED_SIZE,
-                                                          SCENEICON_WIDTH,
-                                                          SCENEICON_HEIGHT,
-                                                          4,
-                                                          "SceneIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load Scene icon");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(SCRIPTICON_BYTES,
-                                                          SCRIPTICON_COMPRESSED_SIZE,
-                                                          SCRIPTICON_WIDTH,
-                                                          SCRIPTICON_HEIGHT,
-                                                          4,
-                                                          "ScriptIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load Script icon");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(FOLDERICON_BYTES,
-                                                          FOLDERICON_COMPRESSED_SIZE,
-                                                          FOLDERICON_WIDTH,
-                                                          FOLDERICON_HEIGHT,
-                                                          4,
-                                                          "FolderIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load Folder icon");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(FOLDERICONEMPTY_BYTES,
-                                                          FOLDERICONEMPTY_COMPRESSED_SIZE,
-                                                          FOLDERICONEMPTY_WIDTH,
-                                                          FOLDERICONEMPTY_HEIGHT,
-                                                          4,
-                                                          "FolderEmptyIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load Folder icon");
-            return false;
-        }
-
-        // Toolbar / Editor Icons
-        result = mTextureManager.LoadFromMemoryCompressed(MOVEICON_BYTES,
-                                                          MOVEICON_COMPRESSED_SIZE,
-                                                          MOVEICON_WIDTH,
-                                                          MOVEICON_HEIGHT,
-                                                          4,
-                                                          "MoveIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load Move icon");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(PAUSEICON_BYTES,
-                                                          PAUSEICON_COMPRESSED_SIZE,
-                                                          PAUSEICON_WIDTH,
-                                                          PAUSEICON_HEIGHT,
-                                                          4,
-                                                          "PauseIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load Pause icon");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(PLAYICON_BYTES,
-                                                          PLAYICON_COMPRESSED_SIZE,
-                                                          PLAYICON_WIDTH,
-                                                          PLAYICON_HEIGHT,
-                                                          4,
-                                                          "PlayIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load Play icon");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(PLAYWINDOWEDICON_BYTES,
-                                                          PLAYWINDOWEDICON_COMPRESSED_SIZE,
-                                                          PLAYWINDOWEDICON_WIDTH,
-                                                          PLAYWINDOWEDICON_HEIGHT,
-                                                          4,
-                                                          "PlayWindowedIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load PlayWindowed icon");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(REDOICON_BYTES,
-                                                          REDOICON_COMPRESSED_SIZE,
-                                                          REDOICON_WIDTH,
-                                                          REDOICON_HEIGHT,
-                                                          4,
-                                                          "RedoIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load Redo icon");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(UNDOICON_BYTES,
-                                                          UNDOICON_COMPRESSED_SIZE,
-                                                          UNDOICON_WIDTH,
-                                                          UNDOICON_HEIGHT,
-                                                          4,
-                                                          "UndoIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load Undo icon");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(GRIDTOGGLE_BYTES,
-                                                          GRIDTOGGLE_COMPRESSED_SIZE,
-                                                          GRIDTOGGLE_WIDTH,
-                                                          GRIDTOGGLE_HEIGHT,
-                                                          4,
-                                                          "GridToggleIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load GridToggle icon");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(FOCUSSELECTED_BYTES,
-                                                          FOCUSSELECTED_COMPRESSED_SIZE,
-                                                          FOCUSSELECTED_WIDTH,
-                                                          FOCUSSELECTED_HEIGHT,
-                                                          4,
-                                                          "FocusSelectedIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load FocusSelected icon");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(ROTATEICON_BYTES,
-                                                          ROTATEICON_COMPRESSED_SIZE,
-                                                          ROTATEICON_WIDTH,
-                                                          ROTATEICON_HEIGHT,
-                                                          4,
-                                                          "RotateIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load Rotate icon");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(SCALEICON_BYTES,
-                                                          SCALEICON_COMPRESSED_SIZE,
-                                                          SCALEICON_WIDTH,
-                                                          SCALEICON_HEIGHT,
-                                                          4,
-                                                          "ScaleIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load Scale icon");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(SELECTICON_BYTES,
-                                                          SELECTICON_COMPRESSED_SIZE,
-                                                          SELECTICON_WIDTH,
-                                                          SELECTICON_HEIGHT,
-                                                          4,
-                                                          "SelectIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load Select icon");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(STOPICON_BYTES,
-                                                          STOPICON_COMPRESSED_SIZE,
-                                                          STOPICON_WIDTH,
-                                                          STOPICON_HEIGHT,
-                                                          4,
-                                                          "StopIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load Stop icon");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(SELECTASSETICON_BYTES,
-                                                          SELECTASSETICON_COMPRESSED_SIZE,
-                                                          SELECTASSETICON_WIDTH,
-                                                          SELECTASSETICON_HEIGHT,
-                                                          4,
-                                                          "SelectAssetIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load SelectAsset icon");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(OPENFOLDER_BYTES,
-                                                          OPENFOLDER_COMPRESSED_SIZE,
-                                                          OPENFOLDER_WIDTH,
-                                                          OPENFOLDER_HEIGHT,
-                                                          4,
-                                                          "OpenFolderIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load OpenFolder icon");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(ABOUT_BANNER_BYTES,
-                                                          ABOUT_BANNER_COMPRESSED_SIZE,
-                                                          ABOUT_BANNER_WIDTH,
-                                                          ABOUT_BANNER_HEIGHT,
-                                                          4,
-                                                          "AboutBanner");
-        if (!result) {
-            X_LOG_ERROR("Failed to load AboutBanner");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(XEDITOR_LOGO_BYTES,
-                                                          XEDITOR_LOGO_COMPRESSED_SIZE,
-                                                          XEDITOR_LOGO_WIDTH,
-                                                          XEDITOR_LOGO_HEIGHT,
-                                                          4,
-                                                          "XEditorLogo");
-        if (!result) {
-            X_LOG_ERROR("Failed to load XEditorLogo");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(BACKGROUND_LOGOS_BYTES,
-                                                          BACKGROUND_LOGOS_COMPRESSED_SIZE,
-                                                          BACKGROUND_LOGOS_WIDTH,
-                                                          BACKGROUND_LOGOS_HEIGHT,
-                                                          4,
-                                                          "BackgroundLogos");
-        if (!result) {
-            X_LOG_ERROR("Failed to load BackgroundLogos");
-            return false;
-        }
-
-        // Welcome screen icons
-        result = mTextureManager.LoadFromMemoryCompressed(CONTROLLER_BYTES,
-                                                          CONTROLLER_COMPRESSED_SIZE,
-                                                          CONTROLLER_WIDTH,
-                                                          CONTROLLER_HEIGHT,
-                                                          4,
-                                                          "ControllerIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load ControllerIcon");
-            return false;
-        }
-
-        result = mTextureManager.LoadFromMemoryCompressed(FOLDER_OUTLINE_BYTES,
-                                                          FOLDER_OUTLINE_COMPRESSED_SIZE,
-                                                          FOLDER_OUTLINE_WIDTH,
-                                                          FOLDER_OUTLINE_HEIGHT,
-                                                          4,
-                                                          "FolderOutlineIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load FolderOutlineIcon");
-            return false;
-        }
-
-        result =
-          mTextureManager.LoadFromMemoryCompressed(COG_BYTES, COG_COMPRESSED_SIZE, COG_WIDTH, COG_HEIGHT, 4, "CogIcon");
-        if (!result) {
-            X_LOG_ERROR("Failed to load CogIcon");
-            return false;
-        }
-
-        return true;
+        // Logos / Branding
+        Load(ABOUT_BANNER_BYTES, ABOUT_BANNER_COMPRESSED_SIZE, ABOUT_BANNER_WIDTH, ABOUT_BANNER_HEIGHT, "AboutBanner");
+        Load(XEDITOR_LOGO_BYTES, XEDITOR_LOGO_COMPRESSED_SIZE, XEDITOR_LOGO_WIDTH, XEDITOR_LOGO_HEIGHT, "XEditorLogo");
+        Load(BACKGROUND_LOGOS_BYTES,
+             BACKGROUND_LOGOS_COMPRESSED_SIZE,
+             BACKGROUND_LOGOS_WIDTH,
+             BACKGROUND_LOGOS_HEIGHT,
+             "BackgroundLogos");
     }
 
     void XEditor::RegisterEditorShortcuts() {

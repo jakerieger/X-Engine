@@ -14,7 +14,7 @@
 #include "Engine/Game.hpp"
 #include "Engine/Color.hpp"
 #include "Engine/DeferredActionQueue.hpp"
-#include "XPak/ProjectDescriptor.hpp"
+#include "Tools/XPak/ProjectDescriptor.hpp"
 
 namespace x {
     struct EditorSession {
@@ -184,7 +184,7 @@ namespace x {
         void ReloadAssetCache(bool fullReload = false);
 
         // ImGui-specific functions
-        bool LoadEditorIcons();
+        void LoadEditorIcons();
         void GenerateAssetThumbnails();
         void SetupDockspace(const f32 yOffset);
         void RegisterEditorShortcuts();

@@ -7,7 +7,7 @@
 #include <functional>
 #include <imgui.h>
 #include "Common/Typedefs.hpp"
-#include "XPak/AssetDescriptor.hpp"
+#include "Tools/XPak/AssetDescriptor.hpp"
 
 #define X_DROP_TARGET_MESH "DropTarget_Mesh"
 #define X_DROP_TARGET_MATERIAL "DropTarget_Material"

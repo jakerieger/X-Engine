@@ -6,14 +6,14 @@
 
 #include "EngineCommon.hpp"
 #include "Common/Typedefs.hpp"
-#include "XPak/AssetDescriptor.hpp"
+#include "Tools/XPak/AssetDescriptor.hpp"
 
 #ifdef X_USE_PAK_FILE
     #ifndef X_PAK_FILE
         #error "X_USE_PAK_FILE is defined, but X_PAK_FILE is not. You nust define the pak file to use."
     #endif
 
-    #include "XPak/XPak.hpp"
+    #include "Tools/XPak/XPak.hpp"
 #else
 #endif
 

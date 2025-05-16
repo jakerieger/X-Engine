@@ -6,7 +6,7 @@
 #include <ranges>
 
 #ifndef X_USE_PAK_FILE
-    #include "XPak/ScriptCompiler.hpp"
+    #include "Tools/XPak/ScriptCompiler.hpp"
 #endif
 
 namespace x {
