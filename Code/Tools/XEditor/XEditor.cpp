@@ -23,7 +23,6 @@
 #include "Res/resource.h"
 #include "Controls.hpp"
 #include "ImGuiHelpers.hpp"
-#include "Common/XML.hpp"
 #include "Common/FileDialogs.hpp"
 #include "Common/WindowsHelpers.hpp"
 #include "Engine/SceneParser.hpp"
@@ -34,13 +33,11 @@
 #include "AssetBrowserIcons.h"
 #include "ToolbarIcons.h"
 #include "Logos.h"
-#include "WelcomeScreenIcons.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace x {
 #pragma region Global Constants
-    static constexpr ImVec2 kViewportSize {1024, 576};  // Default viewport size
     static constexpr f32 kLabelWidth {140.0f};
     static constexpr i32 kNoSelection {-1};
     static constexpr u32 kAssetIconColumnCount {11};
@@ -1244,11 +1241,11 @@ namespace x {
                 ImGui::Image((ImTextureID)(titleImage), titleSize);
 
                 // Button icons
-                ID3D11ShaderResourceView* controllerIcon =
-                  mTextureManager.GetTexture("ControllerIcon")->mShaderResourceView.Get();
-                ID3D11ShaderResourceView* folderIcon =
-                  mTextureManager.GetTexture("FolderOutlineIcon")->mShaderResourceView.Get();
-                ID3D11ShaderResourceView* cogIcon = mTextureManager.GetTexture("CogIcon")->mShaderResourceView.Get();
+                // ID3D11ShaderResourceView* controllerIcon =
+                //   mTextureManager.GetTexture("ControllerIcon")->mShaderResourceView.Get();
+                // ID3D11ShaderResourceView* folderIcon =
+                //   mTextureManager.GetTexture("FolderOutlineIcon")->mShaderResourceView.Get();
+                // ID3D11ShaderResourceView* cogIcon = mTextureManager.GetTexture("CogIcon")->mShaderResourceView.Get();
 
                 Gui::ScopedStyleVars buttonVars(
                   {{ImGuiStyleVar_FrameRounding, 16.0f}, {ImGuiStyleVar_FrameBorderSize, 4.0f}});
