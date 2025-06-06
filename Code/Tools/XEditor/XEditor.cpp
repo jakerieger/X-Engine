@@ -70,13 +70,13 @@ namespace x {
         switch (severity) {
             default:
             case X_LOG_SEVERITY_INFO:
-                return Color("#b9b9b9").ToImVec4();
+                return Colors::White.WithAlpha(0.45f).ToImVec4();
             case X_LOG_SEVERITY_WARN:
                 return Color("#ffe100").ToImVec4();
             case X_LOG_SEVERITY_ERROR:
                 return Color("#eb529e").ToImVec4();
             case X_LOG_SEVERITY_FATAL:
-                return ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+                return {1.0f, 0.0f, 0.0f, 1.0f};
             case X_LOG_SEVERITY_DEBUG:
                 return Color("#ebc388").ToImVec4();
         }
@@ -1924,10 +1924,10 @@ namespace x {
 
             // Display logs
             std::lock_guard<std::mutex> lock(logger.GetBufferMutex());
-            size_t startIndex =
-              (logger.GetCurrentEntry() - logger.GetTotalEntries() + logger.kMaxEntries) % logger.kMaxEntries;
+            const size_t startIndex =
+              (logger.GetCurrentEntry() - logger.GetTotalEntries() + Logger::kMaxEntries) % Logger::kMaxEntries;
             for (size_t i = 0; i < logger.GetTotalEntries(); i++) {
-                const size_t index = (startIndex + i) % logger.kMaxEntries;
+                const size_t index = (startIndex + i) % Logger::kMaxEntries;
                 const auto& entry  = logger.GetEntries()[index];
 
                 // Apply filters
